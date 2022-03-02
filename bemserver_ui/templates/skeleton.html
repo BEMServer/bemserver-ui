@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="{{ lang|default('en') }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ title|default('BEMServer') }}</title>
+        <meta name="description" content="{{ description|default('') }}">
+        <meta name="author" content="{{ author|default('Nobatek/INEF4') }}">
+        <link rel="icon" href="data:," />
+        <link rel="stylesheet" media="all" href="{{ url_for('static', filename='styles/main.css') }}">
+        {%- block head_styles %}
+        {%- endblock head_styles %}
+        {%- block head_scripts %}
+        {%- endblock head_scripts %}
+    </head>
+    <body>
+        {%- block body_content %}
+        {%- endblock body_content %}
+        {%- block body_scripts %}
+        {%- endblock body_scripts %}
+    </body>
+</html>
