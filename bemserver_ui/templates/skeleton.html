@@ -6,7 +6,7 @@
         <title>{{ title|default('BEMServer') }}</title>
         <meta name="description" content="{{ description|default('') }}">
         <meta name="author" content="{{ author|default('Nobatek/INEF4') }}">
-        <link rel="icon" href="data:," />
+        <link rel="icon" href="{{ url_for('static', filename='images/bemserver.ico') }}">
         <link rel="stylesheet" media="all" href="{{ url_for('static', filename='styles/main.css') }}">
         {%- block head_styles %}
         {%- endblock head_styles %}
