@@ -1,0 +1,51 @@
+{% import "macros/flash.html" as mac_flash %}
+{% extends "pages/skeleton.html" %}
+
+{% set title = "Sign in" %}
+
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/signin.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
+{% block body_content %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-4 p-2">
+            <div class="d-flex align-items-center h-100">
+                <img class="img-fluid mx-auto d-block" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="row mt-2">
+                <div class="col-12">
+                    <h1 class="h3 text-center">Sign in to BEMServer</h1>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <form class="form-signin" action="{{ url_for('main.signin') }}" method="POST">
+                        {{ mac_flash.display_messages() -}}
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
+                            <label for="email">Email address</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="pwd" name="pwd" placeholder="Password" required>
+                            <label for="pwd">Password</label>
+                        </div>
+                        <div class="mt-2">
+                            <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfilter %}
+{% endblock body_content %}

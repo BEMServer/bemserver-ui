@@ -1,0 +1,22 @@
+{% import "macros/flash.html" as mac_flash %}
+{% extends "pages/skeleton.html" %}
+
+{% block body_content %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <main>
+                {% block main_title %}
+                <h1>{{ title }}</h1>
+                {% endblock main_title %}
+                {{ mac_flash.display_messages() -}}
+                {% block main_content %}
+                {% endblock main_content %}
+            </main>
+        </div>
+    </div>
+</div>
+{% endfilter %}
+{% endblock body_content %}

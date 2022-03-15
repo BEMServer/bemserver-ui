@@ -1,7 +1,10 @@
 """Application views"""
+from . import main
 
 
-MODULES = ()
+MODULES = (
+    main,
+)
 
 
 def init_app(app):

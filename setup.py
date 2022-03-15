@@ -47,6 +47,7 @@ setup(
     install_requires=[
         "flask>=2.0.3",
         "python-dotenv>=0.19.2",
+        "api-client>=1.3.1",
     ],
     extras_require=EXTRAS_REQUIRE,
     packages=find_packages(exclude=["tests*"]),
