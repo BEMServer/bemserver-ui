@@ -1,0 +1,67 @@
+body,
+.app-header {
+    min-width: 400px;
+}
+
+.app-logo {
+    min-width: 75px !important;
+    max-width: 150px !important;
+}
+
+.app-header,
+.app-sidebar {
+    background-color: #f3f8e9 !important;
+}
+
+.app-content {
+    padding-top: 60px;
+}
+
+.app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100; /* Behind the navbar */
+    padding: 68px 10px 10px 10px; /* Height of navbar */
+    overflow: auto !important;
+}
+
+@media (width < 768px) {
+    .app-sidebar {
+        top: 0;
+        left: 0;
+        width: 300px;
+    }
+}
+
+@media (width > 768px) {
+    #sidebarToggler {
+        visibility: hidden;
+    }
+}
+
+.app-sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+.app-sidebar .nav-link {
+    color: inherit;
+}
+
+.app-sidebar .nav-link:hover {
+    background-color: #0a58ca;
+    color: #ffffff;
+}
+
+.navbar .navbar-toggler {
+    top: .25rem;
+    right: 1rem;
+}
+
+@media (width < 400px) {
+    .navbar {
+        position: absolute !important;
+    }
+}

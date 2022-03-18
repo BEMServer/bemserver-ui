@@ -1,22 +1,35 @@
 {% import "macros/flash.html" as mac_flash %}
 {% extends "pages/skeleton.html" %}
 
-{% block body_content %}
+{% block head_styles %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
+<link rel="stylesheet" media="all" href="{{ url_for('static', filename='styles/app.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
+{% block body_content %}
+{{ super() -}}
+{% include "components/header.html" +%}
 <div class="container-fluid">
     <div class="row">
-        <div class="col">
-            <main>
-                {% block main_title %}
-                <h1>{{ title }}</h1>
-                {% endblock main_title %}
-                {{ mac_flash.display_messages() -}}
-                {% block main_content %}
-                {% endblock main_content %}
-            </main>
-        </div>
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
+            <div class="position-sticky">
+                {% filter indent(width=16, first=True) %}
+                {% include "components/sidebar.html" %}
+                {% endfilter +%}
+            </div>
+        </nav>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 app-content">
+            {% block main_title %}
+            <h1>{{ title }}</h1>
+            {% endblock main_title %}
+            {{ mac_flash.display_messages() -}}
+            {% filter indent(width=12) %}
+            {% block main_content %}
+            {% endblock main_content %}
+            {% endfilter %}
+        </main>
     </div>
 </div>
-{% endfilter %}
 {% endblock body_content %}

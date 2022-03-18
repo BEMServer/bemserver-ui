@@ -1,0 +1,28 @@
+<div class="d-flex flex-column">
+    {% if session["user"].is_admin %}
+    <h6 class="app-sidebar-heading ps-2 mt-4 mb-1 text-muted">
+        <i class="bi bi-gear"></i>
+        Administration
+    </h6>
+    <ul class="nav nav-pills flex-column mb-2">
+        <li class="nav-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="nav-link w-100" href="#" title="View user groups">
+                    <i class="bi bi-people-fill"></i>
+                    User groups
+                </a>
+                <a class="nav-link ms-2" href="#" title="Add a new user group"><i class="bi bi-plus-circle"></i></a>
+            </div>
+        </li>
+        <li class="nav-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="nav-link w-100" href="#" title="View users">
+                    <i class="bi bi-person-lines-fill"></i>
+                    Users
+                </a>
+                <a class="nav-link ms-2" href="#" title="Add a new user"><i class="bi bi-plus-circle"></i></a>
+            </div>
+        </li>
+    </ul>
+    {% endif %}
+</div>
