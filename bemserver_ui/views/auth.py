@@ -1,6 +1,7 @@
 """Auth views (sign in/out)"""
 import flask
 
+import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import signin_required
 
 
@@ -23,10 +24,13 @@ def signin():
             # Credentials check.
             user = flask.g.api_client.users.getall(
                 email=flask.session["auth_data"]["email"])[0]
-        except KeyError:
-            flask.flash("Incorrect credentials", "error")
-            # del flask.session["auth_data"]
+        except bac.BEMServerAPIValidationError as exc:
             flask.session.clear()
+            flask.session["_validation_errors"] = exc.errors
+            flask.flash("Operation failed!", "error")
+        except KeyError:
+            flask.session.clear()
+            flask.flash("Incorrect credentials", "error")
         else:
             # Credentials are valid.
             flask.session["user"] = user
