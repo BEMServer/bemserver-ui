@@ -1,4 +1,4 @@
-{%- set FLASH_MESSAGE_DATA = {
+{% set FLASH_MESSAGE_DATA = {
     "message": {
         "css": "primary",
         "icon": "chat-text",
@@ -19,14 +19,14 @@
         "css": "success",
         "icon": "check-circle",
     },
-} -%}
+} %}
 
-{%- macro display_messages() -%}
-    {%- for category, message in get_flashed_messages(with_categories=True) %}
+{% macro display_messages() %}
+    {% for category, message in get_flashed_messages(with_categories=True) %}
         <div class="alert alert-{{ FLASH_MESSAGE_DATA[category]['css'] }} alert-dismissible fade show" role="alert">
             <i class="bi bi-{{ FLASH_MESSAGE_DATA[category]['icon'] }} me-2"></i>
             {{ message|safe }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    {%- endfor %}
-{%- endmacro -%}
+    {% endfor %}
+{% endmacro %}
