@@ -29,3 +29,10 @@
     </div>
 </div>
 {% endblock body_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/app.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}
