@@ -12,7 +12,6 @@
 
 {% block body_content %}
 {{ super() -}}
-{% filter indent(width=8, first=True) %}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-4 p-2">
@@ -47,5 +46,4 @@
         </div>
     </div>
 </div>
-{% endfilter %}
 {% endblock body_content %}
