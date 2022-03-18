@@ -13,13 +13,9 @@
 {% include "components/header.html" +%}
 <div class="container-fluid">
     <div class="row">
-        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
-            <div class="position-sticky">
-                {% filter indent(width=16, first=True) %}
-                {% include "components/sidebar.html" %}
-                {% endfilter +%}
-            </div>
-        </nav>
+        {% filter indent(width=8, first=True) %}
+        {% include "components/sidebar.html" %}
+        {% endfilter +%}
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 app-content">
             {% block main_title %}
             <h1>{{ title }}</h1>
