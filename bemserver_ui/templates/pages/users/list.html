@@ -1,0 +1,39 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Users" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row justify-content-end mb-3">
+        <div class="col-auto">
+            Actual count: <span class="fw-bold">{{ users|length }}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="list-group">
+                {% for x in users %}
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if not x.is_active %} text-danger{% endif %}" href="#" title="Edit user" aria-current="true">
+                    <i class="bi bi-person-circle"></i>
+                    <div class="d-flex gap-2 w-100 justify-content-between">
+                        <div>
+                            <h6 class="mb-0">{{ x.name }}</h6>
+                            <p class="mb-0 opacity-75">{{ x.email }}</p>
+                        </div>
+                        <div class="d-flex flex-column">
+                            {% if x.is_admin %}
+                            <small class="opacity-50 text-nowrap">admin</small>
+                            {% endif %}
+                            {% if not x.is_active %}
+                            <small class="opacity-50 text-nowrap">disabled</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

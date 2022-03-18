@@ -1,11 +1,13 @@
 """Application views"""
 from . import auth
 from . import main
+from . import users
 
 
 MODULES = (
     auth,
     main,
+    users,
 )
 
 
