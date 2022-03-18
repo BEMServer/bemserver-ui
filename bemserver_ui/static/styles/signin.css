@@ -3,6 +3,7 @@ body {
     align-items: center;
     padding-top: 40px;
     padding-bottom: 40px;
+    min-width: 350px;
     background-color: #f3f8e9 !important;
 }
 
