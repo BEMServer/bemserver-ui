@@ -177,10 +177,10 @@ class BEMServerApiClientRequest:
         return self._execute("GET", endpoint, etag=etag)
 
     def create(self, endpoint, payload):
-        return self._execute("POST", endpoint, data=payload)
+        return self._execute("POST", endpoint, json=payload)
 
     def update(self, endpoint, payload, etag):
-        return self._execute("PUT", endpoint, data=payload, etag=etag)
+        return self._execute("PUT", endpoint, json=payload, etag=etag)
 
     def delete(self, endpoint, etag):
         return self._execute("DELETE", endpoint, etag=etag)
