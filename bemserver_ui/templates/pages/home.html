@@ -4,5 +4,11 @@
 
 {% block main_content %}
 {{ super() -}}
-<a class="btn btn-outline-danger" href="{{ url_for('auth.signout') }}" title="Sign out" role="button"><i class="bi bi-power"></i> Sign out</a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-auto">
+            <a class="btn btn-outline-danger" href="{{ url_for('auth.signout') }}" title="Sign out" role="button"><i class="bi bi-power"></i> Sign out</a>
+        </div>
+    </div>
+</div>
 {% endblock main_content %}
