@@ -1,304 +1,148 @@
 """BEMServer API client"""
-import abc
-import requests
+import logging
 import flask
+import requests
+import requests.exceptions as req_exc
+from requests.auth import HTTPBasicAuth  # noqa
 from io import BytesIO
-from apiclient import APIClient
+
+from .resources import (
+    UserResources, UserGroupResources, UserByUserGroupResources,
+    CampaignResources, UserGroupByCampaignResources, CampaignScopeResources,
+    TimeseriesResources, TimeseriesDataStateResources, TimeseriesPropertyResources,
+    TimeseriesPropertyDataResources, TimeseriesDataResources,
+    EventResources, EventStateResources, EventLevelResources, EventCategoryResources,
+)
+from .exceptions import BEMServerAPIValidationError, BEMServerAPINotFoundError
 
 
-class BaseResources(abc.ABC):
-    endpoint_uri = None
-
-    def __init__(self, apicli):
-        super().__init__()
-        self._apicli = apicli
-
-    def enpoint_uri_by_id(self, id):
-        return f"{self.endpoint_uri}{id}"
-
-    def getall(self, *, etag=None, **kwargs):
-        return self._apicli._getall(self.endpoint_uri, etag=etag, **kwargs)
-
-    def getone(self, id, *, etag=None):
-        return self._apicli._getone(self.enpoint_uri_by_id(id), etag=etag)
-
-    def create(self, payload):
-        return self._apicli._create(self.endpoint_uri, payload)
-
-    def update(self, id, payload, *, etag=None):
-        return self._apicli._update(self.enpoint_uri_by_id(id), payload, etag=etag)
-
-    def delete(self, id, *, etag=None):
-        return self._apicli._delete(self.enpoint_uri_by_id(id), etag=etag)
+APICLI_LOGGER = logging.getLogger(__name__)
 
 
-class UserByCampaignResources(BaseResources):
-    endpoint_uri = "/usersbycampaigns/"
+class BEMServerApiClientResponse:
+    """API client response"""
 
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
+    def __init__(self, raw_response):
+        self._raw_response = raw_response
+        self._mimetype = self._raw_response.headers["Content-Type"].split("; ")[0]
 
-
-class TimeseriesDataStateResources(BaseResources):
-    endpoint_uri = "/timeseries_data_states/"
-
-
-class TimeseriesPropertyResources(BaseResources):
-    endpoint_uri = "/timeseries_properties/"
-
-
-class TimeseriesPropertyDataResources(BaseResources):
-    endpoint_uri = "/timeseries_property_data/"
-
-
-class TimeseriesDataResources:
-    endpoint_uri = "/timeseries-data/"
-    endpoint_uri_agg = f"{endpoint_uri}aggregate"
-
-    def __init__(self, apicli):
-        self._apicli = apicli
+        # Process error, if any.
+        if self.status_code < 300 or self.status_code >= 500:
+            self._raw_response.raise_for_status()
+        else:
+            self._process_client_error()
 
     @property
-    def _auth(self):
-        if "auth_data" in flask.session:
-            # HTTP basic auth.
-            if flask.current_app.config["BEMSERVER_API_AUTH_METHOD"] == "http_basic":
-                return (
-                    flask.session["auth_data"]["email"],
-                    flask.session["auth_data"]["password"]
-                )
-        return None
+    def status_code(self):
+        return self._raw_response.status_code
 
-    @staticmethod
-    def _process_errors(response):
-        from . import process_client_error
-        from .exceptions import BEMServerClientError
+    @property
+    def etag(self):
+        return self._raw_response.headers.get("ETag", "")
 
-        if response.status_code < 200 or response.status_code >= 300:
-            status_code = response.status_code
-            if 300 <= status_code < 400:
-                # Issue in BEMServer UI
-                flask.abort(500, "A server error occured.")
-            elif 400 <= status_code < 500:
-                kwargs = {
-                    "message": (
-                        f"{status_code} Error: {response.reason} "
-                        f"for url: {response.url}"
-                    ),
-                    "status_code": status_code,
-                    "info": response.text,
-                    "json": response.json(),
-                }
-                process_client_error(BEMServerClientError(**kwargs))
-            elif 500 <= status_code < 600:
-                # Issue in BEMServer
-                flask.abort(500, "A server error occured. Please try again later.")
+    @property
+    def pagination(self):
+        """Get pagination data, if any.
 
-    def _send_file(self, raw_response):
-        # Unpack content disposition header.
-        raw_dispos = raw_response.headers["Content-Disposition"].split("; ")
-        dispositions = {}
-        for raw_dispo in raw_dispos:
-            tmp = raw_dispo.split("=")
-            if len(tmp) == 2:
-                dispositions[tmp[0]] = tmp[1]
-            else:
-                dispositions[tmp[0]] = True
-        # Build file response.
-        as_attachment = dispositions.get("attachement", True)
-        filename = dispositions.get("filename", "file")
+        Example:
+            {"total": 4, "total_pages": 1, "first_page": 1, "last_page": 1, "page": 1}
+        """
+        return self._raw_response.headers.get("X-Pagination", {})
+
+    @property
+    def is_json(self):
+        """Check if the mimetype indicates JSON data, either
+        :mimetype:`application/json` or :mimetype:`application/*+json`.
+        """
+        return (
+            self._mimetype == "application/json"
+            or (self._mimetype.startswith("application/")
+                and self._mimetype.endswith("+json"))
+        )
+
+    @property
+    def data(self):
+        if self.is_json:
+            return self._raw_response.json()
+        return self._raw_response.content
+
+    def _process_client_error(self):
+        APICLI_LOGGER.error(f"{self.status_code} {self._raw_response.url}")
+
+        # Authentication error
+        if self.status_code in (401, 403):
+            flask.abort(self.status_code)
+
+        # Resource not found
+        elif self.status_code == 404:
+            raise BEMServerAPINotFoundError
+
+        # Conflict or validation error
+        elif self.status_code in (409, 422):
+            errors = {}
+            if self.is_json:
+                if self.status_code == 409:
+                    # Unique constraint error
+                    if self.data["errors"].get("type") == "unique_constraint":
+                        errors = {
+                            # TODO: manage multiple columns constraint
+                            field: ("Must be unique",)
+                            for field in self.data["errors"]["fields"]
+                        }
+                    # Foreign key constraint error (and default case)
+                    else:
+                        errors = {"_general": ["Operation impossible."]}
+                elif self.status_code == 422:
+                    if "errors" in self.data:
+                        # Marshmallow ValidationError
+                        for loc in ("json", "query", "files"):
+                            if loc in self.data["errors"]:
+                                errors = {**errors, **self.data["errors"][loc]}
+                                if "_schema" in errors:
+                                    errors["_general"] = errors.pop("_schema")
+                    # BEMServer ValidationError
+                    elif "message" in self.data:
+                        errors = {"_general": [self.data["message"]]}
+            for error in errors.pop("_general", []):
+                flask.flash(error, "error")
+            raise BEMServerAPIValidationError(errors=errors)
+
+        # Issue in BEMServer UI
+        flask.abort(500, "A server error occured.")
+
+    def send_file(self):
+        # Example of headers when downloading a file:
+        #   {'Content-Type': 'text/csv; charset=utf-8', 'Content-Length': '103',
+        #    'Content-Disposition': 'attachment; filename=timeseries.csv',...
+        disposition = self._raw_response.headers["Content-Disposition"]
+        filename = disposition.split("; ")[1].split("=")[1]
         return flask.send_file(
-            BytesIO(raw_response.content), download_name=filename,
-            as_attachment=as_attachment)
+            BytesIO(self.data), download_name=filename, as_attachment=True)
 
-    def upload_csv(self, data_state, csv_file):
-        try:
-            response = requests.post(
-                self._apicli._build_uri(self.endpoint_uri),
-                params={"data_state": data_state},
-                files=csv_file,
-                auth=self._auth)
-        except Exception:
-            # Server unreachable, content not parsable. There is not much we can do.
-            flask.abort(500, "A server error occured. Please try again later.")
-        self._process_errors(response)
-        return response
-
-    def download_csv(self, start_time, end_time, data_state, timeseries_ids):
-        try:
-            response = requests.get(
-                self._apicli._build_uri(self.endpoint_uri),
-                params={"start_time": start_time, "end_time": end_time,
-                        "data_state": data_state, "timeseries": timeseries_ids},
-                auth=self._auth)
-        except Exception:
-            # Server unreachable, content not parsable. There is not much we can do.
-            flask.abort(500, "A server error occured. Please try again later.")
-        self._process_errors(response)
-        return self._send_file(response)
-
-    def download_csv_aggregate(
-            self, start_time, end_time, data_state, timeseries_ids, bucket_width,
-            timezone="UTC", aggregation="avg"):
-        try:
-            response = requests.get(
-                self._apicli._build_uri(self.endpoint_uri_agg),
-                params={"start_time": start_time, "end_time": end_time,
-                        "data_state": data_state, "timeseries": timeseries_ids,
-                        "bucket_width": bucket_width, "timezone": timezone,
-                        "aggregation": aggregation},
-                auth=self._auth)
-        except Exception:
-            # Server unreachable, content not parsable. There is not much we can do.
-            flask.abort(500, "A server error occured. Please try again later.")
-        self._process_errors(response)
-        return self._send_file(response)
+    def toJSON(self):
+        # Allows to set this response instance in a flask session variable.
+        return {
+            "status_code": self.status_code,
+            "data": self.data,
+            "etag": self.etag,
+            "pagination": self.pagination,
+        }
 
 
-class TimeseriesResources(BaseResources):
-    endpoint_uri = "/timeseries/"
-
-
-class TimeseriesGroupByUserResources(BaseResources):
-    endpoint_uri = "/timeseries_groups_by_users/"
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-
-class TimeseriesGroupByCampaignResources(BaseResources):
-    endpoint_uri = "/timeseries_groups_by_campaigns/"
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-
-class TimeseriesGroupResources(BaseResources):
-    endpoint_uri = "/timeseries_groups/"
-
-
-class UserResources(BaseResources):
-    endpoint_uri = "/users/"
-
-    def set_admin(self, id, state, *, etag=None):
-        return self._apicli._update(
-            self.enpoint_uri_by_id(id), {"value": state}, etag=etag)
-
-    def set_active(self, id, state, *, etag=None):
-        return self._apicli._update(
-            self.enpoint_uri_by_id(id), {"value": state}, etag=etag)
-
-
-class CampaignResources(BaseResources):
-    endpoint_uri = "/campaigns/"
-
-
-class EventStateResources(BaseResources):
-    endpoint_uri = "/event_states/"
-
-    def getone(self, id, *, etag=None):
-        raise NotImplementedError
-
-    def create(self, payload, *, etag=None):
-        raise NotImplementedError
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-    def delete(self, id, *, etag=None):
-        raise NotImplementedError
-
-
-class EventLevelResources(BaseResources):
-    endpoint_uri = "/event_levels/"
-
-    def getone(self, id, *, etag=None):
-        raise NotImplementedError
-
-    def create(self, payload, *, etag=None):
-        raise NotImplementedError
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-    def delete(self, id, *, etag=None):
-        raise NotImplementedError
-
-
-class EventCategoryResources(BaseResources):
-    endpoint_uri = "/event_categories/"
-
-    def getone(self, id, *, etag=None):
-        raise NotImplementedError
-
-    def create(self, payload, *, etag=None):
-        raise NotImplementedError
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-    def delete(self, id, *, etag=None):
-        raise NotImplementedError
-
-
-class EventChannelByUserResources(BaseResources):
-    endpoint_uri = "/event_channels_by_users/"
-
-    def __init__(self, apicli):
-        self._apicli = apicli
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-
-class EventChannelByCampaignResources:
-    endpoint_uri = "/event_channels_by_campaigns/"
-
-    def __init__(self, apicli):
-        self._apicli = apicli
-
-    def update(self, id, payload, *, etag=None):
-        raise NotImplementedError
-
-
-class EventChannelResources(BaseResources):
-    endpoint_uri = "/event_channels/"
-
-
-class EventResources(BaseResources):
-    endpoint_uri = "/events/"
-
-
-class BEMServerApiClient(APIClient):
-    """API client"""
+class BEMServerApiClientRequest:
+    """API client requester"""
 
     _ETAG_HEADER_BY_HTTP_METHOD = {
-        "get": "If-None-Match",
-        "put": "If-Match",
-        "delete": "If-Match",
+        "GET": "If-None-Match",
+        "PUT": "If-Match",
+        "DELETE": "If-Match",
     }
 
-    def __init__(self, base_uri, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, base_uri, authentication_method):
         self.base_uri = base_uri
-        self.users = UserResources(self)
-        self.campaigns = CampaignResources(self)
-        self.users_bycampaigns = UserByCampaignResources(self)
-        self.timeseries = TimeseriesResources(self)
-        self.timeseries_groups = TimeseriesGroupResources(self)
-        self.timeseries_groups_byusers = TimeseriesGroupByUserResources(self)
-        self.timeseries_groups_bycampaigns = TimeseriesGroupByCampaignResources(self)
-        self.timeseries_datastates = TimeseriesDataStateResources(self)
-        self.timeseries_properties = TimeseriesPropertyResources(self)
-        self.timeseries_propertiesdata = TimeseriesPropertyDataResources(self)
-        self.timeseries_data = TimeseriesDataResources(self)
-        self.events = EventResources(self)
-        self.event_states = EventStateResources(self)
-        self.event_levels = EventLevelResources(self)
-        self.event_categories = EventCategoryResources(self)
-        self.event_channels = EventChannelResources(self)
-        self.event_channels_byusers = EventChannelByUserResources(self)
-        self.event_channels_bycampaigns = EventChannelByCampaignResources(self)
+
+        self._session = requests.Session()
+        self._session.auth = authentication_method
 
     def _build_uri(self, endpoint_uri):
         return f"{self.base_uri}{endpoint_uri}"
@@ -308,26 +152,72 @@ class BEMServerApiClient(APIClient):
         if etag is not None:
             try:
                 etag_header = {
-                    self._ETAG_HEADER_BY_HTTP_METHOD[http_method.lower()]: etag}
+                    self._ETAG_HEADER_BY_HTTP_METHOD[http_method.upper()]: etag}
             except KeyError:
                 pass
         return etag_header
 
-    def _getall(self, endpoint, *, etag=None, **kwargs):
-        headers = self._prepare_etag_header("get", etag)
-        return self.get(self._build_uri(endpoint), params=kwargs, headers=headers)
+    def _execute(self, http_method, endpoint, *, etag=None, **kwargs):
+        full_endpoint_uri = self._build_uri(endpoint)
+        headers = self._prepare_etag_header(http_method, etag)
+        APICLI_LOGGER.debug(f"{http_method} {full_endpoint_uri}")
+        try:
+            raw_resp = self._session.request(
+                http_method, full_endpoint_uri, headers=headers, **kwargs)
+        except req_exc.RequestException as exc:
+            APICLI_LOGGER.error(
+                f"Unexpected error while requesting {full_endpoint_uri}: {exc}")
+            flask.abort(500, "A server error occured. Please try again later.")
+        return BEMServerApiClientResponse(raw_resp)
 
-    def _getone(self, endpoint, *, etag=None):
-        headers = self._prepare_etag_header("get", etag)
-        return self.get(self._build_uri(endpoint), headers=headers)
+    def getall(self, endpoint, *, etag=None, **kwargs):
+        return self._execute("GET", endpoint, etag=etag, **kwargs)
 
-    def _create(self, endpoint, payload):
-        return self.post(self._build_uri(endpoint), data=payload)
+    def getone(self, endpoint, *, etag=None):
+        return self._execute("GET", endpoint, etag=etag)
 
-    def _update(self, endpoint, payload, etag):
-        headers = self._prepare_etag_header("put", etag)
-        return self.put(self._build_uri(endpoint), data=payload, headers=headers)
+    def create(self, endpoint, payload):
+        return self._execute("POST", endpoint, data=payload)
 
-    def _delete(self, endpoint, etag):
-        headers = self._prepare_etag_header("delete", etag)
-        return self.delete(self._build_uri(endpoint), headers=headers)
+    def update(self, endpoint, payload, etag):
+        return self._execute("PUT", endpoint, data=payload, etag=etag)
+
+    def delete(self, endpoint, etag):
+        return self._execute("DELETE", endpoint, etag=etag)
+
+    def upload(self, endpoint, files, **kwargs):
+        """Upload files."""
+        return self._execute("POST", endpoint, files=files, **kwargs)
+
+    def download(self, endpoint, **kwargs):
+        """Download files."""
+        return self._execute("GET", endpoint, **kwargs)
+
+
+class BEMServerApiClient:
+    """API client"""
+
+    def __init__(self, base_uri, authentication_method=None):
+        self._request_manager = BEMServerApiClientRequest(
+            base_uri, authentication_method)
+
+        self.users = UserResources(self._request_manager)
+        self.user_groups = UserGroupResources(self._request_manager)
+        self.user_by_user_groups = UserByUserGroupResources(self._request_manager)
+
+        self.campaigns = CampaignResources(self._request_manager)
+        self.user_groups_by_campaigns = \
+            UserGroupByCampaignResources(self._request_manager)
+        self.campaign_scopes = CampaignScopeResources(self._request_manager)
+
+        self.timeseries = TimeseriesResources(self._request_manager)
+        self.timeseries_datastates = TimeseriesDataStateResources(self._request_manager)
+        self.timeseries_properties = TimeseriesPropertyResources(self._request_manager)
+        self.timeseries_propertiesdata = \
+            TimeseriesPropertyDataResources(self._request_manager)
+        self.timeseries_data = TimeseriesDataResources(self._request_manager)
+
+        self.events = EventResources(self._request_manager)
+        self.event_states = EventStateResources(self._request_manager)
+        self.event_levels = EventLevelResources(self._request_manager)
+        self.event_categories = EventCategoryResources(self._request_manager)

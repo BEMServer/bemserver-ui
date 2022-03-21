@@ -22,8 +22,8 @@ def signin():
         }
         try:
             # Credentials check.
-            user = flask.g.api_client.users.getall(
-                email=flask.session["auth_data"]["email"])[0]
+            user_resp = flask.g.api_client.users.getall(
+                email=flask.session["auth_data"]["email"])
         except bac.BEMServerAPIValidationError as exc:
             flask.session.clear()
             flask.session["_validation_errors"] = exc.errors
@@ -33,8 +33,11 @@ def signin():
             flask.flash("Incorrect credentials", "error")
         else:
             # Credentials are valid.
-            flask.session["user"] = user
-            flask.flash(f"Welcome back {user['name']}!", "message")
+            # XXX: Little trick to "adapt" response data.
+            user_json = user_resp.toJSON()
+            user_json["data"] = user_json["data"][0]
+            flask.session["user"] = user_json
+            flask.flash(f"Welcome back {user_json['data']['name']}!", "message")
             return flask.redirect(flask.url_for("main.index"))
 
     # Render sign in form.
@@ -45,7 +48,7 @@ def signin():
 @auth.signin_required
 def signout():
     # Clear session to forget user's credentials in order to "sign out".
-    username = flask.session["user"]["name"]
+    username = flask.session["user"]["data"]["name"]
     flask.session.clear()
     flask.flash(f"You have signed out! Bye {username}", "message")
     # Redirect to sign in form.
