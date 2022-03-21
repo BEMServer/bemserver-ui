@@ -1,8 +1,15 @@
 """BEMServer UI application extensions"""
 from . import api_client
-from .auth import signin_required  # noqa
+from . import auth
+
+
+EXT_MODULES = (
+    auth,
+    api_client,
+)
 
 
 def init_app(app):
     """Initialize extensions with app"""
-    api_client.init_app(app)
+    for extension in EXT_MODULES:
+        extension.init_app(app)

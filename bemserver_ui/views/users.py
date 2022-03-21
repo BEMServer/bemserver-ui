@@ -2,14 +2,14 @@
 import flask
 
 import bemserver_ui.extensions.api_client as bac
-from bemserver_ui.extensions import signin_required
+from bemserver_ui.extensions import auth
 
 
 blp = flask.Blueprint("users", __name__, url_prefix="/users")
 
 
 @blp.route("/")
-@signin_required
+@auth.signin_required
 def list():
     # TODO: add filters
     try:
@@ -19,4 +19,5 @@ def list():
         flask.flash("Operation failed!", "error")
         return flask.redirect(flask.request.referrer)
 
+    # TODO: manage pagination, if any
     return flask.render_template("pages/users/list.html", users=users)

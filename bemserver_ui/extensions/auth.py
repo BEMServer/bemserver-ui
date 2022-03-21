@@ -17,7 +17,7 @@ def signin_required(f):
             flask.session.clear()
             raise wexc.Unauthorized
         try:
-            # Verfify user existence and credentials.
+            # Verfify user existence and credentials at the same time.
             user = flask.g.api_client.users.getone(flask.session["user"]["id"])
         except wexc.NotFound:
             flask.session.clear()
@@ -27,3 +27,12 @@ def signin_required(f):
             flask.session["user"] = user
         return f(*args, **kwargs)
     return decorated_function
+
+
+def init_app(app):
+
+    @app.context_processor
+    def inject_signed_user():
+        if "user" in flask.session:
+            return dict(signed_user=flask.session["user"])
+        return dict()

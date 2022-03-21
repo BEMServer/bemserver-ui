@@ -1,7 +1,7 @@
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
     <div class="position-sticky">
         <div class="d-flex flex-column">
-            {% if session["user"].is_admin %}
+            {% if signed_user.is_admin %}
             <h6 class="app-sidebar-heading ps-2 mt-4 mb-1 text-muted">
                 <i class="bi bi-gear"></i>
                 Administration

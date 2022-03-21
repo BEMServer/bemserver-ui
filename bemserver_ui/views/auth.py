@@ -2,7 +2,7 @@
 import flask
 
 import bemserver_ui.extensions.api_client as bac
-from bemserver_ui.extensions import signin_required
+from bemserver_ui.extensions import auth
 
 
 blp = flask.Blueprint("auth", __name__, url_prefix="/auth")
@@ -42,7 +42,7 @@ def signin():
 
 
 @blp.route("/signout")
-@signin_required
+@auth.signin_required
 def signout():
     # Clear session to forget user's credentials in order to "sign out".
     username = flask.session["user"]["name"]
