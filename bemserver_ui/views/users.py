@@ -31,3 +31,24 @@ def view():
 
     return flask.render_template(
         "pages/users/view.html", user=user.data, etag=user.etag)
+
+
+@blp.route("/create", methods=["GET", "POST"])
+@auth.signin_required(roles=[Roles.admin])
+def create():
+    if flask.request.method == "POST":
+        try:
+            ret = flask.g.api_client.users.create({
+                "name": flask.request.form["name"],
+                "email": flask.request.form["email"],
+                "password": flask.request.form["password"],
+            })
+        except bac.BEMServerAPIValidationError as exc:
+            flask.abort(
+                422, description="An error occured while creating user account!",
+                response=exc.errors)
+        else:
+            flask.flash(f"New user account created: {ret.data['name']}", "success")
+            return flask.redirect(flask.url_for("users.list"))
+
+    return flask.render_template("pages/users/create.html")
