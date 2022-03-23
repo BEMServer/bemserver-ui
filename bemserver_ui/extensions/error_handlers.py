@@ -22,6 +22,11 @@ def init_app(app):
         flask.flash("Insufficient permissions", "error")
         return flask.redirect(flask.url_for("main.index"))
 
+    @app.errorhandler(wexc.NotFound)
+    def handle_404(exc):
+        flask.flash(exc.description or "Item not found!", "error")
+        return flask.redirect(_get_back_location())
+
     @app.errorhandler(wexc.UnprocessableEntity)
     def handle_422(exc):
         flask.flash(exc.description or "Operation failed!", "error")

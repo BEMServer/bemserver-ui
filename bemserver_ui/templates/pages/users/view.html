@@ -1,0 +1,77 @@
+{% extends "pages/base.html" %}
+
+{% set self_view = signed_user.id == user.id %}
+{% set title = "View user" if not self_view else "My user account" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <dl>
+                <dt>Name</dt>
+                <dd>{{ user.name }}</dd>
+                <dt>Email address</dt>
+                <dd>{{ user.email }}</dd>
+            </dl>
+        </div>
+        {% if signed_user.is_admin %}
+        <div class="col">
+            <dl>
+                <dt>Is active?</dt>
+                <dd class="d-flex">
+                    {% if user.is_active %}
+                    <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
+                    {% else %}
+                    <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
+                    {% endif %}
+                    {% if not self_view %}
+                    <form id="setStatusForm" class="ms-4" action="#" method="POST">
+                        <div class="form-check form-switch d-none">
+                            <input class="form-check-input invisible" type="checkbox" role="switch" form="setStatusForm" id="status" name="status"{% if not user.is_active %} checked{% endif %}>
+                            <label class="form-check-label" for="status">{{ "yes" if user.is_active else "no" }}</label>
+                        </div>
+                        <input type="hidden" form="setStatusForm" id="setStatusEtag" name="setStatusEtag" value="{{ etag }}">
+                        <button type="submit" form="setStatusForm" class="btn btn-sm btn-outline-warning text-break" title="Set status" disabled><span class="fw-bold">{% if user.is_active %}Unset{% else %}Set{% endif %}</span> active</button>
+                    </form>
+                    {% endif %}
+                </dd>
+                <dt>Is admin?</dt>
+                <dd class="d-flex">
+                    {% if user.is_admin %}
+                    <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
+                    {% else %}
+                    <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
+                    {% endif %}
+                    {% if not self_view %}
+                    <form id="setRoleForm" class="ms-4" action="#" method="POST">
+                        <div class="form-check form-switch d-none">
+                            <input class="form-check-input invisible" type="checkbox" role="switch" form="setRoleForm" id="admin" name="admin"{% if not user.is_admin %} checked{% endif %}>
+                            <label class="form-check-label" for="admin">{{ "yes" if user.is_admin else "no" }}</label>
+                        </div>
+                        <input type="hidden" form="setRoleForm" id="setRoleEtag" name="setRoleEtag" value="{{ etag }}">
+                        <button type="submit" form="setRoleForm" class="btn btn-sm btn-outline-warning text-break" title="Set admin" disabled><span class="fw-bold">{% if user.is_admin %}Unset{% else %}Set{% endif %}</span> admin</button>
+                    </form>
+                    {% endif %}
+                </dd>
+            </dl>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-between gap-4">
+                {% if not self_view %}
+                <form id="delForm" action="#" method="POST">
+                    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+                    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete" disabled><i class="bi bi-trash"></i> Delete</button>
+                </form>
+                {% endif %}
+                <div class="d-flex gap-2 ms-auto">
+                    <a href="#" class="btn btn-sm btn-outline-primary text-break disabled" role="button" tabindex="-1" title="Edit" aria-disabled="true"><i class="bi bi-pencil"></i> Edit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
