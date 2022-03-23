@@ -26,13 +26,13 @@
                     <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
                     {% endif %}
                     {% if not self_view %}
-                    <form id="setStatusForm" class="ms-4" action="#" method="POST">
+                    <form id="setStatusForm" class="ms-4" action="{{ url_for('users.set_status', id=user.id) }}" method="POST">
                         <div class="form-check form-switch d-none">
                             <input class="form-check-input invisible" type="checkbox" role="switch" form="setStatusForm" id="status" name="status"{% if not user.is_active %} checked{% endif %}>
                             <label class="form-check-label" for="status">{{ "yes" if user.is_active else "no" }}</label>
                         </div>
                         <input type="hidden" form="setStatusForm" id="setStatusEtag" name="setStatusEtag" value="{{ etag }}">
-                        <button type="submit" form="setStatusForm" class="btn btn-sm btn-outline-warning text-break" title="Set status" disabled><span class="fw-bold">{% if user.is_active %}Unset{% else %}Set{% endif %}</span> active</button>
+                        <button type="submit" form="setStatusForm" class="btn btn-sm btn-outline-warning text-break" title="Set status"><span class="fw-bold">{% if user.is_active %}Unset{% else %}Set{% endif %}</span> active</button>
                     </form>
                     {% endif %}
                 </dd>
@@ -44,13 +44,13 @@
                     <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
                     {% endif %}
                     {% if not self_view %}
-                    <form id="setRoleForm" class="ms-4" action="#" method="POST">
+                    <form id="setRoleForm" class="ms-4" action="{{ url_for('users.set_role', id=user.id) }}" method="POST">
                         <div class="form-check form-switch d-none">
                             <input class="form-check-input invisible" type="checkbox" role="switch" form="setRoleForm" id="admin" name="admin"{% if not user.is_admin %} checked{% endif %}>
                             <label class="form-check-label" for="admin">{{ "yes" if user.is_admin else "no" }}</label>
                         </div>
                         <input type="hidden" form="setRoleForm" id="setRoleEtag" name="setRoleEtag" value="{{ etag }}">
-                        <button type="submit" form="setRoleForm" class="btn btn-sm btn-outline-warning text-break" title="Set admin" disabled><span class="fw-bold">{% if user.is_admin %}Unset{% else %}Set{% endif %}</span> admin</button>
+                        <button type="submit" form="setRoleForm" class="btn btn-sm btn-outline-warning text-break" title="Set admin"><span class="fw-bold">{% if user.is_admin %}Unset{% else %}Set{% endif %}</span> admin</button>
                     </form>
                     {% endif %}
                 </dd>

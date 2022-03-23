@@ -100,3 +100,43 @@ def delete():
         flask.flash("User account deleted!", "success")
 
     return flask.redirect(flask.url_for("users.list"))
+
+
+@blp.route("/set_status", methods=["POST"])
+@auth.signin_required(roles=[Roles.admin])
+def set_status():
+    user_id = flask.request.args["id"]
+    try:
+        flask.g.api_client.users.set_active(
+            user_id, "status" in flask.request.form,
+            etag=flask.request.form["setStatusEtag"])
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(
+            422, description="An error occured while updating user's status!",
+            response=exc.errors)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User not found!")
+    else:
+        flask.flash("User account status updated!", "success")
+
+    return flask.redirect(flask.url_for("users.view", id=user_id))
+
+
+@blp.route("/set_role", methods=["POST"])
+@auth.signin_required(roles=[Roles.admin])
+def set_role():
+    user_id = flask.request.args["id"]
+    try:
+        flask.g.api_client.users.set_admin(
+            user_id, "admin" in flask.request.form,
+            etag=flask.request.form["setRoleEtag"])
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(
+            422, description="An error occured while updating user's role!",
+            response=exc.errors)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User not found!")
+    else:
+        flask.flash("User account role updated!", "success")
+
+    return flask.redirect(flask.url_for("users.view", id=user_id))
