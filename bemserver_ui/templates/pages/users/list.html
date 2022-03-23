@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Users" %}
+{% set title = "User accounts" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -14,24 +14,28 @@
         <div class="col">
             <div class="list-group">
                 {% for x in users %}
-                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if not x.is_active %} text-danger{% endif %}" href="#" title="Edit user" aria-current="true">
-                    <i class="bi bi-person-circle"></i>
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if not x.is_active %} text-danger{% endif %}" href="#" title="View details">
+                    {% if x.id == signed_user.id %}
+                    <i class="bi bi-incognito"></i>
+                    {% else %}
+                    <i class="bi bi-postcard"></i>
+                    {% endif %}
                     <div class="d-flex gap-2 w-100 justify-content-between">
                         <div>
                             <h6 class="mb-0">
-                                {{ x.name }}
+                                <span class="fw-bold">{{ x.name }}</span>
                                 {% if x.id == signed_user.id %}
-                                <small class="opacity-50 text-nowrap text-success ms-4">This is me!</small>
+                                <small class="opacity-50 text-nowrap text-success fst-italic"><i class="bi bi-arrow-bar-left"></i> This is me!</small>
                                 {% endif %}
                             </h6>
                             <p class="mb-0 opacity-75">{{ x.email }}</p>
                         </div>
                         <div class="d-flex flex-column">
                             {% if x.is_admin %}
-                            <small class="opacity-50 text-nowrap">admin</small>
+                            <small class="opacity-50 text-nowrap"><i class="bi bi-lightning"></i> admin</small>
                             {% endif %}
                             {% if not x.is_active %}
-                            <small class="opacity-50 text-nowrap">disabled</small>
+                            <small class="opacity-50 text-nowrap"><i class="bi bi-lock-fill"></i> disabled</small>
                             {% endif %}
                         </div>
                     </div>
