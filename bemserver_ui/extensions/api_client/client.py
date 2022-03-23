@@ -73,6 +73,10 @@ class BEMServerApiClientResponse:
         if self.status_code in (401, 403):
             flask.abort(self.status_code)
 
+        # Precondition error (etag)
+        elif self.status_code in (412, 428):
+            flask.abort(self.status_code)
+
         # Resource not found
         elif self.status_code == 404:
             raise BEMServerAPINotFoundError

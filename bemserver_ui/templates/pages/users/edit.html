@@ -1,0 +1,44 @@
+{% extends "pages/base.html" %}
+
+{% set self_edit = signed_user.id == user.id %}
+{% set title = "Edit user" if not self_edit else "Edit my profile" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend>User account</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" form="editForm" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" form="editForm" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" form="editForm" required>
+                </div>
+                <div class="d-flex justify-content-between gap-4">
+                    {% if not self_edit %}
+                    <form id="delForm" action="#" method="POST" data-delete-confirm="{{ user.name }}'s account">
+                        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+                        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete" disabled><i class="bi bi-trash"></i> Delete</button>
+                    </form>
+                    {% endif %}
+                    <div class="d-flex gap-2 ms-auto">
+                        <a href="{{ url_for('users.view', id=user.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                        <form id="editForm" action="{{ url_for('users.edit', id=user.id) }}" method="POST">
+                            <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                            <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                        </form>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

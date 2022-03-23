@@ -68,7 +68,7 @@
                 </form>
                 {% endif %}
                 <div class="d-flex gap-2 ms-auto">
-                    <a href="#" class="btn btn-sm btn-outline-primary text-break disabled" role="button" tabindex="-1" title="Edit" aria-disabled="true"><i class="bi bi-pencil"></i> Edit</a>
+                    <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
                 </div>
             </div>
         </div>

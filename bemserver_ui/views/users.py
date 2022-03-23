@@ -52,3 +52,37 @@ def create():
             return flask.redirect(flask.url_for("users.list"))
 
     return flask.render_template("pages/users/create.html")
+
+
+@blp.route("/edit", methods=["GET", "POST"])
+@auth.signin_required
+def edit():
+    user_id = flask.request.args["id"]
+
+    if flask.request.method == "GET":
+        try:
+            user = flask.g.api_client.users.getone(user_id)
+        except bac.BEMServerAPINotFoundError:
+            flask.abort(404, description="User not found!")
+
+    elif flask.request.method == "POST":
+        try:
+            user = flask.g.api_client.users.update(
+                user_id, {
+                    "name": flask.request.form["name"],
+                    "email": flask.request.form["email"],
+                    "password": flask.request.form["password"],
+                }, etag=flask.request.form["editEtag"],
+            )
+        except bac.BEMServerAPIValidationError as exc:
+            flask.abort(
+                422, description="An error occured while updating user account!",
+                response=exc.errors)
+        except bac.BEMServerAPINotFoundError:
+            flask.abort(404, description="User not found!")
+        else:
+            flask.flash("User account updated!", "success")
+            return flask.redirect(flask.url_for("users.view", id=user.data["id"]))
+
+    return flask.render_template(
+        "pages/users/edit.html", user=user.data, etag=user.etag)
