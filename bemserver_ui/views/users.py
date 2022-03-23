@@ -86,3 +86,17 @@ def edit():
 
     return flask.render_template(
         "pages/users/edit.html", user=user.data, etag=user.etag)
+
+
+@blp.route("/delete", methods=["POST"])
+@auth.signin_required(roles=[Roles.admin])
+def delete():
+    try:
+        flask.g.api_client.users.delete(
+            flask.request.args["id"], etag=flask.request.form["delEtag"])
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User not found!")
+    else:
+        flask.flash("User account deleted!", "success")
+
+    return flask.redirect(flask.url_for("users.list"))

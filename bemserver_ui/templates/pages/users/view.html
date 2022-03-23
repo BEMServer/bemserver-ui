@@ -62,9 +62,9 @@
         <div class="col">
             <div class="d-flex justify-content-between gap-4">
                 {% if not self_view %}
-                <form id="delForm" action="#" method="POST">
+                <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-delete-confirm="{{ user.name }}'s account">
                     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-                    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete" disabled><i class="bi bi-trash"></i> Delete</button>
+                    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
                 </form>
                 {% endif %}
                 <div class="d-flex gap-2 ms-auto">
