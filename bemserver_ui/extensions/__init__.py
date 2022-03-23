@@ -1,6 +1,7 @@
 """BEMServer UI application extensions"""
 from . import api_client
 from . import auth
+from .auth import Roles  # noqa
 
 
 EXT_MODULES = (
