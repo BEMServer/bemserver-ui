@@ -8,16 +8,31 @@ from bemserver_ui.extensions import auth, Roles
 blp = flask.Blueprint("users", __name__, url_prefix="/users")
 
 
-@blp.route("/")
+@blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
-    # TODO: add filters
+    filters = {"is_admin": None, "is_active": None}
+
+    # Get requested filters.
+    if flask.request.method == "POST":
+        if flask.request.form["is_admin"] == "False":
+            filters["is_admin"] = False
+        elif flask.request.form["is_admin"] == "True":
+            filters["is_admin"] = True
+
+        if flask.request.form["is_active"] == "False":
+            filters["is_active"] = False
+        elif flask.request.form["is_active"] == "True":
+            filters["is_active"] = True
+
     try:
-        users_resp = flask.g.api_client.users.getall()
+        # Get users list applying filters.
+        users_resp = flask.g.api_client.users.getall(**filters)
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, description=exc.errors)
 
-    return flask.render_template("pages/users/list.html", users=users_resp.data)
+    return flask.render_template(
+        "pages/users/list.html", users=users_resp.data, filters=filters)
 
 
 @blp.route("/view")
