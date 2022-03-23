@@ -1,5 +1,4 @@
 """BEMServer UI"""
-import werkzeug.exceptions as wexc
 import flask
 
 from . import extensions
@@ -17,15 +16,5 @@ def create_app():
 
     extensions.init_app(app)
     views.init_app(app)
-
-    @app.errorhandler(wexc.Unauthorized)
-    def handle_401(e):
-        flask.flash("Incorrect or missing credentials", "error")
-        return flask.redirect(flask.url_for("auth.signin"))
-
-    @app.errorhandler(wexc.Forbidden)
-    def handle_403(_):
-        flask.flash("Insufficient permissions", "error")
-        return flask.redirect(flask.url_for("main.index"))
 
     return app
