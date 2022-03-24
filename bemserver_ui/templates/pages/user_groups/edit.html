@@ -1,0 +1,33 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Edit user group" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend>User group information</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ user_group.name }}" form="editForm" required autofocus>
+                </div>
+                <div class="d-flex justify-content-between gap-4">
+                    <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-delete-confirm="{{ user_group.name }} user group">
+                        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+                        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                    </form>
+                    <div class="d-flex gap-2 ms-auto">
+                        <a href="{{ url_for('user_groups.view', id=user_group.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                        <form id="editForm" action="{{ url_for('user_groups.edit', id=user_group.id) }}" method="POST">
+                            <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                            <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                        </form>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

@@ -2,12 +2,14 @@
 from . import auth
 from . import main
 from . import users
+from . import user_groups
 
 
 MODULES = (
     auth,
     main,
     users,
+    user_groups,
 )
 
 
