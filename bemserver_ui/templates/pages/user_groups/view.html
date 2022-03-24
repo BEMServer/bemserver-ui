@@ -33,7 +33,7 @@
         <div class="col">
             <div class="d-flex justify-content-between gap-4">
                 {% if signed_user.is_admin %}
-                <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-delete-confirm="{{ user_group.name }} user group">
+                <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-confirm="Delete {{ user_group.name }} user group">
                     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
                     <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
                 </form>

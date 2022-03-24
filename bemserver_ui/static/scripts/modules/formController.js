@@ -1,13 +1,13 @@
 class FormController {
 
-    setConfirmDelete() {
-        // Search every "delete" form in current page and display a confirm message on submit.
-        let elements = document.querySelectorAll("form[data-delete-confirm]");
+    initConfirm() {
+        // Search every "data-confirm" form in current page and display a confirm message on submit.
+        let elements = document.querySelectorAll("form[data-confirm]");
         elements.forEach(function (element) {
-            let deleteConfirmData = element.getAttribute("data-delete-confirm");
+            let confirmData = element.getAttribute("data-confirm");
             element.addEventListener("submit", function(event) {
                 event.preventDefault();
-                let ret = window.confirm(`Delete ${deleteConfirmData}\n\nDo you confirm this action?`);
+                let ret = window.confirm(`${confirmData}\n\nDo you confirm this action?`);
                 if (ret) {
                     element.submit();
                 }
