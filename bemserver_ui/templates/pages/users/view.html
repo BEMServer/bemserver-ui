@@ -7,12 +7,28 @@
 {{ super() -}}
 <div class="container-fluid">
     <div class="row mb-3">
-        <div class="col">
+        <div class="col-6">
             <dl>
                 <dt>Name</dt>
                 <dd>{{ user.name }}</dd>
                 <dt>Email address</dt>
                 <dd>{{ user.email }}</dd>
+                <dt>Groups <span class="badge bg-primary">{{ user_groups|length }}</span></dt>
+                <dd>
+                    {% if user_groups|length > 0 %}
+                    <div class="list-group list-group-horizontal d-flex flex-wrap mt-1">
+                        {% for x in user_groups %}
+                        {% if signed_user.is_admin %}
+                        <a href="{{ url_for('user_groups.view', id=x.id) }}" class="list-group-item list-group-item-action w-auto" title="View details">{{ x.name }}</a>
+                        {% else %}
+                        {{ x.name }}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <span class="fst-italic text-muted">none</span>
+                    {% endif %}
+                </dd>
             </dl>
         </div>
         {% if signed_user.is_admin %}

@@ -44,8 +44,16 @@ def view():
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User not found!")
 
+    # Get user groups.
+    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=user_id)
+    user_groups = []
+    for x in user_groups_resp.data:
+        user_group_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
+        user_groups.append(user_group_resp.data)
+
     return flask.render_template(
-        "pages/users/view.html", user=user.data, etag=user.etag)
+        "pages/users/view.html", user=user.data, etag=user.etag,
+        user_groups=user_groups)
 
 
 @blp.route("/create", methods=["GET", "POST"])
