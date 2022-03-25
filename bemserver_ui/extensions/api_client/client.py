@@ -87,7 +87,7 @@ class BEMServerApiClientResponse:
             if self.is_json:
                 if self.status_code == 409:
                     # Unique constraint error
-                    if self.data["errors"].get("type") == "unique_constraint":
+                    if self.data.get("errors", {}).get("type") == "unique_constraint":
                         errors = {
                             # TODO: manage multiple columns constraint
                             field: ("Must be unique",)
@@ -95,7 +95,7 @@ class BEMServerApiClientResponse:
                         }
                     # Foreign key constraint error (and default case)
                     else:
-                        errors = {"_general": ["Operation impossible."]}
+                        errors = {"_general": ["Operation failed (409)."]}
                 elif self.status_code == 422:
                     if "errors" in self.data:
                         # Marshmallow ValidationError

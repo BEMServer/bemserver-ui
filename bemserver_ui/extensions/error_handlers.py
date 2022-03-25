@@ -27,6 +27,12 @@ def init_app(app):
         flask.flash(exc.description or "Item not found!", "error")
         return flask.redirect(_get_back_location())
 
+    @app.errorhandler(wexc.Conflict)
+    def handle_409(exc):
+        flask.flash(exc.description or "Operation failed!", "error")
+        flask.session["_validation_errors"] = exc.response or {}
+        return flask.redirect(_get_back_location())
+
     @app.errorhandler(wexc.PreconditionFailed)
     def handle_412(_):
         flask.flash("Internal error: ETag precondition failed", "error")
