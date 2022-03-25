@@ -1,0 +1,48 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Manage user's groups" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Actual groups for <span class="fst-italic">{{ user.name }}</span> <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
+            {% if user_groups|length > 0 %}
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in user_groups %}
+                <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
+                    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('user_groups.view', id=x.id) }}" title="View user group"><i class="bi bi-people"></i> {{ x.name }}</a>
+                    <form action="{{ url_for('user_groups.remove_user', id=x.rel_id, next=url_for('users.manage_groups', id=user.id)) }}" method="POST" data-confirm="Remove {{ user.name }}'s user account from {{ x.name }} group">
+                        <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h5>Available groups <span class="badge bg-primary">{{ all_groups|length }}</span></h5>
+            {% if all_groups|length > 0 %}
+            <form id="addGroupsForm" class="d-flex flex-wrap gap-2" action="{{ url_for('users.manage_groups', id=user.id) }}" method="POST">
+                {% for x in all_groups %}
+                <input class="btn-check" type="checkbox" id="group-{{ x.id }}" name="group-{{ x.id }}" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="group-{{ x.id }}"><i class="bi bi-plus-square-dotted me-3"></i><i class="bi bi-people"></i> {{ x.name }}</label>
+                {% endfor %}
+            </form>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+            <div class="d-flex justify-content-end gap-2">
+                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Cancel">Cancel</a>
+                <button class="btn btn-sm btn-outline-primary{% if all_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

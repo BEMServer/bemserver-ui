@@ -77,16 +77,17 @@
     <div class="row">
         <div class="col">
             <dl>
-                <dt>User groups <span class="badge bg-primary">{{ user_groups|length }}</span></dt>
+                <dt>User's groups <span class="badge bg-primary">{{ user_groups|length }}</span></dt>
                 <dd>
                     {% if user_groups|length > 0 %}
-                    <div class="list-group list-group-horizontal d-flex flex-wrap mt-1">
+                    <div class="d-flex flex-wrap mt-2 gap-2">
                         {% for x in user_groups %}
-                        {% if signed_user.is_admin %}
-                        <a href="{{ url_for('user_groups.view', id=x.id) }}" class="list-group-item list-group-item-action w-auto" title="View details">{{ x.name }}</a>
-                        {% else %}
-                        {{ x.name }}
-                        {% endif %}
+                        <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
+                            <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('user_groups.view', id=x.id) }}" title="View user group"><i class="bi bi-people"></i> {{ x.name }}</a>
+                            <form action="{{ url_for('user_groups.remove_user', id=x.rel_id, next=url_for('users.view', id=user.id)) }}" method="POST" data-confirm="Remove {{ user.name }}'s user account from {{ x.name }} group">
+                                <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
+                            </form>
+                        </div>
                         {% endfor %}
                     </div>
                     {% else %}
@@ -94,6 +95,17 @@
                     {% endif %}
                 </dd>
             </dl>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-between gap-4">
+                {% if signed_user.is_admin %}
+                <div class="d-flex gap-2 ms-auto">
+                    <a href="{{ url_for('users.manage_groups', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage user's groups"><i class="bi bi-person-rolodex"></i> Manage user's groups</a>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
