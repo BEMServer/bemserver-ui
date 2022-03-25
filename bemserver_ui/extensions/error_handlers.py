@@ -35,7 +35,9 @@ def init_app(app):
 
     @app.errorhandler(wexc.PreconditionFailed)
     def handle_412(_):
-        flask.flash("Internal error: ETag precondition failed", "error")
+        flask.flash(
+            "Operation failed: invalid ETag precondition. Your version of an item in"
+            "the page was probably not up to date.\nTry again.", "error")
         return flask.redirect(_get_back_location())
 
     @app.errorhandler(wexc.UnprocessableEntity)
