@@ -210,13 +210,13 @@ def manage_groups():
         user_groups.append(user_group_data)
         user_group_ids.append(user_group_data["id"])
 
-    # Get all groups.
+    # Get available groups (all groups - user's groups).
     all_groups_resp = flask.g.api_client.user_groups.getall()
-    all_groups = []
+    available_groups = []
     for x in all_groups_resp.data:
         if x["id"] not in user_group_ids:
-            all_groups.append(x)
+            available_groups.append(x)
 
     return flask.render_template(
         "pages/users/manage_groups.html", user=user.data,
-        etag=user.etag, user_groups=user_groups, all_groups=all_groups)
+        etag=user.etag, user_groups=user_groups, available_groups=available_groups)

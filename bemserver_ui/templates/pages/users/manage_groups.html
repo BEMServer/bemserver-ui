@@ -26,10 +26,10 @@
     </div>
     <div class="row">
         <div class="col">
-            <h5>Available groups <span class="badge bg-primary">{{ all_groups|length }}</span></h5>
-            {% if all_groups|length > 0 %}
+            <h5>Available groups <span class="badge bg-primary">{{ available_groups|length }}</span></h5>
+            {% if available_groups|length > 0 %}
             <form id="addGroupsForm" class="d-flex flex-wrap gap-2" action="{{ url_for('users.manage_groups', id=user.id) }}" method="POST">
-                {% for x in all_groups %}
+                {% for x in available_groups %}
                 <input class="btn-check" type="checkbox" id="group-{{ x.id }}" name="group-{{ x.id }}" autocomplete="off">
                 <label class="btn btn-outline-secondary" for="group-{{ x.id }}"><i class="bi bi-plus-square-dotted me-3"></i><i class="bi bi-people"></i> {{ x.name }}</label>
                 {% endfor %}
@@ -39,7 +39,7 @@
             {% endif %}
             <div class="d-flex justify-content-end gap-2">
                 <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Cancel">Cancel</a>
-                <button class="btn btn-sm btn-outline-primary{% if all_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save</button>
+                <button class="btn btn-sm btn-outline-primary{% if available_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save</button>
             </div>
 
         </div>
