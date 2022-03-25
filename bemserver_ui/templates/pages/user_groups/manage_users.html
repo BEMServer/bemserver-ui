@@ -1,3 +1,4 @@
+{% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
 {% set title = "Manage group's users" %}
@@ -16,12 +17,7 @@
             {% if users|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
                 {% for x in users %}
-                <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
-                    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('users.view', id=x.id) }}" title="View user account"><i class="bi bi-people"></i> {{ x.name }}</a>
-                    <form action="{{ url_for('user_groups.remove_user', id=x.rel_id, next=url_for('user_groups.manage_users', id=user_group.id)) }}" method="POST" data-confirm="Remove {{ x.name }}'s user account from {{ user_group.name }} group">
-                        <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
-                    </form>
-                </div>
+                {{ mac_component.get_component("users/user_for_group.html", {"user": x, "user_group": user_group}) | indent(width=16) }}
                 {% endfor %}
             </div>
             {% else %}
@@ -35,8 +31,7 @@
             {% if available_users|length > 0 %}
             <form id="addUsersForm" class="d-flex flex-wrap gap-2" action="{{ url_for('user_groups.manage_users', id=user_group.id) }}" method="POST">
                 {% for x in available_users %}
-                <input class="btn-check" type="checkbox" id="user-{{ x.id }}" name="user-{{ x.id }}" autocomplete="off">
-                <label class="btn btn-outline-secondary" for="user-{{ x.id }}"><i class="bi bi-plus-square-dotted me-3"></i><i class="bi bi-person"></i> {{ x.name }}</label>
+                {{ mac_component.get_component("users/user_available.html", {"user": x}) | indent(width=16) }}
                 {% endfor %}
             </form>
             {% else %}

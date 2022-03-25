@@ -1,3 +1,4 @@
+{% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
 {% set title = "User group details" %}
@@ -37,12 +38,7 @@
                     {% if users|length > 0 %}
                     <div class="d-flex flex-wrap mt-2 gap-2">
                         {% for x in users %}
-                        <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
-                            <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('users.view', id=x.id) }}" title="View user account"><i class="bi bi-person-circle"></i> {{ x.name }}</a>
-                            <form action="{{ url_for('user_groups.remove_user', id=x.rel_id, next=url_for('user_groups.view', id=user_group.id)) }}" method="POST" data-confirm="Remove {{ x.name }}'s user account from {{ user_group.name }} group">
-                                <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
-                            </form>
-                        </div>
+                        {{ mac_component.get_component("users/user_for_group.html", {"user": x, "user_group": user_group}) | indent(width=24) }}
                         {% endfor %}
                     </div>
                     {% else %}
