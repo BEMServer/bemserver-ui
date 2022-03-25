@@ -83,7 +83,7 @@
                     {% if user_groups|length > 0 %}
                     <div class="d-flex flex-wrap mt-2 gap-2">
                         {% for x in user_groups %}
-                        {{ mac_component.get_component("user_groups/group_for_user.html", {"user": user, "user_group": x}) | indent(24) }}
+                        {{ mac_component.get_component("user_groups/group_for_user.html", {"user": user, "user_group": x, "read_only": not signed_user.is_admin}) | indent(24) }}
                         {% endfor %}
                     </div>
                     {% else %}

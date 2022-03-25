@@ -1,6 +1,10 @@
 <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
+    {% if comp_params['read_only']%}
+    <i class="bi bi-people"></i> {{ comp_params['user_group'].name }}
+    {% else %}
     <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('user_groups.view', id=comp_params['user_group'].id) }}" title="View user group"><i class="bi bi-people"></i> {{ comp_params['user_group'].name }}</a>
     <form action="{{ url_for('user_groups.remove_user', id=comp_params['user_group'].rel_id, next=url_for(request.endpoint, id=comp_params['user'].id)) }}" method="POST" data-confirm="Remove {{ comp_params['user'].name }}'s user account from {{ comp_params['user_group'].name }} group">
         <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
     </form>
+    {% endif %}
 </div>
