@@ -48,8 +48,13 @@ def view():
     user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=user_id)
     user_groups = []
     for x in user_groups_resp.data:
-        user_group_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
-        user_groups.append(user_group_resp.data)
+        try:
+            group_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a user group has been deleted.
+            pass
+        else:
+            user_groups.append(group_resp.data)
 
     return flask.render_template(
         "pages/users/view.html", user=user.data, etag=user.etag,

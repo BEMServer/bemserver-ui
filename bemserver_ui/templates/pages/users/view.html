@@ -13,22 +13,6 @@
                 <dd>{{ user.name }}</dd>
                 <dt>Email address</dt>
                 <dd>{{ user.email }}</dd>
-                <dt>Groups <span class="badge bg-primary">{{ user_groups|length }}</span></dt>
-                <dd>
-                    {% if user_groups|length > 0 %}
-                    <div class="list-group list-group-horizontal d-flex flex-wrap mt-1">
-                        {% for x in user_groups %}
-                        {% if signed_user.is_admin %}
-                        <a href="{{ url_for('user_groups.view', id=x.id) }}" class="list-group-item list-group-item-action w-auto" title="View details">{{ x.name }}</a>
-                        {% else %}
-                        {{ x.name }}
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <span class="fst-italic text-muted">none</span>
-                    {% endif %}
-                </dd>
             </dl>
         </div>
         {% if signed_user.is_admin %}
@@ -74,7 +58,7 @@
         </div>
         {% endif %}
     </div>
-    <div class="row">
+    <div class="row mb-3">
         <div class="col">
             <div class="d-flex justify-content-between gap-4">
                 {% if not self_view %}
@@ -87,6 +71,29 @@
                     <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
                 </div>
             </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <dl>
+                <dt>User groups <span class="badge bg-primary">{{ user_groups|length }}</span></dt>
+                <dd>
+                    {% if user_groups|length > 0 %}
+                    <div class="list-group list-group-horizontal d-flex flex-wrap mt-1">
+                        {% for x in user_groups %}
+                        {% if signed_user.is_admin %}
+                        <a href="{{ url_for('user_groups.view', id=x.id) }}" class="list-group-item list-group-item-action w-auto" title="View details">{{ x.name }}</a>
+                        {% else %}
+                        {{ x.name }}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <span class="fst-italic text-muted">none</span>
+                    {% endif %}
+                </dd>
+            </dl>
         </div>
     </div>
 </div>
