@@ -1,5 +1,11 @@
 <div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
-    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('users.view', id=comp_params['user'].id) }}" title="View user account"><i class="bi bi-person"></i> {{ comp_params['user'].name }}</a>
+    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('users.view', id=comp_params['user'].id) }}" title="View user account">
+        <div class="d-flex flex-column">
+            <div><i class="bi bi-person"></i> {{ comp_params["user"].name }}</div>
+            <small class="opacity-50 fst-italic">{{ comp_params["user"].email }}</small>
+        </div>
+    </a>
+    <div class="vr"></div>
     <form action="{{ url_for('user_groups.remove_user', id=comp_params['user'].rel_id, next=url_for(request.endpoint, id=comp_params['user_group'].id)) }}" method="POST" data-confirm="Remove {{ comp_params['user'].name }}'s user account from {{ comp_params['user_group'].name }} group">
         <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
     </form>
