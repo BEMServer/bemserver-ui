@@ -1,16 +1,21 @@
+import { ModalConfirm } from "./modalConfirm.js";
+
+
 class FormController {
 
-    initConfirm() {
-        // Search every "data-confirm" form in current page and display a confirm message on submit.
-        let elements = document.querySelectorAll("form[data-confirm]");
-        elements.forEach(function (element) {
-            let confirmData = element.getAttribute("data-confirm");
-            element.addEventListener("submit", function(event) {
+    connectModalConfirm() {
+        // In current page, search every form that contains a "data-modal-confirm-message" attribute.
+        document.querySelectorAll("form[data-modal-confirm-message]").forEach(function (formElmt) {
+            // And display a confirm message on form submit.
+            formElmt.addEventListener("submit", function(event) {
                 event.preventDefault();
-                let ret = window.confirm(`${confirmData}\n\nDo you confirm this action?`);
-                if (ret) {
-                    element.submit();
-                }
+
+                // Add a modal confirm component for this form, defining an "ok" callback function.
+                let modalConfirm = new ModalConfirm(formElmt.id, formElmt.getAttribute("data-modal-confirm-message"), function() { formElmt.submit(); });
+                formElmt.appendChild(modalConfirm);
+
+                // Finally display modal.
+                modalConfirm.show();
             }, false);
         });
     }

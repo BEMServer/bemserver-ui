@@ -8,6 +8,6 @@ document.addEventListener("DOMContentLoaded", function() {
     sidebar.refreshActive();
 
     let formCtrl = new FormController();
-    formCtrl.initConfirm();
+    formCtrl.connectModalConfirm();
 
 }, false);
