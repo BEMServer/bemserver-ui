@@ -190,9 +190,8 @@ def manage_groups():
                     409, description=(
                         "An error occured while trying to add the user in a group!"),
                     response=exc.errors)
-            else:
-                if len(user_group_ids) > 0:
-                    flask.flash("User added to selected group(s)!", "success")
+        if len(user_group_ids) > 0:
+            flask.flash("User added to selected group(s)!", "success")
 
     try:
         user = flask.g.api_client.users.getone(user_id)

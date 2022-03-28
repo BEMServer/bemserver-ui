@@ -138,9 +138,8 @@ def manage_users():
                     409, description=(
                         "An error occured while trying to set the group for a user!"),
                     response=exc.errors)
-            else:
-                if len(user_ids) > 0:
-                    flask.flash("Selected user(s) added in group!", "success")
+        if len(user_ids) > 0:
+            flask.flash("Selected user(s) added in group!", "success")
 
     try:
         user_group = flask.g.api_client.user_groups.getone(user_group_id)
