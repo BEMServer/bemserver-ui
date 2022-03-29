@@ -1,6 +1,8 @@
 """BEMServer API client resources"""
 import abc
 
+from .exceptions import BEMServerAPINotFoundError
+
 
 class BaseResources(abc.ABC):
     endpoint_base_uri = None
@@ -15,7 +17,7 @@ class BaseResources(abc.ABC):
                 f"{self.__class__.__name__}.{endpoint_name} is disabled!")
 
     def enpoint_uri_by_id(self, id):
-        return f"{self.endpoint_base_uri}{id}"
+        return f"{self.endpoint_base_uri}{str(id)}"
 
     def getall(self, *, etag=None, **kwargs):
         self._verify_disabled("getall")
