@@ -13,7 +13,9 @@ from .resources import (
     TimeseriesPropertyDataResources, TimeseriesDataResources,
     EventResources, EventStateResources, EventLevelResources, EventCategoryResources,
 )
-from .exceptions import BEMServerAPIValidationError, BEMServerAPINotFoundError
+from .exceptions import (
+    BEMServerAPIValidationError, BEMServerAPINotFoundError, BEMServerAPINotModified,
+)
 
 
 APICLI_LOGGER = logging.getLogger(__name__)
@@ -24,10 +26,13 @@ class BEMServerApiClientResponse:
 
     def __init__(self, raw_response):
         self._raw_response = raw_response
-        self._mimetype = self._raw_response.headers["Content-Type"].split("; ")[0]
+        content_type = self._raw_response.headers.get("Content-Type", "")
+        self._mimetype = content_type.split("; ")[0]
 
-        # Process error, if any.
-        if self.status_code < 300 or self.status_code >= 500:
+        # Process redirection or error, if any.
+        if self.status_code == 304:
+            raise BEMServerAPINotModified
+        elif self.status_code < 300 or self.status_code >= 500:
             self._raw_response.raise_for_status()
         else:
             self._process_client_error()

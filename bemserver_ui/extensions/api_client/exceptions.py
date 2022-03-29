@@ -14,3 +14,7 @@ class BEMServerAPIValidationError(BEMServerAPIError):
 
 class BEMServerAPINotFoundError(BEMServerAPIError):
     """BEMServer API not found error"""
+
+
+class BEMServerAPINotModified(BEMServerAPIError):
+    """BEMServer API not modified"""
