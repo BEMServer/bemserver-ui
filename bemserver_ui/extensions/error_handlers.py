@@ -15,7 +15,7 @@ def init_app(app):
     @app.errorhandler(wexc.Unauthorized)
     def handle_401(_):
         flask.flash("Incorrect or missing credentials", "error")
-        return flask.redirect(flask.url_for("auth.signin"))
+        return flask.redirect(flask.url_for("auth.signin", ignore_campaign=True))
 
     @app.errorhandler(wexc.Forbidden)
     def handle_403(_):

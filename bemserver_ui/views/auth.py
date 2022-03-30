@@ -38,7 +38,7 @@ def signin():
             user_json["data"] = user_json["data"][0]
             flask.session["user"] = user_json
             flask.flash(f"Welcome back {user_json['data']['name']}!", "message")
-            return flask.redirect(flask.url_for("main.index"))
+            return flask.redirect(flask.url_for("main.index", ignore_campaign=True))
 
     # Render sign in form.
     return flask.render_template("pages/signin.html")

@@ -1,0 +1,28 @@
+<div class="offcanvas offcanvas-start bg-light border-0 rounded-end shadow app-campaign-selector" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="true" aria-labelledby="campaignSelectorLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title font-monospace" id="campaignSelectorLabel">Select a campaign</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <select class="form-select" id="campaignSelectorSelect" aria-label="Select a campaign">
+                <option value=""{% if not g.campaign_ctxt.has_campaign %} selected{% endif %}>No campaign</option>
+                <optgroup label="Available campaigns">
+                    {% for x in g.campaign_ctxt.campaigns %}
+                    <option value="{{ x.id }}"{% if x.id|string == g.campaign_ctxt.id|string %} selected{% endif %} data-campaign-start="{{ x.start_time }}" data-campaign-end="{{ x.end_time }}">{{ x.name }}</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+            <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnOK" title="Select campaign">Select</a>
+            <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnUnselect" title="Unselect campaign">Unselect</a>
+        </div>
+        <div id="campaignSelectedProperties">
+            <dl>
+                <dt>Start time</dt>
+                <dd id="campaignSelectedStart"></dd>
+                <dt>End time</dt>
+                <dd id="campaignSelectedEnd"></dd>
+            </dl>
+        </div>
+    </div>
+</div>

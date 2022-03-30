@@ -69,3 +69,12 @@ body,
         position: absolute !important;
     }
 }
+
+.app-campaign-selector {
+    top: 60px;
+    height: 270px;
+}
+
+.app-campaign-selected {
+    background-color: #0088db33 !important;
+}

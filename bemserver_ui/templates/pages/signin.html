@@ -27,7 +27,7 @@
             </div>
             <div class="row mt-2">
                 <div class="col-12">
-                    <form class="form-signin" action="{{ url_for(request.endpoint) }}" method="POST">
+                    <form class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign=True) }}" method="POST">
                         {{ mac_flash.display_messages() -}}
                         <div class="form-floating">
                             <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
