@@ -16,13 +16,9 @@
             <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnOK" title="Select campaign">Select</a>
             <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnUnselect" title="Unselect campaign">Unselect</a>
         </div>
-        <div id="campaignSelectedProperties">
-            <dl>
-                <dt>Start time</dt>
-                <dd id="campaignSelectedStart"></dd>
-                <dt>End time</dt>
-                <dd id="campaignSelectedEnd"></dd>
-            </dl>
+        <div id="campaignSelectedProperties" class="d-flex flex-column">
+            <div><small class="fw-bold w-100">From</small><small class="ms-2" id="campaignSelectedStart">not defined</small></div>
+            <div><small class="fw-bold">To</small><small class="ms-2" id="campaignSelectedEnd">not defined</small></div>
         </div>
     </div>
 </div>
