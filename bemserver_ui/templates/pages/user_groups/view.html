@@ -1,62 +1,50 @@
 {% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
-{% set title = "User group details" %}
+{% set title = "View user group" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-flex gap-3">
+    {% if signed_user.is_admin %}
+    <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row">
-        <div class="col">
-            <dl>
-                <dt>Name</dt>
-                <dd>{{ user_group.name }}</dd>
-            </dl>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col">
-            <div class="d-flex justify-content-between gap-4">
-                {% if signed_user.is_admin %}
-                <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
-                    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-                    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-                </form>
-                {% endif %}
-                <div class="d-flex gap-2 ms-auto">
-                    <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
-                </div>
-            </div>
-        </div>
+        <dl class="col">
+            <dt>Name</dt>
+            <dd>{{ user_group.name }}</dd>
+        </dl>
     </div>
     <hr>
     <div class="row">
         <div class="col">
-            <dl>
-                <dt>Group's users <span class="badge bg-primary">{{ users|length }}</span></dt>
-                <dd>
-                    {% if users|length > 0 %}
-                    <div class="d-flex flex-wrap mt-2 gap-2">
-                        {% for x in users %}
-                        {{ mac_component.get_component("users/user_for_group.html", {"user": x, "user_group": user_group}) | indent(width=24) }}
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <span class="fst-italic text-muted">none</span>
-                    {% endif %}
-                </dd>
-            </dl>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="d-flex justify-content-between gap-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5>User's groups <span class="badge bg-primary">{{ users|length }}</span></h5>
                 {% if signed_user.is_admin %}
-                <div class="d-flex gap-2 ms-auto">
-                    <a href="{{ url_for('user_groups.manage_users', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage group's users"><i class="bi bi-people"></i> Manage group's users</a>
-                </div>
+                <a href="{{ url_for('user_groups.manage_users', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage group's users"><i class="bi bi-people"></i> Manage group's users</a>
                 {% endif %}
             </div>
+            {% if users|length > 0 %}
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in users %}
+                {{ mac_component.get_component("users/user_for_group.html", {"user": x, "user_group": user_group}) | indent(width=16) }}
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
         </div>
     </div>
 </div>
