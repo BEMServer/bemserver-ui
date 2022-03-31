@@ -1,4 +1,5 @@
 """BEMServer UI application extensions"""
+from . import jinja_custom_filters
 from . import error_handlers
 from . import api_client
 from . import auth
@@ -7,6 +8,7 @@ from .auth import Roles  # noqa
 
 
 EXT_MODULES = (
+    jinja_custom_filters,
     error_handlers,
     auth,
     api_client,
