@@ -2,12 +2,19 @@
 
 {% set title = "User groups" %}
 
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('user_groups.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new user group"><i class="bi bi-plus-circle"></i> New user group</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row justify-content-end mb-3">
         <div class="col-auto">
-            Actual count: <span class="fw-bold">{{ user_groups|length }}</span>
+            Current items count: <span class="fw-bold">{{ user_groups|length }}</span>
         </div>
     </div>
     <div class="row">
