@@ -1,0 +1,45 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Campaigns" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="#" class="btn btn-sm btn-outline-primary" title="Add a new campaign"><i class="bi bi-plus-circle"></i> New campaign</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row justify-content-end mb-3">
+        <div class="col-auto">
+            Current items count: <span class="fw-bold">{{ campaigns|length }}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="list-group">
+                {% for x in campaigns %}
+                {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == x.id|string %}
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if is_campaign_selected %} app-campaign-selected{% endif %}" href="#" title="View details">
+                    <i class="bi bi-boxes"></i>
+                    <div class="d-sm-flex d-grid gap-2 w-100 justify-content-between">
+                        <div>
+                            <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
+                            {% if is_campaign_selected %}
+                            <small class="opacity-50 text-nowrap fst-italic">This campaign is currently selected.</small>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-column">
+                            <div><small class="fw-bold opacity-75">From</small><small class="opacity-50 ms-2">{{ x.start_time | iso_datetime_format(default="not defined") }}</small></div>
+                            <div><small class="fw-bold opacity-75">To</small><small class="opacity-50 ms-2">{{ x.end_time | iso_datetime_format(default="not defined") }}</small></div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

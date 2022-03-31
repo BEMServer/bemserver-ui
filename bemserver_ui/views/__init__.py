@@ -3,6 +3,7 @@ from . import auth
 from . import main
 from . import users
 from . import user_groups
+from . import campaigns
 
 
 MODULES = (
@@ -10,6 +11,7 @@ MODULES = (
     main,
     users,
     user_groups,
+    campaigns,
 )
 
 
