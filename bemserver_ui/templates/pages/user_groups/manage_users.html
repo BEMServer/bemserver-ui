@@ -1,19 +1,15 @@
 {% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
-{% set title = "Manage group's users" %}
+{% set title = "Manage " + user_group.name + " group's users" %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col">
-            <h4>{{ user_group.name }}</h4>
-        </div>
-    </div>
-    <div class="row mb-3">
-        <div class="col">
-            <h5>Actual users <span class="badge bg-primary">{{ users|length }}</span></h5>
+    <div class="row d-lg-flex d-grid">
+        <div class="col col-lg-6 pb-3 pb-lg-0">
+            <div class="vr float-end ms-4 d-none d-lg-block h-100"></div>
+            <h5>Current users <span class="badge bg-primary">{{ users|length }}</span></h5>
             {% if users|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
                 {% for x in users %}
@@ -24,8 +20,6 @@
             <span class="fst-italic text-muted">none</span>
             {% endif %}
         </div>
-    </div>
-    <div class="row">
         <div class="col">
             <h5>Available users <span class="badge bg-primary">{{ available_users|length }}</span></h5>
             {% if available_users|length > 0 %}
@@ -37,11 +31,10 @@
             {% else %}
             <span class="fst-italic text-muted">none</span>
             {% endif %}
-            <div class="d-flex justify-content-end gap-2">
+            <div class="d-flex justify-content-end gap-2 mt-3">
                 <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('user_groups.view', id=user_group.id) }}" title="Cancel">Cancel</a>
-                <button class="btn btn-sm btn-outline-primary{% if available_users|length <= 0 %} disabled{% endif %}" type="submit" form="addUsersForm" title="Save"><i class="bi bi-save"></i> Save</button>
+                <button class="btn btn-sm btn-outline-primary{% if available_users|length <= 0 %} disabled{% endif %}" type="submit" form="addUsersForm" title="Save"><i class="bi bi-save"></i> Save selection</button>
             </div>
-
         </div>
     </div>
 </div>
