@@ -3,13 +3,25 @@
 {% set self_edit = signed_user.id == user.id %}
 {% set title = "Edit user" if not self_edit else "Edit my profile" %}
 
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+{% if not self_edit %}
+<form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
+{% endif %}
+{% endfilter %}
+{% endblock main_toolbar %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row">
         <div class="col">
             <fieldset>
-                <legend>User account</legend>
+                <legend class="invisible d-none">User account</legend>
                 <div class="mb-3">
                     <label class="form-label" for="name">Name</label>
                     <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" form="editForm" required autofocus>
@@ -22,20 +34,12 @@
                     <label class="form-label" for="password">Password</label>
                     <input type="password" class="form-control" id="password" name="password" form="editForm" required>
                 </div>
-                <div class="d-flex justify-content-between gap-4">
-                    {% if not self_edit %}
-                    <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
-                        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-                        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('users.view', id=user.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                    <form id="editForm" action="{{ url_for('users.edit', id=user.id) }}" method="POST">
+                        <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                        <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </form>
-                    {% endif %}
-                    <div class="d-flex gap-2 ms-auto">
-                        <a href="{{ url_for('users.view', id=user.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
-                        <form id="editForm" action="{{ url_for('users.edit', id=user.id) }}" method="POST">
-                            <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
-                            <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
-                        </form>
-                    </div>
                 </div>
             </fieldset>
         </div>

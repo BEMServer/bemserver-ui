@@ -9,7 +9,7 @@
         <div class="col">
             <form action="{{ url_for('users.create') }}" method="POST">
                 <fieldset>
-                    <legend>User account</legend>
+                    <legend class="invisible d-none">User account</legend>
                     <div class="mb-3">
                         <label class="form-label" for="name">Name</label>
                         <input type="text" class="form-control" id="name" name="name" required autofocus>
