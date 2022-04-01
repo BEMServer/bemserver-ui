@@ -5,6 +5,7 @@ class CampaignSelector {
     #campaignBtnOKElmt = null;
     #campaignBtnUnselectElmt = null;
     #campaignAllPropsElmt = null;
+    #campaignDescriptionElmt = null;
     #campaignStartElmt = null;
     #campaignEndElmt = null;
 
@@ -13,13 +14,7 @@ class CampaignSelector {
         let campaignParam = searchParams.get("campaign");
         this.currentCampaign = campaignParam != null ? campaignParam : "";
 
-        this.#selectorComponentElmt = document.querySelector("div.app-campaign-selector");
-        this.#campaignSelectElmt = document.getElementById("campaignSelectorSelect");
-        this.#campaignBtnOKElmt = document.getElementById("campaignSelectorBtnOK");
-        this.#campaignBtnUnselectElmt = document.getElementById("campaignSelectorBtnUnselect");
-        this.#campaignAllPropsElmt = document.getElementById("campaignSelectedProperties");
-        this.#campaignStartElmt = document.getElementById("campaignSelectedStart");
-        this.#campaignEndElmt = document.getElementById("campaignSelectedEnd");
+        this._cacheDOM();
 
         this.#selectorComponentElmt.addEventListener("show.bs.offcanvas", this._onShow.bind(this), false);
         this.#campaignSelectElmt.addEventListener("change", this._onChange.bind(this), false);
@@ -27,6 +22,17 @@ class CampaignSelector {
         this.#campaignBtnUnselectElmt.addEventListener("click", this._onUnselect.bind(this), false);
 
         this._onShow();
+    }
+
+    _cacheDOM() {
+        this.#selectorComponentElmt = document.querySelector("div.app-campaign-selector");
+        this.#campaignSelectElmt = document.getElementById("campaignSelectorSelect");
+        this.#campaignBtnOKElmt = document.getElementById("campaignSelectorBtnOK");
+        this.#campaignBtnUnselectElmt = document.getElementById("campaignSelectorBtnUnselect");
+        this.#campaignAllPropsElmt = document.getElementById("campaignSelectedProperties");
+        this.#campaignDescriptionElmt = document.getElementById("campaignSelectedDescription");
+        this.#campaignStartElmt = document.getElementById("campaignSelectedStart");
+        this.#campaignEndElmt = document.getElementById("campaignSelectedEnd");
     }
 
     _selectCampaign() {
@@ -83,9 +89,17 @@ class CampaignSelector {
             this.#campaignAllPropsElmt.classList.remove("invisible", "d-none");
 
             let selectedOptionElmnt = this.#campaignSelectElmt.item(this.#campaignSelectElmt.selectedIndex);
+            let description = selectedOptionElmnt.getAttribute("data-campaign-desc");
             let startTime = new Date(selectedOptionElmnt.getAttribute("data-campaign-start"));
             let endTime = new Date(selectedOptionElmnt.getAttribute("data-campaign-end"));
 
+            description = description ? description : "-";
+            this.#campaignDescriptionElmt.innerHTML = description;
+            if (this.#campaignDescriptionElmt.scrollWidth > this.#campaignDescriptionElmt.clientWidth) {
+                this.#campaignDescriptionElmt.innerHTML = `<abbr class="" title="${description}">${description}</abbr>`;
+            }
+
+            this.#campaignDescriptionElmt.setAttribute("title", this.#campaignDescriptionElmt.innerHTML);
             this.#campaignStartElmt.innerHTML = !isNaN(startTime) ? startTime.toLocaleString(navigator.language, {timeZoneName: "short"}) : "not defined";
             this.#campaignEndElmt.innerHTML = !isNaN(endTime) ? endTime.toLocaleString(navigator.language, {timeZoneName: "short"}) : "not defined";
         }

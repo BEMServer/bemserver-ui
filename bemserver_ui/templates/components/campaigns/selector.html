@@ -1,4 +1,4 @@
-<div class="offcanvas offcanvas-start bg-light border-0 rounded-end shadow app-campaign-selector" tabindex="-1" data-bs-scroll="true" data-bs-backdrop="true" aria-labelledby="campaignSelectorLabel">
+<div class="offcanvas offcanvas-start bg-light border-0 rounded-end shadow app-campaign-selector" tabindex="-1" data-bs-scroll="false" data-bs-backdrop="true" aria-labelledby="campaignSelectorLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title font-monospace" id="campaignSelectorLabel">Select a campaign</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -9,16 +9,17 @@
                 <option value=""{% if not g.campaign_ctxt.has_campaign %} selected{% endif %}>No campaign</option>
                 <optgroup label="Available campaigns">
                     {% for x in g.campaign_ctxt.campaigns %}
-                    <option value="{{ x.id }}"{% if x.id|string == g.campaign_ctxt.id|string %} selected{% endif %} data-campaign-start="{{ x.start_time }}" data-campaign-end="{{ x.end_time }}">{{ x.name }}</option>
+                    <option value="{{ x.id }}"{% if x.id|string == g.campaign_ctxt.id|string %} selected{% endif %} data-campaign-desc="{{ x.description }}" data-campaign-start="{{ x.start_time }}" data-campaign-end="{{ x.end_time }}">{{ x.name }}</option>
                     {% endfor %}
                 </optgroup>
             </select>
             <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnOK" title="Select campaign">Select</a>
             <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnUnselect" title="Unselect campaign">Unselect</a>
         </div>
-        <div id="campaignSelectedProperties" class="d-flex flex-column">
-            <div><small class="fw-bold w-100">From</small><small class="ms-2" id="campaignSelectedStart">not defined</small></div>
-            <div><small class="fw-bold">To</small><small class="ms-2" id="campaignSelectedEnd">not defined</small></div>
+        <div id="campaignSelectedProperties">
+            <div class="vstack"><small class="fw-bold">Description</small><small id="campaignSelectedDescription" class="d-inline-block text-truncate ms-2">-</small></div>
+            <div class="hstack gap-2"><small class="fw-bold">From</small><small id="campaignSelectedStart">not defined</small></div>
+            <div class="hstack gap-2"><small class="fw-bold">To</small><small id="campaignSelectedEnd">not defined</small></div>
         </div>
     </div>
 </div>
