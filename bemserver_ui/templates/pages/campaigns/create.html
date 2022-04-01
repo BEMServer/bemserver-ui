@@ -1,0 +1,60 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create campaign" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('campaigns.create') }}" method="POST">
+                <fieldset>
+                    <legend class="invisible d-none">Campaign informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="row d-xl-flex d-grid mb-3">
+                        <div class="col pb-3 pb-xl-0">
+                            <label class="form-label" for="start_date">From</label>
+                            <div class="d-lg-flex d-grid gap-1">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="start_date">Date</span>
+                                    <input type="date" class="form-control" id="start_date" name="start_date">
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Time</span>
+                                    <input type="time" class="form-control" id="start_time" name="start_time">
+                                    <span class="input-group-text">UTC</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="end_date">To</label>
+                            <div class="d-lg-flex d-grid gap-1">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="end_date">Date</span>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Time</span>
+                                    <input type="time" class="form-control" id="end_time" name="end_time">
+                                    <span class="input-group-text">UTC</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('campaigns.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

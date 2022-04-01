@@ -1,0 +1,84 @@
+{% extends "pages/base.html" %}
+
+{% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
+{% set title = "Edit campaign" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-flex gap-3">
+    <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
+    </form>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    {% if is_campaign_selected_edit %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                This is the campaign currently selected. <span class="fw-bold fst-italic">Deletion is disabled.</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend class="invisible d-none">Campaign information</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" form="editForm" value="{{ campaign.name }}" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea class="form-control" id="description" name="description" form="editForm" rows="3">{{ campaign.description }}</textarea>
+                </div>
+                <div class="row d-xl-flex d-grid mb-3">
+                    <div class="col pb-3 pb-xl-0">
+                        <label class="form-label" for="start_date">From</label>
+                        <div class="d-lg-flex d-grid gap-1">
+                            <div class="input-group">
+                                <span class="input-group-text" id="start_date">Date</span>
+                                <input type="date" class="form-control" id="start_date" name="start_date" form="editForm" value="{{ campaign.start_date }}">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">Time</span>
+                                <input type="time" class="form-control" id="start_time" name="start_time" form="editForm" value="{{ campaign.start_time }}">
+                                <span class="input-group-text">UTC</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="end_date">To</label>
+                        <div class="d-lg-flex d-grid gap-1">
+                            <div class="input-group">
+                                <span class="input-group-text" id="end_date">Date</span>
+                                <input type="date" class="form-control" id="end_date" name="end_date" form="editForm" value="{{ campaign.end_date }}">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text">Time</span>
+                                <input type="time" class="form-control" id="end_time" name="end_time" form="editForm" value="{{ campaign.end_time }}">
+                                <span class="input-group-text">UTC</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('campaigns.view', id=campaign.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                    <form id="editForm" action="{{ url_for('campaigns.edit', id=campaign.id) }}" method="POST">
+                        <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                        <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
