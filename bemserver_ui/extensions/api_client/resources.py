@@ -89,7 +89,7 @@ class TimeseriesPropertyDataResources(BaseResources):
 
 
 class TimeseriesDataResources(BaseResources):
-    endpoint_base_uri = "/timeseries-data/"
+    endpoint_base_uri = "/timeseries_data/"
     disabled_endpoints = ["getall", "getone", "create", "update", "delete"]
 
     def upload_csv(self, data_state, csv_file):
