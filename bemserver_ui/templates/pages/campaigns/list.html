@@ -25,10 +25,11 @@
                 <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if is_campaign_selected %} app-campaign-selected{% endif %}" href="{{ url_for('campaigns.view', id=x.id) }}" title="View details">
                     <i class="bi bi-boxes"></i>
                     <div class="d-sm-flex d-grid gap-2 w-100 justify-content-between">
-                        <div>
+                        <div class="d-flex flex-column">
                             <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
+                            <small class="opacity-50">{{ x.description }}</small>
                             {% if is_campaign_selected %}
-                            <small class="opacity-50 text-nowrap fst-italic">This campaign is currently selected.</small>
+                            <small class="opacity-50 text-success text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small>
                             {% endif %}
                         </div>
                         <div class="d-flex flex-column">
