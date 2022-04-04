@@ -31,7 +31,7 @@
     <div class="row">
         <div class="col">
             <div class="d-flex justify-content-between align-items-center">
-                <h5>User's groups <span class="badge bg-primary">{{ users|length }}</span></h5>
+                <h5>Group's users <span class="badge bg-primary">{{ users|length }}</span></h5>
                 {% if signed_user.is_admin %}
                 <a href="{{ url_for('user_groups.manage_users', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage group's users"><i class="bi bi-people"></i> Manage group's users</a>
                 {% endif %}
