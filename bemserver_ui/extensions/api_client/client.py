@@ -8,7 +8,8 @@ from io import BytesIO
 
 from .resources import (
     UserResources, UserGroupResources, UserByUserGroupResources,
-    CampaignResources, UserGroupByCampaignResources, CampaignScopeResources,
+    CampaignResources, UserGroupByCampaignResources,
+    CampaignScopeResources, UserGroupByCampaignScopeResources,
     TimeseriesResources, TimeseriesDataStateResources, TimeseriesPropertyResources,
     TimeseriesPropertyDataResources, TimeseriesDataResources,
     EventResources, EventStateResources, EventLevelResources, EventCategoryResources,
@@ -218,6 +219,8 @@ class BEMServerApiClient:
         self.user_groups_by_campaigns = \
             UserGroupByCampaignResources(self._request_manager)
         self.campaign_scopes = CampaignScopeResources(self._request_manager)
+        self.user_groups_by_campaign_scopes = \
+            UserGroupByCampaignScopeResources(self._request_manager)
 
         self.timeseries = TimeseriesResources(self._request_manager)
         self.timeseries_datastates = TimeseriesDataStateResources(self._request_manager)
