@@ -9,6 +9,8 @@
 <div class="d-flex gap-3">
     {% if is_campaign_selected_edit %}
     <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
+    {% else %}
+    <a href="{{ url_for('campaigns.view', id=campaign.id, campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
     {% endif %}
     <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
         <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
