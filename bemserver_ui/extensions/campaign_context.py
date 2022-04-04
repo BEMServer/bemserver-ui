@@ -61,8 +61,13 @@ def url_for_campaign(endpoint, **kwargs):
     else:
         ignore_campaign = kwargs.pop("ignore_campaign", False)
 
-    if not ignore_campaign and flask.g.campaign_ctxt.has_campaign:
-        kwargs["campaign"] = flask.g.campaign_ctxt.id
+    forced_campaign = kwargs.pop("forced_campaign", None)
+
+    if not ignore_campaign:
+        if forced_campaign is not None:
+            kwargs["campaign"] = forced_campaign
+        elif flask.g.campaign_ctxt.has_campaign:
+            kwargs["campaign"] = flask.g.campaign_ctxt.id
 
     return flask_url_for(endpoint, **kwargs)
 
@@ -72,7 +77,10 @@ def init_app(app):
     @app.before_request
     def load_campaign_context():
         if "user" in flask.session and flask.request.endpoint != "static":
-            flask.g.campaign_ctxt = CampaignContext(flask.request.args.get("campaign"))
+            flask.g.campaign_ctxt = CampaignContext(
+                flask.request.args.get("forced_campaign", None)
+                or flask.request.args.get("campaign")
+            )
 
     # Monkey patch flask.url_for used in jinja templates.
     @app.context_processor
