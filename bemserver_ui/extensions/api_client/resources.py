@@ -1,8 +1,6 @@
 """BEMServer API client resources"""
 import abc
 
-from .exceptions import BEMServerAPINotFoundError
-
 
 class BaseResources(abc.ABC):
     endpoint_base_uri = None
