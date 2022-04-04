@@ -31,7 +31,7 @@ def list():
         "pages/campaigns/list.html", campaigns=campaigns.data)
 
 
-@blp.route("/view/<int:id>")
+@blp.route("/<int:id>/view")
 @auth.signin_required
 def view(id):
     try:
@@ -76,7 +76,7 @@ def create():
     return flask.render_template("pages/campaigns/create.html")
 
 
-@blp.route("/edit/<int:id>", methods=["GET", "POST"])
+@blp.route("/<int:id>/edit", methods=["GET", "POST"])
 @auth.signin_required
 def edit(id):
     if flask.request.method == "POST":
@@ -135,7 +135,7 @@ def edit(id):
         "pages/campaigns/edit.html", campaign=campaign_data, etag=campaign.etag)
 
 
-@blp.route("/delete/<int:id>", methods=["POST"])
+@blp.route("/<int:id>/delete", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
     try:
