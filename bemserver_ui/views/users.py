@@ -35,17 +35,16 @@ def list():
         "pages/users/list.html", users=users_resp.data, filters=filters)
 
 
-@blp.route("/view")
+@blp.route("/<int:id>/view")
 @auth.signin_required
-def view():
-    user_id = flask.request.args["id"]
+def view(id):
     try:
-        user = flask.g.api_client.users.getone(user_id)
+        user = flask.g.api_client.users.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User not found!")
 
     # Get user groups.
-    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=user_id)
+    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=id)
     user_groups = []
     for x in user_groups_resp.data:
         try:
@@ -84,26 +83,24 @@ def create():
     return flask.render_template("pages/users/create.html")
 
 
-@blp.route("/edit", methods=["GET", "POST"])
+@blp.route("/<int:id>/edit", methods=["GET", "POST"])
 @auth.signin_required
-def edit():
-    user_id = flask.request.args["id"]
-
+def edit(id):
     if flask.request.method == "GET":
         try:
-            user = flask.g.api_client.users.getone(user_id)
+            user = flask.g.api_client.users.getone(id)
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="User not found!")
 
     elif flask.request.method == "POST":
+        payload = {
+            "name": flask.request.form["name"],
+            "email": flask.request.form["email"],
+            "password": flask.request.form["password"],
+        }
         try:
             user = flask.g.api_client.users.update(
-                user_id, {
-                    "name": flask.request.form["name"],
-                    "email": flask.request.form["email"],
-                    "password": flask.request.form["password"],
-                }, etag=flask.request.form["editEtag"],
-            )
+                id, payload, etag=flask.request.form["editEtag"])
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
                 422, description="An error occured while updating user account!",
@@ -118,12 +115,11 @@ def edit():
         "pages/users/edit.html", user=user.data, etag=user.etag)
 
 
-@blp.route("/delete", methods=["POST"])
+@blp.route("/<int:id>/delete", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-def delete():
+def delete(id):
     try:
-        flask.g.api_client.users.delete(
-            flask.request.args["id"], etag=flask.request.form["delEtag"])
+        flask.g.api_client.users.delete(id, etag=flask.request.form["delEtag"])
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User not found!")
     else:
@@ -132,14 +128,13 @@ def delete():
     return flask.redirect(flask.url_for("users.list"))
 
 
-@blp.route("/set_status", methods=["POST"])
+@blp.route("/<int:id>/set_status", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-def set_status():
-    user_id = flask.request.args["id"]
+def set_status(id):
+    status = "status" in flask.request.form
     try:
         flask.g.api_client.users.set_active(
-            user_id, "status" in flask.request.form,
-            etag=flask.request.form["setStatusEtag"])
+            id, status, etag=flask.request.form["setStatusEtag"])
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(
             422, description="An error occured while updating user's status!",
@@ -149,17 +144,16 @@ def set_status():
     else:
         flask.flash("User account status updated!", "success")
 
-    return flask.redirect(flask.url_for("users.view", id=user_id))
+    return flask.redirect(flask.url_for("users.view", id=id))
 
 
-@blp.route("/set_role", methods=["POST"])
+@blp.route("/<int:id>/set_role", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-def set_role():
-    user_id = flask.request.args["id"]
+def set_role(id):
+    status = "admin" in flask.request.form
     try:
         flask.g.api_client.users.set_admin(
-            user_id, "admin" in flask.request.form,
-            etag=flask.request.form["setRoleEtag"])
+            id, status, etag=flask.request.form["setRoleEtag"])
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(
             422, description="An error occured while updating user's role!",
@@ -169,20 +163,18 @@ def set_role():
     else:
         flask.flash("User account role updated!", "success")
 
-    return flask.redirect(flask.url_for("users.view", id=user_id))
+    return flask.redirect(flask.url_for("users.view", id=id))
 
 
-@blp.route("/manage_groups", methods=["GET", "POST"])
+@blp.route("/<int:id>/manage_groups", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
-def manage_groups():
-    user_id = flask.request.args["id"]
-
+def manage_groups(id):
     if flask.request.method == "POST":
         user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_group_id in user_group_ids:
             try:
                 flask.g.api_client.user_by_user_groups.create({
-                    "user_id": user_id,
+                    "user_id": id,
                     "user_group_id": user_group_id,
                 })
             except bac.BEMServerAPIValidationError as exc:
@@ -194,12 +186,12 @@ def manage_groups():
             flask.flash("User added to selected group(s)!", "success")
 
     try:
-        user = flask.g.api_client.users.getone(user_id)
+        user = flask.g.api_client.users.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User not found!")
 
     # Get user's groups.
-    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=user_id)
+    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=id)
     user_groups = []
     user_group_ids = []
     for x in user_groups_resp.data:
