@@ -1,0 +1,10 @@
+<div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
+    {% if comp_params["read_only"] %}
+    <i class="bi bi-people"></i> {{ comp_params["user_group"].name }}
+    {% else %}
+    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('user_groups.view', id=comp_params['user_group'].id) }}" title="View user group"><i class="bi bi-people"></i> {{ comp_params["user_group"].name }}</a>
+    <div class="vr"></div>
+    {% block group_for_target_remove %}
+    {% endblock group_for_target_remove %}
+    {% endif %}
+</div>

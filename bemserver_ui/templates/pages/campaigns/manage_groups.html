@@ -1,7 +1,7 @@
 {% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
-{% set title = "Manage " + user.name + "'s user groups" %}
+{% set title = "Manage " + campaign.name + "'s user groups" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -13,7 +13,7 @@
             {% if user_groups|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
                 {% for x in user_groups %}
-                {{ mac_component.get_component("user_groups/group_for_user.html", {"target": user, "user_group": x}) | indent(width=16) }}
+                {{ mac_component.get_component("user_groups/group_for_campaign.html", {"target": campaign, "user_group": x}) | indent(width=16) }}
                 {% endfor %}
             </div>
             {% else %}
@@ -23,7 +23,7 @@
         <div class="col">
             <h5>Available user groups <span class="badge bg-primary">{{ available_groups|length }}</span></h5>
             {% if available_groups|length > 0 %}
-            <form id="addGroupsForm" class="d-flex flex-wrap gap-2 mt-2" action="{{ url_for('users.manage_groups', id=user.id) }}" method="POST">
+            <form id="addGroupsForm" class="d-flex flex-wrap gap-2 mt-2" action="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" method="POST">
                 {% for x in available_groups %}
                 {{ mac_component.get_component("user_groups/user_group_available.html", {"user_group": x}) | indent(width=16) }}
                 {% endfor %}
@@ -32,7 +32,7 @@
             <span class="fst-italic text-muted">none</span>
             {% endif %}
             <div class="d-flex justify-content-end gap-2 mt-3">
-                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Cancel">Cancel</a>
+                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('campaigns.view', id=campaign.id) }}" title="Cancel">Cancel</a>
                 <button class="btn btn-sm btn-outline-primary{% if available_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save selection</button>
             </div>
         </div>

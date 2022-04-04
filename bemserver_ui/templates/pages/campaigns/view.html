@@ -1,3 +1,4 @@
+{% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
@@ -55,6 +56,26 @@
             <dt>Description</dt>
             <dd>{{ campaign.description | default("-") }}</dd>
         </dl>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5>Campaign's user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
+                {% if signed_user.is_admin %}
+                <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage user's groups"><i class="bi bi-person-rolodex"></i> Manage user's groups</a>
+                {% endif %}
+            </div>
+            {% if user_groups|length > 0 %}
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in user_groups %}
+                {{ mac_component.get_component("user_groups/group_for_campaign.html", {"target": campaign, "user_group": x, "read_only": not signed_user.is_admin}) | indent(16) }}
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock main_content %}

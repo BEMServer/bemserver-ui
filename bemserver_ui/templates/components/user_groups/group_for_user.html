@@ -1,11 +1,9 @@
-<div class="border border-1 rounded bg-white d-flex align-items-center gap-3 p-2">
-    {% if comp_params["read_only"] %}
-    <i class="bi bi-people"></i> {{ comp_params["user_group"].name }}
-    {% else %}
-    <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('user_groups.view', id=comp_params['user_group'].id) }}" title="View user group"><i class="bi bi-people"></i> {{ comp_params["user_group"].name }}</a>
-    <div class="vr"></div>
-    <form action="{{ url_for('user_groups.remove_user', id=comp_params['user_group'].rel_id, next=url_for(request.endpoint, id=comp_params['user'].id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ comp_params['user'].name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ comp_params['user_group'].name }}&lt;/mark&gt; group">
-        <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
-    </form>
-    {% endif %}
-</div>
+{% extends "components/user_groups/group_for_target_base.html" %}
+
+{% block group_for_target_remove %}
+{% filter indent(width=4, first=True) %}
+<form action="{{ url_for('user_groups.remove_user', id=comp_params['user_group'].rel_id, next=url_for(request.endpoint, id=comp_params['target'].id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ comp_params['target'].name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ comp_params['user_group'].name }}&lt;/mark&gt; group">
+    <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
+</form>
+{% endfilter %}
+{% endblock group_for_target_remove %}
