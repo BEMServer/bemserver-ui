@@ -2,9 +2,9 @@
 <nav id="sidebarMenu" class="col-md-3 col-xl-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
     <div class="position-sticky">
         <div class="d-flex flex-column">
-            <ul class="nav nav-pills flex-column mb-2">
+            <ul class="nav nav-pills flex-column">
                 <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100 fw-bold text-center text-break app-campaign-selected" role="button" title="Select a campaign" data-bs-toggle="offcanvas" data-bs-target=".app-campaign-selector" aria-controls="app-campaign-selector">
                             {% if g.campaign_ctxt.has_campaign %}
                             {{ g.campaign_ctxt.name }}
@@ -12,16 +12,16 @@
                             <span class="fst-italic">Select a campaign</span>
                             {% endif %}
                         </a>
-                        <a class="nav-link ms-2" href="{{ url_for('campaigns.list') }}" title="Manage campaigns"><i class="bi bi-boxes"></i></a>
+                        <a class="nav-link" href="{{ url_for('campaigns.list') }}" title="Manage campaigns"><i class="bi bi-boxes"></i></a>
                     </div>
                 </li>
             </ul>
             {% if g.campaign_ctxt.has_campaign %}
             <ul class="nav nav-pills flex-column mt-3">
                 <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="#"><i class="bi bi-building"></i> Sites</a>
-                        <div class="dropdown ms-2">
+                        <div class="dropdown">
                             <button type="button" class="nav-link dropdown-toggle" id="dropdownMenuSites" title="Add sites/buildings..." data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuSites">
                                 <li><a class="dropdown-item" href="#" title="Add a new site">New site</a></li>
@@ -40,17 +40,17 @@
             {% endif %}
             {% if signed_user.is_admin %}
             <h6 class="app-sidebar-heading ps-2 mt-4 mb-1 text-muted"><i class="bi bi-gear"></i> Administration</h6>
-            <ul class="nav nav-pills flex-column mb-2">
+            <ul class="nav nav-pills flex-column">
                 <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('user_groups.list') }}" title="View user groups"><i class="bi bi-people-fill"></i> User groups</a>
-                        <a class="nav-link ms-2" href="{{ url_for('user_groups.create') }}" title="Add a new user group"><i class="bi bi-plus-circle"></i></a>
+                        <a class="nav-link" href="{{ url_for('user_groups.create') }}" title="Add a new user group"><i class="bi bi-plus-circle"></i></a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('users.list') }}" title="View users"><i class="bi bi-person-lines-fill"></i> Users</a>
-                        <a class="nav-link ms-2" href="{{ url_for('users.create') }}" title="Add a new user"><i class="bi bi-plus-circle"></i></a>
+                        <a class="nav-link" href="{{ url_for('users.create') }}" title="Add a new user"><i class="bi bi-plus-circle"></i></a>
                     </div>
                 </li>
             </ul>
