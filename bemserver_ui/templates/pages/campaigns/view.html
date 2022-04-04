@@ -7,17 +7,22 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-flex gap-3">
-    {% if is_campaign_selected_edit %}
-    <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
-    {% else %}
-    <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
-    {% endif %}
-    <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
-    </form>
-    <div class="d-flex gap-2 ms-auto">
+<div class="d-lg-flex d-grid gap-2">
+    <div class="d-flex justify-content-end gap-3">
+        {% if is_campaign_selected_edit %}
+        <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Add a new campaign scope">New campaign scope</a>
+        <div class="vr d-none d-lg-block"></div>
+        <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
+        {% else %}
+        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
+        {% endif %}
+        <div class="vr d-none d-lg-block me-2"></div>
+    </div>
+    <div class="d-flex justify-content-end gap-3">
+        <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
+            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
+        </form>
         <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
 </div>
@@ -63,7 +68,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h5>Campaign's user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
                 {% if signed_user.is_admin %}
-                <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage user's groups"><i class="bi bi-person-rolodex"></i> Manage user's groups</a>
+                <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign's groups</a>
                 {% endif %}
             </div>
             {% if user_groups|length > 0 %}

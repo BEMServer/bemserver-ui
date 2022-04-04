@@ -4,6 +4,7 @@ from . import main
 from . import users
 from . import user_groups
 from . import campaigns
+from . import campaign_scopes
 
 
 MODULES = (
@@ -12,6 +13,7 @@ MODULES = (
     users,
     user_groups,
     campaigns,
+    campaign_scopes,
 )
 
 

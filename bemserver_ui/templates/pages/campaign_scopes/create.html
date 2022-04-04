@@ -1,0 +1,35 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create campaign scope" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>{{ g.campaign_ctxt.campaign.name }} campaign</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('campaign_scopes.create') }}" method="POST">
+                <fieldset>
+                    <legend class="invisible d-none">Campaign scope informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('campaign_scopes.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

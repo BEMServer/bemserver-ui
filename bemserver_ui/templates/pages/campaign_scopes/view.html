@@ -1,0 +1,60 @@
+{% import "macros/component.html" as mac_component %}
+{% extends "pages/base.html" %}
+
+{% set title = "View campaign scope" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-lg-flex d-grid gap-3">
+    <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+    <a href="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>{{ g.campaign_ctxt.campaign.name }} campaign</h5>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <dl class="col">
+            <dt>Name</dt>
+            <dd>{{ campaign_scope.name }}</dd>
+        </dl>
+    </div>
+    <div class="row">
+        <dl class="col">
+            <dt>Description</dt>
+            <dd>{{ campaign_scope.description | default("-") }}</dd>
+        </dl>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5>Campaign scope's user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
+                {% if signed_user.is_admin %}
+                <a href="{{ url_for('campaign_scopes.manage_groups', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign scope's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign scope's groups</a>
+                {% endif %}
+            </div>
+            {% if user_groups|length > 0 %}
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in user_groups %}
+                {{ mac_component.get_component("user_groups/group_for_campaign_scope.html", {"target": campaign_scope, "user_group": x, "read_only": not signed_user.is_admin}) | indent(16) }}
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

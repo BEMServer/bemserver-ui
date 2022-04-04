@@ -1,6 +1,7 @@
 """A bunch of functions that automatically inject current campaign data
 in urls and requests.
 """
+import functools
 import flask
 from flask import url_for as flask_url_for
 
@@ -89,3 +90,21 @@ def init_app(app):
 
     # Monkey patch main flask.url_for function.
     flask.url_for = url_for_campaign
+
+
+def ensure_campaign_context(func=None, has_campaign=True):
+    """Ensure that decorated view is loaded while a campaign is selected."""
+
+    def ensure_campaign_context_internal(func):
+        @functools.wraps(func)
+        def decorated(*args, **kwargs):
+
+            if not flask.g.campaign_ctxt.has_campaign:
+                return flask.redirect(flask.url_for("main.index"))
+
+            return func(*args, **kwargs)
+        return decorated
+
+    if func is not None:
+        return ensure_campaign_context_internal(func)
+    return ensure_campaign_context_internal

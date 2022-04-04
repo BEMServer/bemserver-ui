@@ -5,6 +5,7 @@ from . import api_client
 from . import auth
 from . import campaign_context
 from .auth import Roles  # noqa
+from .campaign_context import ensure_campaign_context  # noqa
 
 
 EXT_MODULES = (

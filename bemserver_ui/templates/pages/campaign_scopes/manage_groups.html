@@ -1,0 +1,41 @@
+{% import "macros/component.html" as mac_component %}
+{% extends "pages/base.html" %}
+
+{% set title = "Manage " + campaign_scope.name + " scope's user groups" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row d-lg-flex d-grid">
+        <div class="col col-lg-6 pb-3 pb-lg-0">
+            <div class="vr float-end ms-4 d-none d-lg-block h-100"></div>
+            <h5>Current user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
+            {% if user_groups|length > 0 %}
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in user_groups %}
+                {{ mac_component.get_component("user_groups/group_for_campaign_scope.html", {"target": campaign_scope, "user_group": x}) | indent(width=16) }}
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+        </div>
+        <div class="col">
+            <h5>Available user groups <span class="badge bg-primary">{{ available_groups|length }}</span></h5>
+            {% if available_groups|length > 0 %}
+            <form id="addGroupsForm" class="d-flex flex-wrap gap-2 mt-2" action="{{ url_for('campaign_scopes.manage_groups', id=campaign_scope.id) }}" method="POST">
+                {% for x in available_groups %}
+                {{ mac_component.get_component("user_groups/user_group_available.html", {"user_group": x}) | indent(width=16) }}
+                {% endfor %}
+            </form>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('campaign_scopes.view', id=campaign_scope.id) }}" title="Cancel">Cancel</a>
+                <button class="btn btn-sm btn-outline-primary{% if available_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save selection</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

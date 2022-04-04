@@ -182,7 +182,7 @@ def manage_groups(id):
             except bac.BEMServerAPIValidationError as exc:
                 flask.abort(
                     409, description=(
-                        "An error occured while trying to add the user in a group!"),
+                        "An error occured while trying to add user group in campaign!"),
                     response=exc.errors)
         if len(user_group_ids) > 0:
             flask.flash("User added to selected group(s)!", "success")
@@ -213,9 +213,9 @@ def manage_groups(id):
 @blp.route("/<int:id>/remove_user_group", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def remove_user_group(id):
-    user_groups_by_campaign_id = flask.request.args["rel_id"]
+    rel_id = flask.request.args["rel_id"]
     try:
-        flask.g.api_client.user_groups_by_campaigns.delete(user_groups_by_campaign_id)
+        flask.g.api_client.user_groups_by_campaigns.delete(rel_id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(
             404, description="User group has already been removed from this campaign!")
