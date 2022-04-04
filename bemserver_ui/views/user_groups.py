@@ -20,18 +20,16 @@ def list():
         "pages/user_groups/list.html", user_groups=user_groups_resp.data)
 
 
-@blp.route("/view")
+@blp.route("/<int:id>/view")
 @auth.signin_required(roles=[Roles.admin])
-def view():
-    user_group_id = flask.request.args["id"]
+def view(id):
     try:
-        user_group = flask.g.api_client.user_groups.getone(user_group_id)
+        user_group = flask.g.api_client.user_groups.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User group not found!")
 
     # Get users.
-    users_resp = flask.g.api_client.user_by_user_groups.getall(
-        user_group_id=user_group_id)
+    users_resp = flask.g.api_client.user_by_user_groups.getall(user_group_id=id)
     users = []
     for x in users_resp.data:
         try:
@@ -68,24 +66,22 @@ def create():
     return flask.render_template("pages/user_groups/create.html")
 
 
-@blp.route("/edit", methods=["GET", "POST"])
+@blp.route("/<int:id>/edit", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
-def edit():
-    user_group_id = flask.request.args["id"]
-
+def edit(id):
     if flask.request.method == "GET":
         try:
-            user_group = flask.g.api_client.user_groups.getone(user_group_id)
+            user_group = flask.g.api_client.user_groups.getone(id)
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="User group not found!")
 
     elif flask.request.method == "POST":
+        payload = {
+            "name": flask.request.form["name"],
+        }
         try:
             user_group = flask.g.api_client.user_groups.update(
-                user_group_id, {
-                    "name": flask.request.form["name"],
-                }, etag=flask.request.form["editEtag"],
-            )
+                id, payload, etag=flask.request.form["editEtag"])
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
                 422, description="An error occured while updating user group!",
@@ -102,12 +98,11 @@ def edit():
         user_group=user_group.data, etag=user_group.etag)
 
 
-@blp.route("/delete", methods=["POST"])
+@blp.route("/<int:id>/delete", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-def delete():
+def delete(id):
     try:
-        flask.g.api_client.user_groups.delete(
-            flask.request.args["id"], etag=flask.request.form["delEtag"])
+        flask.g.api_client.user_groups.delete(id, etag=flask.request.form["delEtag"])
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User group not found!")
     except bac.BEMServerAPIValidationError as exc:
@@ -120,18 +115,16 @@ def delete():
     return flask.redirect(flask.url_for("user_groups.list"))
 
 
-@blp.route("/manage_users", methods=["GET", "POST"])
+@blp.route("/<int:id>/manage_users", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
-def manage_users():
-    user_group_id = flask.request.args["id"]
-
+def manage_users(id):
     if flask.request.method == "POST":
         user_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_id in user_ids:
             try:
                 flask.g.api_client.user_by_user_groups.create({
                     "user_id": user_id,
-                    "user_group_id": user_group_id,
+                    "user_group_id": id,
                 })
             except bac.BEMServerAPIValidationError as exc:
                 flask.abort(
@@ -142,13 +135,12 @@ def manage_users():
             flask.flash("Selected user(s) added in group!", "success")
 
     try:
-        user_group = flask.g.api_client.user_groups.getone(user_group_id)
+        user_group = flask.g.api_client.user_groups.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User group not found!")
 
     # Get users in group.
-    users_resp = flask.g.api_client.user_by_user_groups.getall(
-        user_group_id=user_group_id)
+    users_resp = flask.g.api_client.user_by_user_groups.getall(user_group_id=id)
     users = []
     user_ids = []
     for x in users_resp.data:
@@ -175,10 +167,10 @@ def manage_users():
         etag=user_group.etag, users=users, available_users=available_users)
 
 
-@blp.route("/remove_user", methods=["POST"])
+@blp.route("/<int:id>/remove_user", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-def remove_user():
-    users_by_user_groups_id = flask.request.args["id"]
+def remove_user(id):
+    users_by_user_groups_id = flask.request.args["rel_id"]
     try:
         flask.g.api_client.user_by_user_groups.delete(users_by_user_groups_id)
     except bac.BEMServerAPINotFoundError:

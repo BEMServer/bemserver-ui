@@ -6,7 +6,7 @@
         </div>
     </a>
     <div class="vr"></div>
-    <form action="{{ url_for('user_groups.remove_user', id=comp_params['user'].rel_id, next=url_for(request.endpoint, id=comp_params['user_group'].id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ comp_params['user'].name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ comp_params['user_group'].name }}&lt;/mark&gt; group">
+    <form action="{{ url_for('user_groups.remove_user', id=comp_params['user_group'].id, rel_id=comp_params['user'].rel_id, next=url_for(request.endpoint, id=comp_params['user_group'].id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ comp_params['user'].name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ comp_params['user_group'].name }}&lt;/mark&gt; group">
         <button class="btn btn-sm btn-outline-danger rounded-circle px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
     </form>
 </div>
