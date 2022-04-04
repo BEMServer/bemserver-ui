@@ -37,7 +37,7 @@ class CampaignContext:
     def _load_campaigns(self):
         try:
             campaigns = flask.g.api_client.campaigns.getall(
-                etag=flask.session.get("campaigns_etag"))
+                sorted="+name", etag=flask.session.get("campaigns_etag"))
         except bac.BEMServerAPINotModified:
             pass
         else:
