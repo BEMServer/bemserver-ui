@@ -2,6 +2,7 @@ class CampaignSelector {
 
     #selectorComponentElmt = null;
     #campaignSelectElmt = null;
+    #campaignBtnViewElmt = null;
     #campaignBtnOKElmt = null;
     #campaignBtnUnselectElmt = null;
     #campaignAllPropsElmt = null;
@@ -27,6 +28,7 @@ class CampaignSelector {
     _cacheDOM() {
         this.#selectorComponentElmt = document.querySelector("div.app-campaign-selector");
         this.#campaignSelectElmt = document.getElementById("campaignSelectorSelect");
+        this.#campaignBtnViewElmt = document.getElementById("campaignSelectorBtnView");
         this.#campaignBtnOKElmt = document.getElementById("campaignSelectorBtnOK");
         this.#campaignBtnUnselectElmt = document.getElementById("campaignSelectorBtnUnselect");
         this.#campaignAllPropsElmt = document.getElementById("campaignSelectedProperties");
@@ -89,6 +91,9 @@ class CampaignSelector {
             this.#campaignAllPropsElmt.classList.remove("invisible", "d-none");
 
             let selectedOptionElmnt = this.#campaignSelectElmt.item(this.#campaignSelectElmt.selectedIndex);
+
+            this.#campaignBtnViewElmt.href = this.#campaignBtnViewElmt.getAttribute("data-campaign-view-href").replace("-1", selectedOptionElmnt.value);
+
             let description = selectedOptionElmnt.getAttribute("data-campaign-desc");
             let startTime = new Date(selectedOptionElmnt.getAttribute("data-campaign-start"));
             let endTime = new Date(selectedOptionElmnt.getAttribute("data-campaign-end"));
@@ -108,6 +113,8 @@ class CampaignSelector {
     _refresh() {
         if (this.#campaignSelectElmt.value == "") {
             this.#campaignSelectElmt.classList.remove("border-info");
+            this.#campaignBtnViewElmt.classList.add("invisible", "d-none");
+            this.#campaignBtnViewElmt.removeAttribute("href");
             if (this.currentCampaign == this.#campaignSelectElmt.value) {
                 this.#campaignBtnOKElmt.classList.add("invisible", "d-none");
             }
@@ -117,6 +124,7 @@ class CampaignSelector {
             this.#campaignBtnUnselectElmt.classList.add("invisible", "d-none");
         }
         else {
+            this.#campaignBtnViewElmt.classList.remove("invisible", "d-none");
             if (this.currentCampaign == this.#campaignSelectElmt.value) {
                 this.#campaignSelectElmt.classList.add("border-info");
                 this.#campaignBtnOKElmt.classList.add("invisible", "d-none");

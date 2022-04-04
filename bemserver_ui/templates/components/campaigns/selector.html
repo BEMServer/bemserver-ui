@@ -13,6 +13,7 @@
                     {% endfor %}
                 </optgroup>
             </select>
+            <a class="btn btn-sm btn-outline-secondary" data-campaign-view-href="{{ url_for('campaigns.view', id=-1) }}" id="campaignSelectorBtnView" role="button" title="View campaign"><i class="bi bi-eye"></i></a>
             <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnOK" title="Select campaign">Select</a>
             <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnUnselect" title="Unselect campaign">Unselect</a>
         </div>
