@@ -1,4 +1,3 @@
-{% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
 {% set title = "Manage " + user_group.name + " group's users" %}
@@ -12,8 +11,10 @@
             <h5>Current users <span class="badge bg-primary">{{ users|length }}</span></h5>
             {% if users|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
-                {% for x in users %}
-                {{ mac_component.get_component("users/user_for_group.html", {"user": x, "user_group": user_group}) | indent(width=16) }}
+                {% for user in users %}
+                {% filter indent(width=16) %}
+                {% include "components/users/user_for_group.html" %}
+                {% endfilter %}
                 {% endfor %}
             </div>
             {% else %}
@@ -24,8 +25,10 @@
             <h5>Available users <span class="badge bg-primary">{{ available_users|length }}</span></h5>
             {% if available_users|length > 0 %}
             <form id="addUsersForm" class="d-flex flex-wrap gap-2" action="{{ url_for('user_groups.manage_users', id=user_group.id) }}" method="POST">
-                {% for x in available_users %}
-                {{ mac_component.get_component("users/user_available.html", {"user": x}) | indent(width=16) }}
+                {% for user in available_users %}
+                {% filter indent(width=16) %}
+                {% include "components/users/user_available.html" %}
+                {% endfilter %}
                 {% endfor %}
             </form>
             {% else %}

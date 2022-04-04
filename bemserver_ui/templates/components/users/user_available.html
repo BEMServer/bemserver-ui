@@ -1,11 +1,11 @@
-<input class="btn-check" type="checkbox" id="user-{{ comp_params['user'].id }}" name="user-{{ comp_params['user'].id }}" autocomplete="off">
-<label class="btn btn-outline-secondary" for="user-{{ comp_params['user'].id }}">
+<input class="btn-check" type="checkbox" id="user-{{ user.id }}" name="user-{{ user.id }}" autocomplete="off">
+<label class="btn btn-outline-secondary" for="user-{{ user.id }}">
     <div class="d-flex align-items-center gap-3">
         <div><i class="bi bi-plus-square-dotted"></i></div>
         <div class="vr"></div>
         <div class="d-flex flex-column justify-content-start">
-            <div class="text-start"><i class="bi bi-person"></i> {{ comp_params["user"].name }}</div>
-            <small class="opacity-50 fst-italic">{{ comp_params["user"].email }}</small>
+            <div class="text-start"><i class="bi bi-person"></i> {{ user.name }}</div>
+            <small class="opacity-50 fst-italic">{{ user.email }}</small>
         </div>
     </div>
 </label>

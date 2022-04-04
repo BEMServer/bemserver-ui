@@ -1,10 +1,10 @@
-<input class="btn-check" type="checkbox" id="group-{{ comp_params['user_group'].id }}" name="group-{{ comp_params['user_group'].id }}" autocomplete="off">
-<label class="btn btn-outline-secondary" for="group-{{ comp_params['user_group'].id }}">
+<input class="btn-check" type="checkbox" id="group-{{ user_group.id }}" name="group-{{ user_group.id }}" autocomplete="off">
+<label class="btn btn-outline-secondary" for="group-{{ user_group.id }}">
     <div class="d-flex align-items-center gap-3">
         <div><i class="bi bi-plus-square-dotted"></i></div>
         <div class="vr"></div>
         <div class="d-flex flex-column justify-content-start">
-            <div class="text-start"><i class="bi bi-people"></i> {{ comp_params['user_group'].name }}</div>
+            <div class="text-start"><i class="bi bi-people"></i> {{ user_group.name }}</div>
         </div>
     </div>
 </label>

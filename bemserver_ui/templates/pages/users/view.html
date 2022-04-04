@@ -1,4 +1,3 @@
-{% import "macros/component.html" as mac_component %}
 {% extends "pages/base.html" %}
 
 {% set self_view = signed_user.id == user.id %}
@@ -85,8 +84,10 @@
             </div>
             {% if user_groups|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
-                {% for x in user_groups %}
-                {{ mac_component.get_component("user_groups/group_for_user.html", {"target": user, "user_group": x, "read_only": not signed_user.is_admin}) | indent(16) }}
+                {% for user_group in user_groups %}
+                {% filter indent(width=16) %}
+                {% include "components/user_groups/group_for_user.html" %}
+                {% endfilter %}
                 {% endfor %}
             </div>
             {% else %}
