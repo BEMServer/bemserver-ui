@@ -139,3 +139,97 @@ class EventCategoryResources(BaseResources):
 
 class EventResources(BaseResources):
     endpoint_base_uri = "/events/"
+
+
+class SiteResources(BaseResources):
+    endpoint_base_uri = "/sites/"
+
+
+class BuildingResources(BaseResources):
+    endpoint_base_uri = "/buildings/"
+
+
+class StoreyResources(BaseResources):
+    endpoint_base_uri = "/storeys/"
+
+
+class SpaceResources(BaseResources):
+    endpoint_base_uri = "/spaces/"
+
+
+class ZoneResources(BaseResources):
+    endpoint_base_uri = "/zones/"
+
+
+class StructuralElementPropertyResources(BaseResources):
+    endpoint_base_uri = "/structural_element_properties/"
+
+
+class SitePropertyResources(BaseResources):
+    endpoint_base_uri = "/site_properties/"
+    disabled_endpoints = ["update"]
+
+
+class BuildingPropertyResources(BaseResources):
+    endpoint_base_uri = "/building_properties/"
+    disabled_endpoints = ["update"]
+
+
+class StoreyPropertyResources(BaseResources):
+    endpoint_base_uri = "/storey_properties/"
+    disabled_endpoints = ["update"]
+
+
+class SpacePropertyResources(BaseResources):
+    endpoint_base_uri = "/space_properties/"
+    disabled_endpoints = ["update"]
+
+
+class ZonePropertyResources(BaseResources):
+    endpoint_base_uri = "/zone_properties/"
+    disabled_endpoints = ["update"]
+
+
+class SitePropertyDataResources(BaseResources):
+    endpoint_base_uri = "/site_property_data/"
+
+
+class BuildingPropertyDataResources(BaseResources):
+    endpoint_base_uri = "/building_property_data/"
+
+
+class StoreyPropertyDataResources(BaseResources):
+    endpoint_base_uri = "/storey_property_data/"
+
+
+class SpacePropertyDataResources(BaseResources):
+    endpoint_base_uri = "/space_property_data/"
+
+
+class ZonePropertyDataResources(BaseResources):
+    endpoint_base_uri = "/zone_property_data/"
+
+
+class TimeseriesBySiteResources(BaseResources):
+    endpoint_base_uri = "/timeseries_by_sites/"
+    disabled_endpoints = ["update"]
+
+
+class TimeseriesByBuildingResources(BaseResources):
+    endpoint_base_uri = "/timeseries_by_buildings/"
+    disabled_endpoints = ["update"]
+
+
+class TimeseriesByStoreyResources(BaseResources):
+    endpoint_base_uri = "/timeseries_by_storeys/"
+    disabled_endpoints = ["update"]
+
+
+class TimeseriesBySpaceResources(BaseResources):
+    endpoint_base_uri = "/timeseries_by_spaces/"
+    disabled_endpoints = ["update"]
+
+
+class TimeseriesByZoneResources(BaseResources):
+    endpoint_base_uri = "/timeseries_by_zones/"
+    disabled_endpoints = ["update"]

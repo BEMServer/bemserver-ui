@@ -13,6 +13,14 @@ from .resources import (
     TimeseriesResources, TimeseriesDataStateResources, TimeseriesPropertyResources,
     TimeseriesPropertyDataResources, TimeseriesDataResources,
     EventResources, EventStateResources, EventLevelResources, EventCategoryResources,
+    StructuralElementPropertyResources,
+    SiteResources, SitePropertyResources, SitePropertyDataResources,
+    BuildingResources, BuildingPropertyResources, BuildingPropertyDataResources,
+    StoreyResources, StoreyPropertyResources, StoreyPropertyDataResources,
+    SpaceResources, SpacePropertyResources, SpacePropertyDataResources,
+    ZoneResources, ZonePropertyResources, ZonePropertyDataResources,
+    TimeseriesBySiteResources, TimeseriesByBuildingResources,
+    TimeseriesByStoreyResources, TimeseriesBySpaceResources, TimeseriesByZoneResources,
 )
 from .exceptions import (
     BEMServerAPIValidationError, BEMServerAPINotFoundError, BEMServerAPINotModified,
@@ -225,7 +233,7 @@ class BEMServerApiClient:
         self.timeseries = TimeseriesResources(self._request_manager)
         self.timeseries_datastates = TimeseriesDataStateResources(self._request_manager)
         self.timeseries_properties = TimeseriesPropertyResources(self._request_manager)
-        self.timeseries_propertiesdata = \
+        self.timeseries_property_data = \
             TimeseriesPropertyDataResources(self._request_manager)
         self.timeseries_data = TimeseriesDataResources(self._request_manager)
 
@@ -233,3 +241,30 @@ class BEMServerApiClient:
         self.event_states = EventStateResources(self._request_manager)
         self.event_levels = EventLevelResources(self._request_manager)
         self.event_categories = EventCategoryResources(self._request_manager)
+
+        self.sites = SiteResources(self._request_manager)
+        self.buildings = BuildingResources(self._request_manager)
+        self.storeys = StoreyResources(self._request_manager)
+        self.spaces = SpaceResources(self._request_manager)
+        self.zones = ZoneResources(self._request_manager)
+
+        self.structural_element_properties = \
+            StructuralElementPropertyResources(self._request_manager)
+        self.site_properties = SitePropertyResources(self._request_manager)
+        self.building_properties = BuildingPropertyResources(self._request_manager)
+        self.storey_properties = StoreyPropertyResources(self._request_manager)
+        self.space_properties = SpacePropertyResources(self._request_manager)
+        self.zone_properties = ZonePropertyResources(self._request_manager)
+
+        self.site_property_data = SitePropertyDataResources(self._request_manager)
+        self.building_property_data = \
+            BuildingPropertyDataResources(self._request_manager)
+        self.storey_property_data = StoreyPropertyDataResources(self._request_manager)
+        self.space_property_data = SpacePropertyDataResources(self._request_manager)
+        self.zone_property_data = ZonePropertyDataResources(self._request_manager)
+
+        self.timeseries_by_sites = TimeseriesBySiteResources(self._request_manager)
+        self.timeseries_by_buildings = TimeseriesByBuildingResources(self._request_manager)
+        self.timeseries_by_storeys = TimeseriesByStoreyResources(self._request_manager)
+        self.timeseries_by_spaces = TimeseriesBySpaceResources(self._request_manager)
+        self.timeseries_by_zones = TimeseriesByZoneResources(self._request_manager)
