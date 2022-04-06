@@ -3,7 +3,7 @@ class Sidebar {
     refreshActive() {
         // Set active the nav link element that corresponds to the current page location.
         let currentUrl = window.location.pathname + window.location.search;
-        let elements = document.querySelectorAll(".nav-link");
+        let elements = document.querySelectorAll(".app-sidebar .nav-link");
         elements.forEach(function (element) {
             if (element.getAttribute("href") == currentUrl) {
                 element.classList.add("active", "fw-bold");
