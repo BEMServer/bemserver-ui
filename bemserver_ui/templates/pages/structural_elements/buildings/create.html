@@ -1,0 +1,50 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create building" %}
+{% set has_no_sites = sites|length <= 0 %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    {% if has_no_sites %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                Your campaign currently has <span class="fw-bold">no sites</span>.
+                You must first <a href="{{ url_for('sites.create') }}" title="Create a new site">create a site</a> to add a building to it.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('buildings.create') }}" method="POST">
+                <fieldset{% if has_no_sites %} disabled{% endif %}>
+                    <legend class="invisible d-none">Building informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="site">Site</label>
+                        <select class="form-select" id="site" name="site" aria-label="Select a site" required>
+                            {% for x in sites %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </fieldset>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('structural_elements.manage') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"{% if has_no_sites %} disabled{% endif %}><i class="bi bi-save"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

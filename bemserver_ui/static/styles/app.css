@@ -78,3 +78,13 @@ body,
 .app-campaign-selected {
     background-color: #0088db33 !important;
 }
+
+.app-tabs .nav-item:hover {
+    background-color: #0088db !important;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.app-tabs .nav-item:hover .nav-link:not(.active) {
+    color: #ffffff;
+}

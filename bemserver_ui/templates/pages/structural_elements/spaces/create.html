@@ -1,0 +1,50 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create space" %}
+{% set has_no_storeys = storeys|length <= 0 %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    {% if has_no_storeys %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                Your campaign currently has <span class="fw-bold">no storeys</span>.
+                You must first <a href="{{ url_for('storeys.create') }}" title="Create a new building">create a storey</a> to add a space to it.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('spaces.create') }}" method="POST">
+                <fieldset{% if has_no_storeys %} disabled{% endif %}>
+                    <legend class="invisible d-none">Space informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="storey">Storey</label>
+                        <select class="form-select" id="storey" name="storey" aria-label="Select a storey" required>
+                            {% for x in storeys %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </fieldset>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('structural_elements.manage') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"{% if has_no_storeys %} disabled{% endif %}><i class="bi bi-save"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

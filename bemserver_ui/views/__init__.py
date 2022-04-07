@@ -5,6 +5,7 @@ from . import users
 from . import user_groups
 from . import campaigns
 from . import campaign_scopes
+from . import structural_elements
 
 
 MODULES = (
@@ -14,6 +15,12 @@ MODULES = (
     user_groups,
     campaigns,
     campaign_scopes,
+    structural_elements.structural_elements,
+    structural_elements.sites,
+    structural_elements.buildings,
+    structural_elements.storeys,
+    structural_elements.spaces,
+    structural_elements.zones,
 )
 
 

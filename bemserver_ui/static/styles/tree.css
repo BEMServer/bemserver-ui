@@ -1,0 +1,21 @@
+.nav-tree ul {
+    list-style-type: none;
+    list-style-position: inside;
+}
+
+.nav-tree > ul {
+    padding-left: 0 !important;
+}
+
+.nav-tree-item-icon,
+.nav-tree-item-link {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav-tree-item-link:hover,
+.nav-tree-item-link.active {
+    background-color: #0088db;
+    color: #ffffff;
+}

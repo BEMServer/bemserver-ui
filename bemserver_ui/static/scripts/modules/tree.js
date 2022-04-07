@@ -1,0 +1,132 @@
+class Tree {
+
+    #treeId = "tree";
+    #treeElmt = null;
+    #treeItemElmts = [];
+    #toolbarElmt = null
+    #collapseAllBtnElmt = null;
+    #expandAllBtnElmt = null;
+
+    #selectedTreeItem = null;
+    #onSelectedTreeItemCallback = null;
+
+    #defaultIconItem = "bi bi-folder";
+    #defaultIconItemCollapsed = "bi bi-folder-plus";
+    #defaultIconItemExpanded = "bi bi-folder-minus";
+    #iconItem = this.#defaultIconItem;
+    #iconItemCollapsed = this.#defaultIconItemCollapsed;
+    #iconItemExpanded = this.#defaultIconItemExpanded;
+
+    constructor(treeId, onSelectedTreeItemCallback, options) {
+        this.#treeId = treeId;
+        this.#onSelectedTreeItemCallback = onSelectedTreeItemCallback;
+        this.#iconItem = options?.icons?.default != null ? options?.icons?.default : this.#defaultIconItem;
+        this.#iconItemCollapsed = options?.icons?.collapsed || this.#defaultIconItemCollapsed;
+        this.#iconItemExpanded = options?.icons?.expanded || this.#defaultIconItemExpanded;
+
+        this.#cacheDOM();
+
+        this.#initIcons();
+        this.#initEventListeners();
+
+        if (this.#treeItemElmts?.length <= 0) {
+            this.#toolbarElmt?.classList.add("d-none");
+        }
+    }
+
+    #cacheDOM() {
+        this.#treeElmt = document.getElementById(this.#treeId);
+        this.#treeItemElmts = [].slice.call(this.#treeElmt.querySelectorAll(".nav-tree-item"));
+        this.#toolbarElmt = document.getElementById(`${this.#treeId}Toolbar`);
+        this.#collapseAllBtnElmt = document.getElementById(`${this.#treeId}CollapseAll`);
+        this.#expandAllBtnElmt = document.getElementById(`${this.#treeId}ExpandAll`);
+    }
+
+    #initIcons() {
+        this.#treeItemElmts.forEach(function (itemElmt) {
+            let iconLinkElmt = itemElmt.querySelector(".nav-tree-item-icon > i");
+            if (iconLinkElmt != null) {
+                if (iconLinkElmt.className == this.#defaultIconItemCollapsed) {
+                    iconLinkElmt.setAttribute("class", this.#iconItemCollapsed);
+                }
+                else {
+                    iconLinkElmt.setAttribute("class", this.#iconItemExpanded);
+                }
+            }
+
+            let iconElmt = itemElmt.querySelector(".nav-tree-item > i");
+            iconElmt?.setAttribute("class", this.#iconItem);
+        }.bind(this));
+    }
+
+    #initEventListeners() {
+        this.#treeItemElmts.forEach(function (itemElmt) {
+            let collapsableElmnt = itemElmt.querySelector("ul.collapse");
+            collapsableElmnt?.addEventListener("show.bs.collapse", function(event) {
+                let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
+                iconElmt.className = this.#iconItemExpanded;
+            }.bind(this));
+            collapsableElmnt?.addEventListener("hide.bs.collapse", function(event) {
+                let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
+                iconElmt.className = this.#iconItemCollapsed;
+            }.bind(this));
+
+            let linkElmt = itemElmt.querySelector(".nav-tree-item-link");
+            linkElmt?.addEventListener("click", function(event) {
+                event.preventDefault();
+
+                if (this.#selectedTreeItem == event.target) {
+                    this.#selectedTreeItem?.classList.remove("active");
+                    this.#selectedTreeItem = null;
+                }
+                else {
+                    this.#selectedTreeItem?.classList.remove("active");
+                    this.#selectedTreeItem = event.target;
+                    this.#selectedTreeItem.classList.add("active");
+                }
+                this.#onSelectedTreeItemCallback?.call(this.#selectedTreeItem);
+            }.bind(this), false);
+        }.bind(this));
+
+        this.#collapseAllBtnElmt?.addEventListener("click", this.collapseAll.bind(this), false);
+        this.#expandAllBtnElmt?.addEventListener("click", this.expandAll.bind(this), false);
+    }
+
+    #getCollapsableFromItem(itemElmt, switchable=false) {
+        let collapsableElmnt = itemElmt.querySelector("ul.collapse");
+        if (collapsableElmnt != null) {
+            return new bootstrap.Collapse(collapsableElmnt, {toggle: switchable});
+        }
+        return null;
+    }
+
+    #collapseItem(itemElmt) {
+        let bsCollapse = this.#getCollapsableFromItem(itemElmt);
+        bsCollapse?.hide();
+    }
+
+    #expandItem(itemElmt) {
+        let bsCollapse = this.#getCollapsableFromItem(itemElmt);
+        bsCollapse?.show();
+    }
+
+    #expandOrCollapseItem(itemElmt) {
+        let bsCollapse = this.#getCollapsableFromItem(itemElmt, switchable=true);
+        bsCollapse?.toggle();
+    }
+
+    collapseAll() {
+        this.#treeItemElmts.reverse().forEach(function (itemElmt) {
+            this.#collapseItem(itemElmt);
+        }.bind(this));
+    }
+
+    expandAll() {
+        this.#treeItemElmts.forEach(function (itemElmt) {
+            this.#expandItem(itemElmt);
+        }.bind(this));
+    }
+}
+
+
+export { Tree };
