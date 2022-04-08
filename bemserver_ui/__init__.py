@@ -2,6 +2,7 @@
 import flask
 
 from . import extensions
+from . import internal_api
 from . import views
 
 
@@ -15,6 +16,7 @@ def create_app():
     app.jinja_env.lstrip_blocks = True
 
     extensions.init_app(app)
+    internal_api.init_app(app)
     views.init_app(app)
 
     return app
