@@ -9,15 +9,17 @@ blp = flask.Blueprint(
     "structural_elements", __name__, url_prefix="/structural_elements")
 
 
-def build_tree(campaign_id):
+def _extract_data(data, data_type):
+    return {
+        "id": data["id"],
+        "name": data["name"],
+        "type": data_type,
+        "data_url": flask.url_for(f"api.{data_type}s.retrieve_data", id=data["id"]),
+        "nodes": [],
+    }
 
-    def extract_data(data, data_type):
-        return {
-            "id": data["id"],
-            "name": data["name"],
-            "type": data_type,
-            "nodes": [],
-        }
+
+def _build_tree(campaign_id):
 
     tree_data = []
     # Get all sites.
@@ -28,7 +30,7 @@ def build_tree(campaign_id):
         flask.abort(422, response=exc.errors)
     # For each site...
     for site in sites_resp.data:
-        site_data = extract_data(site, "site")
+        site_data = _extract_data(site, "site")
         # ...get all buildings.
         try:
             buildings_resp = flask.g.api_client.buildings.getall(
@@ -37,7 +39,7 @@ def build_tree(campaign_id):
             flask.abort(422, response=exc.errors)
         # For each building...
         for building in buildings_resp.data:
-            building_data = extract_data(building, "building")
+            building_data = _extract_data(building, "building")
             # ...get storeys.
             try:
                 storeys_resp = flask.g.api_client.storeys.getall(
@@ -46,7 +48,7 @@ def build_tree(campaign_id):
                 flask.abort(422, response=exc.errors)
             # For each storey...
             for storey in storeys_resp.data:
-                storey_data = extract_data(storey, "storey")
+                storey_data = _extract_data(storey, "storey")
                 # ...get spaces.
                 try:
                     spaces_resp = flask.g.api_client.spaces.getall(
@@ -54,7 +56,7 @@ def build_tree(campaign_id):
                 except bac.BEMServerAPIValidationError as exc:
                     flask.abort(422, response=exc.errors)
                 for space in spaces_resp.data:
-                    space_data = extract_data(space, "space")
+                    space_data = _extract_data(space, "space")
                     storey_data["nodes"].append(space_data)
                 building_data["nodes"].append(storey_data)
             site_data["nodes"].append(building_data)
@@ -73,7 +75,7 @@ def manage():
     campaign_id = flask.g.campaign_ctxt.id
 
     # Structural elements tree data.
-    sites_tree_data = build_tree(campaign_id)
+    sites_tree_data = _build_tree(campaign_id)
 
     # Zones tree data.
     try:
@@ -84,9 +86,8 @@ def manage():
     else:
         zones_tree_data = []
         for zone in zones_resp.data:
-            zone["type"] = "zone"
-            zone["nodes"] = []
-            zones_tree_data.append(zone)
+            zone_data = _extract_data(zone, "zone")
+            zones_tree_data.append(zone_data)
 
     return flask.render_template(
         "pages/structural_elements/manage.html", sites_tree_data=sites_tree_data,

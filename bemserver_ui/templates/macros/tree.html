@@ -1,5 +1,5 @@
 {% macro render_tree(tree_id, tree_data) %}
-<div id="{{ tree_id }}" class="nav-tree overflow-auto">
+<div id="{{ tree_id }}" class="nav-tree">
     {% if tree_data|length > 0 %}
     {% filter indent(width=4) %}
     {{ _render_tree_nodes(tree_data) -}}
@@ -21,7 +21,7 @@
         {% else %}
         <i class="bi bi-folder"></i>
         {% endif %}
-        <a class="nav-tree-item-link rounded px-2 py-1" data-tree-item-id="{{ node.id }}" data-tree-item-type="{{ node.type }}">{{ node.name }}</a>
+        <a class="nav-tree-item-link rounded px-2 py-1" data-tree-item-url="{{ node.data_url }}">{{ node.name }}</a>
         {% if has_children %}
         {{ _render_tree_nodes(node.nodes, node.id|string, level=level+1, indent_width=8) -}}
         {% endif %}

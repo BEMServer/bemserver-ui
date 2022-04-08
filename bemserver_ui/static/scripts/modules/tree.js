@@ -9,6 +9,10 @@ class Tree {
 
     #selectedTreeItem = null;
     #onSelectedTreeItemCallback = null;
+    #onUnselectedTreeItemCallback = null;
+    selectedItemUrl = null;
+
+    #ignoreUnselectEvent = true;
 
     #defaultIconItem = "bi bi-folder";
     #defaultIconItemCollapsed = "bi bi-folder-plus";
@@ -17,9 +21,11 @@ class Tree {
     #iconItemCollapsed = this.#defaultIconItemCollapsed;
     #iconItemExpanded = this.#defaultIconItemExpanded;
 
-    constructor(treeId, onSelectedTreeItemCallback, options) {
+    constructor(treeId, callbacks, options) {
         this.#treeId = treeId;
-        this.#onSelectedTreeItemCallback = onSelectedTreeItemCallback;
+        this.#onSelectedTreeItemCallback = callbacks?.selected;
+        this.#onUnselectedTreeItemCallback = callbacks?.unselected;
+        this.#ignoreUnselectEvent = options?.ignoreUnselectEvent != null ? options?.ignoreUnselectEvent : true;
         this.#iconItem = options?.icons?.default != null ? options?.icons?.default : this.#defaultIconItem;
         this.#iconItemCollapsed = options?.icons?.collapsed || this.#defaultIconItemCollapsed;
         this.#iconItemExpanded = options?.icons?.expanded || this.#defaultIconItemExpanded;
@@ -61,12 +67,12 @@ class Tree {
 
     #initEventListeners() {
         this.#treeItemElmts.forEach(function (itemElmt) {
-            let collapsableElmnt = itemElmt.querySelector("ul.collapse");
-            collapsableElmnt?.addEventListener("show.bs.collapse", function(event) {
+            let collapsableElmt = itemElmt.querySelector("ul.collapse");
+            collapsableElmt?.addEventListener("show.bs.collapse", function(event) {
                 let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
                 iconElmt.className = this.#iconItemExpanded;
             }.bind(this));
-            collapsableElmnt?.addEventListener("hide.bs.collapse", function(event) {
+            collapsableElmt?.addEventListener("hide.bs.collapse", function(event) {
                 let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
                 iconElmt.className = this.#iconItemCollapsed;
             }.bind(this));
@@ -75,16 +81,20 @@ class Tree {
             linkElmt?.addEventListener("click", function(event) {
                 event.preventDefault();
 
-                if (this.#selectedTreeItem == event.target) {
-                    this.#selectedTreeItem?.classList.remove("active");
-                    this.#selectedTreeItem = null;
-                }
-                else {
+                if (this.#selectedTreeItem != event.target) {
                     this.#selectedTreeItem?.classList.remove("active");
                     this.#selectedTreeItem = event.target;
                     this.#selectedTreeItem.classList.add("active");
+                    this.selectedItemUrl = this.#selectedTreeItem.getAttribute("data-tree-item-url");
+                    this.#onSelectedTreeItemCallback?.call(null, this.selectedItemUrl);
+                    this.#getCollapsableFromItem(this.#selectedTreeItem.parentElement)?.show();
                 }
-                this.#onSelectedTreeItemCallback?.call(this.#selectedTreeItem);
+                else if (!this.#ignoreUnselectEvent) {
+                    this.#selectedTreeItem?.classList.remove("active");
+                    this.#selectedTreeItem = null;
+                    this.selectedItemUrl = null;
+                    this.#onUnselectedTreeItemCallback?.call();
+                }
             }.bind(this), false);
         }.bind(this));
 

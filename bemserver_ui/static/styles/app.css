@@ -39,6 +39,10 @@ body,
     #sidebarToggler {
         visibility: hidden;
     }
+
+    .app-tab-content {
+        min-height: 400px;
+    }
 }
 
 .app-sidebar-heading {
