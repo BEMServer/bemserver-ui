@@ -264,7 +264,8 @@ class BEMServerApiClient:
         self.zone_property_data = ZonePropertyDataResources(self._request_manager)
 
         self.timeseries_by_sites = TimeseriesBySiteResources(self._request_manager)
-        self.timeseries_by_buildings = TimeseriesByBuildingResources(self._request_manager)
+        self.timeseries_by_buildings = \
+            TimeseriesByBuildingResources(self._request_manager)
         self.timeseries_by_storeys = TimeseriesByStoreyResources(self._request_manager)
         self.timeseries_by_spaces = TimeseriesBySpaceResources(self._request_manager)
         self.timeseries_by_zones = TimeseriesByZoneResources(self._request_manager)
