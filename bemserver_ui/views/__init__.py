@@ -21,6 +21,7 @@ MODULES = (
     structural_elements.storeys,
     structural_elements.spaces,
     structural_elements.zones,
+    structural_elements.structural_element_properties,
 )
 
 

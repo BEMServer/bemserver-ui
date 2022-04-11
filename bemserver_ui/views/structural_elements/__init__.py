@@ -5,3 +5,4 @@ from . import buildings  # noqa
 from . import storeys  # noqa
 from . import spaces  # noqa
 from . import zones  # noqa
+from . import structural_element_properties  # noqa

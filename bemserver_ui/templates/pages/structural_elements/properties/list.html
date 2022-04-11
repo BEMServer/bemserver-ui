@@ -1,0 +1,70 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Structural elements properties" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('structural_element_properties.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new property"><i class="bi bi-plus-circle"></i> New property</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row justify-content-end mb-3">
+        <div class="col-auto">
+            Current items count: <span class="fw-bold">{{ properties|length }}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive-xl">
+                <table class="table table-sm table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="3"></th>
+                            <th scope="col" colspan="{{ structural_elements|length }}" class="text-center">Used in</th>
+                            <th scope="col"></th>
+                        </tr>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Description</th>
+                            {% for struct_elmt in structural_elements %}
+                            <th scope="col" class="text-center">{{ struct_elmt | capitalize }}</th>
+                            {% endfor %}
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prop in properties %}
+                        <tr class="align-middle">
+                            <th scope="row">{{ prop.id }}</th>
+                            <td>{{ prop.name }}</td>
+                            <td class="w-50">
+                                {% if prop.description|length > 80 %}
+                                <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
+                                {% else %}
+                                {{ prop.description }}
+                                {% endif %}
+                            </td>
+                            {% for struct_elmt in structural_elements %}
+                            <td class="table-{% if prop.used_in[struct_elmt] %}success{% else %}danger{% endif %} text-center">
+                                {% if prop.used_in[struct_elmt] %}
+                                <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
+                                {% else %}
+                                <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                            <td class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('structural_element_properties.edit', id=prop.id) }}" title="Edit property"><i class="bi bi-pencil"></i></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>              
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
