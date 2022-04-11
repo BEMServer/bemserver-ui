@@ -69,8 +69,8 @@
     document.addEventListener("DOMContentLoaded", function() {
 
         let structuralElmts = new StructuralElements();
-        let treeSites = new Tree("treeSites", {selected: structuralElmts.renderData.bind(structuralElmts), unselected: structuralElmts.renderNoData.bind(structuralElmts)});
-        let treeZones = new Tree("treeZones", {selected: structuralElmts.renderData.bind(structuralElmts), unselected: structuralElmts.renderNoData.bind(structuralElmts)});
+        let treeSites = new Tree("treeSites", {selected: structuralElmts.renderData.bind(structuralElmts)});
+        let treeZones = new Tree("treeZones", {selected: structuralElmts.renderData.bind(structuralElmts)});
 
         treeSites.collapseAll();
         treeZones.collapseAll();
