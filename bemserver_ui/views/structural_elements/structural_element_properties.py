@@ -1,4 +1,5 @@
 """Structural element properties views"""
+from copy import deepcopy
 import flask
 
 import bemserver_ui.extensions.api_client as bac
@@ -13,7 +14,7 @@ blp = flask.Blueprint(
 STRUCTURAL_ELEMENTS = ["site", "building", "storey", "space", "zone"]
 
 
-def set_used_in(props_data):
+def extend_props_data(props_data):
     prop_ids = {}
     for struct_elmt in STRUCTURAL_ELEMENTS:
         api_resource = getattr(flask.g.api_client, f"{struct_elmt}_properties")
@@ -29,11 +30,21 @@ def set_used_in(props_data):
         for struct_elmt in STRUCTURAL_ELEMENTS:
             prop_data["used_in"][struct_elmt] = \
                 prop_data["id"] in prop_ids[struct_elmt]
+        prop_data["is_orphan"] = not any([
+            prop_data["used_in"][x] for x in STRUCTURAL_ELEMENTS])
 
 
-@blp.route("/")
+@blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
+    filters = {x: True for x in STRUCTURAL_ELEMENTS}
+    filters["orphan"] = True
+    # Get requested filters.
+    if flask.request.method == "POST":
+        for x in STRUCTURAL_ELEMENTS:
+            filters[x] = x in flask.request.form
+        filters["orphan"] = "orphan" in flask.request.form
+
     try:
         props_resp = flask.g.api_client.structural_element_properties.getall(
             sort="+name")
@@ -41,11 +52,24 @@ def list():
         flask.abort(422, response=exc.errors)
 
     props_data = props_resp.data
-    set_used_in(props_data)
+    extend_props_data(props_data)
+
+    # Apply filters, if needed.
+    if not all(filters.values()):
+        all_props_data = deepcopy(props_data)
+        props_data = []
+        for prop_data in all_props_data:
+            if filters["orphan"] and prop_data["is_orphan"]:
+                props_data.append(prop_data)
+            else:
+                for struct_elmt in STRUCTURAL_ELEMENTS:
+                    if filters[struct_elmt] and prop_data["used_in"][struct_elmt]:
+                        props_data.append(prop_data)
+                        break
 
     return flask.render_template(
         "pages/structural_elements/properties/list.html", properties=props_data,
-        structural_elements=STRUCTURAL_ELEMENTS)
+        structural_elements=STRUCTURAL_ELEMENTS, filters=filters)
 
 
 @blp.route("/create", methods=["GET", "POST"])
@@ -149,7 +173,7 @@ def edit(id):
         flask.abort(404, description="Property not found!")
 
     prop_data = prop_resp.data
-    set_used_in([prop_data])
+    extend_props_data([prop_data])
 
     return flask.render_template(
         "pages/structural_elements/properties/edit.html", property=prop_data,
