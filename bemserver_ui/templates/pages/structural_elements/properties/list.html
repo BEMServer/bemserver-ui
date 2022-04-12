@@ -17,11 +17,11 @@
             <div class="accordion" id="accordionFilters">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingFilters">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters">
+                        <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
                             <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
                         </button>
                     </h2>
-                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                    <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <form class="d-lg-flex justify-content-end d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
                                 <div class="d-flex flex-wrap gap-2">
@@ -67,7 +67,7 @@
                             <th scope="col">Name</th>
                             <th scope="col">Description</th>
                             {% for struct_elmt in structural_elements %}
-                            <th scope="col" class="text-center">{{ struct_elmt | capitalize }}</th>
+                            <th scope="col" class="text-center">{{ struct_elmt | capitalize }}s</th>
                             {% endfor %}
                             <th scope="col"></th>
                         </tr>
@@ -85,7 +85,7 @@
                                 {% endif %}
                             </td>
                             {% for struct_elmt in structural_elements %}
-                            <td class="table-{% if prop.used_in[struct_elmt] %}success{% else %}danger{% endif %} text-center">
+                            <td class="table-{% if prop.used_in[struct_elmt] %}success{% else %}warning{% endif %} text-center">
                                 {% if prop.used_in[struct_elmt] %}
                                 <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
                                 {% else %}

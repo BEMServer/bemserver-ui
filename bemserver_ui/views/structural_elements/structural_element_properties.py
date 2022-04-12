@@ -55,7 +55,9 @@ def list():
     extend_props_data(props_data)
 
     # Apply filters, if needed.
+    is_filtered = False
     if not all(filters.values()):
+        is_filtered = True
         all_props_data = deepcopy(props_data)
         props_data = []
         for prop_data in all_props_data:
@@ -69,7 +71,8 @@ def list():
 
     return flask.render_template(
         "pages/structural_elements/properties/list.html", properties=props_data,
-        structural_elements=STRUCTURAL_ELEMENTS, filters=filters)
+        structural_elements=STRUCTURAL_ELEMENTS, filters=filters,
+        is_filtered=is_filtered)
 
 
 @blp.route("/create", methods=["GET", "POST"])
