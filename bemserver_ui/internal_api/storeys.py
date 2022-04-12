@@ -31,6 +31,7 @@ def retrieve_data(id):
         storey_property_data_resp = flask.g.api_client.site_property_data.getall(
             storey_id=id, storey_property_id=storey_property["property_id"])
         if len(storey_property_data_resp.data) == 1:
+            storey_property["id"] = storey_property_data_resp.data[0]["id"]
             storey_property["value"] = storey_property_data_resp.data[0]["value"]
 
         storey_properties.append(storey_property)

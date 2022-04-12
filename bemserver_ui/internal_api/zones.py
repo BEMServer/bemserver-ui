@@ -31,6 +31,7 @@ def retrieve_data(id):
         zone_property_data_resp = flask.g.api_client.zone_property_data.getall(
             zone_id=id, zone_property_id=zone_property["property_id"])
         if len(zone_property_data_resp.data) == 1:
+            zone_property["id"] = zone_property_data_resp.data[0]["id"]
             zone_property["value"] = zone_property_data_resp.data[0]["value"]
 
         zone_properties.append(zone_property)

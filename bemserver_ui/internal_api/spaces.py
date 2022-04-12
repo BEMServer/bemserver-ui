@@ -31,6 +31,7 @@ def retrieve_data(id):
         space_property_data_resp = flask.g.api_client.site_property_data.getall(
             space_id=id, space_property_id=space_property["property_id"])
         if len(space_property_data_resp.data) == 1:
+            space_property["id"] = space_property_data_resp.data[0]["id"]
             space_property["value"] = space_property_data_resp.data[0]["value"]
 
         space_properties.append(space_property)
