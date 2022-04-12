@@ -42,6 +42,7 @@ body,
 
     .app-tab-content {
         min-height: 400px;
+        height: 80%;
     }
 }
 

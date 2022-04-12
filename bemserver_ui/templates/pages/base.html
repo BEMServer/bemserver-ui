@@ -11,8 +11,8 @@
 {% block body_content %}
 {{ super() -}}
 {% include "components/header.html" +%}
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid h-100">
+    <div class="row h-100">
         {% filter indent(width=8, first=True) %}
         {% include "components/sidebar.html" %}
         {% endfilter +%}
