@@ -1,4 +1,5 @@
 import { Fetcher } from "./fetcher.js";
+import { flaskES6 } from "../app.js";
 
 
 class StructuralElements {
@@ -27,11 +28,23 @@ class StructuralElements {
     }
 
     #renderGeneral(data) {
-        this.#generalTabContentElmt.innerHTML = `<h5 class="mb-3">${data.general.name}</h5>
+        let editBtnElmt = ``;
+        try {
+            let editUrl = flaskES6.urlFor(`${data.type}s.edit`, {id: data.general.id});
+            editBtnElmt = `<a class="btn btn-sm btn-outline-primary" href="${editUrl}" role="button" title="Edit ${data.type}"><i class="bi bi-pencil"></i> Edit</a>`;
+        }
+        catch (error) {
+            console.error(error);
+        }
+
+        this.#generalTabContentElmt.innerHTML = `<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5>${data.general.name}</h5>
+    ${editBtnElmt}
+</div>
 <p class="fst-italic">${data.general.description}</p>
 <dl class="row opacity-50">
     <dt class="col-2">IFC ID</dt>
-    <dd class="col-10">${data.general.ifc_id != null ? data.general.ifc_id : "-"}</dd>
+    <dd class="col-10">${(data.general.ifc_id != null && data.general.ifc_id != "") ? data.general.ifc_id : "-"}</dd>
 </dl>`;
     }
 
