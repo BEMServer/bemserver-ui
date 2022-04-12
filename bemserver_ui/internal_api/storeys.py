@@ -17,16 +17,26 @@ def retrieve_data(id):
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Storey not found!")
 
-    try:
-        storey_property_data_resp = \
-            flask.g.api_client.storey_property_data.getall(zone_id=id)
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(
-            422, description="An error occured while retrieving storey property data!",
-            response=exc.errors)
+    # Retrieve storey property data (all available, filled and not with values).
+    storey_properties = []
+    storey_properties_resp = flask.g.api_client.storey_properties.getall()
+    for storey_property in storey_properties_resp.data:
+        struct_property_resp = flask.g.api_client.structural_element_properties.getone(
+            storey_property["structural_element_property_id"])
+        storey_property["property_id"] = storey_property.pop("id")
+        storey_property["name"] = struct_property_resp.data["name"]
+        storey_property["description"] = struct_property_resp.data["description"]
+
+        storey_property["value"] = None
+        storey_property_data_resp = flask.g.api_client.site_property_data.getall(
+            storey_id=id, storey_property_id=storey_property["property_id"])
+        if len(storey_property_data_resp.data) == 1:
+            storey_property["value"] = storey_property_data_resp.data[0]["value"]
+
+        storey_properties.append(storey_property)
 
     return flask.jsonify({
         "type": "storey",
         "general": storey_resp.data,
-        "properties": storey_property_data_resp.data,
+        "properties": storey_properties,
     })

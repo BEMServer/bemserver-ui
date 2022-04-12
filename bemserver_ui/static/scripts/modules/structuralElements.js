@@ -27,13 +27,26 @@ class StructuralElements {
     }
 
     #renderGeneral(data) {
-        this.#generalTabContentElmt.innerHTML = `<p class="fw-bold">${data.general.name}</p>
-<p class="fst-italic">${data.general.description}</p>`;
+        this.#generalTabContentElmt.innerHTML = `<h5 class="mb-3">${data.general.name}</h5>
+<p class="fst-italic">${data.general.description}</p>
+<dl class="row opacity-50">
+    <dt class="col-2">IFC ID</dt>
+    <dd class="col-10">${data.general.ifc_id != null ? data.general.ifc_id : "-"}</dd>
+</dl>`;
     }
 
     #renderProperties(data) {
-        this.#propertiesTabContentElmt.innerHTML = `<p class="fw-bold">${data.general.name}</p>
-<p>${data.properties}</p>`;
+        let propertiesHTML = ``;
+        for (let property of data.properties) {
+            let propertyHelp = property.description != "" ? ` <sup><abbr title="${property.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
+            propertiesHTML += `<dt class="col-2">${property.name}${propertyHelp}</dt>`;
+            propertiesHTML += `<dd class="col-10">${(property.value != "" && property.value != null) ? property.value : "-"}</dd>`;
+        }
+
+        this.#propertiesTabContentElmt.innerHTML = `<h5 class="mb-3">${data.general.name}</h5>
+<dl class="row">
+    ${propertiesHTML}
+</dl>`;
     }
 
     #renderError(error) {
