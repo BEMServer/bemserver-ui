@@ -17,11 +17,11 @@
             <div class="accordion" id="accordionFilters">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingFilters">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters">
+                        <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
                             <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
                         </button>
                     </h2>
-                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                    <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <form class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
                                 <select class="form-select form-select-sm{% if filters['is_admin'] is not none %} border border-info{% endif %}" id="is_admin" name="is_admin" aria-label="Select a filter value">

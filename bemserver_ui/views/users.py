@@ -25,6 +25,8 @@ def list():
         elif flask.request.form["is_active"] == "True":
             filters["is_active"] = True
 
+    is_filtered = filters["is_admin"] is not None or filters["is_active"] is not None
+
     try:
         # Get users list applying filters.
         users_resp = flask.g.api_client.users.getall(**filters)
@@ -32,7 +34,8 @@ def list():
         flask.abort(422, description=exc.errors)
 
     return flask.render_template(
-        "pages/users/list.html", users=users_resp.data, filters=filters)
+        "pages/users/list.html", users=users_resp.data, filters=filters,
+        is_filtered=is_filtered)
 
 
 @blp.route("/<int:id>/view")
