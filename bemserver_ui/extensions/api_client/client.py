@@ -41,7 +41,7 @@ class BEMServerApiClientResponse:
         # Process redirection or error, if any.
         if self.status_code == 304:
             raise BEMServerAPINotModified
-        elif self.status_code < 300 or self.status_code >= 500:
+        elif self.status_code < 300 or self.status_code > 500:
             self._raw_response.raise_for_status()
         else:
             self._process_client_error()
