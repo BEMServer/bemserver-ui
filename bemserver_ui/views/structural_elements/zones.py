@@ -26,6 +26,7 @@ def create():
             "name": flask.request.form["name"],
             "description": flask.request.form["description"],
             "campaign_id": flask.g.campaign_ctxt.id,
+            "ifc_id": flask.request.form["ifc_id"],
         }
         try:
             ret = flask.g.api_client.zones.create(payload)

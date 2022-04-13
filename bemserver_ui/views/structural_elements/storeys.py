@@ -26,6 +26,7 @@ def create():
             "name": flask.request.form["name"],
             "description": flask.request.form["description"],
             "building_id": flask.request.form["building"],
+            "ifc_id": flask.request.form["ifc_id"],
         }
         try:
             ret = flask.g.api_client.storeys.create(payload)
