@@ -1,5 +1,6 @@
 """Structural element properties views"""
 from copy import deepcopy
+import urllib.parse
 import flask
 
 import bemserver_ui.extensions.api_client as bac
@@ -106,11 +107,17 @@ def create():
                     else:
                         flask.flash(f"{prop_name} property added to {x}s", "success")
 
-            return flask.redirect(flask.url_for("structural_element_properties.list"))
+            url_next = (urllib.parse.unquote(flask.request.args.get("next")
+                        or flask.url_for("structural_element_properties.list")))
+
+            return flask.redirect(url_next)
+
+    url_cancel = (urllib.parse.unquote(flask.request.args.get("back")
+                  or flask.url_for("structural_element_properties.list")))
 
     return flask.render_template(
         "pages/structural_elements/properties/create.html",
-        structural_elements=STRUCTURAL_ELEMENTS)
+        structural_elements=STRUCTURAL_ELEMENTS, url_cancel=url_cancel)
 
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])
