@@ -144,3 +144,18 @@ def delete(id):
         flask.flash("Site deleted!", "success")
 
     return flask.redirect(flask.url_for("structural_elements.manage"))
+
+
+@blp.route("/<int:id>/delete_property/<int:property_id>", methods=["POST"])
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def delete_property(id, property_id):
+    try:
+        flask.g.api_client.site_property_data.delete(
+            property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"])
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="Property not found!")
+    else:
+        flask.flash("Property deleted!", "success")
+
+    return flask.redirect(flask.url_for('sites.edit', id=id, tab="properties"))
