@@ -12,7 +12,7 @@ const flaskES6 = new FlaskES6();
 
 document.addEventListener("DOMContentLoaded", function() {
 
-    sidebar.refreshActive();
+    sidebar.refresh();
     formCtrl.connectModalConfirm();
     campaignSelector.hide();
 
