@@ -30,7 +30,7 @@ class StructuralElements {
     #renderGeneral(data) {
         let editBtnElmt = ``;
         try {
-            let editUrl = flaskES6.urlFor(`${data.type}s.edit`, {id: data.general.id});
+            let editUrl = flaskES6.urlFor(`structural_elements.edit`, {type:data.type, id: data.general.id});
             editBtnElmt = `<a class="btn btn-sm btn-outline-primary" href="${editUrl}" role="button" title="Edit ${data.type}"><i class="bi bi-pencil"></i> Edit</a>`;
         }
         catch (error) {

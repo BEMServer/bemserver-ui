@@ -1,0 +1,56 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create " + type %}
+{% set has_no_parents = parent_type is not none and parents|length <= 0 %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    {% if has_no_parents %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                Your campaign currently has <span class="fw-bold">no {{ parent_type }}s</span>.
+                You must first <a href="{{ url_for('structural_elements.create', type=parent_type) }}" title="Create a new {{ parent_type }}">create a {{ parent_type }}</a> to add a {{ type }} to it.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row mb-3">
+        <div class="col">
+            <form action="{{ url_for('structural_elements.create', type=type) }}" method="POST">
+                <fieldset{% if has_no_parents %} disabled{% endif %}>
+                    <legend class="invisible d-none">{{ type|capitalize }} general informations</legend>
+                    {% if parent_type is not none and parents|length > 0 %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ parent_type }}">{{ parent_type|capitalize }}</label>
+                        <select class="form-select" id="{{ parent_type }}" name="{{ parent_type }}" aria-label="Select a {{ parent_type }}" required>
+                            {% for x in parents %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="ifc_id">IFC ID</label>
+                        <input type="text" class="form-control" id="ifc_id" name="ifc_id" maxlength="22">
+                    </div>
+                </fieldset>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('structural_elements.manage') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"{% if has_no_parents %} disabled{% endif %}><i class="bi bi-save"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

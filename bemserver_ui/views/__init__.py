@@ -16,11 +16,6 @@ MODULES = (
     campaigns,
     campaign_scopes,
     structural_elements.structural_elements,
-    structural_elements.sites,
-    structural_elements.buildings,
-    structural_elements.storeys,
-    structural_elements.spaces,
-    structural_elements.zones,
     structural_elements.structural_element_properties,
 )
 

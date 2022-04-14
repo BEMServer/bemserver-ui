@@ -35,12 +35,12 @@
                         <div class="dropdown">
                             <button type="button" class="nav-link dropdown-toggle" id="dropdownMenuSites" title="Add sites/buildings..." data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuSites">
-                                <li><a class="dropdown-item" href="{{ url_for('sites.create') }}" title="Add a new site">New site</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('buildings.create') }}" title="Add a new building">New building</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('storeys.create') }}" title="Add a new storey">New storey</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('spaces.create') }}" title="Add a new space">New space</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">New site</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">New building</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">New storey</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">New space</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('zones.create') }}" title="Add a new zone">New zone</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">New zone</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item disabled" href="#" title="Import CSV files">Import CSV</a></li>
                                 <li><a class="dropdown-item disabled" href="#" title="Import IFC file">Import IFC</a></li>
