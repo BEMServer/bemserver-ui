@@ -4,17 +4,18 @@ import { FormController } from "./modules/formController.js";
 import { CampaignSelector } from "./modules/campaignSelector.js";
 
 
-const sidebar = new Sidebar();
-const formCtrl = new FormController();
 const campaignSelector = new CampaignSelector();
 const flaskES6 = new FlaskES6();
 
 
 document.addEventListener("DOMContentLoaded", function() {
 
+    let sidebar = new Sidebar();
+    let formCtrl = new FormController();
+
     sidebar.refresh();
-    formCtrl.connectModalConfirm();
     campaignSelector.hide();
+    formCtrl.bind();
 
 }, false);
 
