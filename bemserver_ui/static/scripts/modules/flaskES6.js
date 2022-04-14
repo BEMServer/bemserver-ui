@@ -45,9 +45,6 @@ class FlaskES6 {
         if (endpointData == undefined) {
             throw new Error(`Endpoint "${endpoint}" does not exist`);
         }
-        if (Object.keys(rule).length != endpointData[1].length) {
-            throw new Error(`Incorrect parameters for "${endpoint}": ${JSON.stringify(rule)}, expected ${endpointData[1]}`);
-        }
 
         // Inject campaign context, if any.
         if (campaignSelector.currentCampaign != null) {
