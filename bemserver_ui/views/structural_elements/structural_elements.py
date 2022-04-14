@@ -14,7 +14,6 @@ def _extract_data(data, data_type):
         "id": data["id"],
         "name": data["name"],
         "type": data_type,
-        "data_url": flask.url_for(f"api.{data_type}s.retrieve_data", id=data["id"]),
         "nodes": [],
     }
 

@@ -21,7 +21,7 @@
         {% else %}
         <i class="bi bi-folder"></i>
         {% endif %}
-        <a class="nav-tree-item-link rounded px-2 py-1" data-tree-item-url="{{ node.data_url }}">{{ node.name }}</a>
+        <a class="nav-tree-item-link rounded px-2 py-1" data-tree-item-type="{{ node.type }}" data-tree-item-id="{{ node.id }}">{{ node.name }}</a>
         {% if has_children %}
         {{ _render_tree_nodes(node.nodes, node.id|string, level=level+1, indent_width=8) -}}
         {% endif %}

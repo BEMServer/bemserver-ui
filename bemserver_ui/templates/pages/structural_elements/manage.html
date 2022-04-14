@@ -63,31 +63,18 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
     import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
-    import { StructuralElements } from "{{ url_for('static', filename='scripts/modules/structuralElements.js') }}";
+    import { StructuralElementsManageView } from "{{ url_for('static', filename='scripts/modules/views/structuralElementsManage.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", function() {
 
-        let structuralElmts = new StructuralElements();
-        let treeSites = new Tree("treeSites", {selected: structuralElmts.renderData.bind(structuralElmts)});
-        let treeZones = new Tree("treeZones", {selected: structuralElmts.renderData.bind(structuralElmts)});
+        let structuralElmts = new StructuralElementsManageView();
+        let treeSites = new Tree("treeSites", {selected: structuralElmts.render.bind(structuralElmts)});
+        let treeZones = new Tree("treeZones", {selected: structuralElmts.render.bind(structuralElmts)});
 
         treeSites.collapseAll();
         treeZones.collapseAll();
-        structuralElmts.renderData();
-
-        let tabElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
-        tabElmts.forEach(function (tabElmt) {
-            tabElmt.addEventListener("shown.bs.tab", function (event) {
-                // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
-                if (event.target.id == "sites-tab") {
-                    structuralElmts.renderData(treeSites.selectedItemUrl);
-                }
-                else {
-                    structuralElmts.renderData(treeZones.selectedItemUrl);
-                }
-            });
-        });
+        structuralElmts.refresh();
 
     }, false);
 </script>

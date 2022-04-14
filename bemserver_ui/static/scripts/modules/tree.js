@@ -10,7 +10,8 @@ class Tree {
     #selectedTreeItem = null;
     #onSelectedTreeItemCallback = null;
     #onUnselectedTreeItemCallback = null;
-    selectedItemUrl = null;
+    selectedItemId = null;
+    selectedItemType = null;
 
     #ignoreUnselectEvent = true;
 
@@ -85,14 +86,16 @@ class Tree {
                     this.#selectedTreeItem?.classList.remove("active");
                     this.#selectedTreeItem = event.target;
                     this.#selectedTreeItem.classList.add("active");
-                    this.selectedItemUrl = this.#selectedTreeItem.getAttribute("data-tree-item-url");
-                    this.#onSelectedTreeItemCallback?.call(null, this.selectedItemUrl);
+                    this.selectedItemId = this.#selectedTreeItem.getAttribute("data-tree-item-id");
+                    this.selectedItemType = this.#selectedTreeItem.getAttribute("data-tree-item-type");
+                    this.#onSelectedTreeItemCallback?.call(null, this.selectedItemId, this.selectedItemType);
                     this.#getCollapsableFromItem(this.#selectedTreeItem.parentElement)?.show();
                 }
                 else if (!this.#ignoreUnselectEvent) {
                     this.#selectedTreeItem?.classList.remove("active");
                     this.#selectedTreeItem = null;
-                    this.selectedItemUrl = null;
+                    this.selectedItemId = null;
+                    this.selectedItemType = null;
                     this.#onUnselectedTreeItemCallback?.call();
                 }
             }.bind(this), false);
