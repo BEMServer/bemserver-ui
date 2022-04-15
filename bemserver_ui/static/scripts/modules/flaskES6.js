@@ -65,7 +65,7 @@ class FlaskES6 {
         for (let searchParam in rule) {
             urlSearchParams.append(searchParam, rule[searchParam])
         }
-        if (urlSearchParams.length > 0) {
+        if (Array.from(urlSearchParams).length > 0) {
             url += "?" + urlSearchParams.toString();
         }
 
