@@ -47,7 +47,7 @@ class FlaskES6 {
         }
 
         // Inject campaign context, if any.
-        if (campaignSelector.currentCampaign != null) {
+        if (campaignSelector.currentCampaign != null && campaignSelector.currentCampaign != "") {
             rule["campaign"] = campaignSelector.currentCampaign;
         }
 
@@ -65,7 +65,9 @@ class FlaskES6 {
         for (let searchParam in rule) {
             urlSearchParams.append(searchParam, rule[searchParam])
         }
-        url += "?" + urlSearchParams.toString();
+        if (urlSearchParams.length > 0) {
+            url += "?" + urlSearchParams.toString();
+        }
 
         if (has_anchor) {
             url += "#" + anchor;
