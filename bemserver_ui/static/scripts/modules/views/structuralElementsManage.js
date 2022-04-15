@@ -33,7 +33,7 @@ class StructuralElementsManageView {
     }
 
     #initEventListeners() {
-        this.#tabSitesElmts.forEach(function (tabElmt) {
+        for (let tabElmt of this.#tabSitesElmts) {
             if (tabElmt.classList.contains("active")) {
                 this.#tabSitesSelected = tabElmt;
             }
@@ -41,14 +41,14 @@ class StructuralElementsManageView {
             tabElmt.addEventListener("shown.bs.tab", function (event) {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabSitesSelected = event.target;
-                this.#tabPropertiesElmts.forEach(function (tabPropertyElmt) {
+                for (let tabPropertyElmt of this.#tabPropertiesElmts) {
                     this.#alreadyLoadedPerTab[tabPropertyElmt.id] = false;
-                }.bind(this));
+                }
                 this.refresh();
             }.bind(this));
-        }.bind(this));
+        }
 
-        this.#tabPropertiesElmts.forEach(function (tabElmt) {
+        for (let tabElmt of this.#tabPropertiesElmts) {
             if (tabElmt.classList.contains("active")) {
                 this.#tabPropertiesSelected = tabElmt;
             }
@@ -58,7 +58,7 @@ class StructuralElementsManageView {
                 this.#tabPropertiesSelected = event.target;
                 this.refresh();
             }.bind(this));
-        }.bind(this));
+        }
     }
 
     #getEditBtnHTML(type, id, tab=null) {
@@ -159,9 +159,9 @@ class StructuralElementsManageView {
 
     render(id, type) {
         this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type};
-        this.#tabPropertiesElmts.forEach(function (tabElmt) {
+        for (let tabElmt of this.#tabPropertiesElmts) {
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
-        }.bind(this));
+        }
         this.refresh();
     }
 
