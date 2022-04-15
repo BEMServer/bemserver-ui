@@ -14,16 +14,20 @@ def init_app(app):
 
     @app.route(f"{app.static_url_path}/scripts/modules/flaskES6-endpoints.js")
     def flask_es6_endpoints():
-        app_root = flask.current_app.config.get("APPLICATION_ROOT", "/") or "/"
-        rules = {}
-        for r in flask.current_app.url_map.iter_rules():
-            if flask.request.endpoint == r.endpoint:
-                continue
-            rule = r.rule if app_root == "/" else f"{app_root}{r.rule}"
-            rule_args = [x.split(":")[-1] for x in rule_parser.findall(rule)]
-            rule_tr = splitter.split(rule)
-            rules[r.endpoint] = (rule_tr, rule_args)
-        es6_endpoints = f"export const flaskEndpoints = {json.dumps(rules)};"
+        if "_endpoints" not in flask.session:
+            rules = {}
+            app_root = flask.current_app.config.get("APPLICATION_ROOT", "/") or "/"
+            for r in flask.current_app.url_map.iter_rules():
+                if flask.request.endpoint == r.endpoint:
+                    continue
+                rule = r.rule if app_root == "/" else f"{app_root}{r.rule}"
+                rule_args = [x.split(":")[-1] for x in rule_parser.findall(rule)]
+                rule_tr = splitter.split(rule)
+                rules[r.endpoint] = (rule_tr, rule_args)
+            flask.session["_endpoints"] = json.dumps(rules)
+
+        es6_endpoints = f"export const flaskEndpoints = {flask.session['_endpoints']};"
+
         return flask.make_response(
             (es6_endpoints, 200, {"Content-Type": "text/javascript"})
         )
