@@ -1,10 +1,10 @@
 import { FlaskES6 } from "./modules/flaskES6.js";
 import { Sidebar } from "./modules/sidebar.js";
 import { FormController } from "./modules/formController.js";
-import { CampaignSelector } from "./modules/campaignSelector.js";
+import { CampaignSelectorView } from "./modules/views/campaignSelector.js";
 
 
-const campaignSelector = new CampaignSelector();
+const campaignSelector = new CampaignSelectorView();
 const flaskES6 = new FlaskES6();
 
 

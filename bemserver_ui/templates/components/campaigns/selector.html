@@ -7,20 +7,18 @@
         <div class="d-flex align-items-center gap-2 mb-3">
             <select class="form-select" id="campaignSelectorSelect" aria-label="Select a campaign">
                 <option value=""{% if not g.campaign_ctxt.has_campaign %} selected{% endif %}>No campaign</option>
-                <optgroup label="Available campaigns">
-                    {% for x in g.campaign_ctxt.campaigns %}
-                    <option value="{{ x.id }}"{% if x.id|string == g.campaign_ctxt.id|string %} selected{% endif %} data-campaign-desc="{{ x.description }}" data-campaign-start="{{ x.start_time }}" data-campaign-end="{{ x.end_time }}">{{ x.name }}</option>
+                {% for campaign_state in g.campaign_ctxt.campaign_states %}
+                <optgroup label="{{ campaign_state|capitalize }} ({{ g.campaign_ctxt.campaigns_by_state[campaign_state]|length }})">
+                    {% for x in g.campaign_ctxt.campaigns_by_state[campaign_state] %}
+                    <option value="{{ x.id }}"{% if x.id|string == g.campaign_ctxt.id|string %} selected{% endif %}>{{ x.name }}</option>
                     {% endfor %}
                 </optgroup>
+                {% endfor %}
             </select>
-            <a class="btn btn-sm btn-outline-secondary" data-campaign-view-href="{{ url_for('campaigns.view', id=-1) }}" id="campaignSelectorBtnView" role="button" title="View campaign"><i class="bi bi-eye"></i></a>
-            <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnOK" title="Select campaign">Select</a>
+            <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnView" title="View campaign"><i class="bi bi-eye"></i></a>
+            <a class="btn btn-sm btn-outline-primary" role="button" id="campaignSelectorBtnSelect" title="Select campaign">Select</a>
             <a class="btn btn-sm btn-outline-secondary" role="button" id="campaignSelectorBtnUnselect" title="Unselect campaign">Unselect</a>
         </div>
-        <div id="campaignSelectedProperties">
-            <div class="vstack"><small class="fw-bold">Description</small><small id="campaignSelectedDescription" class="d-inline-block text-truncate ms-2">-</small></div>
-            <div class="hstack gap-2"><small class="fw-bold">From</small><small id="campaignSelectedStart">not defined</small></div>
-            <div class="hstack gap-2"><small class="fw-bold">To</small><small id="campaignSelectedEnd">not defined</small></div>
-        </div>
+        <div id="campaignSelectedProperties"></div>
     </div>
 </div>

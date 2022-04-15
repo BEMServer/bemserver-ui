@@ -6,6 +6,7 @@ To be used in browser client code such as ES6 fetch.
 import flask
 
 from . import structural_elements
+from . import campaigns
 
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
@@ -13,6 +14,7 @@ blp = flask.Blueprint("api", __name__, url_prefix="/api")
 
 MODULES = (
     structural_elements,
+    campaigns,
 )
 
 
