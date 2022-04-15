@@ -19,16 +19,21 @@ def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
         return ret.isoformat()
 
 
-@blp.route("/")
+@blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
-    try:
-        campaigns = flask.g.api_client.campaigns.getall()
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    filters = {"state": "all"}
+
+    # Get requested filters.
+    if flask.request.method == "POST":
+        filters["state"] = flask.request.form["state"]
+
+    is_filtered = filters["state"] != "all"
+
+    # /!\ No need to load campaign list from API, just use campaign context.
 
     return flask.render_template(
-        "pages/campaigns/list.html", campaigns=campaigns.data)
+        "pages/campaigns/list.html", filters=filters, is_filtered=is_filtered)
 
 
 @blp.route("/<int:id>/view")
