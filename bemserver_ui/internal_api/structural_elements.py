@@ -9,7 +9,7 @@ blp = flask.Blueprint(
     "structural_elements", __name__, url_prefix="/structural_elements")
 
 
-@blp.route("/<string:type>/<int:id>/retrieve_data")
+@blp.route("/<string:type>/<int:id>")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_data(type, id):
@@ -25,7 +25,7 @@ def retrieve_data(type, id):
     })
 
 
-@blp.route("/<string:type>/<int:id>/retrieve_property_data")
+@blp.route("/<string:type>/<int:id>/properties")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_property_data(type, id):
