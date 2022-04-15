@@ -19,41 +19,31 @@ def _extract_data(data, data_type):
 
 
 def _build_tree(campaign_id):
-    tree_data = []
-    # Get all sites.
-    try:
-        sites_resp = flask.g.api_client.sites.getall(
-            campaign_id=campaign_id, sort="+name")
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
-    # For each site...
-    for site in sites_resp.data:
-        site_data = _extract_data(site, "site")
-        # ...get all buildings.
+    # Get all structure elements for campaign.
+    structural_elements = {}
+    for structural_element_type in ["site", "building", "storey", "space"]:
+        api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
         try:
-            buildings_resp = flask.g.api_client.buildings.getall(
-                site_id=site["id"], sort="+name")
+            structural_elements[structural_element_type] = \
+                api_resource.getall(campaign_id=campaign_id, sort="+name").data
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(422, response=exc.errors)
-        # For each building...
-        for building in buildings_resp.data:
+
+    # Build structural elements tree.
+    tree_data = []
+    for site in structural_elements["site"]:
+        site_data = _extract_data(site, "site")
+        for building in structural_elements["building"]:
+            if building["site_id"] != site["id"]:
+                continue
             building_data = _extract_data(building, "building")
-            # ...get storeys.
-            try:
-                storeys_resp = flask.g.api_client.storeys.getall(
-                    building_id=building["id"], sort="+name")
-            except bac.BEMServerAPIValidationError as exc:
-                flask.abort(422, response=exc.errors)
-            # For each storey...
-            for storey in storeys_resp.data:
+            for storey in structural_elements["storey"]:
+                if storey["building_id"] != building["id"]:
+                    continue
                 storey_data = _extract_data(storey, "storey")
-                # ...get spaces.
-                try:
-                    spaces_resp = flask.g.api_client.spaces.getall(
-                        storey_id=storey["id"], sort="+name")
-                except bac.BEMServerAPIValidationError as exc:
-                    flask.abort(422, response=exc.errors)
-                for space in spaces_resp.data:
+                for space in structural_elements["space"]:
+                    if space["storey_id"] != storey["id"]:
+                        continue
                     space_data = _extract_data(space, "space")
                     storey_data["nodes"].append(space_data)
                 building_data["nodes"].append(storey_data)
