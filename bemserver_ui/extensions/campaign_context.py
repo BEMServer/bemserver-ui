@@ -117,8 +117,8 @@ def init_app(app):
 
     @app.before_request
     def load_campaign_context():
-        if ("user" in flask.session and flask.request.endpoint != "static"
-                and not flask.request.endpoint.startswith("api.")):
+        if "user" in flask.session and flask.request.endpoint not in (
+                "static", "flask_es6_endpoints"):
             flask.g.campaign_ctxt = CampaignContext(
                 flask.request.args.get("forced_campaign", None)
                 or flask.request.args.get("campaign")
@@ -133,7 +133,7 @@ def init_app(app):
     flask.url_for = url_for_campaign
 
 
-def ensure_campaign_context(func=None, has_campaign=True):
+def ensure_campaign_context(func=None):
     """Ensure that decorated view is loaded while a campaign is selected."""
 
     def ensure_campaign_context_internal(func):
