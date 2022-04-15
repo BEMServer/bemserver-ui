@@ -131,30 +131,12 @@ def create(type):
     if type not in ("site", "zone"):
         if type == "building":
             parent_type = "site"
-            parents = flask.g.api_client.sites.getall(
-                campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
         elif type == "storey":
             parent_type = "building"
-            sites = flask.g.api_client.sites.getall(
-                campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
-            for site in sites:
-                buildings = flask.g.api_client.buildings.getall(
-                    site_id=site["id"], sort="+name").data
-                parents.extend(buildings)
         elif type == "space":
             parent_type = "storey"
-            sites = flask.g.api_client.sites.getall(
-                campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
-            for site in sites:
-                buildings = flask.g.api_client.buildings.getall(
-                    site_id=site["id"], sort="+name").data
-                for building in buildings:
-                    storeys = flask.g.api_client.storeys.getall(
-                        building_id=building["id"], sort="+name").data
-                    parents.extend(storeys)
-        # XXX: API need an update to get directly parent for the current campaign only
-        # parents = getattr(flask.g.api_client, f"{type}s").getall(
-        #     campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
+        parents = getattr(flask.g.api_client, f"{parent_type}s").getall(
+            campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
 
     return flask.render_template(
         "pages/structural_elements/create.html",
