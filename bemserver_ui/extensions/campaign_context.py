@@ -77,7 +77,8 @@ def init_app(app):
 
     @app.before_request
     def load_campaign_context():
-        if "user" in flask.session and flask.request.endpoint != "static":
+        if ("user" in flask.session and flask.request.endpoint != "static"
+                and not flask.request.endpoint.startswith("api.")):
             flask.g.campaign_ctxt = CampaignContext(
                 flask.request.args.get("forced_campaign", None)
                 or flask.request.args.get("campaign")
