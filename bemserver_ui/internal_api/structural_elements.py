@@ -29,27 +29,28 @@ def retrieve_data(type, id):
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_property_data(type, id):
+    api_prop_resource = getattr(flask.g.api_client, f"{type}_properties")
+    try:
+        properties_resp = api_prop_resource.getall()
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
     available_properties = {}
-    properties_resp = getattr(flask.g.api_client, f"{type}_properties").getall()
     for property in properties_resp.data:
-        struct_property_resp = flask.g.api_client.structural_element_properties.getone(
-            property["structural_element_property_id"])
-        property["name"] = struct_property_resp.data["name"]
-        property["description"] = struct_property_resp.data["description"]
         available_properties[property["id"]] = property
 
-    properties = []
     api_propdata_resource = getattr(flask.g.api_client, f"{type}_property_data")
-    property_data_resp = api_propdata_resource.getall(**{f"{type}_id": id})
+    try:
+        property_data_resp = api_propdata_resource.getall(**{f"{type}_id": id})
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
+
+    properties = []
     for property_data in property_data_resp.data:
-        property = available_properties.pop(property_data[f"{type}_property_id"])
-        property["structural_element_property_id"] = property.pop("id")
-        property["id"] = property_data["id"]
-        property["value"] = property_data["value"]
-        # Get ETag.
-        property_data_resp = api_propdata_resource.getone(property["id"])
-        property["etag"] = property_data_resp.etag
-        properties.append(property)
+        strut_elmt_property = available_properties[
+            property_data[f"{type}_property_id"]]["structural_element_property"]
+        for k, v in strut_elmt_property.items():
+            property_data[k] = v
+        properties.append(property_data)
 
     return flask.jsonify({
         "type": type,
