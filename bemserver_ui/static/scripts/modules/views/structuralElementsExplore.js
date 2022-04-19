@@ -1,5 +1,5 @@
 import { Fetcher } from "../fetcher.js";
-import { flaskES6 } from "../../app.js";
+import { flaskES6, signedUser } from "../../app.js";
 import { Spinner } from "./spinner.js";
 
 
@@ -62,16 +62,18 @@ class StructuralElementsExploreView {
     }
 
     #getEditBtnHTML(type, id, tab=null) {
-        let editUrlParams = {type: type, id: id};
-        if (tab != null) {
-            editUrlParams["tab"] = tab;
-        }
-        try {
-            let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
-            return `<a class="btn btn-sm btn-outline-primary ms-auto" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
-        }
-        catch (error) {
-            console.error(error);
+        if (signedUser.is_admin) {
+            let editUrlParams = {type: type, id: id};
+            if (tab != null) {
+                editUrlParams["tab"] = tab;
+            }
+            try {
+                let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
+                return `<a class="btn btn-sm btn-outline-primary ms-auto" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
+            }
+            catch (error) {
+                console.error(error);
+            }
         }
         return ``;
     }
