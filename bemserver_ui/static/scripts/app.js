@@ -1,3 +1,4 @@
+import { signedUser } from "./modules/signedUserData.js";
 import { FlaskES6 } from "./modules/flaskES6.js";
 import { Sidebar } from "./modules/sidebar.js";
 import { FormController } from "./modules/formController.js";
@@ -20,4 +21,4 @@ document.addEventListener("DOMContentLoaded", function() {
 }, false);
 
 
-export { campaignSelector, flaskES6 } ;
+export { campaignSelector, flaskES6, signedUser } ;

@@ -7,6 +7,7 @@ At the same time:
 """
 import enum
 import functools
+import json
 import flask
 import werkzeug.exceptions as wexc
 
@@ -64,3 +65,12 @@ def init_app(app):
         if "user" in flask.session:
             return dict(signed_user=flask.session["user"]["data"])
         return dict()
+
+    @app.route(f"{app.static_url_path}/scripts/modules/signedUserData.js")
+    def es6_signed_user():
+        user = (flask.session.get("user", {}) or {}).get("data")
+        es6_signed_user_data = (
+            f"export const signedUser = {json.dumps(user)};")
+        return flask.make_response(
+            (es6_signed_user_data, 200, {"Content-Type": "text/javascript"})
+        )
