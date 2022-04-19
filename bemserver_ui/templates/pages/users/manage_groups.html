@@ -1,6 +1,7 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Manage " + user.name + "'s user groups" %}
+{% set title = "Manage user's groups" %}
+{% set subtitle = user.name %}
 
 {% block main_content %}
 {{ super() -}}

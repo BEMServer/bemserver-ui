@@ -10,8 +10,17 @@ body {
     color: #474747 !important;
 }
 
-h1 {
+h1,
+h2 {
     color: #6e8a98;
+}
+
+.vr {
+    color: #6e8a98 !important;
+}
+
+.bg-primary {
+    background-color: #0088db !important;
 }
 
 .accordion-button:not(.collapsed),

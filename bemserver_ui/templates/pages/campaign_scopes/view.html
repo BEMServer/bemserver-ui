@@ -1,16 +1,19 @@
 {% extends "pages/base.html" %}
 
-{% set title = "View campaign scope" %}
+{% set title = "Campaign scope" %}
+{% set subtitle = campaign_scope.name %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-lg-flex d-grid gap-3">
-    <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-    </form>
-    <a href="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+<div class="d-xl-flex d-grid justify-content-center gap-2 mx-auto">
+    <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0">
+        <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
+            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+        </form>
+        <a href="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+    </div>
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -20,14 +23,9 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <h5>{{ g.campaign_ctxt.campaign.name }} campaign</h5>
+            <h5>Campaign</h5>
+            <p>{{ g.campaign_ctxt.campaign.name }}</p>
         </div>
-    </div>
-    <div class="row mb-3">
-        <dl class="col">
-            <dt>Name</dt>
-            <dd>{{ campaign_scope.name }}</dd>
-        </dl>
     </div>
     <div class="row">
         <dl class="col">

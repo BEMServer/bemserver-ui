@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>BEMServer{% if title %} - {{ title }}{% endif %}</title>
+        <title>BEMServer{% if title %} - {{ title }}{% if subtitle %} - {{ subtitle }}{% endif %}{% endif %}</title>
         <meta name="description" content="{{ description|default('') }}">
         <meta name="author" content="{{ author|default('Nobatek/INEF4') }}">
         <link rel="icon" href="{{ url_for('static', filename='images/bemserver.ico') }}">

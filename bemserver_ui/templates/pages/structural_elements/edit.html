@@ -1,15 +1,19 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Edit " + type %}
+{% set title = type|capitalize %}
+{% set subtitle = structural_element.name %}
+
 {% set url_create_property = url_for('structural_element_properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='properties')|urlencode) %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<form id="delForm" action="{{ url_for('structural_elements.delete', type=type, id=structural_element.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ structural_element.name }}&lt;/mark&gt; {{ type }}">
-    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-</form>
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <form id="delForm" action="{{ url_for('structural_elements.delete', type=type, id=structural_element.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ structural_element.name }}&lt;/mark&gt; {{ type }}">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+</div>
 {% endfilter %}
 {% endblock main_toolbar %}
 

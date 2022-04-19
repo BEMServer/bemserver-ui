@@ -1,6 +1,7 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Manage " + campaign_scope.name + " scope's user groups" %}
+{% set title = "Manage campaign scope's user groups" %}
+{% set subtitle = campaign_scope.name %}
 
 {% block main_content %}
 {{ super() -}}

@@ -1,29 +1,41 @@
 {% extends "pages/base.html" %}
 
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
-{% set title = "View campaign" %}
+{% set title = "Campaign" %}
+{% set subtitle = campaign.name %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-lg-flex d-grid gap-2">
-    <div class="d-flex justify-content-end gap-3">
-        {% if is_campaign_selected_edit %}
+<div class="d{% if is_campaign_selected_edit %}-xl{% endif %}-flex {% if is_campaign_selected_edit %} d-grid{% endif %} gap-2 mx-auto">
+    {% if is_campaign_selected_edit %}
+    <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0 mt-lg-2 mt-0 mt-xl-0">
+        {% if signed_user.is_admin %}
         <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Add a new campaign scope">New campaign scope</a>
-        <div class="vr d-none d-lg-block"></div>
-        <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
-        {% else %}
-        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
+        <div class="vr"></div>
         {% endif %}
-        <div class="vr d-none d-lg-block me-2"></div>
+        <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
+        {% if signed_user.is_admin %}
+        <div class="vr d-none d-xl-block me-xl-2"></div>
+        {% endif %}
     </div>
-    <div class="d-flex justify-content-end gap-3">
+    {% else %}
+    <div class="hstack gap-3 ms-auto">
+        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
+        {% if signed_user.is_admin %}
+        <div class="vr me-2"></div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% if signed_user.is_admin %}
+    <div class="hstack gap-2{% if is_campaign_selected_edit %} mx-auto ms-lg-auto me-lg-0{% else %} me-auto{% endif %}">
         <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
         </form>
         <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
+    {% endif %}
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -42,10 +54,6 @@
     </div>
     {% endif %}
     <div class="row mb-3">
-        <dl class="col-auto">
-            <dt>Name</dt>
-            <dd>{{ campaign.name }}</dd>
-        </dl>
         <dl class="col-auto">
             <dt>From</dt>
             <dd>{{ campaign.start_time | iso_datetime_format(default="not defined") }}</dd>

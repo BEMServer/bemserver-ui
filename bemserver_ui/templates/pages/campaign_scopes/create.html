@@ -1,13 +1,14 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Create campaign scope" %}
+{% set title = "Create a new campaign scope" %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <h5>{{ g.campaign_ctxt.campaign.name }} campaign</h5>
+            <h5>Campaign</h5>
+            <p>{{ g.campaign_ctxt.campaign.name }}</p>
         </div>
     </div>
     <div class="row">

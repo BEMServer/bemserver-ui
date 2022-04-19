@@ -1,19 +1,24 @@
 {% extends "pages/base.html" %}
 
 {% set self_view = signed_user.id == user.id %}
-{% set title = "View user" if not self_view else "My user account" %}
+{% set title = "User profile" if not self_view else "My profile" %}
+{% if not self_view %}
+{% set subtitle = user.name %}
+{% endif %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-flex gap-3">
-    {% if not self_view %}
-    <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-    </form>
-    {% endif %}
-    <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0">
+        {% if not self_view %}
+        <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
+            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+    </div>
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -22,10 +27,12 @@
 {{ super() -}}
 <div class="container-fluid">
     <div class="row">
+        {% if self_view %}
         <dl class="col-auto">
             <dt>Name</dt>
             <dd>{{ user.name }}</dd>
         </dl>
+        {% endif %}
         <dl class="col-auto">
             <dt>Email address</dt>
             <dd>{{ user.email }}</dd>
