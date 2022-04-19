@@ -3,7 +3,7 @@ import { flaskES6 } from "../../app.js";
 import { Spinner } from "./spinner.js";
 
 
-class StructuralElementsManageView {
+class StructuralElementsExploreView {
 
     #tabSitesElmts = null;
     #tabPropertiesElmts = null;
@@ -180,4 +180,4 @@ class StructuralElementsManageView {
 }
 
 
-export { StructuralElementsManageView };
+export { StructuralElementsExploreView };

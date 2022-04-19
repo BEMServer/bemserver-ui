@@ -63,12 +63,12 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
     import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
-    import { StructuralElementsManageView } from "{{ url_for('static', filename='scripts/modules/views/structuralElementsManage.js') }}";
+    import { StructuralElementsExploreView } from "{{ url_for('static', filename='scripts/modules/views/structuralElementsExplore.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", function() {
 
-        let structuralElmts = new StructuralElementsManageView();
+        let structuralElmts = new StructuralElementsExploreView();
         let treeSites = new Tree("treeSites", {selected: structuralElmts.render.bind(structuralElmts)});
         let treeZones = new Tree("treeZones", {selected: structuralElmts.render.bind(structuralElmts)});
 

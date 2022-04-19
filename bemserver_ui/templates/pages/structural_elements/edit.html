@@ -84,7 +84,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-end gap-2">
-                <a href="{{ url_for('structural_elements.manage') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                <a href="{{ url_for('structural_elements.explore') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
                 <form id="editForm" action="{{ url_for('structural_elements.edit', type=type, id=structural_element.id) }}" method="POST">
                     <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                     <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>

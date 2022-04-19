@@ -30,7 +30,7 @@
                 {% endif %}
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
-                        <a class="nav-link w-100" href="{{ url_for('structural_elements.manage') }}"><i class="bi bi-building"></i> Sites</a>
+                        <a class="nav-link w-100" href="{{ url_for('structural_elements.explore') }}"><i class="bi bi-building"></i> Sites</a>
                         {% if signed_user.is_admin %}
                         <div class="dropdown">
                             <button type="button" class="nav-link dropdown-toggle" id="dropdownMenuSites" title="Add sites/buildings..." data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></button>

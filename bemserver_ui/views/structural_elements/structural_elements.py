@@ -55,7 +55,7 @@ def _build_tree(campaign_id):
 @blp.route("/")
 @auth.signin_required
 @ensure_campaign_context
-def manage():
+def explore():
     # This page retrieves all the structural elements of selected campaign.
     # Those structural elements are rendered in a tree view.
     # To do this, just build the entire tree (sites/buildings/storeys/spaces).
@@ -78,7 +78,7 @@ def manage():
             zones_tree_data.append(zone_data)
 
     return flask.render_template(
-        "pages/structural_elements/manage.html", sites_tree_data=sites_tree_data,
+        "pages/structural_elements/explore.html", sites_tree_data=sites_tree_data,
         zones_tree_data=zones_tree_data)
 
 
@@ -213,7 +213,7 @@ def edit(type, id):
                 else:
                     flask.flash(f"{prop_data['name']} property updated!", "success")
 
-            return flask.redirect(flask.url_for("structural_elements.manage"))
+            return flask.redirect(flask.url_for("structural_elements.explore"))
 
     tab = flask.request.args.get("tab", "general")
 
@@ -234,7 +234,7 @@ def delete(type, id):
     else:
         flask.flash(f"{type} deleted!", "success")
 
-    return flask.redirect(flask.url_for("structural_elements.manage"))
+    return flask.redirect(flask.url_for("structural_elements.explore"))
 
 
 @blp.route("/<string:type>/<int:id>/create_property", methods=["POST"])
