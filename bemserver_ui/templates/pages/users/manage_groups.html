@@ -9,7 +9,7 @@
     <div class="row d-lg-flex d-grid">
         <div class="col col-lg-6 pb-3 pb-lg-0">
             <div class="vr float-end ms-4 d-none d-lg-block h-100"></div>
-            <h5>Current user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
+            <h5>Member of <span class="badge bg-secondary">{{ user_groups|length }}</span></h5>
             {% if user_groups|length > 0 %}
             <div class="d-flex flex-wrap mt-2 gap-2">
                 {% for user_group in user_groups %}
@@ -23,7 +23,7 @@
             {% endif %}
         </div>
         <div class="col">
-            <h5>Available user groups <span class="badge bg-primary">{{ available_groups|length }}</span></h5>
+            <h5>Available user groups <span class="badge bg-secondary">{{ available_groups|length }}</span></h5>
             {% if available_groups|length > 0 %}
             <form id="addGroupsForm" class="d-flex flex-wrap gap-2 mt-2" action="{{ url_for('users.manage_groups', id=user.id) }}" method="POST">
                 {% for user_group in available_groups %}

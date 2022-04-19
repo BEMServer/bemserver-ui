@@ -20,33 +20,6 @@ def list():
         "pages/user_groups/list.html", user_groups=user_groups_resp.data)
 
 
-@blp.route("/<int:id>/view")
-@auth.signin_required(roles=[Roles.admin])
-def view(id):
-    try:
-        user_group = flask.g.api_client.user_groups.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="User group not found!")
-
-    # Get users.
-    users_resp = flask.g.api_client.user_by_user_groups.getall(user_group_id=id)
-    users = []
-    for x in users_resp.data:
-        try:
-            user_resp = flask.g.api_client.users.getone(id=x["user_id"])
-        except bac.BEMServerAPINotFoundError:
-            # Here, just ignore if a user has been deleted meanwhile.
-            pass
-        else:
-            user_data = user_resp.data
-            user_data["rel_id"] = x["id"]
-            users.append(user_data)
-
-    return flask.render_template(
-        "pages/user_groups/view.html", user_group=user_group.data, etag=user_group.etag,
-        users=users)
-
-
 @blp.route("/create", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def create():
@@ -91,7 +64,7 @@ def edit(id):
         else:
             flask.flash("User group updated!", "success")
             return flask.redirect(
-                flask.url_for("user_groups.view", id=user_group.data["id"]))
+                flask.url_for("user_groups.manage", id=user_group.data["id"]))
 
     return flask.render_template(
         "pages/user_groups/edit.html",
@@ -115,9 +88,9 @@ def delete(id):
     return flask.redirect(flask.url_for("user_groups.list"))
 
 
-@blp.route("/<int:id>/manage_users", methods=["GET", "POST"])
+@blp.route("/<int:id>/manage", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
-def manage_users(id):
+def manage(id):
     if flask.request.method == "POST":
         user_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_id in user_ids:
@@ -163,7 +136,7 @@ def manage_users(id):
             available_users.append(x)
 
     return flask.render_template(
-        "pages/user_groups/manage_users.html", user_group=user_group.data,
+        "pages/user_groups/manage.html", user_group=user_group.data,
         etag=user_group.etag, users=users, available_users=available_users)
 
 

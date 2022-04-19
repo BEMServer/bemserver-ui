@@ -23,7 +23,7 @@
         <div class="col">
             <div class="list-group">
                 {% for x in user_groups %}
-                <a class="list-group-item list-group-item-action d-flex gap-3 py-3" href="{{ url_for('user_groups.view', id=x.id) }}" title="View details">
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3" href="{{ url_for('user_groups.manage', id=x.id) }}" title="Manage user group">
                     <i class="bi bi-person-rolodex"></i>
                     <div class="d-flex gap-2 w-100 justify-content-between">
                         <div>
