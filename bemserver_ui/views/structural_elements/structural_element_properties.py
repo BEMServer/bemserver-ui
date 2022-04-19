@@ -54,6 +54,7 @@ def list():
 
     props_data = props_resp.data
     extend_props_data(props_data)
+    total_count = len(props_data)
 
     # Apply filters, if needed.
     is_filtered = False
@@ -73,7 +74,7 @@ def list():
     return flask.render_template(
         "pages/structural_elements/properties/list.html", properties=props_data,
         structural_elements=STRUCTURAL_ELEMENTS, filters=filters,
-        is_filtered=is_filtered)
+        is_filtered=is_filtered, total_count=total_count)
 
 
 @blp.route("/create", methods=["GET", "POST"])
