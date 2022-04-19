@@ -10,9 +10,11 @@ body {
     color: #474747 !important;
 }
 
-h1,
-h2 {
+h1 {
     color: #6e8a98;
+}
+h2 {
+    color: #95c11a;
 }
 
 .vr {
@@ -21,6 +23,10 @@ h2 {
 
 .bg-primary {
     background-color: #0088db !important;
+}
+
+.bg-secondary {
+    background-color: #95c11a !important;
 }
 
 .accordion-button:not(.collapsed),

@@ -27,7 +27,7 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'properties' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'properties' %}true{% else %}false{% endif %}">Properties <span class="badge bg-primary">{{ properties|length }}</span></button>
+                    <button class="nav-link{% if tab == 'properties' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'properties' %}true{% else %}false{% endif %}">Properties <span class="badge bg-secondary">{{ properties|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
@@ -103,7 +103,7 @@
             <div class="modal-body">
                 <form id="addPropertyForm" action="{{ url_for('structural_elements.create_property', type=type, id=structural_element.id) }}" method="POST">
                     <div class="mb-3">
-                        <label class="form-label" for="availableProperty">Available properties <span class="badge bg-primary">{{ available_properties|length }}</span></label>
+                        <label class="form-label" for="availableProperty">Available properties <span class="badge bg-secondary">{{ available_properties|length }}</span></label>
                         <select form="addPropertyForm" class="form-select" id="availableProperty" name="availableProperty" aria-label="Select a property">
                             {% for property_id, property_data in available_properties.items() %}
                             <option value="{{ property_id }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}</option>
