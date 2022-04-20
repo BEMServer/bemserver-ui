@@ -1,5 +1,6 @@
 """BEMServer API client"""
 import logging
+import json
 import flask
 import requests
 import requests.exceptions as req_exc
@@ -61,7 +62,7 @@ class BEMServerApiClientResponse:
         Example:
             {"total": 4, "total_pages": 1, "first_page": 1, "last_page": 1, "page": 1}
         """
-        return self._raw_response.headers.get("X-Pagination", {})
+        return json.loads(self._raw_response.headers.get("X-Pagination", "{}"))
 
     @property
     def is_json(self):
