@@ -125,9 +125,7 @@ def init_app(app):
             )
 
     # Monkey patch flask.url_for used in jinja templates.
-    @app.context_processor
-    def monkeypatch_url_for():
-        return dict(url_for=url_for_campaign)
+    app.jinja_env.globals["url_for"] = url_for_campaign
 
     # Monkey patch main flask.url_for function.
     flask.url_for = url_for_campaign
