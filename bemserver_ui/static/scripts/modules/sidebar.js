@@ -15,11 +15,30 @@ class Sidebar {
     #setActive(elmt) {
         elmt?.classList.add("active", "fw-bold");
         elmt?.setAttribute("aria-current", "page");
+        this.#tryOpenCollapse(elmt);
     }
 
     #unsetActive(elmt) {
         elmt?.classList.remove("active", "fw-bold");
         elmt?.removeAttribute("aria-current");
+    }
+
+    #tryOpenCollapse(elmt) {
+        let collapseElmt = null;
+        // Try to find collapse element in parents.
+        let parentElmt = elmt?.parentElement;
+        while (parentElmt != null) {
+            if (parentElmt.classList.contains("collapse")) {
+                collapseElmt = parentElmt;
+                break;
+            }
+            parentElmt = parentElmt.parentElement;
+        }
+        // Is there, in elmt parents, a collapse element to open?
+        if (collapseElmt != null) {
+            let bsCollapse = new bootstrap.Collapse(collapseElmt, {toggle: false});
+            bsCollapse.show();
+        }
     }
 
     refresh() {

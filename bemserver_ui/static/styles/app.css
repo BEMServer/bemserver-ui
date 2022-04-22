@@ -23,7 +23,7 @@ body,
     bottom: 0;
     left: 0;
     z-index: 100; /* Behind the navbar */
-    padding: 68px 10px 10px 10px; /* Height of navbar */
+    padding: 68px 8px 8px 8px; /* Height of navbar */
     overflow: auto !important;
 }
 
@@ -61,6 +61,26 @@ body,
 .app-sidebar .nav-link:hover,
 .app-sidebar .nav-link.active {
     background-color: #0088db !important;
+}
+
+.accordion.app-sidebar-accordion .accordion-item {
+    background-color: inherit !important;
+}
+
+.accordion.app-sidebar-accordion .accordion-button {
+    background-color: #ffffff44 !important;
+}
+
+.accordion.app-sidebar-accordion .accordion-body {
+    background-color: #ffffff77 !important;
+}
+
+.accordion.app-sidebar-accordion .accordion-button:not(.collapsed) {
+    background-color: #ffffff00 !important;
+}
+
+.accordion.app-sidebar-accordion .accordion-button:not(.collapsed) * {
+    color: inherit !important;
 }
 
 .navbar .navbar-toggler {
