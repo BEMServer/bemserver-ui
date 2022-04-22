@@ -1,0 +1,51 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Timeseries properties" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <a href="{{ url_for('timeseries_properties.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new timeseries property"><i class="bi bi-plus-circle"></i> New property</a>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive-xl">
+                <table class="table table-sm table-hover table-bordered caption-top">
+                    <caption class="fst-italic text-end">{{ properties|length }} items</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prop in properties %}
+                        <tr class="align-middle">
+                            <th scope="row">{{ prop.id }}</th>
+                            <td>{{ prop.name }}</td>
+                            <td class="w-50">
+                                {% if prop.description|length > 80 %}
+                                <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
+                                {% else %}
+                                {{ prop.description }}
+                                {% endif %}
+                            </td>
+                            <td class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('timeseries_properties.edit', id=prop.id) }}" title="Edit property"><i class="bi bi-pencil"></i></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>              
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

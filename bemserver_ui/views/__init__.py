@@ -20,6 +20,7 @@ MODULES = (
     structural_elements.structural_element_properties,
     timeseries.timeseries,
     timeseries.timeseries_datastates,
+    timeseries.timeseries_properties,
 )
 
 
