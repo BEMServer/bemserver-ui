@@ -63,6 +63,25 @@
                 <h6 class="app-sidebar-heading border-bottom fw-bold text-muted ps-2 pb-2 mt-2 mb-0"><i class="bi bi-gear"></i> Administration</h6>
                 <div class="accordion app-sidebar-accordion" id="accordionAdmininstration">
                     <div class="accordion-item border-0">
+                        <h2 class="accordion-header" id="panelHeadingAdminSites">
+                            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminSites" aria-expanded="false" aria-controls="panelCollapseAdminSites">
+                                <span><i class="bi bi-building"></i> Sites</span>
+                            </button>
+                        </h2>
+                        <div id="panelCollapseAdminSites" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminSites">
+                            <div class="accordion-body px-0 py-2">
+                                <ul class="nav nav-pills flex-column gap-1">
+                                    <li class="nav-item">
+                                        <div class="d-flex justify-content-between align-items-center gap-1">
+                                            <a class="nav-link w-100" href="{{ url_for('structural_element_properties.list') }}" title="View properties"><i class="bi bi-card-list"></i> Properties</a>
+                                            <a class="nav-link" href="{{ url_for('structural_element_properties.create') }}" title="Add a new property"><i class="bi bi-plus-circle"></i></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminTS">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTS" aria-expanded="false" aria-controls="panelCollapseAdminTS">
                                 <span><i class="bi bi-clock-history"></i> Timeseries</span>
