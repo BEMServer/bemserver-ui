@@ -141,7 +141,7 @@ def edit(id):
         else:
             flask.flash(
                 f"{timeseries_resp.data['name']} timeseries updated!", "success")
-            return flask.redirect(flask.url_for("timeseries.list", id=id))
+            return flask.redirect(flask.url_for("timeseries.list"))
 
     try:
         timeseries_resp = flask.g.api_client.timeseries.getone(id)
