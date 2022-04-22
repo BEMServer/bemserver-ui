@@ -19,7 +19,7 @@
                 </li>
             </ul>
             {% if g.campaign_ctxt.has_campaign %}
-            <ul class="nav nav-pills flex-column mt-3">
+            <ul class="nav nav-pills flex-column gap-1 mt-3">
                 {% if signed_user.is_admin %}
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
@@ -49,11 +49,24 @@
                         {% endif %}
                     </div>
                 </li>
+                <li class="nav-item">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
+                        <a class="nav-link w-100" href="{{ url_for('timeseries.list') }}" title="View timeseries"><i class="bi bi-clock-history"></i> Timeseries</a>
+                        <a class="nav-link" href="{{ url_for('timeseries.create') }}" title="Add a new timeseries"><i class="bi bi-plus-circle"></i></a>
+                    </div>
+                </li>
             </ul>
             {% endif %}
             {% if signed_user.is_admin %}
-            <h6 class="app-sidebar-heading ps-2 mt-4 mb-1 text-muted"><i class="bi bi-gear"></i> Administration</h6>
-            <ul class="nav nav-pills flex-column">
+            <h6 class="app-sidebar-heading ps-2 mt-4 mb-2 text-muted"><i class="bi bi-gear"></i> Administration</h6>
+            <ul class="nav nav-pills flex-column gap-1">
+                <li class="nav-item">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
+                        <a class="nav-link w-100" href="{{ url_for('structural_element_properties.list') }}" title="View properties"><i class="bi bi-card-list"></i> Sites properties</a>
+                        <a class="nav-link" href="{{ url_for('structural_element_properties.create') }}" title="Add a new property"><i class="bi bi-plus-circle"></i></a>
+                    </div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('user_groups.list') }}" title="View user groups"><i class="bi bi-people-fill"></i> User groups</a>
@@ -64,13 +77,6 @@
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('users.list') }}" title="View users"><i class="bi bi-person-lines-fill"></i> Users</a>
                         <a class="nav-link" href="{{ url_for('users.create') }}" title="Add a new user"><i class="bi bi-plus-circle"></i></a>
-                    </div>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center gap-1">
-                        <a class="nav-link w-100" href="{{ url_for('structural_element_properties.list') }}" title="View properties"><i class="bi bi-card-list"></i> Sites properties</a>
-                        <a class="nav-link" href="{{ url_for('structural_element_properties.create') }}" title="Add a new property"><i class="bi bi-plus-circle"></i></a>
                     </div>
                 </li>
             </ul>

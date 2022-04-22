@@ -1,0 +1,56 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create a new timeseries" %}
+{% set subtitle = g.campaign_ctxt.name %}
+
+{% set has_campaign_scopes = campaign_scopes|length > 0 %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    {% if not has_campaign_scopes %}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                Selected campaign has currently <span class="fw-bold">no campaign scopes</span>.
+                You must first <a href="{{ url_for('campaign_scopes.create') }}" title="Create a new campaign scope">create a campaign scope</a> to add a timeseries to it.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('timeseries.create') }}" method="POST">
+                <fieldset{% if not has_campaign_scopes %} disabled{% endif %}>
+                    <legend class="invisible d-none">Timeseries informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="campaign_scope_id">Campaign scopes</label>
+                        <select class="form-select" id="campaign_scope_id" name="campaign_scope_id" aria-label="Select a campaign scope" required>
+                            {% for x in campaign_scopes %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="unit_symbol">Unit symbol</label>
+                        <input type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20">
+                    </div>
+                </fieldset>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('timeseries.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"{% if not has_campaign_scopes %} disabled{% endif %}><i class="bi bi-save"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

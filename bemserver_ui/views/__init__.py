@@ -6,6 +6,7 @@ from . import user_groups
 from . import campaigns
 from . import campaign_scopes
 from . import structural_elements
+from . import timeseries
 
 
 MODULES = (
@@ -17,6 +18,7 @@ MODULES = (
     campaign_scopes,
     structural_elements.structural_elements,
     structural_elements.structural_element_properties,
+    timeseries,
 )
 
 

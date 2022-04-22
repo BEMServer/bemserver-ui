@@ -1,0 +1,52 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Timeseries" %}
+{% set subtitle = timeseries.name %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <form id="delForm" action="{{ url_for('timeseries.delete', id=timeseries.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ timeseries.name }}&lt;/mark&gt; timeseries">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend class="invisible d-none">Timeseries informations</legend>
+                <dl class="mb-3">
+                    <dt>Campaign scope</dt>
+                    <dd>{{ timeseries.campaign_scope_name }}</dd>
+                </dl>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" form="editForm" class="form-control" id="name" name="name" minlength="1" maxlength="80" value="{{ timeseries.name }}" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ timeseries.description }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="unit_symbol">Unit symbol</label>
+                    <input type="text" form="editForm" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20" value="{{ timeseries.unit_symbol }}">
+                </div>
+            </fieldset>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ url_for('timeseries.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                <form id="editForm" action="{{ url_for('timeseries.edit', id=timeseries.id) }}" method="POST">
+                    <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                    <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

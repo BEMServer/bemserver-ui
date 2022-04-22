@@ -1,0 +1,168 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Timeseries" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <form id="formFilters" class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                                <select class="form-select form-select-sm{% if filters['campaign_scope_id'] is not none %} border border-info{% endif %}" id="campaign_scope" name="campaign_scope" form="formFilters" aria-label="Select a filter value">
+                                    <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
+                                    {% for x in campaign_scopes %}
+                                    <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id|string %} selected{% endif %}>{{ x.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
+                                <a class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-end mb-3">
+        <div class="col-auto">
+            Current items count: <span class="fw-bold">{{ pagination.total }}</span>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="d-lg-flex justify-content-lg-between align-items-center d-grid gap-2 w-100">
+            <div class="d-flex justify-content-between align-items-center gap-4 w-100">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-nowrap mb-0" for="page_size">Page size</label>
+                    <select class="form-select form-select-sm" id="page_size" name="page_size" form="formFilters" aria-label="Select a page size">
+                        {% for x in [5, 10, 25, 50, 100] %}
+                        <option value="{{ x }}"{% if filters["page_size"] == x %} selected{% endif %}>{{ x }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <small class="opacity-75">Items: {{ ((pagination.page - 1) * filters.page_size) + 1 }} - {% if pagination.page == pagination.last_page %}{{ pagination.total }}{% else %}{{ ((pagination.page - 1) * filters.page_size) + filters.page_size }}{% endif %}</small>
+            </div>
+            <nav aria-label="Timeseries pagination">
+                <input type="hidden" form="formFilters" id="page" name="page" value="{{ pagination.page }}">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item{% if pagination.page == pagination.first_page %} disabled{% endif %}"><a class="page-link"{% if pagination.page != pagination.first_page %} role="button" title="First page" data-page="{{ pagination.first_page }}"{% endif %}><i class="bi bi-chevron-double-left"></i></a></li>
+                    <li class="page-item{% if pagination.previous_page is undefined %} disabled{% endif %}"><a class="page-link"{% if pagination.previous_page is not undefined %} role="button" title="Previous page" data-page="{{ pagination.previous_page }}"{% endif %}><i class="bi bi-chevron-left"></i></a></li>
+                    {% if pagination.nav_links.has_start_ellipsis %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                    {% endif %}
+                    {% for x in range(pagination.nav_links.start_page, pagination.nav_links.end_page + 1) %}
+                    <li class="page-item{% if x == pagination.page %} active{% endif %}"{% if x == pagination.page %} aria-current="page"{% endif %}>
+                        <a class="page-link" role="button" title="Page {{ x }}" data-page="{{ x }}">{{ x }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if pagination.nav_links.has_end_ellipsis %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                    {% endif %}
+                    <li class="page-item{% if pagination.next_page is undefined %} disabled{% endif %}"><a class="page-link"{% if pagination.next_page is not undefined %} role="button" title="Next page" data-page="{{ pagination.next_page }}"{% endif %}><i class="bi bi-chevron-right"></i></a></li>
+                    <li class="page-item{% if pagination.page == pagination.last_page %} disabled{% endif %}"><a class="page-link"{% if pagination.page != pagination.last_page %} role="button" title="Last page" data-page="{{ pagination.last_page }}"{% endif %}><i class="bi bi-chevron-double-right"></i></a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="accordion" id="accordionTimeseries">
+                {% for x in timeseries %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="panelHeadingTimeseries-{{ x.id }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTimeseries-{{ x.id }}" aria-expanded="false" aria-controls="panelCollapseTimeseries-{{ x.id }}">
+                            <div class="d-sm-flex justify-content-sm-between d-grid gap-3 w-100 me-3">
+                                <div class="d-flex gap-1 text-nowrap">
+                                    <span class="fw-bold"><i class="bi bi-clock-history me-1"></i> {{ x.name }}</span>
+                                    {% if x.unit_symbol %}
+                                    <span class="opacity-50">[{{ x.unit_symbol }}]</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-secondary">{{ x.campaign_scope_name }}</small>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="panelCollapseTimeseries-{{ x.id }}" class="accordion-collapse collapse" aria-labelledby="panelHeadingTimeseries-{{ x.id }}" data-ts-id="{{ x.id }}" data-ts-loaded="false">
+                        <div class="accordion-body">
+                            <div class="d-flex justify-content-between align-items-center gap-3">
+                                <small class="opacity-50">{{ x.description }}</small>
+                                <a class="btn btn-sm btn-outline-secondary text-nowrap" href="{{ url_for('timeseries.edit', id=x.id) }}" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        let formFiltersElmt = document.getElementById("formFilters");
+        let campaignScopeElmt = document.getElementById("campaign_scope");
+        let pageInputElmt = document.getElementById("page");
+        let pageSizeElmt = document.getElementById("page_size");
+        let pageLinkElmts = [].slice.call(document.querySelectorAll(".page-item:not(.disabled) .page-link"));
+        let accordionTimeseriesBtnElmts = [].slice.call(document.querySelectorAll("#accordionTimeseries .accordion-collapse.collapse"));
+
+        campaignScopeElmt.addEventListener("change", function(event) {
+            event.preventDefault();
+
+            if (event.target.options[event.target.selectedIndex].value != "{{ filters.campaign_scope_id }}") {
+                pageInputElmt.value = 1;
+            }
+            else {
+                pageInputElmt.value = "{{ filters.page }}";
+            }
+        });
+
+        pageSizeElmt.addEventListener("change", function(event) {
+            event.preventDefault();
+
+            pageInputElmt.value = 1;
+            formFiltersElmt.submit();
+        });
+
+        pageLinkElmts.forEach(function(pageLinkElmt) {
+            pageLinkElmt.addEventListener("click", function(event) {
+                event.preventDefault();
+
+                pageInputElmt.value = this.getAttribute("data-page");
+                formFiltersElmt.submit();
+            });
+        });
+
+        accordionTimeseriesBtnElmts.forEach(function(accordionTimeseriesBtnElmt) {
+            accordionTimeseriesBtnElmt.addEventListener("show.bs.collapse", function(event) {
+                // TODO: load timeseries properties
+            });
+        });
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
