@@ -1,4 +1,5 @@
 """Timeseries properties views"""
+import urllib.parse
 import flask
 
 import bemserver_ui.extensions.api_client as bac
@@ -38,9 +39,15 @@ def create():
         else:
             prop_name = ret_resp.data["name"]
             flask.flash(f"New timeseries property created: {prop_name}", "success")
-            return flask.redirect(flask.url_for("timeseries_properties.list"))
+            url_next = (urllib.parse.unquote(flask.request.args.get("next")
+                        or flask.url_for("timeseries_properties.list")))
+            return flask.redirect(url_next)
 
-    return flask.render_template("pages/timeseries/properties/create.html")
+    url_cancel = (urllib.parse.unquote(flask.request.args.get("back")
+                  or flask.url_for("timeseries_properties.list")))
+
+    return flask.render_template(
+        "pages/timeseries/properties/create.html", url_cancel=url_cancel)
 
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])

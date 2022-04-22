@@ -122,7 +122,38 @@ def create():
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])
 @auth.signin_required
+@ensure_campaign_context
 def edit(id):
+    try:
+        properties_resp = flask.g.api_client.timeseries_properties.getall()
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
+    available_properties = {x["id"]: x for x in properties_resp.data}
+
+    try:
+        property_data_resp = flask.g.api_client.timeseries_property_data.getall(
+            **{"timeseries_id": id})
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
+
+    properties = {}
+    for property in property_data_resp.data:
+        ts_property = available_properties.pop(property["property_id"])
+        for k, v in ts_property.items():
+            if k in property:
+                continue
+            property[k] = v
+
+        # Get ETag.
+        try:
+            property_data_resp = \
+                flask.g.api_client.timeseries_property_data.getone(property["id"])
+        except bac.BEMServerAPINotFoundError:
+            flask.abort(404, f"{property['name']} property not found!")
+        property["etag"] = property_data_resp.etag
+
+        properties[property["property_id"]] = property
+
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
@@ -141,6 +172,27 @@ def edit(id):
         else:
             flask.flash(
                 f"{timeseries_resp.data['name']} timeseries updated!", "success")
+
+            # Update property values, only if value has changed.
+            for prop_id, prop_data in properties.items():
+                payload = {
+                    "id": timeseries_resp.data["id"],
+                    "property_id": prop_id,
+                    "value": flask.request.form[f"property-{prop_id}"],
+                }
+                if payload["value"] == prop_data["value"]:
+                    continue
+                try:
+                    flask.g.api_client.timeseries_property_data.update(
+                        prop_data["id"], payload,
+                        etag=flask.request.form[f"property-{prop_id}-etag"])
+                except bac.BEMServerAPIValidationError:
+                    flask.flash(
+                        f"Error while setting {prop_data['name']} property!",
+                        "warning")
+                else:
+                    flask.flash(f"{prop_data['name']} property updated!", "success")
+
             return flask.redirect(flask.url_for("timeseries.list"))
 
     try:
@@ -157,9 +209,12 @@ def edit(id):
     timeseries_data = deepcopy(timeseries_resp.data)
     timeseries_data["campaign_scope_name"] = campaign_scopes_resp.data["name"]
 
+    tab = flask.request.args.get("tab", "general")
+
     return flask.render_template(
         "pages/timeseries/edit.html", timeseries=timeseries_data,
-        etag=timeseries_resp.etag)
+        etag=timeseries_resp.etag, properties=properties,
+        available_properties=available_properties, tab=tab)
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
@@ -173,3 +228,39 @@ def delete(id):
         flask.flash("Timeseries deleted!", "success")
 
     return flask.redirect(flask.url_for("timeseries.list"))
+
+
+@blp.route("/<int:id>/property", methods=["POST"])
+@auth.signin_required
+@ensure_campaign_context
+def create_property(id):
+    payload = {
+        "timeseries_id": id,
+        "property_id": flask.request.form["availableProperty"],
+        "value": flask.request.form["availablePropertyValue"],
+    }
+    try:
+        flask.g.api_client.timeseries_property_data.create(payload)
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(
+            422, description="Error while setting the timeseries property value!",
+            response=exc.errors)
+    else:
+        flask.flash("Property value defined!", "success")
+
+    return flask.redirect(flask.url_for('timeseries.edit', id=id, tab="properties"))
+
+
+@blp.route("/<int:id>/property/<int:property_id>/delete", methods=["POST"])
+@auth.signin_required
+@ensure_campaign_context
+def delete_property(id, property_id):
+    try:
+        flask.g.api_client.timeseries_property_data.delete(
+            property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"])
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="Property not found!")
+    else:
+        flask.flash("Property value deleted!", "success")
+
+    return flask.redirect(flask.url_for('timeseries.edit', id=id, tab="properties"))
