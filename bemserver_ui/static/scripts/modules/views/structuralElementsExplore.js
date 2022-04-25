@@ -69,7 +69,7 @@ class StructuralElementsExploreView {
             }
             try {
                 let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
-                return `<a class="btn btn-sm btn-outline-primary ms-auto" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
+                return `<a class="btn btn-sm btn-outline-secondary" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
             }
             catch (error) {
                 console.error(error);
@@ -84,10 +84,12 @@ class StructuralElementsExploreView {
     ${this.#getEditBtnHTML(data.type, data.structural_element.id)}
 </div>
 <p class="fst-italic">${data.structural_element.description}</p>
-<dl class="row opacity-50">
-    <dt class="col-2">IFC ID</dt>
-    <dd class="col-10">${(data.structural_element.ifc_id != null && data.structural_element.ifc_id != "") ? data.structural_element.ifc_id : "-"}</dd>
-</dl>`;
+<div class="row">
+    <dl class="col opacity-50">
+        <dt>IFC ID</dt>
+        <dd>${(data.structural_element.ifc_id != null && data.structural_element.ifc_id != "") ? data.structural_element.ifc_id : "-"}</dd>
+    </dl>
+</div>`;
     }
 
     #getPropertiesHTML(data, id) {
@@ -95,20 +97,22 @@ class StructuralElementsExploreView {
         if (data.properties.length > 0) {
             for (let property of data.properties) {
                 let propertyHelp = property.description != "" ? ` <sup><abbr title="${property.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
-                propertyDataHTML += `<dt class="col-3">${property.name}${propertyHelp}</dt>`;
-                propertyDataHTML += `<dd class="col-9">${(property.value != "" && property.value != null) ? property.value : "-"}</dd>`;
+                propertyDataHTML += `<dl>
+    <dt>${property.name}${propertyHelp}</dt>
+    <dd>${(property.value != "" && property.value != null) ? property.value : "-"}</dd>
+</dl>`;
             }
         }
         else {
             propertyDataHTML = `<p class="fst-italic">No data</p>`;
         }
 
-        return `<div class="d-flex justify-content-between align-items-center mb-3">
+        return `<div class="d-flex justify-content-between align-items-start mb-3">
+    <div class="d-flex gap-4">
+        ${propertyDataHTML}
+    </div>
     ${this.#getEditBtnHTML(data.type, id, "properties")}
-</div>
-<dl class="row">
-    ${propertyDataHTML}
-</dl>`;
+</div>`;
     }
 
     #getErrorHTML(error) {
