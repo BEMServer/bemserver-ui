@@ -7,6 +7,7 @@ import flask
 
 from . import structural_elements
 from . import campaigns
+from . import timeseries
 
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
@@ -15,6 +16,7 @@ blp = flask.Blueprint("api", __name__, url_prefix="/api")
 MODULES = (
     structural_elements,
     campaigns,
+    timeseries,
 )
 
 

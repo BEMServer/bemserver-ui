@@ -99,12 +99,15 @@
                             </div>
                         </button>
                     </h2>
-                    <div id="panelCollapseTimeseries-{{ x.id }}" class="accordion-collapse collapse" aria-labelledby="panelHeadingTimeseries-{{ x.id }}" data-ts-id="{{ x.id }}" data-ts-loaded="false">
+                    <div id="panelCollapseTimeseries-{{ x.id }}" class="accordion-collapse collapse" aria-labelledby="panelHeadingTimeseries-{{ x.id }}" data-ts-id="{{ x.id }}">
                         <div class="accordion-body">
-                            <div class="d-flex justify-content-between align-items-center gap-3">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
                                 <small class="opacity-50">{{ x.description }}</small>
+                                {% if signed_user.is_admin %}
                                 <a class="btn btn-sm btn-outline-secondary text-nowrap" href="{{ url_for('timeseries.edit', id=x.id) }}" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                                {% endif %}
                             </div>
+                            <div id="timeseriesProperties-{{ x.id }}" data-ts-loaded="false"></div>
                         </div>
                     </div>
                 </div>
@@ -119,48 +122,12 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
+    import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseriesList.js') }}";
+
 
     document.addEventListener("DOMContentLoaded", function() {
 
-        let formFiltersElmt = document.getElementById("formFilters");
-        let campaignScopeElmt = document.getElementById("campaign_scope");
-        let pageInputElmt = document.getElementById("page");
-        let pageSizeElmt = document.getElementById("page_size");
-        let pageLinkElmts = [].slice.call(document.querySelectorAll(".page-item:not(.disabled) .page-link"));
-        let accordionTimeseriesBtnElmts = [].slice.call(document.querySelectorAll("#accordionTimeseries .accordion-collapse.collapse"));
-
-        campaignScopeElmt.addEventListener("change", function(event) {
-            event.preventDefault();
-
-            if (event.target.options[event.target.selectedIndex].value != "{{ filters.campaign_scope_id }}") {
-                pageInputElmt.value = 1;
-            }
-            else {
-                pageInputElmt.value = "{{ filters.page }}";
-            }
-        });
-
-        pageSizeElmt.addEventListener("change", function(event) {
-            event.preventDefault();
-
-            pageInputElmt.value = 1;
-            formFiltersElmt.submit();
-        });
-
-        pageLinkElmts.forEach(function(pageLinkElmt) {
-            pageLinkElmt.addEventListener("click", function(event) {
-                event.preventDefault();
-
-                pageInputElmt.value = this.getAttribute("data-page");
-                formFiltersElmt.submit();
-            });
-        });
-
-        accordionTimeseriesBtnElmts.forEach(function(accordionTimeseriesBtnElmt) {
-            accordionTimeseriesBtnElmt.addEventListener("show.bs.collapse", function(event) {
-                // TODO: load timeseries properties
-            });
-        });
+        let tsListView = new TimeseriesListView({{ filters | tojson }});
 
     });
 </script>
