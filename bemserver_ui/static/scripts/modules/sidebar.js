@@ -35,7 +35,7 @@ class Sidebar {
             parentElmt = parentElmt.parentElement;
         }
         // Is there, in elmt parents, a collapse element to open?
-        if (collapseElmt != null) {
+        if (collapseElmt != null && !collapseElmt.classList.contains("app-sidebar")) {
             let bsCollapse = new bootstrap.Collapse(collapseElmt, {toggle: false});
             bsCollapse.show();
         }
