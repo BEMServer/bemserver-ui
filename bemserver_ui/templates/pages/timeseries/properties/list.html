@@ -32,7 +32,7 @@
                         <tr class="align-middle">
                             <th scope="row">{{ prop.id }}</th>
                             <td>{{ prop.name }}</td>
-                            <td class="w-50">
+                            <td>
                                 {% if prop.description|length > 80 %}
                                 <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
                                 {% else %}
