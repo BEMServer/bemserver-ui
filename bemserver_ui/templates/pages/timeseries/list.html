@@ -26,7 +26,7 @@
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <form id="formFilters" class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                <select class="form-select form-select-sm{% if filters['campaign_scope_id'] is not none %} border border-info{% endif %}" id="campaign_scope" name="campaign_scope" form="formFilters" aria-label="Select a filter value">
+                                <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope" name="campaign_scope" form="formFilters" aria-label="Select a filter value">
                                     <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
                                     {% for x in campaign_scopes %}
                                     <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id|string %} selected{% endif %}>{{ x.name }}</option>

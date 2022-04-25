@@ -34,9 +34,11 @@ class TimeseriesListView {
 
             if (event.target.options[event.target.selectedIndex].value != this.filters.campaign_scope_id) {
                 this.#pageInputElmt.value = 1;
+                event.target.classList.remove("border-info", "bg-info", "bg-opacity-10");
             }
             else {
                 this.#pageInputElmt.value = this.filters.page;
+                event.target.classList.add("border-info", "bg-info", "bg-opacity-10");
             }
         }.bind(this));
 
