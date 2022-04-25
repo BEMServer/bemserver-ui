@@ -51,3 +51,14 @@ h2 {
     background-color: #0088db !important;
     border-color: #0088db !important;
 }
+
+@keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+}
+  
+.fade-in {
+    opacity: 0;
+    animation: fadeIn .5s ease-in 1 forwards;
+}

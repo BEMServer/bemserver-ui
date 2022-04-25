@@ -30,11 +30,11 @@
                 <legend class="invisible d-none">Campaign scope informations</legend>
                 <div class="mb-3">
                     <label class="form-label" for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" form="editForm" value="{{ campaign_scope.name }}" required autofocus>
+                    <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ campaign_scope.name }}" minlength="1" maxlength="80" required autofocus>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" form="editForm" rows="3">{{ campaign_scope.description }}</textarea>
+                    <textarea form="editForm" class="form-control" id="description" name="description" rows="3">{{ campaign_scope.description }}</textarea>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('campaign_scopes.view', id=campaign_scope.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>

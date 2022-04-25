@@ -12,7 +12,7 @@
                     <legend class="invisible d-none">User group information</legend>
                     <div class="mb-3">
                         <label class="form-label" for="name">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required autofocus>
+                        <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ url_for('user_groups.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>

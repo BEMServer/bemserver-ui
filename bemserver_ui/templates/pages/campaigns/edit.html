@@ -36,11 +36,11 @@
                 <legend class="invisible d-none">Campaign information</legend>
                 <div class="mb-3">
                     <label class="form-label" for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" form="editForm" value="{{ campaign.name }}" required autofocus>
+                    <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ campaign.name }}" minlength="1" maxlength="80" required autofocus>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" form="editForm" rows="3">{{ campaign.description }}</textarea>
+                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ campaign.description }}</textarea>
                 </div>
                 <div class="row d-xl-flex d-grid mb-3">
                     <div class="col pb-3 pb-xl-0">
@@ -48,11 +48,11 @@
                         <div class="d-lg-flex d-grid gap-1">
                             <div class="input-group">
                                 <span class="input-group-text" id="start_date">Date</span>
-                                <input type="date" class="form-control" id="start_date" name="start_date" form="editForm" value="{{ campaign.start_date }}">
+                                <input type="date" form="editForm" class="form-control" id="start_date" name="start_date" value="{{ campaign.start_date }}">
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">Time</span>
-                                <input type="time" class="form-control" id="start_time" name="start_time" form="editForm" value="{{ campaign.start_time }}">
+                                <input type="time" form="editForm" class="form-control" id="start_time" name="start_time" value="{{ campaign.start_time }}">
                                 <span class="input-group-text">UTC</span>
                             </div>
                         </div>
@@ -62,11 +62,11 @@
                         <div class="d-lg-flex d-grid gap-1">
                             <div class="input-group">
                                 <span class="input-group-text" id="end_date">Date</span>
-                                <input type="date" class="form-control" id="end_date" name="end_date" form="editForm" value="{{ campaign.end_date }}">
+                                <input type="date" form="editForm" class="form-control" id="end_date" name="end_date" value="{{ campaign.end_date }}">
                             </div>
                             <div class="input-group">
                                 <span class="input-group-text">Time</span>
-                                <input type="time" class="form-control" id="end_time" name="end_time" form="editForm" value="{{ campaign.end_time }}">
+                                <input type="time" form="editForm" class="form-control" id="end_time" name="end_time" value="{{ campaign.end_time }}">
                                 <span class="input-group-text">UTC</span>
                             </div>
                         </div>

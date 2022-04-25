@@ -30,15 +30,15 @@
                 <legend class="invisible d-none">User account</legend>
                 <div class="mb-3">
                     <label class="form-label" for="name">Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" form="editForm" required autofocus>
+                    <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ user.name }}" minlength="1" maxlength="80" required autofocus>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" form="editForm" required>
+                    <input type="email" form="editForm" class="form-control" id="email" name="email" value="{{ user.email }}" required>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" form="editForm" required>
+                    <input type="password" form="editForm" class="form-control" id="password" name="password" minlength="1" maxlength="80" required>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('users.view', id=user.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
