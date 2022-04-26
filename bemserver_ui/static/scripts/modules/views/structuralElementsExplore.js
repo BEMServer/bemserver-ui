@@ -99,7 +99,7 @@ class StructuralElementsExploreView {
                 let propertyHelp = property.description != "" ? ` <sup><abbr title="${property.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
                 propertyDataHTML += `<dl>
     <dt>${property.name}${propertyHelp}</dt>
-    <dd>${(property.value != "" && property.value != null) ? property.value : "-"}</dd>
+    <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
 </dl>`;
             }
         }

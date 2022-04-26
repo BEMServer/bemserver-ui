@@ -102,7 +102,7 @@ class TimeseriesListView {
             for (let property of properties) {
                 propertyDataHTML += `<dl>
     <dt>${property.name}${this.#getPropertyHelpHTML(property)}</dt>
-    <dd>${(property.value != "" && property.value != null) ? property.value : "-"}</dd>
+    <dd>${(property.value !== "" && property.value != null) ? Number.parseFloat(property.value).toFixed(1) : "-"}</dd>
 </dl>`;
             }
         }
