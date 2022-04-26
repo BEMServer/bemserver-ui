@@ -6,7 +6,9 @@ import werkzeug.exceptions as wexc
 def init_app(app):
 
     def _is_from_internal_api():
-        return flask.request.endpoint.startswith("api.")
+        if flask.request.endpoint is not None:
+            return flask.request.endpoint.startswith("api.")
+        return False
 
     def _handle_for_internal_api(status_code, message, validation_errors=None):
         payload = {"message": message}
