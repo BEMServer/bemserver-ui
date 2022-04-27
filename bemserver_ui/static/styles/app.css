@@ -112,3 +112,7 @@ body,
 .app-tabs .nav-item:hover .nav-link:not(.active) {
     color: #ffffff;
 }
+
+.app-spinner {
+    color: #95c11a !important;
+}
