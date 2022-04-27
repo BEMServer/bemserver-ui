@@ -12,6 +12,7 @@ class Tree {
     #onUnselectedTreeItemCallback = null;
     selectedItemId = null;
     selectedItemType = null;
+    selectedItemPath = null;
 
     #ignoreUnselectEvent = true;
 
@@ -88,7 +89,8 @@ class Tree {
                     this.#selectedTreeItem.classList.add("active");
                     this.selectedItemId = this.#selectedTreeItem.getAttribute("data-tree-item-id");
                     this.selectedItemType = this.#selectedTreeItem.getAttribute("data-tree-item-type");
-                    this.#onSelectedTreeItemCallback?.call(null, this.selectedItemId, this.selectedItemType);
+                    this.selectedItemPath = this.#selectedTreeItem.getAttribute("data-tree-item-path");
+                    this.#onSelectedTreeItemCallback?.call(null, this.selectedItemId, this.selectedItemType, this.selectedItemPath);
                     this.#getCollapsableFromItem(this.#selectedTreeItem.parentElement)?.show();
                 }
                 else if (!this.#ignoreUnselectEvent) {
@@ -96,6 +98,7 @@ class Tree {
                     this.#selectedTreeItem = null;
                     this.selectedItemId = null;
                     this.selectedItemType = null;
+                    this.selectedItemPath = null;
                     this.#onUnselectedTreeItemCallback?.call();
                 }
             }.bind(this), false);

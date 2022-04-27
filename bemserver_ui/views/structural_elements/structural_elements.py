@@ -9,11 +9,18 @@ blp = flask.Blueprint(
     "structural_elements", __name__, url_prefix="/structural_elements")
 
 
-def _extract_data(data, data_type):
+def _extract_data(data, data_type, parent_data=None):
+    full_path = data["name"]
+    if parent_data is not None and len(parent_data["full_path"]) > 0:
+        full_path = " / ".join([parent_data["full_path"], full_path])
     return {
+        "node_id": f"{data_type}_{data['id']}",
         "id": data["id"],
         "name": data["name"],
         "type": data_type,
+        "path": "" if parent_data is None else parent_data["full_path"],
+        "full_path": full_path,
+        "parent_node_id": None if parent_data is None else parent_data["node_id"],
         "nodes": [],
     }
 
@@ -36,15 +43,15 @@ def _build_tree(campaign_id):
         for building in structural_elements["building"]:
             if building["site_id"] != site["id"]:
                 continue
-            building_data = _extract_data(building, "building")
+            building_data = _extract_data(building, "building", site_data)
             for storey in structural_elements["storey"]:
                 if storey["building_id"] != building["id"]:
                     continue
-                storey_data = _extract_data(storey, "storey")
+                storey_data = _extract_data(storey, "storey", building_data)
                 for space in structural_elements["space"]:
                     if space["storey_id"] != storey["id"]:
                         continue
-                    space_data = _extract_data(space, "space")
+                    space_data = _extract_data(space, "space", storey_data)
                     storey_data["nodes"].append(space_data)
                 building_data["nodes"].append(storey_data)
             site_data["nodes"].append(building_data)

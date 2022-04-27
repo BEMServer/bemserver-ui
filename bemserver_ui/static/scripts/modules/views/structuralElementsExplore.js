@@ -78,9 +78,12 @@ class StructuralElementsExploreView {
         return ``;
     }
 
-    #getGeneralHTML(data) {
+    #getGeneralHTML(data, path) {
         return `<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5>${data.structural_element.name}</h5>
+    <div>
+        <h5>${data.structural_element.name}</h5>
+        <h6>${path}</h6>
+    </div>
     ${this.#getEditBtnHTML(data.type, data.structural_element.id)}
 </div>
 <p class="fst-italic">${data.structural_element.description}</p>
@@ -127,7 +130,7 @@ class StructuralElementsExploreView {
         this.#propertiesTabContentElmt.innerHTML = "";
     }
 
-    #renderGeneral(id, type) {
+    #renderGeneral(id, type, path) {
         this.#generalTabContentElmt.innerHTML = "";
         let spinner = new Spinner();
         this.#generalTabContentElmt.appendChild(spinner);
@@ -136,7 +139,7 @@ class StructuralElementsExploreView {
         let fetcher = new Fetcher();
         fetcher.get(retrieveDataUrl).then(
             (data) => {
-                this.#generalTabContentElmt.innerHTML = this.#getGeneralHTML(data);
+                this.#generalTabContentElmt.innerHTML = this.#getGeneralHTML(data, path);
             }
         ).catch(
             (error) => {
@@ -145,7 +148,7 @@ class StructuralElementsExploreView {
         );
     }
 
-    #renderProperties(id, type) {
+    #renderProperties(id, type, path) {
         this.#propertiesTabContentElmt.innerHTML = "";
         let spinner = new Spinner();
         this.#propertiesTabContentElmt.appendChild(spinner);
@@ -163,8 +166,8 @@ class StructuralElementsExploreView {
         );
     }
 
-    render(id, type) {
-        this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type};
+    render(id, type, path) {
+        this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type, path: path};
         for (let tabElmt of this.#tabPropertiesElmts) {
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
         }
@@ -175,7 +178,7 @@ class StructuralElementsExploreView {
         let selectedItemData = this.#selectedItemsPerTab[this.#tabSitesSelected.id];
         if (selectedItemData != null) {
             if (!this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id]) {
-                this.#renderPerTab[this.#tabPropertiesSelected.id]?.call(this, selectedItemData.id, selectedItemData.type);
+                this.#renderPerTab[this.#tabPropertiesSelected.id]?.call(this, selectedItemData.id, selectedItemData.type, selectedItemData.path);
                 this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = true;
             }
         }
