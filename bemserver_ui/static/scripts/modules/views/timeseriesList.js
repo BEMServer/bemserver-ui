@@ -110,8 +110,7 @@ class TimeseriesListView {
             propertyDataHTML = `<p class="fst-italic">No properties</p>`;
         }
 
-        return `<hr>
-<div class="d-flex justify-content-between align-items-start mb-3">
+        return `<div class="d-flex justify-content-between align-items-start mb-3">
     <div class="d-flex gap-4">
         ${propertyDataHTML}
     </div>

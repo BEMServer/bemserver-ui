@@ -96,13 +96,27 @@
                     </h2>
                     <div id="panelCollapseTimeseries-{{ x.id }}" class="accordion-collapse collapse" aria-labelledby="panelHeadingTimeseries-{{ x.id }}" data-ts-id="{{ x.id }}">
                         <div class="accordion-body">
-                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
-                                <small class="opacity-50">{{ x.description }}</small>
-                                {% if signed_user.is_admin %}
-                                <a class="btn btn-sm btn-outline-secondary text-nowrap" href="{{ url_for('timeseries.edit', id=x.id) }}" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
-                                {% endif %}
+                            <ul class="nav nav-tabs app-tabs justify-content-center" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="general-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#general-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="general-tabcontent-{{ x.id }}" aria-selected="true">General</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="properties-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#properties-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="properties-tabcontent-{{ x.id }}">Properties</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content overflow-auto border border-top-0 bg-white mb-3">
+                                <div class="tab-pane fade show active p-3" id="general-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="general-tab-{{ x.id }}">
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                        <small class="opacity-50">{{ x.description }}</small>
+                                        {% if signed_user.is_admin %}
+                                        <a class="btn btn-sm btn-outline-secondary text-nowrap" href="{{ url_for('timeseries.edit', id=x.id) }}" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade p-3" id="properties-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="properties-tab-{{ x.id }}">
+                                    <div id="timeseriesProperties-{{ x.id }}" data-ts-loaded="false"></div>
+                                </div>
                             </div>
-                            <div id="timeseriesProperties-{{ x.id }}" data-ts-loaded="false"></div>
                         </div>
                     </div>
                 </div>
