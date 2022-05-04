@@ -1,6 +1,6 @@
-import { Fetcher } from "../fetcher.js";
-import { flaskES6, signedUser } from "../../app.js";
-import { Spinner } from "../components/spinner.js";
+import { Fetcher } from "../../fetcher.js";
+import { flaskES6, signedUser } from "../../../app.js";
+import { Spinner } from "../../components/spinner.js";
 
 
 class StructuralElementsExploreView {
