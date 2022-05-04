@@ -49,7 +49,7 @@ class FormController {
         for (let confirmFormElmt of this.#confirmFormElmts) {
             // Add a modal confirm component for this form, defining an "ok" callback function.
             let modalConfirm = new ModalConfirm(confirmFormElmt.id, confirmFormElmt.getAttribute("data-modal-confirm-message"), function() { confirmFormElmt.submit(); });
-            confirmFormElmt.appendChild(modalConfirm);
+            document.body.appendChild(modalConfirm);
 
             // Add an event listener to display a confirm message on form submit.
             confirmFormElmt.addEventListener("submit", function(event) {
