@@ -6,12 +6,10 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid gap-2">
-    <div class="hstack gap-2">
-        {% if signed_user.is_admin %}
-        <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary" title="Manage timeseries structural elements">Manage structural elements</a>
-        {% endif %}
-    </div>
+    {% if signed_user.is_admin %}
+    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary" title="Manage timeseries structural elements">Manage structural elements</a>
     <div class="vr d-none d-lg-block mx-2"></div>
+    {% endif %}
     <div class="hstack gap-2">
         <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary mx-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
     </div>
