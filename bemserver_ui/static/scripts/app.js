@@ -1,16 +1,17 @@
 import { signedUser } from "./modules/signedUserData.js";
-import { FlaskES6 } from "./modules/flaskES6.js";
+import { FlaskES6 } from "./modules/tools/flaskES6.js";
 import { Sidebar } from "./modules/sidebar.js";
 import { FormController } from "./modules/formController.js";
 import { CampaignSelectorView } from "./modules/views/campaigns/selector.js";
+import { flaskEndpoints } from "./modules/flaskES6-endpoints.js";
 
 
-const campaignSelector = new CampaignSelectorView();
-const flaskES6 = new FlaskES6();
+const flaskES6 = new FlaskES6(flaskEndpoints);
 
 
 document.addEventListener("DOMContentLoaded", function() {
 
+    let campaignSelector = new CampaignSelectorView();
     let sidebar = new Sidebar();
     let formCtrl = new FormController();
 
@@ -21,4 +22,4 @@ document.addEventListener("DOMContentLoaded", function() {
 }, false);
 
 
-export { campaignSelector, flaskES6, signedUser } ;
+export { flaskES6, signedUser } ;

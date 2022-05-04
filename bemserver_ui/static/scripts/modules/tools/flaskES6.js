@@ -1,12 +1,8 @@
-import { flaskEndpoints } from "./flaskES6-endpoints.js";
-import { campaignSelector } from "../app.js";
-
-
 class FlaskES6 {
 
     #endpoints = null;
 
-    constructor() {
+    constructor(flaskEndpoints) {
         this.#endpoints = flaskEndpoints;
     }
 
@@ -47,8 +43,10 @@ class FlaskES6 {
         }
 
         // Inject campaign context, if any.
-        if (campaignSelector.currentCampaign != null && campaignSelector.currentCampaign != "") {
-            rule["campaign"] = campaignSelector.currentCampaign;
+        let currentLocationSearchParams = new URLSearchParams(window.location.search.replace("?", ""));
+        let campaign = currentLocationSearchParams.get("campaign");
+        if (campaign != null) {
+            rule["campaign"] = campaign;
         }
 
         let url = "";
