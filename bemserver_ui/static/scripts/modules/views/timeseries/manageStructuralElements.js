@@ -3,7 +3,7 @@ import { AccordionList } from "../../components/accordionList.js";
 import { DropZone } from "../../components/dropZone.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { Spinner } from "../../components/spinner.js";
-import { Fetcher } from "../../fetcher.js";
+import { Fetcher } from "../../tools/fetcher.js";
 import { ModalConfirm } from "../../modalConfirm.js";
 import { flaskES6 } from "../../../app.js";
 import { Parser } from "../../tools/parser.js";

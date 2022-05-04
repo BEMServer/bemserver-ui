@@ -1,4 +1,4 @@
-import { Fetcher } from "../../fetcher.js";
+import { Fetcher } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 
