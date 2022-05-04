@@ -12,31 +12,32 @@ from ..structural_elements.structural_elements import (
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
 
 
-# TODO: fix prepare_pagination when no items
-# pagination has only "total" and "total_pages" values
 def prepare_pagination(pagination, nb_total_links=5):
-    nb_links_per_side = int(nb_total_links / 2)
-    start_nb_links = \
-        min([nb_links_per_side, pagination["page"] - pagination["first_page"]])
-    end_nb_links = \
-        min([nb_links_per_side, pagination["last_page"] - pagination["page"]])
-
-    tmp_start_nb_links = start_nb_links + (nb_links_per_side - end_nb_links)
-    end_nb_links = end_nb_links + (nb_links_per_side - start_nb_links)
-    start_nb_links = tmp_start_nb_links
-    del tmp_start_nb_links
-
     start_page = 1
     has_start_ellipsis = False
-    if "previous_page" in pagination:
-        start_page = max([start_page, pagination["page"] - start_nb_links])
-        has_start_ellipsis = start_page > pagination["first_page"]
-
-    end_page = pagination["last_page"]
+    end_page = 1
     has_end_ellipsis = False
-    if "next_page" in pagination:
-        end_page = min([end_page, pagination["page"] + end_nb_links])
-        has_end_ellipsis = end_page < pagination["last_page"]
+
+    if "page" in pagination:
+        nb_links_per_side = int(nb_total_links / 2)
+        start_nb_links = \
+            min([nb_links_per_side, pagination["page"] - pagination["first_page"]])
+        end_nb_links = \
+            min([nb_links_per_side, pagination["last_page"] - pagination["page"]])
+
+        tmp_start_nb_links = start_nb_links + (nb_links_per_side - end_nb_links)
+        end_nb_links = end_nb_links + (nb_links_per_side - start_nb_links)
+        start_nb_links = tmp_start_nb_links
+        del tmp_start_nb_links
+
+        if "previous_page" in pagination:
+            start_page = max([start_page, pagination["page"] - start_nb_links])
+            has_start_ellipsis = start_page > pagination["first_page"]
+
+        end_page = pagination["last_page"]
+        if "next_page" in pagination:
+            end_page = min([end_page, pagination["page"] + end_nb_links])
+            has_end_ellipsis = end_page < pagination["last_page"]
 
     pagination["nav_links"] = {
         "start_page": start_page,

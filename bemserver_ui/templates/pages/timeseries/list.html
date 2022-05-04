@@ -60,7 +60,13 @@
                         {% endfor %}
                     </select>
                 </div>
-                <small class="opacity-75">Items: {{ ((pagination.page - 1) * filters.page_size) + 1 }} - {% if pagination.page == pagination.last_page %}{{ pagination.total }}{% else %}{{ ((pagination.page - 1) * filters.page_size) + filters.page_size }}{% endif %} out of {{ pagination.total }}</small>
+                <small class="opacity-75">
+                    {% if pagination.page is defined %}
+                    Items: {{ ((pagination.page - 1) * filters.page_size) + 1 }} - {% if pagination.page == pagination.last_page %}{{ pagination.total }}{% else %}{{ ((pagination.page - 1) * filters.page_size) + filters.page_size }}{% endif %} out of {{ pagination.total }}
+                    {% else %}
+                    No item
+                    {% endif %}
+                </small>
             </div>
             <nav aria-label="Timeseries pagination">
                 <input type="hidden" form="formFilters" id="page" name="page" value="{{ pagination.page }}">
@@ -71,7 +77,7 @@
                     <li class="page-item disabled"><a class="page-link">...</a></li>
                     {% endif %}
                     {% for x in range(pagination.nav_links.start_page, pagination.nav_links.end_page + 1) %}
-                    <li class="page-item{% if x == pagination.page %} active{% endif %}"{% if x == pagination.page %} aria-current="page"{% endif %}>
+                    <li class="page-item{% if pagination.page is defined %}{% if x == pagination.page %} active{% endif %}{% else %} disabled{% endif %}"{% if x == pagination.page %} aria-current="page"{% endif %}>
                         <a class="page-link" role="button" title="Page {{ x }}" data-page="{{ x }}">{{ x }}</a>
                     </li>
                     {% endfor %}
@@ -86,6 +92,7 @@
     </div>
     <div class="row">
         <div class="col">
+            {% if timeseries|length > 0 %}
             <div class="accordion" id="accordionTimeseries">
                 {% for x in timeseries %}
                 <div class="accordion-item">
@@ -136,6 +143,9 @@
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <p class="fst-italic text-center text-muted">No data</p>
+            {% endif %}
         </div>
     </div>
 </div>
