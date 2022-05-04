@@ -52,7 +52,9 @@
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('timeseries.list') }}" title="View timeseries"><i class="bi bi-clock-history"></i> Timeseries</a>
+                        {% if signed_user.is_admin %}
                         <a class="nav-link" href="{{ url_for('timeseries.create') }}" title="Add a new timeseries"><i class="bi bi-plus-circle"></i></a>
+                        {% endif %}
                     </div>
                 </li>
             </ul>

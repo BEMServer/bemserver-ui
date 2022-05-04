@@ -95,7 +95,7 @@ def list():
 
 
 @blp.route("/create", methods=["GET", "POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def create():
     if flask.request.method == "POST":
@@ -127,7 +127,7 @@ def create():
 
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def edit(id):
     try:
@@ -224,7 +224,7 @@ def edit(id):
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 def delete(id):
     try:
         flask.g.api_client.timeseries.delete(id, etag=flask.request.form["delEtag"])
@@ -237,7 +237,7 @@ def delete(id):
 
 
 @blp.route("/<int:id>/property", methods=["POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def create_property(id):
     payload = {
@@ -258,7 +258,7 @@ def create_property(id):
 
 
 @blp.route("/<int:id>/property/<int:property_id>/delete", methods=["POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def delete_property(id, property_id):
     try:
