@@ -129,6 +129,9 @@ class AccordionList extends HTMLDivElement {
             let accordionListItemElmt = new AccordionListItem(row.id, row.icon, row.name);
             this.appendChild(accordionListItemElmt);
         }
+        if (this.childElementCount <= 0) {
+            this.innerHTML = `<p class="fst-italic text-center text-muted">No data</p>`;
+        }
     }
 }
 
