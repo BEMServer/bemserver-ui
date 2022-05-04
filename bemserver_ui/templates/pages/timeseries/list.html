@@ -155,7 +155,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseriesList.js') }}";
+    import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", function() {
