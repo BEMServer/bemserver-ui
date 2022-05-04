@@ -1,9 +1,11 @@
-<div class="border border-1 rounded bg-white p-2">
-    <div class="d-flex justify-content-between gap-3">
-        <a class="link-secondary text-decoration-none" role="button" href="{{ url_for('users.view', id=user.id) }}" title="View user account"><i class="bi bi-person"></i> {{ user.name }}</a>
-        <form action="{{ url_for('user_groups.remove_user', id=user_group.id, rel_id=user.rel_id, next=url_for(request.endpoint, id=user_group.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
-            <button class="btn btn-sm btn-outline-danger px-1 py-0" type="submit" title="Remove user from group"><i class="bi bi-person-x"></i></button>
-        </form>
-    </div>
-    <small class="opacity-50 fst-italic">{{ user.email }}</small>
+<div class="btn-group bg-white rounded" role="group" aria-label="Actions on user">
+    <a class="btn btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Manage user acount">
+        <div class="d-flex flex-column justify-content-start">
+            <span class="text-start"><i class="bi bi-person"></i> {{ user.name }}</span>
+            <small class="opacity-50 fst-italic">{{ user.email }}</small>
+        </div>
+    </a>
+    <form class="btn-group" action="{{ url_for('user_groups.remove_user', id=user_group.id, rel_id=user.rel_id, next=url_for(request.endpoint, id=user_group.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s user account from &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
+        <button class="btn btn-outline-danger" type="submit" title="Remove user from group"><i class="bi bi-x-lg"></i></button>
+    </form>
 </div>
