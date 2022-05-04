@@ -2,7 +2,7 @@ import { Pagination, PageSizeSelector } from "../../components/pagination.js";
 import { AccordionList } from "../../components/accordionList.js";
 import { DropZone } from "../../components/dropZone.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../spinner.js";
+import { Spinner } from "../../components/spinner.js";
 import { Fetcher } from "../../fetcher.js";
 import { ModalConfirm } from "../../modalConfirm.js";
 import { flaskES6 } from "../../../app.js";

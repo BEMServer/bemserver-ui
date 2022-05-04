@@ -1,4 +1,4 @@
-import { Spinner } from "../views/spinner.js";
+import { Spinner } from "./spinner.js";
 
 
 class DropZone extends HTMLDivElement {

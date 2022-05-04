@@ -1,6 +1,6 @@
 import { Fetcher } from "../fetcher.js";
 import { flaskES6 } from "../../app.js";
-import { Spinner } from "./spinner.js";
+import { Spinner } from "../components/spinner.js";
 
 
 class CampaignSelectorView {
@@ -91,8 +91,7 @@ class CampaignSelectorView {
 
     #renderProperties() {
         this.#campaignSelectedPropertiesElmt.innerHTML = "";
-        let spinner = new Spinner();
-        this.#campaignSelectedPropertiesElmt.appendChild(spinner);
+        this.#campaignSelectedPropertiesElmt.appendChild(new Spinner());
 
         if (this.#campaignSelectElmt.value == "") {
             this.#campaignSelectedPropertiesElmt.innerHTML = "";

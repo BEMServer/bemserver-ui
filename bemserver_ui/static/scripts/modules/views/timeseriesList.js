@@ -1,6 +1,6 @@
 import { Fetcher } from "../fetcher.js";
 import { flaskES6, signedUser } from "../../app.js";
-import { Spinner } from "./spinner.js";
+import { Spinner } from "../components/spinner.js";
 
 
 class TimeseriesListView {
@@ -167,8 +167,7 @@ class TimeseriesListView {
         let tsAlreadyLoaded = JSON.parse(timeseriesPropertiesElmt.getAttribute("data-ts-loaded"));
         if (!tsAlreadyLoaded) {
             timeseriesPropertiesElmt.innerHTML = "";
-            let spinner = new Spinner();
-            timeseriesPropertiesElmt.appendChild(spinner);
+            timeseriesPropertiesElmt.appendChild(new Spinner());
 
             let retrievePropertiesUrl = flaskES6.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId});
             let fetcher = new Fetcher();
@@ -190,8 +189,7 @@ class TimeseriesListView {
         let tsAlreadyLoaded = JSON.parse(timeseriesStructuralElementsElmt.getAttribute("data-ts-loaded"));
         if (!tsAlreadyLoaded) {
             timeseriesStructuralElementsElmt.innerHTML = "";
-            let spinner = new Spinner();
-            timeseriesStructuralElementsElmt.appendChild(spinner);
+            timeseriesStructuralElementsElmt.appendChild(new Spinner());
 
             let retrieveStructuralElementsUrl = flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId});
             let fetcher = new Fetcher();

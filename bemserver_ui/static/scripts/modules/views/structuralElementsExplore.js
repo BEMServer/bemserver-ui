@@ -1,6 +1,6 @@
 import { Fetcher } from "../fetcher.js";
 import { flaskES6, signedUser } from "../../app.js";
-import { Spinner } from "./spinner.js";
+import { Spinner } from "../components/spinner.js";
 
 
 class StructuralElementsExploreView {
@@ -132,8 +132,7 @@ class StructuralElementsExploreView {
 
     #renderGeneral(id, type, path) {
         this.#generalTabContentElmt.innerHTML = "";
-        let spinner = new Spinner();
-        this.#generalTabContentElmt.appendChild(spinner);
+        this.#generalTabContentElmt.appendChild(new Spinner());
 
         let retrieveDataUrl = flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id});
         let fetcher = new Fetcher();
@@ -150,8 +149,7 @@ class StructuralElementsExploreView {
 
     #renderProperties(id, type, path) {
         this.#propertiesTabContentElmt.innerHTML = "";
-        let spinner = new Spinner();
-        this.#propertiesTabContentElmt.appendChild(spinner);
+        this.#propertiesTabContentElmt.appendChild(new Spinner());
 
         let retrievePropertiesUrl = flaskES6.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id});
         let fetcher = new Fetcher();
