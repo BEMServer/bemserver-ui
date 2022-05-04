@@ -1,4 +1,4 @@
-import { ModalConfirm } from "./modalConfirm.js";
+import { ModalConfirm } from "./components/modalConfirm.js";
 
 
 class FormController {
