@@ -342,8 +342,9 @@ class Pagination extends HTMLUListElement {
 
     #renderPageItemElements() {
         for (let pageItemNumber = this.#startPageItem ; pageItemNumber <= this.#endPageItem ; pageItemNumber += 1) {
-            let isActive = this.#page == pageItemNumber;
-            let pageItemElmt = new PaginationItem({isActive: isActive, page: pageItemNumber, title: `Page ${pageItemNumber}`, innerHTML: pageItemNumber.toString()});
+            let isEnabled = this.#totalItems > 0;
+            let isActive = this.#page == pageItemNumber && isEnabled;
+            let pageItemElmt = new PaginationItem({isActive: isActive, isEnabled: isEnabled, page: pageItemNumber, title: `Page ${pageItemNumber}`, innerHTML: pageItemNumber.toString()});
             if (isActive) {
                 this.#currentActivePageItemElmt = pageItemElmt;
             }
