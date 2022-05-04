@@ -2,7 +2,7 @@ import { signedUser } from "./modules/signedUserData.js";
 import { FlaskES6 } from "./modules/flaskES6.js";
 import { Sidebar } from "./modules/sidebar.js";
 import { FormController } from "./modules/formController.js";
-import { CampaignSelectorView } from "./modules/views/campaignSelector.js";
+import { CampaignSelectorView } from "./modules/views/campaigns/selector.js";
 
 
 const campaignSelector = new CampaignSelectorView();
