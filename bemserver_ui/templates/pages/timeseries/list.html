@@ -5,8 +5,16 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
+<div class="d-lg-flex d-grid gap-2">
+    <div class="hstack gap-2">
+        {% if signed_user.is_admin %}
+        <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary" title="Manage timeseries structural elements">Manage structural elements</a>
+        {% endif %}
+    </div>
+    <div class="vr d-none d-lg-block mx-2"></div>
+    <div class="hstack gap-2">
+        <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary mx-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
+    </div>
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -103,6 +111,9 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="properties-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#properties-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="properties-tabcontent-{{ x.id }}">Properties</button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="locations-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#locations-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="locations-tabcontent-{{ x.id }}">Locations</button>
+                                </li>
                             </ul>
                             <div class="tab-content overflow-auto border border-top-0 bg-white mb-3">
                                 <div class="tab-pane fade show active p-3" id="general-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="general-tab-{{ x.id }}">
@@ -115,6 +126,9 @@
                                 </div>
                                 <div class="tab-pane fade p-3" id="properties-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="properties-tab-{{ x.id }}">
                                     <div id="timeseriesProperties-{{ x.id }}" data-ts-loaded="false"></div>
+                                </div>
+                                <div class="tab-pane fade p-3" id="locations-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="locations-tab-{{ x.id }}">
+                                    <div id="timeseriesStructuralElements-{{ x.id }}" data-ts-loaded="false"></div>
                                 </div>
                             </div>
                         </div>

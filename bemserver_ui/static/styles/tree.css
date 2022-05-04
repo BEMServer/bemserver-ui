@@ -15,7 +15,17 @@
 }
 
 .nav-tree-item-link:hover,
-.nav-tree-item-link.active {
+.nav-tree-item-link.active,
+.nav-tree-item-link.dragging {
     background-color: #0088db;
     color: #ffffff;
+}
+
+.nav-tree-item-link[draggable=true] {
+    cursor: grab;
+}
+
+.nav-tree-item-link.dragging {
+    cursor: grabbing;
+    opacity: 0.4;
 }

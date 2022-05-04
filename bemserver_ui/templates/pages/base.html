@@ -33,8 +33,10 @@
             </div>
             <hr class="d-lg-none d-block">
             {% endblock main_title %}
-            {{ mac_flash.display_messages() -}}
-            {% filter indent(width=12) %}
+            <div id="messages">
+                {{- mac_flash.display_messages() }}
+            </div>
+            {% filter indent(width=12, first=True) %}
             {% block main_content %}
             {% endblock main_content %}
             {% endfilter %}

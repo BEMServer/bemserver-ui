@@ -1,0 +1,103 @@
+{% import "macros/tree.html" as mac_tree %}
+{% extends "pages/base.html" %}
+
+{% set title = "Timeseries" %}
+{% set subtitle = "Manage location in structural elements" %}
+
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row h-100">
+        <div class="col-12 col-lg-7 col-xl-8 pb-3 pb-lg-0">
+            <h5>Timeseries</h5>
+            <div class="row mb-3 invisible d-none">
+                <div class="col d-flex align-items-center gap-2">
+                    <label class="form-label m-0" for="search">Search</label>
+                    <input type="text" class="form-control" id="search" name="search">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
+                    <div class="d-flex justify-content-between align-items-center gap-4 w-100">
+                        <div id="tsPageSizeSelectorContainer"></div>
+                        <small id="tsItemsCount" class="text-nowrap opacity-75"></small>
+                    </div>
+                    <div id="tsPaginationContainer"></div>
+                </nav>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="tsListContainer"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <h5>
+                Locations available
+                <sup><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#helpLocations" aria-expanded="false" aria-controls="helpLocations"><i class="bi bi-question-diamond"></i></a></sup>
+            </h5>
+            <div class="collapse mb-3" id="helpLocations">
+                <div class="alert alert-info pb-0" role="alert">
+                    <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                    <p class="ms-3">Click on a node in sites or zones tree to <span class="fw-bold fst-italic">drag and drop it over a timeseries</span> you want to locate.</p>
+                </div>
+            </div>
+            <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="true"><i class="bi bi-building"></i> Sites / Buildings...</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="false"><i class="bi bi-bullseye"></i> Zones</button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
+                <div class="tab-pane fade show active p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
+                    <div id="treeSitesToolbar" class="d-flex justify-content-end gap-3">
+                        <a id="treeSitesCollapseAll" class="link-primary text-decoration-none" role="button"><i class="bi bi-arrows-collapse"></i> <small>collapse all</small></a>
+                        <a id="treeSitesExpandAll" class="link-primary text-decoration-none" role="button"><i class="bi bi-arrows-expand"></i> <small>expand all</small></a>
+                    </div>
+                    {% filter indent(width=20) %}
+                    {{ mac_tree.render_tree("treeSites", sites_tree_data) }}
+                    {% endfilter %}
+                </div>
+                <div class="tab-pane fade p-3" id="zones-tabcontent" role="tabpanel" aria-labelledby="zones-tab">
+                    {% filter indent(width=20) %}
+                    {{ mac_tree.render_tree("treeZones", zones_tree_data) }}
+                    {% endfilter %}        
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
+    import { TimeseriesManageStructuralElementsView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/manageStructuralElements.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        let treeSites = new Tree("treeSites");
+        let treeZones = new Tree("treeZones");
+        let tsManageStructuralElementsView = new TimeseriesManageStructuralElementsView({treeStructuralElements: treeSites, treeZones: treeZones});
+
+        treeSites.collapseAll();
+        treeZones.collapseAll();
+
+        tsManageStructuralElementsView.refresh();
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

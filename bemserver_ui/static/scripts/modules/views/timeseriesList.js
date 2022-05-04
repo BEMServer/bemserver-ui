@@ -62,6 +62,7 @@ class TimeseriesListView {
             accordionTimeseriesBtnElmt.addEventListener("show.bs.collapse", function(event) {
                 let tsId = event.target.getAttribute("data-ts-id");
                 this.#renderProperties(tsId);
+                this.#renderStructuralElements(tsId);
             }.bind(this));
         }
     }
@@ -118,6 +119,42 @@ class TimeseriesListView {
 </div>`;
     }
 
+    #getStructuralElementsHTML(data, tsId) {
+        let contentHTML = ``;
+
+        let totalLinks = 0;
+
+        for (let [structuralElementType, tsStructElmtLinks] of Object.entries(data.data)) {
+            let structuralElementContentHTML = ``;
+            let nbLinks = 0;
+            for (let tsStructElmtLink of tsStructElmtLinks) {
+                structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white text-muted px-2 py-1 gap-1">
+<i class="bi bi-${structuralElementType == "zone" ? "bullseye" : "building"}"></i>
+<span class="fw-bold">${tsStructElmtLink.structural_element.name}</span>`;
+                if (structuralElementType != "zone") {
+                    structuralElementContentHTML += `<small class="opacity-75">${tsStructElmtLink.structural_element.path}</small>`;
+                }
+                structuralElementContentHTML += `</div>`;
+
+                totalLinks += 1;
+                nbLinks += 1;
+            }
+
+            contentHTML += `<div class="mb-3">
+    <h6 class="fw-bold text-capitalize text-muted">${structuralElementType}s <span class="badge bg-secondary">${nbLinks}</span></h6>
+    <div class="d-flex gap-2 mx-2">${structuralElementContentHTML}</div>
+</div>`;
+        }
+
+        if (totalLinks <= 0) {
+            contentHTML = `<p class="fst-italic">No locations</p>`;
+        }
+
+        return `<div class="mb-3">
+    ${contentHTML}
+</div>`;
+    }
+
     #getErrorHTML(error) {
         return `<div class="alert alert-danger" role="alert">
     <i class="bi bi-x-octagon me-2"></i>
@@ -143,6 +180,29 @@ class TimeseriesListView {
             ).catch(
                 (error) => {
                     timeseriesPropertiesElmt.innerHTML = this.#getErrorHTML(error.message);
+                }
+            );
+        }
+    }
+
+    #renderStructuralElements(tsId) {
+        let timeseriesStructuralElementsElmt = document.getElementById(`timeseriesStructuralElements-${tsId}`);
+        let tsAlreadyLoaded = JSON.parse(timeseriesStructuralElementsElmt.getAttribute("data-ts-loaded"));
+        if (!tsAlreadyLoaded) {
+            timeseriesStructuralElementsElmt.innerHTML = "";
+            let spinner = new Spinner();
+            timeseriesStructuralElementsElmt.appendChild(spinner);
+
+            let retrieveStructuralElementsUrl = flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId});
+            let fetcher = new Fetcher();
+            fetcher.get(retrieveStructuralElementsUrl).then(
+                (data) => {
+                    timeseriesStructuralElementsElmt.innerHTML = this.#getStructuralElementsHTML(data, tsId);
+                    timeseriesStructuralElementsElmt.setAttribute("data-ts-loaded", true);
+                }
+            ).catch(
+                (error) => {
+                    timeseriesStructuralElementsElmt.innerHTML = this.#getErrorHTML(error.message);
                 }
             );
         }
