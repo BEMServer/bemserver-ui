@@ -20,14 +20,6 @@
             </ul>
             {% if g.campaign_ctxt.has_campaign %}
             <ul class="nav nav-pills flex-column gap-1 mt-3">
-                {% if signed_user.is_admin %}
-                <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center gap-1">
-                        <a class="nav-link w-100" href="{{ url_for('campaign_scopes.list') }}" title="View campaign scopes"><i class="bi bi-box"></i> Campaign scopes</a>
-                        <a class="nav-link" href="{{ url_for('campaign_scopes.create') }}" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i></a>
-                    </div>
-                </li>
-                {% endif %}
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('structural_elements.explore') }}"><i class="bi bi-building"></i> Sites</a>
@@ -49,6 +41,14 @@
                         {% endif %}
                     </div>
                 </li>
+                {% if signed_user.is_admin %}
+                <li class="nav-item">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
+                        <a class="nav-link w-100" href="{{ url_for('campaign_scopes.list') }}" title="View campaign scopes"><i class="bi bi-box"></i> Campaign scopes</a>
+                        <a class="nav-link" href="{{ url_for('campaign_scopes.create') }}" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i></a>
+                    </div>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('timeseries.list') }}" title="View timeseries"><i class="bi bi-clock-history"></i> Timeseries</a>
