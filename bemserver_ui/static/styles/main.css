@@ -67,5 +67,10 @@ h2 {
     background-color: #95c11a33 !important;
 }
 .drop-not-allowed {
-    background-color: rgba(var(--bs-danger-rgb), 0.7) !important;
+    background-color: var(--bs-gray-400) !important;
+}
+
+.dragging-duplicate {
+    background-color: rgba(var(--bs-warning-rgb), 0.4) !important;
+    color: var(--bs-gray-dark) !important;
 }

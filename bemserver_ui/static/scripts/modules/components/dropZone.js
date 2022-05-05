@@ -22,17 +22,18 @@ class DropZone extends HTMLDivElement {
         this.addEventListener("dragover", function(event) {
             event.preventDefault();
 
-            let isDuplicate = false;
-            if (!this.#allowDuplicates) {
-                let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
-                isDuplicate = this.querySelector(`#${jsonData.sourceNodeId}`) != null;
-            }
+            let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
+            let sourceElmt = this.querySelector(`#${jsonData.sourceNodeId}`);
 
+            let isDuplicate = (!this.#allowDuplicates && sourceElmt != null);
             if (isDuplicate) {
+                sourceElmt.classList.add("dragging-duplicate");
                 this.classList.add("drop-not-allowed");
+                event.dataTransfer.dropEffect = "none";
             }
             else {
                 this.classList.add("dragover");
+                event.dataTransfer.dropEffect = "copy";
             }
 
             let dragOverEvent = new CustomEvent("itemDragOver", {
@@ -51,6 +52,10 @@ class DropZone extends HTMLDivElement {
 
             this.classList.remove("dragover");
             this.classList.remove("drop-not-allowed");
+
+            let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
+            let sourceElmt = this.querySelector(`#${jsonData.sourceNodeId}`);
+            sourceElmt?.classList.remove("dragging-duplicate");
 
             let dragLeaveEvent = new CustomEvent("itemDragLeave", {
                 detail: {
