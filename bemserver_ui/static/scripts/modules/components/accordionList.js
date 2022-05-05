@@ -6,18 +6,20 @@ class AccordionListItem extends HTMLDivElement {
     #itemId = null;
     #itemIcon = null;
     #itemTitle = null;
+    #itemSubtitle = null;
 
     #collapseElmt = null;
     #bodyContainerElmt = null;
 
     #bsCollapse = null;
 
-    constructor(itemId, itemIcon, itemTitle) {
+    constructor(itemId, itemIcon, itemTitle, itemSubtitle = null) {
         super();
 
         this.#itemId = itemId;
         this.#itemIcon = itemIcon;
         this.#itemTitle = itemTitle;
+        this.#itemSubtitle = itemSubtitle;
     }
 
     connectedCallback() {
@@ -50,6 +52,7 @@ class AccordionListItem extends HTMLDivElement {
 
         // Build title.
         let itemTitleContainerElmt = document.createElement("div");
+        itemTitleContainerElmt.classList.add("d-flex", "gap-1", "text-nowrap");
         let itemTitleIconElmt = document.createElement("i");
         itemTitleIconElmt.classList.add("bi", `bi-${this.#itemIcon}`, "me-1");
         itemTitleContainerElmt.appendChild(itemTitleIconElmt);
@@ -57,6 +60,12 @@ class AccordionListItem extends HTMLDivElement {
         itemTitleTextElmt.classList.add("fw-bold");
         itemTitleTextElmt.innerText = this.#itemTitle;
         itemTitleContainerElmt.appendChild(itemTitleTextElmt);
+        if (this.#itemSubtitle != null) {
+            let itemSubtitleElmt = document.createElement("span");
+            itemSubtitleElmt.classList.add("opacity-50");
+            itemSubtitleElmt.innerText = this.#itemSubtitle;
+            itemTitleContainerElmt.appendChild(itemSubtitleElmt);
+        }
         itemHeaderBtnContentElmt.appendChild(itemTitleContainerElmt);
 
         this.#bodyContainerElmt = document.createElement("div");
@@ -126,7 +135,7 @@ class AccordionList extends HTMLDivElement {
     render(data) {
         this.innerHTML = "";
         for (let row of data) {
-            let accordionListItemElmt = new AccordionListItem(row.id, row.icon, row.name);
+            let accordionListItemElmt = new AccordionListItem(row.id, row.icon, row.name, row.subtitle);
             this.appendChild(accordionListItemElmt);
         }
         if (this.childElementCount <= 0) {

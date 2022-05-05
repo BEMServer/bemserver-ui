@@ -250,6 +250,9 @@ class TimeseriesManageStructuralElementsView {
             (data) => {
                 for (let row of data.data) {
                     row.icon = "clock-history";
+                    if (row.unit_symbol != null) {
+                        row.subtitle = `[${row.unit_symbol}]`;
+                    }
                 }
                 this.#tsListElmt.render(data.data);
 
