@@ -3,6 +3,14 @@ body,
     min-width: 420px;
 }
 
+.app-messages {
+    z-index: 1031;
+    max-height: 150px;
+}
+.app-messages > .alert {
+    min-width: 75vh !important;
+}
+
 .app-logo {
     min-width: 75px !important;
     max-width: 150px !important;

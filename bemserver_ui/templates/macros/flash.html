@@ -23,7 +23,7 @@
 
 {% macro display_messages() %}
     {% for category, message in get_flashed_messages(with_categories=True) %}
-        <div class="alert alert-{{ FLASH_MESSAGE_DATA[category]['css'] }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ FLASH_MESSAGE_DATA[category]['css'] }} alert-dismissible fade show shadow" role="alert">
             <i class="bi bi-{{ FLASH_MESSAGE_DATA[category]['icon'] }} me-2"></i>
             {{ message|safe }}
             {% set validation_errors = session.pop("_validation_errors", {}) %}

@@ -25,3 +25,11 @@ body {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+.app-messages {
+    z-index: 1031;
+    max-height: 150px;
+}
+.app-messages > .alert {
+    min-width: 75vh !important;
+}

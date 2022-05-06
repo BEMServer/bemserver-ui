@@ -87,7 +87,7 @@ class FlashMessage extends HTMLDivElement {
     connectedCallback() {
         this.#initOverrideFromAttributes();
 
-        this.classList.add("alert", `alert-${this.#messageClass}`, "fade", "show");
+        this.classList.add("alert", `alert-${this.#messageClass}`, "fade", "show", "shadow");
         this.setAttribute("role", "alert");
 
         let iconElmt = document.createElement("i");
