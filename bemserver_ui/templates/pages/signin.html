@@ -33,7 +33,21 @@
         </div>
     </div>
 </div>
-<div class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3 app-messages">
+<div id="messages" class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3 app-messages">
     {{- mac_flash.display_messages() }}
 </div>
 {% endblock body_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { FlashTimer } from "{{ url_for('static', filename='scripts/modules/flashTimer.js') }}";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let flashTimer = new FlashTimer();
+        flashTimer.bind();
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

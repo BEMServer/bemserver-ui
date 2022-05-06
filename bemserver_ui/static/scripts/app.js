@@ -4,6 +4,7 @@ import { Sidebar } from "./modules/sidebar.js";
 import { FormController } from "./modules/formController.js";
 import { CampaignSelectorView } from "./modules/views/campaigns/selector.js";
 import { flaskEndpoints } from "./modules/flaskES6-endpoints.js";
+import { FlashTimer } from "./modules/flashTimer.js";
 
 
 const flaskES6 = new FlaskES6(flaskEndpoints);
@@ -14,10 +15,12 @@ document.addEventListener("DOMContentLoaded", function() {
     let campaignSelector = new CampaignSelectorView();
     let sidebar = new Sidebar();
     let formCtrl = new FormController();
+    let flashTimer = new FlashTimer();
 
     sidebar.refresh();
     campaignSelector.hide();
     formCtrl.bind();
+    flashTimer.bind();
 
 }, false);
 
