@@ -14,36 +14,26 @@
 {{ super() -}}
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-4 p-2">
-            <div class="d-flex align-items-center h-100">
-                <img class="img-fluid mx-auto d-block" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
-            </div>
-        </div>
-        <div class="col-auto">
-            <div class="row mt-2">
-                <div class="col-12">
-                    <h1 class="h3 text-center">Sign in to BEMServer</h1>
-                </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-12">
-                    <form class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign=True) }}" method="POST">
-                        {{ mac_flash.display_messages() -}}
-                        <div class="form-floating">
-                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
-                            <label for="email">Email address</label>
-                        </div>
-                        <div class="form-floating">
-                            <input type="password" class="form-control" id="pwd" name="pwd" placeholder="Password" required>
-                            <label for="pwd">Password</label>
-                        </div>
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary w-100">Sign in</button>
-                        </div>
-                    </form>
-                </div>
+        <div class="col d-lg-flex d-grid justify-content-center gap-3">
+            <img class="mx-auto m-lg-0 my-0 my-lg-auto" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
+            <div class="vstack gap-2 p-4" style="min-width: 370px; max-width: 400px;">
+                <h1 class="h3 text-center d-none d-lg-block">Sign in to BEMServer</h1>
+                <form id="signinForm" class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign=True) }}" method="POST">
+                    <div class="form-floating">
+                        <input type="email" form="signinForm" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
+                        <label for="email">Email address</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" form="signinForm" class="form-control" id="pwd" name="pwd" placeholder="Password" required>
+                        <label for="pwd">Password</label>
+                    </div>
+                </form>
+                <button type="submit" form="signinForm" class="btn btn-primary w-100">Sign in</button>
             </div>
         </div>
     </div>
+</div>
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 4000;">
+    {{ mac_flash.display_messages() -}}
 </div>
 {% endblock body_content %}

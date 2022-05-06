@@ -1,10 +1,14 @@
+html,
+body {
+    background-color: #f3f8e9 !important;
+}
+
 body {
     display: flex;
     align-items: center;
     padding-top: 40px;
     padding-bottom: 40px;
-    min-width: 350px;
-    background-color: #f3f8e9 !important;
+    min-width: 400px;
 }
 
 .form-signin .form-floating:focus-within {
