@@ -12,7 +12,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid" style="height: calc(100% - 75px);">
+<div class="container-fluid">
     <div class="row d-sm-flex d-grid mb-3 mb-sm-0 h-100">
         <div class="col col-sm-6 pb-3 pb-sm-0">
             <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
@@ -23,7 +23,7 @@
                     <button class="nav-link" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="false"><i class="bi bi-bullseye"></i> Zones</button>
                 </li>
             </ul>
-            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent" style="height: 80%;">
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
                 <div class="tab-pane fade show active p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
                     <div id="treeSitesToolbar" class="d-flex justify-content-end gap-3">
                         <a id="treeSitesCollapseAll" class="link-primary text-decoration-none" role="button"><i class="bi bi-arrows-collapse"></i> <small>collapse all</small></a>
@@ -48,10 +48,14 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="false">Properties</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="timeseries-tab" data-bs-toggle="tab" data-bs-target="#timeseries-tabcontent" type="button" role="tab" aria-controls="timeseries-tabcontent" aria-selected="false">Timeseries</button>
+                </li>
             </ul>
-            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabPropertiesContent" style="height: 80%;">
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabPropertiesContent">
                 <div class="tab-pane fade show active p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab"></div>
                 <div class="tab-pane fade p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab"></div>
+                <div class="tab-pane fade p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab"></div>
             </div>
         </div>
     </div>

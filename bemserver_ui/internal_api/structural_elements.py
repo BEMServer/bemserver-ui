@@ -56,3 +56,28 @@ def retrieve_property_data(type, id):
         "type": type,
         "properties": properties,
     })
+
+
+@blp.route("/<string:type>/<int:id>/timeseries")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_timeseries(type, id):
+    api_prop_resource = getattr(flask.g.api_client, f"timeseries_by_{type}s")
+    try:
+        ts_by_type_resp = api_prop_resource.getall(**{f"{type}_id": id})
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
+
+    timeseries = []
+    for ts_by_type in ts_by_type_resp.data:
+        try:
+            ts_resp = flask.g.api_client.timeseries.getone(
+                id=ts_by_type["timeseries_id"])
+        except bac.BEMServerAPINotFoundError:
+            pass
+        timeseries.append(ts_resp.data)
+
+    return flask.jsonify({
+        "type": type,
+        "timeseries": timeseries,
+    })

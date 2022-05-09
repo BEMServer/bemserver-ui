@@ -7,16 +7,20 @@ class StructuralElementsExploreView {
 
     #tabSitesElmts = null;
     #tabPropertiesElmts = null;
+    #tabTimeseriesElmts = null;
     #generalTabContentElmt = null;
     #propertiesTabContentElmt = null;
+    #timeseriesTabContentElmt = null;
 
     #tabSitesSelected = null;
     #tabPropertiesSelected = null;
+    #tabTimeseriesSelected = null;
 
     #selectedItemsPerTab = {};
     #renderPerTab = {
         "general-tab": this.#renderGeneral.bind(this),
         "properties-tab": this.#renderProperties.bind(this),
+        "timeseries-tab": this.#renderTimeseries.bind(this),
     }
     #alreadyLoadedPerTab = {};
 
@@ -28,8 +32,10 @@ class StructuralElementsExploreView {
     #cacheDOM() {
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
         this.#tabPropertiesElmts = [].slice.call(document.querySelectorAll("#tabProperties button[data-bs-toggle='tab']"));
+        this.#tabTimeseriesElmts = [].slice.call(document.querySelectorAll("#tabTimeseries button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
         this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
+        this.#timeseriesTabContentElmt = document.getElementById("timeseries-tabcontent");
     }
 
     #initEventListeners() {
@@ -56,6 +62,18 @@ class StructuralElementsExploreView {
             tabElmt.addEventListener("shown.bs.tab", function (event) {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabPropertiesSelected = event.target;
+                this.refresh();
+            }.bind(this));
+        }
+
+        for (let tabElmt of this.#tabTimeseriesElmts) {
+            if (tabElmt.classList.contains("active")) {
+                this.#tabTimeseriesSelected = tabElmt;
+            }
+            this.#alreadyLoadedPerTab[tabElmt.id] = false;
+            tabElmt.addEventListener("shown.bs.tab", function (event) {
+                // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
+                this.#tabTimeseriesSelected = event.target;
                 this.refresh();
             }.bind(this));
         }
@@ -118,6 +136,24 @@ class StructuralElementsExploreView {
 </div>`;
     }
 
+    #getTimeseriesHTML(data, id) {
+        let contentHTML = ``;
+        if (data.timeseries.length > 0) {
+            contentHTML += `<p class="text-muted text-end">Items count: ${data.timeseries.length}</p>`;
+            for (let ts_data of data.timeseries) {
+                let tsHelp = ts_data.description != "" ? ` <sup><abbr title="${ts_data.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
+                contentHTML += `<li><span class="fw-bold">${ts_data.name}</span><span class="opacity-50 mx-1">[${ts_data.unit_symbol}]</span>${tsHelp}</li>`;
+            }
+        }
+        else {
+            contentHTML = `<p class="fst-italic">No data</p>`;
+        }
+
+        return `<ul class="list-unstyled mb-3">
+    ${contentHTML}
+</ul>`;
+    }
+
     #getErrorHTML(error) {
         return `<div class="alert alert-danger" role="alert">
     <i class="bi bi-x-octagon me-2"></i>
@@ -160,6 +196,23 @@ class StructuralElementsExploreView {
         ).catch(
             (error) => {
                 this.#propertiesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
+            }
+        );
+    }
+
+    #renderTimeseries(id, type, path) {
+        this.#timeseriesTabContentElmt.innerHTML = "";
+        this.#timeseriesTabContentElmt.appendChild(new Spinner());
+
+        let retrieveTimeseriesUrl = flaskES6.urlFor(`api.structural_elements.retrieve_timeseries`, {type: type, id: id});
+        let fetcher = new Fetcher();
+        fetcher.get(retrieveTimeseriesUrl).then(
+            (data) => {
+                this.#timeseriesTabContentElmt.innerHTML = this.#getTimeseriesHTML(data, id);
+            }
+        ).catch(
+            (error) => {
+                this.#timeseriesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
             }
         );
     }
