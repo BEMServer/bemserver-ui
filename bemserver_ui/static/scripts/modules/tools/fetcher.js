@@ -1,9 +1,18 @@
 class Fetcher {
 
+    _abortController = null;
+
     constructor() {
     }
 
-    async #handleErrors(response) {
+    cancel() {
+        if (this._abortController != null) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
+    }
+
+    async _handleErrors(response) {
         if (!response.ok) {
             if (response.status == 401) {
                 // Just reload the current page, server knows what to do.
@@ -20,10 +29,11 @@ class Fetcher {
     }
 
     async get(url) {
+        this._abortController = new AbortController();
         return window.fetch(
-            url
+            url, { signal: this._abortController.signal }
         ).then(
-            (response) => this.#handleErrors(response)
+            (response) => this._handleErrors(response)
         ).then(
             (response) => {
                 return response.json();
@@ -42,7 +52,7 @@ class Fetcher {
                 body: JSON.stringify(payload),
             }
         ).then(
-            (response) => this.#handleErrors(response)
+            (response) => this._handleErrors(response)
         ).then(
             (response) => {
                 return response.json();

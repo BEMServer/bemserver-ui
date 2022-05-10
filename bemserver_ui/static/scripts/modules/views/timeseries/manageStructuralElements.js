@@ -14,6 +14,8 @@ class TimeseriesManageStructuralElementsView {
     #fetcher = null;
 
     #messagesElmt = null;
+    #searchElmt = null;
+    #clearSearchBtnElmt = null;
 
     #tsPageSizeSelectorContainerElmt = null;
     #tsPageSizeSelectorElmt = null;
@@ -47,6 +49,8 @@ class TimeseriesManageStructuralElementsView {
 
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
+        this.#searchElmt = document.getElementById("search");
+        this.#clearSearchBtnElmt = document.getElementById("clear");
 
         this.#tsPageSizeSelectorContainerElmt = document.getElementById("tsPageSizeSelectorContainer");
         this.#tsItemsCountElmt = document.getElementById("tsItemsCount");
@@ -69,10 +73,29 @@ class TimeseriesManageStructuralElementsView {
         this.#tsPaginationContainerElmt.addEventListener("pageItemClick", function(event) {
             event.preventDefault();
 
-            this.#tsItemsCountElmt.innerHTML = "";
-            this.#tsItemsCountElmt.appendChild(new Spinner({isSmallSize: true}));
-            this.#tsListElmt.setLoading();
             this.refresh({"page": event.detail.page});
+        }.bind(this));
+
+        this.#searchElmt.addEventListener("input", function(event) {
+            event.preventDefault();
+
+            if (event.target.value != "") {
+                this.#clearSearchBtnElmt.classList.remove("d-none", "invisible");
+            }
+            else {
+                this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+            }
+
+            this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value, "search": event.target.value});
+        }.bind(this));
+
+        this.#clearSearchBtnElmt.addEventListener("click", function(event) {
+            event.preventDefault();
+
+            this.#searchElmt.value = "";
+            this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+
+            this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value});
         }.bind(this));
 
         this.#tsListElmt.addEventListener("accordionItemOpen", function(event) {
@@ -237,6 +260,8 @@ class TimeseriesManageStructuralElementsView {
     }
 
     refresh(options = {}) {
+        this.#fetcher.cancel();
+
         if (this.#tsPaginationElmt == null) {
             this.#tsPaginationContainerElmt.innerHTML = "";
             this.#tsPaginationContainerElmt.appendChild(new Spinner());
@@ -246,6 +271,12 @@ class TimeseriesManageStructuralElementsView {
         this.#tsListElmt.setLoading();
 
         let fetcherOptions = {"page_size": Parser.parseIntOrDefault(options.page_size, this.#tsPageSizeSelectorElmt.current), "page": Parser.parseIntOrDefault(options.page, 1)};
+        if ("search" in options) {
+            fetcherOptions["search"] = options.search;
+        }
+        else if (this.#searchElmt.value != "") {
+            fetcherOptions["search"] = this.#searchElmt.value;
+        }
         this.#fetcher.get(flaskES6.urlFor(`api.timeseries.retrieve_list`, fetcherOptions)).then(
             (data) => {
                 for (let row of data.data) {
@@ -285,8 +316,10 @@ class TimeseriesManageStructuralElementsView {
             }
         ).catch(
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString()});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                if (error.name != "AbortError") {
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
+                }
             }
         );
     }

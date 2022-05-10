@@ -19,6 +19,8 @@ def retrieve_list():
         filters["page_size"] = flask.request.args["page_size"]
     if "page" in flask.request.args:
         filters["page"] = flask.request.args["page"]
+    if "search" in flask.request.args:
+        filters["in_name"] = flask.request.args["search"]
 
     try:
         # Get timeseries list.
