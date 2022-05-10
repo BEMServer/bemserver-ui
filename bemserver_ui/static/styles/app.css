@@ -8,7 +8,7 @@ body,
     max-height: 150px;
 }
 .app-messages > .alert {
-    min-width: 75vh !important;
+    min-width: 40vw !important;
 }
 
 .app-logo {
