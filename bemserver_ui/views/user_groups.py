@@ -154,6 +154,57 @@ def remove_user(id):
     return flask.redirect(flask.request.args["next"])
 
 
+@blp.route("/<int:id>/manage_campaigns", methods=["GET", "POST"])
+@auth.signin_required(roles=[Roles.admin])
+def manage_campaigns(id):
+    if flask.request.method == "POST":
+        campaign_ids = [x.split("-")[1] for x in flask.request.form.keys()]
+        for campaign_id in campaign_ids:
+            payload = {"campaign_id": campaign_id, "user_group_id": id}
+            try:
+                flask.g.api_client.user_groups_by_campaigns.create(payload)
+            except bac.BEMServerAPIValidationError as exc:
+                flask.abort(
+                    409, description=(
+                        "Error while setting the campaign for a user group!"),
+                    response=exc.errors)
+        if len(campaign_ids) > 0:
+            flask.flash("Selected campaign(s) added for user group!", "success")
+
+    try:
+        user_group = flask.g.api_client.user_groups.getone(id)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User group not found!")
+
+    # Get campaigns for user group.
+    ugbc_resp = flask.g.api_client.user_groups_by_campaigns.getall(user_group_id=id)
+    campaigns = []
+    campaign_ids = []
+    for x in ugbc_resp.data:
+        try:
+            campaign_resp = flask.g.api_client.campaigns.getone(id=x["campaign_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a campaign has been deleted meanwhile.
+            pass
+        else:
+            campaign_data = campaign_resp.data
+            campaign_data["rel_id"] = x["id"]
+            campaigns.append(campaign_data)
+            campaign_ids.append(campaign_data["id"])
+
+    # Get available campaigns (all campaigns - group's campaigns).
+    all_campaigns_resp = flask.g.api_client.campaigns.getall()
+    available_campaigns = []
+    for x in all_campaigns_resp.data:
+        if x["id"] not in campaign_ids:
+            available_campaigns.append(x)
+
+    return flask.render_template(
+        "pages/user_groups/manage_campaigns.html", user_group=user_group.data,
+        etag=user_group.etag, campaigns=campaigns,
+        available_campaigns=available_campaigns)
+
+
 @blp.route("/<int:id>/manage_campaign_scopes", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context

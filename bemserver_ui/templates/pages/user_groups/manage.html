@@ -8,7 +8,10 @@
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid justify-content-center gap-2 mx-auto">
     {% if signed_user.is_admin %}
-    <a href="{{ url_for('user_groups.manage_campaign_scopes', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage campaign scopes">Manage campaign scopes</a>
+    <div class="hstack gap-2 mx-auto">
+        <a href="{{ url_for('user_groups.manage_campaigns', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage campaigns">Manage campaigns</a>
+        <a href="{{ url_for('user_groups.manage_campaign_scopes', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage campaign scopes">Manage campaign scopes</a>
+    </div>
     <div class="vr d-none d-lg-block mx-2"></div>
     {% endif %}
     <div class="hstack gap-2 mx-auto">

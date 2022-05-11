@@ -1,0 +1,105 @@
+{% extends "pages/base.html" %}
+
+{% set title = user_group.name %}
+{% set subtitle = "Manage campaigns" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-xl-flex d-grid justify-content-center gap-2 mx-auto">
+    <div class="hstack gap-2 mx-auto">
+        {% if signed_user.is_admin %}
+        <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+    </div>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col pb-3 pb-lg-0">
+            <h5>
+                Campaigns <span class="badge bg-secondary">{{ campaigns|length }}</span>
+                {% if campaigns|length > 0 %}
+                <sup><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#helpMembers" aria-expanded="false" aria-controls="helpMembers"><i class="bi bi-question-diamond"></i></a></sup>
+                {% endif %}
+            </h5>
+            {% if campaigns|length > 0 %}
+            <div class="collapse mb-3" id="helpMembers">
+                <div class="alert alert-info pb-0" role="alert">
+                    <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                    <p class="ms-3">Click on <span class="btn btn-sm btn-outline-danger px-1 py-0"><i class="bi bi-x-lg"></i></span> button to remove a campaign for <span class="fw-bold fst-italic">{{ user_group.name }}</span></p>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap mt-2 gap-2">
+                {% for x in campaigns %}
+                <div class="btn-group bg-white rounded" role="group" aria-label="Actions on campaign">
+                    <a class="btn btn-outline-secondary" role="button" href="{{ url_for('campaigns.view', id=x.id) }}" title="Manage campaign">
+                        <div class="d-flex flex-column justify-content-start">
+                            <span class="text-start"><i class="bi bi-box"></i> {{ x.name }}</span>
+                        </div>
+                    </a>
+                    <form class="btn-group" action="{{ url_for('campaigns.remove_user_group', id=x.id, rel_id=x.rel_id, next=url_for(request.endpoint, id=user_group.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ x.name }}&lt;/mark&gt; campaign for &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
+                        <button class="btn btn-outline-danger" type="submit" title="Remove campaign"><i class="bi bi-x-lg"></i></button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <span class="fst-italic text-muted">none</span>
+            {% endif %}
+        </div>
+        <div class="w-100 d-lg-none d-block"></div>
+        <div class="col">
+            <div class="hstack">
+                <div class="vr d-none d-lg-block me-lg-4"></div>
+                <div class="w-100">
+                    <h5>
+                        Available campaigns <span class="badge bg-secondary">{{ available_campaigns|length }}</span>
+                        {% if available_campaigns|length > 0 %}
+                        <sup><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#helpAvailable" aria-expanded="false" aria-controls="helpAvailable"><i class="bi bi-question-diamond"></i></a></sup>
+                        {% endif %}
+                    </h5>
+                    {% if available_campaigns|length > 0 %}
+                    <div class="collapse mb-3" id="helpAvailable">
+                        <div class="alert alert-info pb-0" role="alert">
+                            <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                            <ol>
+                                <li>Click on the campaigns below to select/unselect them</li>
+                                <li>Click on <div class="btn btn-sm btn-primary">Set campaigns</div> button to set selected campaigns for <span class="fw-bold fst-italic">{{ user_group.name }}</span></li>
+                            </ol>
+                        </div>
+                    </div>
+                    <form id="addCampaignForm" class="d-flex flex-wrap gap-2" action="{{ url_for('user_groups.manage_campaigns', id=user_group.id) }}" method="POST">
+                        {% for x in available_campaigns %}
+                        <input class="btn-check" type="checkbox" id="campaign-{{ x.id }}" name="campaign-{{ x.id }}" autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="campaign-{{ x.id }}">
+                            <div class="d-flex align-items-center gap-3">
+                                <div><i class="bi bi-plus-square-dotted"></i></div>
+                                <div class="vr"></div>
+                                <div class="d-flex flex-column justify-content-start">
+                                    <span class="text-start"><i class="bi bi-box"></i> {{ x.name }}</span>
+                                </div>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </form>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button class="btn btn-sm btn-primary" type="submit" form="addCampaignForm" title="Save">Set campaigns</button>
+                    </div>
+                    {% else %}
+                    <span class="fst-italic text-muted">none</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
