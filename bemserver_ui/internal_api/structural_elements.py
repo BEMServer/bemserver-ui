@@ -6,7 +6,8 @@ from bemserver_ui.extensions import auth, ensure_campaign_context
 
 
 blp = flask.Blueprint(
-    "structural_elements", __name__, url_prefix="/structural_elements")
+    "structural_elements", __name__, url_prefix="/structural_elements"
+)
 
 
 @blp.route("/<string:type>/<int:id>")
@@ -18,11 +19,13 @@ def retrieve_data(type, id):
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description=f"{type} not found!")
 
-    return flask.jsonify({
-        "type": type,
-        "structural_element": ret_resp.data,
-        "etag": ret_resp.etag,
-    })
+    return flask.jsonify(
+        {
+            "type": type,
+            "structural_element": ret_resp.data,
+            "etag": ret_resp.etag,
+        }
+    )
 
 
 @blp.route("/<string:type>/<int:id>/properties")
@@ -47,15 +50,18 @@ def retrieve_property_data(type, id):
     properties = []
     for property_data in property_data_resp.data:
         strut_elmt_property = available_properties[
-            property_data[f"{type}_property_id"]]["structural_element_property"]
+            property_data[f"{type}_property_id"]
+        ]["structural_element_property"]
         for k, v in strut_elmt_property.items():
             property_data[k] = v
         properties.append(property_data)
 
-    return flask.jsonify({
-        "type": type,
-        "properties": properties,
-    })
+    return flask.jsonify(
+        {
+            "type": type,
+            "properties": properties,
+        }
+    )
 
 
 @blp.route("/<string:type>/<int:id>/timeseries")
@@ -72,12 +78,15 @@ def retrieve_timeseries(type, id):
     for ts_by_type in ts_by_type_resp.data:
         try:
             ts_resp = flask.g.api_client.timeseries.getone(
-                id=ts_by_type["timeseries_id"])
+                id=ts_by_type["timeseries_id"]
+            )
         except bac.BEMServerAPINotFoundError:
             pass
         timeseries.append(ts_resp.data)
 
-    return flask.jsonify({
-        "type": type,
-        "timeseries": timeseries,
-    })
+    return flask.jsonify(
+        {
+            "type": type,
+            "timeseries": timeseries,
+        }
+    )

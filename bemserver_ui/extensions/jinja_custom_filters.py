@@ -3,7 +3,6 @@ import datetime as dt
 
 
 def init_app(app):
-
     @app.template_filter("iso_datetime_format")
     def iso_datetime_format(iso_datetime, *, default="unknown"):
         """Convert an ISO datetime to a human readable string.
@@ -13,7 +12,10 @@ def init_app(app):
         """
         try:
             ret = dt.datetime.fromisoformat(iso_datetime)
-        except (ValueError, TypeError,):
+        except (
+            ValueError,
+            TypeError,
+        ):
             return default
         else:
             return ret.strftime("%d/%m/%Y, %H:%M:%S %Z")

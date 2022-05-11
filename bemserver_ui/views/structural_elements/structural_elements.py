@@ -6,7 +6,8 @@ from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
 
 
 blp = flask.Blueprint(
-    "structural_elements", __name__, url_prefix="/structural_elements")
+    "structural_elements", __name__, url_prefix="/structural_elements"
+)
 
 
 def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
@@ -36,8 +37,9 @@ def _build_tree_sites(campaign_id, *, is_draggable=False):
     for structural_element_type in ["site", "building", "storey", "space"]:
         api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
         try:
-            structural_elements[structural_element_type] = \
-                api_resource.getall(campaign_id=campaign_id, sort="+name").data
+            structural_elements[structural_element_type] = api_resource.getall(
+                campaign_id=campaign_id, sort="+name"
+            ).data
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(422, response=exc.errors)
 
@@ -49,17 +51,20 @@ def _build_tree_sites(campaign_id, *, is_draggable=False):
             if building["site_id"] != site["id"]:
                 continue
             building_data = _extract_data(
-                building, "building", site_data, is_draggable=is_draggable)
+                building, "building", site_data, is_draggable=is_draggable
+            )
             for storey in structural_elements["storey"]:
                 if storey["building_id"] != building["id"]:
                     continue
                 storey_data = _extract_data(
-                    storey, "storey", building_data, is_draggable=is_draggable)
+                    storey, "storey", building_data, is_draggable=is_draggable
+                )
                 for space in structural_elements["space"]:
                     if space["storey_id"] != storey["id"]:
                         continue
                     space_data = _extract_data(
-                        space, "space", storey_data, is_draggable=is_draggable)
+                        space, "space", storey_data, is_draggable=is_draggable
+                    )
                     storey_data["nodes"].append(space_data)
                 building_data["nodes"].append(storey_data)
             site_data["nodes"].append(building_data)
@@ -70,7 +75,8 @@ def _build_tree_sites(campaign_id, *, is_draggable=False):
 def _build_tree_zones(campaign_id, *, is_draggable=False):
     try:
         zones_resp = flask.g.api_client.zones.getall(
-            campaign_id=campaign_id, sort="+name")
+            campaign_id=campaign_id, sort="+name"
+        )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, response=exc.errors)
 
@@ -120,8 +126,10 @@ def explore():
     zones_tree_data = _build_tree_zones(campaign_id)
 
     return flask.render_template(
-        "pages/structural_elements/explore.html", sites_tree_data=sites_tree_data,
-        zones_tree_data=zones_tree_data)
+        "pages/structural_elements/explore.html",
+        sites_tree_data=sites_tree_data,
+        zones_tree_data=zones_tree_data,
+    )
 
 
 @blp.route("/<string:type>/create", methods=["GET", "POST"])
@@ -149,13 +157,20 @@ def create(type):
             ret_resp = api_resource.create(payload)
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description=f"Error while creating the {type}!",
-                response=exc.errors)
+                422,
+                description=f"Error while creating the {type}!",
+                response=exc.errors,
+            )
         else:
             flask.flash(f"New {type} created: {ret_resp.data['name']}", "success")
-            return flask.redirect(flask.url_for(
-                "structural_elements.edit", type=type, id=ret_resp.data["id"],
-                tab="properties"))
+            return flask.redirect(
+                flask.url_for(
+                    "structural_elements.edit",
+                    type=type,
+                    id=ret_resp.data["id"],
+                    tab="properties",
+                )
+            )
 
     # Get parent type and list.
     parent_type = None
@@ -167,12 +182,18 @@ def create(type):
             parent_type = "building"
         elif type == "space":
             parent_type = "storey"
-        parents = getattr(flask.g.api_client, f"{parent_type}s").getall(
-            campaign_id=flask.g.campaign_ctxt.id, sort="+name").data
+        parents = (
+            getattr(flask.g.api_client, f"{parent_type}s")
+            .getall(campaign_id=flask.g.campaign_ctxt.id, sort="+name")
+            .data
+        )
 
     return flask.render_template(
         "pages/structural_elements/create.html",
-        type=type, parent_type=parent_type, parents=parents)
+        type=type,
+        parent_type=parent_type,
+        parents=parents,
+    )
 
 
 @blp.route("/<string:type>/<int:id>/edit", methods=["GET", "POST"])
@@ -227,11 +248,14 @@ def edit(type, id):
         }
         try:
             ret_resp = api_resource.update(
-                id, payload, etag=flask.request.form["editEtag"])
+                id, payload, etag=flask.request.form["editEtag"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description=f"Error while updating the {type}!",
-                response=exc.errors)
+                422,
+                description=f"Error while updating the {type}!",
+                response=exc.errors,
+            )
         else:
             flask.flash(f"{type} updated: {ret_resp.data['name']}", "success")
 
@@ -246,12 +270,14 @@ def edit(type, id):
                     continue
                 try:
                     api_propdata_resource.update(
-                        prop_data["id"], payload,
-                        etag=flask.request.form[f"property-{prop_id}-etag"])
+                        prop_data["id"],
+                        payload,
+                        etag=flask.request.form[f"property-{prop_id}-etag"],
+                    )
                 except bac.BEMServerAPIValidationError:
                     flask.flash(
-                        f"Error while setting {prop_data['name']} property!",
-                        "warning")
+                        f"Error while setting {prop_data['name']} property!", "warning"
+                    )
                 else:
                     flask.flash(f"{prop_data['name']} property updated!", "success")
 
@@ -260,9 +286,14 @@ def edit(type, id):
     tab = flask.request.args.get("tab", "general")
 
     return flask.render_template(
-        "pages/structural_elements/edit.html", type=type,
-        structural_element=ret_resp.data, etag=ret_resp.etag, properties=properties,
-        available_properties=available_properties, tab=tab)
+        "pages/structural_elements/edit.html",
+        type=type,
+        structural_element=ret_resp.data,
+        etag=ret_resp.etag,
+        properties=properties,
+        available_properties=available_properties,
+        tab=tab,
+    )
 
 
 @blp.route("/<string:type>/<int:id>/delete", methods=["POST"])
@@ -293,28 +324,34 @@ def create_property(type, id):
         api_resource.create(payload)
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(
-            422, description=f"Error while setting the property for {type}!",
-            response=exc.errors)
+            422,
+            description=f"Error while setting the property for {type}!",
+            response=exc.errors,
+        )
     else:
         flask.flash("Property defined!", "success")
 
     return flask.redirect(
-        flask.url_for('structural_elements.edit', type=type, id=id, tab="properties"))
+        flask.url_for("structural_elements.edit", type=type, id=id, tab="properties")
+    )
 
 
 @blp.route(
-    "/<string:type>/<int:id>/delete_property/<int:property_id>", methods=["POST"])
+    "/<string:type>/<int:id>/delete_property/<int:property_id>", methods=["POST"]
+)
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def delete_property(type, id, property_id):
     api_resource = getattr(flask.g.api_client, f"{type}_property_data")
     try:
         api_resource.delete(
-            property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"])
+            property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
+        )
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Property not found!")
     else:
         flask.flash("Property deleted!", "success")
 
     return flask.redirect(
-        flask.url_for('structural_elements.edit', id=id, type=type, tab="properties"))
+        flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
+    )

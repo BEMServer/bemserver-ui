@@ -12,7 +12,10 @@ blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
 def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
     try:
         ret = dt.datetime.strptime(f"{form_date} {form_time}", "%Y-%m-%d %H:%M")
-    except (ValueError, TypeError,):
+    except (
+        ValueError,
+        TypeError,
+    ):
         return None
     else:
         ret = ret.replace(tzinfo=tz)
@@ -33,7 +36,8 @@ def list():
     # /!\ No need to load campaign list from API, just use campaign context.
 
     return flask.render_template(
-        "pages/campaigns/list.html", filters=filters, is_filtered=is_filtered)
+        "pages/campaigns/list.html", filters=filters, is_filtered=is_filtered
+    )
 
 
 @blp.route("/<int:id>/view")
@@ -59,8 +63,11 @@ def view(id):
             ugroups.append(ugroup_data)
 
     return flask.render_template(
-        "pages/campaigns/view.html", campaign=campaign.data, etag=campaign.etag,
-        user_groups=ugroups)
+        "pages/campaigns/view.html",
+        campaign=campaign.data,
+        etag=campaign.etag,
+        user_groups=ugroups,
+    )
 
 
 @blp.route("/create", methods=["GET", "POST"])
@@ -73,10 +80,12 @@ def create():
         }
         start_time = convert_form_datetime_to_iso(
             flask.request.form["start_date"],
-            flask.request.form.get("start_time", "00:00") or "00:00")
+            flask.request.form.get("start_time", "00:00") or "00:00",
+        )
         end_time = convert_form_datetime_to_iso(
             flask.request.form["end_date"],
-            flask.request.form.get("end_time", "23:59") or "23:59")
+            flask.request.form.get("end_time", "23:59") or "23:59",
+        )
 
         if start_time is not None:
             payload["start_time"] = start_time
@@ -87,8 +96,10 @@ def create():
             ret = flask.g.api_client.campaigns.create(payload)
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="An error occured while creating the campaign!",
-                response=exc.errors)
+                422,
+                description="An error occured while creating the campaign!",
+                response=exc.errors,
+            )
         else:
             flask.flash(f"New campaign created: {ret.data['name']}", "success")
             return flask.redirect(flask.url_for("campaigns.list"))
@@ -107,10 +118,12 @@ def edit(id):
 
         start_time = convert_form_datetime_to_iso(
             flask.request.form["start_date"],
-            flask.request.form.get("start_time", "00:00") or "00:00")
+            flask.request.form.get("start_time", "00:00") or "00:00",
+        )
         end_time = convert_form_datetime_to_iso(
             flask.request.form["end_date"],
-            flask.request.form.get("end_time", "23:59") or "23:59")
+            flask.request.form.get("end_time", "23:59") or "23:59",
+        )
 
         if start_time is not None:
             payload["start_time"] = start_time
@@ -119,11 +132,14 @@ def edit(id):
 
         try:
             campaign = flask.g.api_client.campaigns.update(
-                id, payload, etag=flask.request.form["editEtag"])
+                id, payload, etag=flask.request.form["editEtag"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="An error occured while updating the campaign!",
-                response=exc.errors)
+                422,
+                description="An error occured while updating the campaign!",
+                response=exc.errors,
+            )
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="Campaign not found!")
         else:
@@ -138,21 +154,30 @@ def edit(id):
     campaign_data = campaign.data
     try:
         full_start_time = dt.datetime.fromisoformat(campaign_data["start_time"])
-    except (KeyError, ValueError, TypeError,):
+    except (
+        KeyError,
+        ValueError,
+        TypeError,
+    ):
         campaign_data["start_date"] = ""
     else:
         campaign_data["start_date"] = full_start_time.date()
         campaign_data["start_time"] = full_start_time.time().strftime("%H:%M")
     try:
         full_end_time = dt.datetime.fromisoformat(campaign_data["end_time"])
-    except (KeyError, ValueError, TypeError,):
+    except (
+        KeyError,
+        ValueError,
+        TypeError,
+    ):
         campaign_data["end_date"] = ""
     else:
         campaign_data["end_date"] = full_end_time.date()
         campaign_data["end_time"] = full_end_time.time().strftime("%H:%M")
 
     return flask.render_template(
-        "pages/campaigns/edit.html", campaign=campaign_data, etag=campaign.etag)
+        "pages/campaigns/edit.html", campaign=campaign_data, etag=campaign.etag
+    )
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
@@ -180,15 +205,20 @@ def manage_groups(id):
         user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_group_id in user_group_ids:
             try:
-                flask.g.api_client.user_groups_by_campaigns.create({
-                    "campaign_id": id,
-                    "user_group_id": user_group_id,
-                })
+                flask.g.api_client.user_groups_by_campaigns.create(
+                    {
+                        "campaign_id": id,
+                        "user_group_id": user_group_id,
+                    }
+                )
             except bac.BEMServerAPIValidationError as exc:
                 flask.abort(
-                    409, description=(
-                        "An error occured while trying to add user group in campaign!"),
-                    response=exc.errors)
+                    409,
+                    description=(
+                        "An error occured while trying to add user group in campaign!"
+                    ),
+                    response=exc.errors,
+                )
         if len(user_group_ids) > 0:
             flask.flash("User added to selected group(s)!", "success")
 
@@ -211,8 +241,12 @@ def manage_groups(id):
             available_groups.append(x)
 
     return flask.render_template(
-        "pages/campaigns/manage_groups.html", campaign=campaign.data,
-        etag=campaign.etag, user_groups=groups, available_groups=available_groups)
+        "pages/campaigns/manage_groups.html",
+        campaign=campaign.data,
+        etag=campaign.etag,
+        user_groups=groups,
+        available_groups=available_groups,
+    )
 
 
 @blp.route("/<int:id>/remove_user_group", methods=["POST"])
@@ -223,7 +257,8 @@ def remove_user_group(id):
         flask.g.api_client.user_groups_by_campaigns.delete(rel_id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(
-            404, description="User group has already been removed from this campaign!")
+            404, description="User group has already been removed from this campaign!"
+        )
     else:
         flask.flash("User group removed from campaign!", "success")
 

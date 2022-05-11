@@ -38,7 +38,8 @@ def signin_required(func=None, roles=None):
             try:
                 # Verfify user existence and credentials at the same time.
                 user_resp = flask.g.api_client.users.getone(
-                    flask.session["user"]["data"]["id"])
+                    flask.session["user"]["data"]["id"]
+                )
             except wexc.NotFound:
                 flask.session.clear()
                 raise wexc.Unauthorized
@@ -51,6 +52,7 @@ def signin_required(func=None, roles=None):
                 raise wexc.Forbidden
 
             return func(*args, **kwargs)
+
         return decorated
 
     if func is not None:
@@ -59,7 +61,6 @@ def signin_required(func=None, roles=None):
 
 
 def init_app(app):
-
     @app.context_processor
     def inject_signed_user():
         if "user" in flask.session:
@@ -69,8 +70,7 @@ def init_app(app):
     @app.route(f"{app.static_url_path}/scripts/modules/signedUserData.js")
     def es6_signed_user():
         user = (flask.session.get("user", {}) or {}).get("data")
-        es6_signed_user_data = (
-            f"export const signedUser = {json.dumps(user)};")
+        es6_signed_user_data = f"export const signedUser = {json.dumps(user)};"
         return flask.make_response(
             (es6_signed_user_data, 200, {"Content-Type": "text/javascript"})
         )

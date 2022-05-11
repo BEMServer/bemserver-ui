@@ -41,7 +41,7 @@ setup(
         (
             "License :: OSI Approved :: "
             "GNU Affero General Public License v3 or later (AGPLv3+)"
-        )
+        ),
     ],
     python_requires=">=3.7",
     install_requires=[

@@ -15,12 +15,14 @@ def list():
     campaign_id = flask.g.campaign_ctxt.id
     try:
         campaign_scopes = flask.g.api_client.campaign_scopes.getall(
-            campaign_id=campaign_id, sort="+name")
+            campaign_id=campaign_id, sort="+name"
+        )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, description=exc.errors)
 
     return flask.render_template(
-        "pages/campaign_scopes/list.html", campaign_scopes=campaign_scopes.data)
+        "pages/campaign_scopes/list.html", campaign_scopes=campaign_scopes.data
+    )
 
 
 @blp.route("/<int:id>/view")
@@ -34,7 +36,8 @@ def view(id):
 
     # Get campaign scope's user groups.
     ugroups_resp = flask.g.api_client.user_groups_by_campaign_scopes.getall(
-        campaign_scope_id=id)
+        campaign_scope_id=id
+    )
     ugroups = []
     for x in ugroups_resp.data:
         try:
@@ -48,8 +51,11 @@ def view(id):
             ugroups.append(ugroup_data)
 
     return flask.render_template(
-        "pages/campaign_scopes/view.html", campaign_scope=campaign_scope.data,
-        etag=campaign_scope.etag, user_groups=ugroups)
+        "pages/campaign_scopes/view.html",
+        campaign_scope=campaign_scope.data,
+        etag=campaign_scope.etag,
+        user_groups=ugroups,
+    )
 
 
 @blp.route("/create", methods=["GET", "POST"])
@@ -66,12 +72,15 @@ def create():
             ret = flask.g.api_client.campaign_scopes.create(payload)
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="An error occured while creating the campaign scope!",
-                response=exc.errors)
+                422,
+                description="An error occured while creating the campaign scope!",
+                response=exc.errors,
+            )
         else:
             flask.flash(f"New campaign scope created: {ret.data['name']}", "success")
             return flask.redirect(
-                flask.url_for("campaign_scopes.view", id=ret.data["id"]))
+                flask.url_for("campaign_scopes.view", id=ret.data["id"])
+            )
 
     return flask.render_template("pages/campaign_scopes/create.html")
 
@@ -87,11 +96,14 @@ def edit(id):
         }
         try:
             campaign_scope = flask.g.api_client.campaign_scopes.update(
-                id, payload, etag=flask.request.form["editEtag"])
+                id, payload, etag=flask.request.form["editEtag"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="An error occured while updating the campaign scope!",
-                response=exc.errors)
+                422,
+                description="An error occured while updating the campaign scope!",
+                response=exc.errors,
+            )
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="Campaign scope not found!")
         else:
@@ -104,8 +116,10 @@ def edit(id):
         flask.abort(404, description="Campaign scope not found!")
 
     return flask.render_template(
-        "pages/campaign_scopes/edit.html", campaign_scope=campaign_scope.data,
-        etag=campaign_scope.etag)
+        "pages/campaign_scopes/edit.html",
+        campaign_scope=campaign_scope.data,
+        etag=campaign_scope.etag,
+    )
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
@@ -114,7 +128,8 @@ def edit(id):
 def delete(id):
     try:
         flask.g.api_client.campaign_scopes.delete(
-            id, etag=flask.request.form["delEtag"])
+            id, etag=flask.request.form["delEtag"]
+        )
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Campaign scope not found!")
     else:
@@ -136,21 +151,27 @@ def manage_groups(id):
         user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_group_id in user_group_ids:
             try:
-                flask.g.api_client.user_groups_by_campaign_scopes.create({
-                    "campaign_scope_id": id,
-                    "user_group_id": user_group_id,
-                })
+                flask.g.api_client.user_groups_by_campaign_scopes.create(
+                    {
+                        "campaign_scope_id": id,
+                        "user_group_id": user_group_id,
+                    }
+                )
             except bac.BEMServerAPIValidationError as exc:
                 flask.abort(
-                    409, description=(
-                        "An error occured while adding user group in campaign scope!"),
-                    response=exc.errors)
+                    409,
+                    description=(
+                        "An error occured while adding user group in campaign scope!"
+                    ),
+                    response=exc.errors,
+                )
         if len(user_group_ids) > 0:
             flask.flash("User added to selected group(s)!", "success")
 
     # Get campaign scope's user groups.
     groups_resp = flask.g.api_client.user_groups_by_campaign_scopes.getall(
-        campaign_scope_id=id)
+        campaign_scope_id=id
+    )
     groups = []
     group_ids = []
     for x in groups_resp.data:
@@ -168,9 +189,12 @@ def manage_groups(id):
             available_groups.append(x)
 
     return flask.render_template(
-        "pages/campaign_scopes/manage_groups.html", campaign_scope=campaign_scope.data,
-        etag=campaign_scope.etag, user_groups=groups,
-        available_groups=available_groups)
+        "pages/campaign_scopes/manage_groups.html",
+        campaign_scope=campaign_scope.data,
+        etag=campaign_scope.etag,
+        user_groups=groups,
+        available_groups=available_groups,
+    )
 
 
 @blp.route("/<int:id>/remove_user_group", methods=["POST"])
@@ -182,8 +206,11 @@ def remove_user_group(id):
         flask.g.api_client.user_groups_by_campaign_scopes.delete(rel_id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(
-            404, description=(
-                "User group has already been removed from this campaign scope!"))
+            404,
+            description=(
+                "User group has already been removed from this campaign scope!"
+            ),
+        )
     else:
         flask.flash("User group removed from campaign scope!", "success")
 

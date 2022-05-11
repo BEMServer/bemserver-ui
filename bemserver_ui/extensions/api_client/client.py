@@ -8,23 +8,48 @@ from requests.auth import HTTPBasicAuth  # noqa
 from io import BytesIO
 
 from .resources import (
-    UserResources, UserGroupResources, UserByUserGroupResources,
-    CampaignResources, UserGroupByCampaignResources,
-    CampaignScopeResources, UserGroupByCampaignScopeResources,
-    TimeseriesResources, TimeseriesDataStateResources, TimeseriesPropertyResources,
-    TimeseriesPropertyDataResources, TimeseriesDataResources,
-    EventResources, EventStateResources, EventLevelResources, EventCategoryResources,
+    UserResources,
+    UserGroupResources,
+    UserByUserGroupResources,
+    CampaignResources,
+    UserGroupByCampaignResources,
+    CampaignScopeResources,
+    UserGroupByCampaignScopeResources,
+    TimeseriesResources,
+    TimeseriesDataStateResources,
+    TimeseriesPropertyResources,
+    TimeseriesPropertyDataResources,
+    TimeseriesDataResources,
+    EventResources,
+    EventStateResources,
+    EventLevelResources,
+    EventCategoryResources,
     StructuralElementPropertyResources,
-    SiteResources, SitePropertyResources, SitePropertyDataResources,
-    BuildingResources, BuildingPropertyResources, BuildingPropertyDataResources,
-    StoreyResources, StoreyPropertyResources, StoreyPropertyDataResources,
-    SpaceResources, SpacePropertyResources, SpacePropertyDataResources,
-    ZoneResources, ZonePropertyResources, ZonePropertyDataResources,
-    TimeseriesBySiteResources, TimeseriesByBuildingResources,
-    TimeseriesByStoreyResources, TimeseriesBySpaceResources, TimeseriesByZoneResources,
+    SiteResources,
+    SitePropertyResources,
+    SitePropertyDataResources,
+    BuildingResources,
+    BuildingPropertyResources,
+    BuildingPropertyDataResources,
+    StoreyResources,
+    StoreyPropertyResources,
+    StoreyPropertyDataResources,
+    SpaceResources,
+    SpacePropertyResources,
+    SpacePropertyDataResources,
+    ZoneResources,
+    ZonePropertyResources,
+    ZonePropertyDataResources,
+    TimeseriesBySiteResources,
+    TimeseriesByBuildingResources,
+    TimeseriesByStoreyResources,
+    TimeseriesBySpaceResources,
+    TimeseriesByZoneResources,
 )
 from .exceptions import (
-    BEMServerAPIValidationError, BEMServerAPINotFoundError, BEMServerAPINotModified,
+    BEMServerAPIValidationError,
+    BEMServerAPINotFoundError,
+    BEMServerAPINotModified,
 )
 
 
@@ -69,10 +94,9 @@ class BEMServerApiClientResponse:
         """Check if the mimetype indicates JSON data, either
         :mimetype:`application/json` or :mimetype:`application/*+json`.
         """
-        return (
-            self._mimetype == "application/json"
-            or (self._mimetype.startswith("application/")
-                and self._mimetype.endswith("+json"))
+        return self._mimetype == "application/json" or (
+            self._mimetype.startswith("application/")
+            and self._mimetype.endswith("+json")
         )
 
     @property
@@ -136,7 +160,8 @@ class BEMServerApiClientResponse:
         disposition = self._raw_response.headers["Content-Disposition"]
         filename = disposition.split("; ")[1].split("=")[1]
         return flask.send_file(
-            BytesIO(self.data), download_name=filename, as_attachment=True)
+            BytesIO(self.data), download_name=filename, as_attachment=True
+        )
 
     def toJSON(self):
         # Allows to set this response instance in a flask session variable.
@@ -171,7 +196,8 @@ class BEMServerApiClientRequest:
         if etag is not None:
             try:
                 etag_header = {
-                    self._ETAG_HEADER_BY_HTTP_METHOD[http_method.upper()]: etag}
+                    self._ETAG_HEADER_BY_HTTP_METHOD[http_method.upper()]: etag
+                }
             except KeyError:
                 pass
         return etag_header
@@ -182,10 +208,12 @@ class BEMServerApiClientRequest:
         APICLI_LOGGER.debug(f"{http_method} {full_endpoint_uri}")
         try:
             raw_resp = self._session.request(
-                http_method, full_endpoint_uri, headers=headers, **kwargs)
+                http_method, full_endpoint_uri, headers=headers, **kwargs
+            )
         except req_exc.RequestException as exc:
             APICLI_LOGGER.error(
-                f"Unexpected error while requesting {full_endpoint_uri}: {exc}")
+                f"Unexpected error while requesting {full_endpoint_uri}: {exc}"
+            )
             flask.abort(500, "A server error occured. Please try again later.")
         return BEMServerApiClientResponse(raw_resp)
 
@@ -218,24 +246,28 @@ class BEMServerApiClient:
 
     def __init__(self, base_uri, authentication_method=None):
         self._request_manager = BEMServerApiClientRequest(
-            base_uri, authentication_method)
+            base_uri, authentication_method
+        )
 
         self.users = UserResources(self._request_manager)
         self.user_groups = UserGroupResources(self._request_manager)
         self.user_by_user_groups = UserByUserGroupResources(self._request_manager)
 
         self.campaigns = CampaignResources(self._request_manager)
-        self.user_groups_by_campaigns = \
-            UserGroupByCampaignResources(self._request_manager)
+        self.user_groups_by_campaigns = UserGroupByCampaignResources(
+            self._request_manager
+        )
         self.campaign_scopes = CampaignScopeResources(self._request_manager)
-        self.user_groups_by_campaign_scopes = \
-            UserGroupByCampaignScopeResources(self._request_manager)
+        self.user_groups_by_campaign_scopes = UserGroupByCampaignScopeResources(
+            self._request_manager
+        )
 
         self.timeseries = TimeseriesResources(self._request_manager)
         self.timeseries_datastates = TimeseriesDataStateResources(self._request_manager)
         self.timeseries_properties = TimeseriesPropertyResources(self._request_manager)
-        self.timeseries_property_data = \
-            TimeseriesPropertyDataResources(self._request_manager)
+        self.timeseries_property_data = TimeseriesPropertyDataResources(
+            self._request_manager
+        )
         self.timeseries_data = TimeseriesDataResources(self._request_manager)
 
         self.events = EventResources(self._request_manager)
@@ -249,8 +281,9 @@ class BEMServerApiClient:
         self.spaces = SpaceResources(self._request_manager)
         self.zones = ZoneResources(self._request_manager)
 
-        self.structural_element_properties = \
-            StructuralElementPropertyResources(self._request_manager)
+        self.structural_element_properties = StructuralElementPropertyResources(
+            self._request_manager
+        )
         self.site_properties = SitePropertyResources(self._request_manager)
         self.building_properties = BuildingPropertyResources(self._request_manager)
         self.storey_properties = StoreyPropertyResources(self._request_manager)
@@ -258,15 +291,17 @@ class BEMServerApiClient:
         self.zone_properties = ZonePropertyResources(self._request_manager)
 
         self.site_property_data = SitePropertyDataResources(self._request_manager)
-        self.building_property_data = \
-            BuildingPropertyDataResources(self._request_manager)
+        self.building_property_data = BuildingPropertyDataResources(
+            self._request_manager
+        )
         self.storey_property_data = StoreyPropertyDataResources(self._request_manager)
         self.space_property_data = SpacePropertyDataResources(self._request_manager)
         self.zone_property_data = ZonePropertyDataResources(self._request_manager)
 
         self.timeseries_by_sites = TimeseriesBySiteResources(self._request_manager)
-        self.timeseries_by_buildings = \
-            TimeseriesByBuildingResources(self._request_manager)
+        self.timeseries_by_buildings = TimeseriesByBuildingResources(
+            self._request_manager
+        )
         self.timeseries_by_storeys = TimeseriesByStoreyResources(self._request_manager)
         self.timeseries_by_spaces = TimeseriesBySpaceResources(self._request_manager)
         self.timeseries_by_zones = TimeseriesByZoneResources(self._request_manager)

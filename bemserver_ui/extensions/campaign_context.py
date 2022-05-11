@@ -28,7 +28,6 @@ def deduce_campaign_state(campaign_data, dt_now=None):
 
 
 class CampaignContext:
-
     def __init__(self, campaign_id=None):
         self.id = campaign_id
         self._load_campaigns()
@@ -45,7 +44,8 @@ class CampaignContext:
     @property
     def campaigns_by_state(self):
         return flask.session.get(
-            "campaigns", {"all": [], **{x.value: [] for x in CampaignState}})
+            "campaigns", {"all": [], **{x.value: [] for x in CampaignState}}
+        )
 
     @property
     def has_campaign(self):
@@ -66,7 +66,8 @@ class CampaignContext:
     def _load_campaigns(self):
         try:
             campaigns_resp = flask.g.api_client.campaigns.getall(
-                sort="+name", etag=flask.session.get("campaigns_etag"))
+                sort="+name", etag=flask.session.get("campaigns_etag")
+            )
         except bac.BEMServerAPINotModified:
             pass
         else:
@@ -114,11 +115,12 @@ def url_for_campaign(endpoint, **kwargs):
 
 
 def init_app(app):
-
     @app.before_request
     def load_campaign_context():
         if "user" in flask.session and flask.request.endpoint not in (
-                "static", "flask_es6_endpoints"):
+            "static",
+            "flask_es6_endpoints",
+        ):
             flask.g.campaign_ctxt = CampaignContext(
                 flask.request.args.get("forced_campaign", None)
                 or flask.request.args.get("campaign")
@@ -142,6 +144,7 @@ def ensure_campaign_context(func=None):
                 return flask.redirect(flask.url_for("main.index"))
 
             return func(*args, **kwargs)
+
         return decorated
 
     if func is not None:

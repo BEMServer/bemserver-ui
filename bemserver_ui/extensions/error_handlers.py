@@ -4,7 +4,6 @@ import werkzeug.exceptions as wexc
 
 
 def init_app(app):
-
     def _is_from_internal_api():
         if flask.request.endpoint is not None:
             return flask.request.endpoint.startswith("api.")
@@ -60,7 +59,8 @@ def init_app(app):
     def handle_412(exc):
         message = (
             "Operation failed: invalid ETag precondition. Your version of an item in "
-            "the page was probably not up to date.\nTry again.")
+            "the page was probably not up to date.\nTry again."
+        )
         if _is_from_internal_api():
             return _handle_for_internal_api(exc.code, message)
         flask.flash(message, "error")

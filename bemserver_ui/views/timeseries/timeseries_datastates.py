@@ -6,21 +6,24 @@ from bemserver_ui.extensions import auth, Roles
 
 
 blp = flask.Blueprint(
-    "timeseries_datastates", __name__, url_prefix="/timeseries_datastates")
+    "timeseries_datastates", __name__, url_prefix="/timeseries_datastates"
+)
 
 
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
     try:
-        timeseries_datastates_resp = \
-            flask.g.api_client.timeseries_datastates.getall(sort="+name")
+        timeseries_datastates_resp = flask.g.api_client.timeseries_datastates.getall(
+            sort="+name"
+        )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, description=exc.errors)
 
     return flask.render_template(
         "pages/timeseries/datastates/list.html",
-        timeseries_datastates=timeseries_datastates_resp.data)
+        timeseries_datastates=timeseries_datastates_resp.data,
+    )
 
 
 @blp.route("/create", methods=["GET", "POST"])
@@ -34,11 +37,14 @@ def create():
             ret = flask.g.api_client.timeseries_datastates.create(payload)
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="Error while creating the timeseries data state!",
-                response=exc.errors)
+                422,
+                description="Error while creating the timeseries data state!",
+                response=exc.errors,
+            )
         else:
             flask.flash(
-                f"New timeseries data state created: {ret.data['name']}", "success")
+                f"New timeseries data state created: {ret.data['name']}", "success"
+            )
             return flask.redirect(flask.url_for("timeseries_datastates.list"))
 
     return flask.render_template("pages/timeseries/datastates/create.html")
@@ -53,17 +59,21 @@ def edit(id):
         }
         try:
             ts_datastates_resp = flask.g.api_client.timeseries_datastates.update(
-                id, payload, etag=flask.request.form["editEtag"])
+                id, payload, etag=flask.request.form["editEtag"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="Error while updating the timeseries data state!",
-                response=exc.errors)
+                422,
+                description="Error while updating the timeseries data state!",
+                response=exc.errors,
+            )
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="Timeseries data state not found!")
         else:
             flask.flash(
                 f"{ts_datastates_resp.data['name']} timeseries data state updated!",
-                "success")
+                "success",
+            )
             return flask.redirect(flask.url_for("timeseries_datastates.list"))
 
     try:
@@ -73,7 +83,9 @@ def edit(id):
 
     return flask.render_template(
         "pages/timeseries/datastates/edit.html",
-        timeseries_datastate=ts_datastates_resp.data, etag=ts_datastates_resp.etag)
+        timeseries_datastate=ts_datastates_resp.data,
+        etag=ts_datastates_resp.etag,
+    )
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
@@ -81,7 +93,8 @@ def edit(id):
 def delete(id):
     try:
         flask.g.api_client.timeseries_datastates.delete(
-            id, etag=flask.request.form["delEtag"])
+            id, etag=flask.request.form["delEtag"]
+        )
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Timeseries data state not found!")
     else:

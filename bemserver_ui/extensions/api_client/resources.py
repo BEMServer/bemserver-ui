@@ -12,7 +12,8 @@ class BaseResources(abc.ABC):
     def _verify_disabled(self, endpoint_name):
         if endpoint_name in self.disabled_endpoints:
             raise NotImplementedError(
-                f"{self.__class__.__name__}.{endpoint_name} is disabled!")
+                f"{self.__class__.__name__}.{endpoint_name} is disabled!"
+            )
 
     def enpoint_uri_by_id(self, id):
         return f"{self.endpoint_base_uri}{str(id)}"
@@ -99,27 +100,37 @@ class TimeseriesDataResources(BaseResources):
 
     def upload_csv(self, data_state, csv_file):
         q_params = {"data_state": data_state}
-        return self._req.upload(
-            self.endpoint_base_uri, params=q_params, files=csv_file)
+        return self._req.upload(self.endpoint_base_uri, params=q_params, files=csv_file)
 
     def download_csv(self, start_time, end_time, data_state, timeseries_ids):
         q_params = {
-            "start_time": start_time, "end_time": end_time,
-            "data_state": data_state, "timeseries": timeseries_ids,
+            "start_time": start_time,
+            "end_time": end_time,
+            "data_state": data_state,
+            "timeseries": timeseries_ids,
         }
         return self._req.download(self.endpoint_base_uri, params=q_params)
 
     def download_csv_aggregate(
-            self, start_time, end_time, data_state, timeseries_ids, bucket_width,
-            timezone="UTC", aggregation="avg"):
+        self,
+        start_time,
+        end_time,
+        data_state,
+        timeseries_ids,
+        bucket_width,
+        timezone="UTC",
+        aggregation="avg",
+    ):
         q_params = {
-            "start_time": start_time, "end_time": end_time,
-            "data_state": data_state, "timeseries": timeseries_ids,
-            "bucket_width": bucket_width, "timezone": timezone,
+            "start_time": start_time,
+            "end_time": end_time,
+            "data_state": data_state,
+            "timeseries": timeseries_ids,
+            "bucket_width": bucket_width,
+            "timezone": timezone,
             "aggregation": aggregation,
         }
-        return self._req.download(
-            f"{self.endpoint_base_uri}aggregate", params=q_params)
+        return self._req.download(f"{self.endpoint_base_uri}aggregate", params=q_params)
 
 
 class EventStateResources(BaseResources):

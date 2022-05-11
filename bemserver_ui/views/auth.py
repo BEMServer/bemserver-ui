@@ -23,7 +23,8 @@ def signin():
         try:
             # Credentials check.
             user_resp = flask.g.api_client.users.getall(
-                email=flask.session["auth_data"]["email"])
+                email=flask.session["auth_data"]["email"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.session.clear()
             flask.session["_validation_errors"] = exc.errors

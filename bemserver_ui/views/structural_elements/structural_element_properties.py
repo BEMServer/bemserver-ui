@@ -8,8 +8,10 @@ from bemserver_ui.extensions import auth, Roles
 
 
 blp = flask.Blueprint(
-    "structural_element_properties", __name__,
-    url_prefix="/structural_element_properties")
+    "structural_element_properties",
+    __name__,
+    url_prefix="/structural_element_properties",
+)
 
 
 STRUCTURAL_ELEMENTS = ["site", "building", "storey", "space", "zone"]
@@ -24,15 +26,16 @@ def extend_props_data(props_data):
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(422, response=exc.errors)
         prop_ids[struct_elmt] = [
-            x["structural_element_property_id"] for x in props_resp.data]
+            x["structural_element_property_id"] for x in props_resp.data
+        ]
 
     for prop_data in props_data:
         prop_data["used_in"] = {}
         for struct_elmt in STRUCTURAL_ELEMENTS:
-            prop_data["used_in"][struct_elmt] = \
-                prop_data["id"] in prop_ids[struct_elmt]
-        prop_data["is_orphan"] = not any([
-            prop_data["used_in"][x] for x in STRUCTURAL_ELEMENTS])
+            prop_data["used_in"][struct_elmt] = prop_data["id"] in prop_ids[struct_elmt]
+        prop_data["is_orphan"] = not any(
+            [prop_data["used_in"][x] for x in STRUCTURAL_ELEMENTS]
+        )
 
 
 @blp.route("/", methods=["GET", "POST"])
@@ -48,7 +51,8 @@ def list():
 
     try:
         props_resp = flask.g.api_client.structural_element_properties.getall(
-            sort="+name")
+            sort="+name"
+        )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, response=exc.errors)
 
@@ -72,9 +76,13 @@ def list():
                         break
 
     return flask.render_template(
-        "pages/structural_elements/properties/list.html", properties=props_data,
-        structural_elements=STRUCTURAL_ELEMENTS, filters=filters,
-        is_filtered=is_filtered, total_count=total_count)
+        "pages/structural_elements/properties/list.html",
+        properties=props_data,
+        structural_elements=STRUCTURAL_ELEMENTS,
+        filters=filters,
+        is_filtered=is_filtered,
+        total_count=total_count,
+    )
 
 
 @blp.route("/create", methods=["GET", "POST"])
@@ -89,8 +97,10 @@ def create():
             ret_resp = flask.g.api_client.structural_element_properties.create(payload)
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="An error occured while creating the property!",
-                response=exc.errors)
+                422,
+                description="An error occured while creating the property!",
+                response=exc.errors,
+            )
         else:
             prop_name = ret_resp.data["name"]
             flask.flash(f"New property created: {prop_name}", "success")
@@ -103,22 +113,28 @@ def create():
                         api_resource.create(payload)
                     except bac.BEMServerAPIValidationError:
                         flask.flash(
-                            f"Error while adding {prop_name} property to {x}s!",
-                            "error")
+                            f"Error while adding {prop_name} property to {x}s!", "error"
+                        )
                     else:
                         flask.flash(f"{prop_name} property added to {x}s", "success")
 
-            url_next = (urllib.parse.unquote(flask.request.args.get("next")
-                        or flask.url_for("structural_element_properties.list")))
+            url_next = urllib.parse.unquote(
+                flask.request.args.get("next")
+                or flask.url_for("structural_element_properties.list")
+            )
 
             return flask.redirect(url_next)
 
-    url_cancel = (urllib.parse.unquote(flask.request.args.get("back")
-                  or flask.url_for("structural_element_properties.list")))
+    url_cancel = urllib.parse.unquote(
+        flask.request.args.get("back")
+        or flask.url_for("structural_element_properties.list")
+    )
 
     return flask.render_template(
         "pages/structural_elements/properties/create.html",
-        structural_elements=STRUCTURAL_ELEMENTS, url_cancel=url_cancel)
+        structural_elements=STRUCTURAL_ELEMENTS,
+        url_cancel=url_cancel,
+    )
 
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])
@@ -131,11 +147,14 @@ def edit(id):
         }
         try:
             prop_resp = flask.g.api_client.structural_element_properties.update(
-                id, payload, etag=flask.request.form["editEtag"])
+                id, payload, etag=flask.request.form["editEtag"]
+            )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
-                422, description="Error while updating the property!",
-                response=exc.errors)
+                422,
+                description="Error while updating the property!",
+                response=exc.errors,
+            )
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="Property not found!")
         else:
@@ -157,10 +176,12 @@ def edit(id):
                         except bac.BEMServerAPIValidationError:
                             flask.flash(
                                 f"Error while adding {prop_name} property to {x}s!",
-                                "error")
+                                "error",
+                            )
                         else:
                             flask.flash(
-                                f"{prop_name} property added to {x}s", "success")
+                                f"{prop_name} property added to {x}s", "success"
+                            )
                 # Property is NOT requested to be associated.
                 # Is property currently attach to structural element?
                 # 1. Yes, remove association.
@@ -171,10 +192,12 @@ def edit(id):
                     except bac.BEMServerAPINotFoundError:
                         flask.flash(
                             f"{prop_name} property is already removed for {x}s!",
-                            "warning")
+                            "warning",
+                        )
                     else:
                         flask.flash(
-                            f"{prop_name} property removed from {x}s", "success")
+                            f"{prop_name} property removed from {x}s", "success"
+                        )
 
             return flask.redirect(flask.url_for("structural_element_properties.list"))
 
@@ -187,8 +210,11 @@ def edit(id):
     extend_props_data([prop_data])
 
     return flask.render_template(
-        "pages/structural_elements/properties/edit.html", property=prop_data,
-        etag=prop_resp.etag, structural_elements=STRUCTURAL_ELEMENTS)
+        "pages/structural_elements/properties/edit.html",
+        property=prop_data,
+        etag=prop_resp.etag,
+        structural_elements=STRUCTURAL_ELEMENTS,
+    )
 
 
 @blp.route("/<int:id>/delete", methods=["POST"])
@@ -196,7 +222,8 @@ def edit(id):
 def delete(id):
     try:
         flask.g.api_client.structural_element_properties.delete(
-            id, etag=flask.request.form["delEtag"])
+            id, etag=flask.request.form["delEtag"]
+        )
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Property not found!")
     else:
