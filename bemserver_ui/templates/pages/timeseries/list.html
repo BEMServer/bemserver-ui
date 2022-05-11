@@ -31,13 +31,21 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
-                            <form id="formFilters" class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                            <form id="formFilters" class="d-xl-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
                                 <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope" name="campaign_scope" form="formFilters" aria-label="Select a filter value">
                                     <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
                                     {% for x in campaign_scopes %}
                                     <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id|string %} selected{% endif %}>{{ x.name }}</option>
                                     {% endfor %}
                                 </select>
+                                {% for struct_elmt_type, struct_elmts in structural_elements.items() %}
+                                <select class="form-select form-select-sm border{% if filters[struct_elmt_type + '_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="{{ struct_elmt_type }}" name="{{ struct_elmt_type }}" form="formFilters" aria-label="Select a filter value">
+                                    <option value="{{ none }}"{% if filters[struct_elmt_type + "_id"] is none %} selected{% endif %}>All {{ struct_elmt_type }}s</option>
+                                    {% for x in struct_elmts %}
+                                    <option value="{{ x.id }}"{% if filters[struct_elmt_type + "_id"] == x.id|string %} selected{% endif %}>{{ x.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% endfor %}
                                 <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
                                 <a class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
                             </form>

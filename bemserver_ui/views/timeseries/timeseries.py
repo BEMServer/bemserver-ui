@@ -58,16 +58,29 @@ def prepare_pagination(pagination, nb_total_links=5):
 def list():
     campaign_id = flask.g.campaign_ctxt.id
 
-    filters = {"campaign_id": campaign_id, "campaign_scope_id": None, "page_size": 10}
+    filters = {
+        "campaign_id": campaign_id,
+        "campaign_scope_id": None,
+        "page_size": 10,
+        **{f"{x}_id": None for x in ["site", "building", "storey", "space", "zone"]},
+    }
     # Get requested filters.
     if flask.request.method == "POST":
         if flask.request.form["campaign_scope"] != "None":
             filters["campaign_scope_id"] = flask.request.form["campaign_scope"]
+        for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
+            filter_value = flask.request.form.get(struct_elmt_type, "None") or "None"
+            if filter_value != "None":
+                filters[f"{struct_elmt_type}_id"] = filter_value
         if "page_size" in flask.request.form:
             filters["page_size"] = int(flask.request.form["page_size"])
-        if "page" in flask.request.form:
+        if "page" in flask.request.form and flask.request.form["page"] != "":
             filters["page"] = int(flask.request.form["page"])
-    is_filtered = filters["campaign_scope_id"] is not None
+    is_filtered = (
+        filters["campaign_scope_id"] is not None
+        or any([filters[f"{x}_id"] is not None
+                for x in ["site", "building", "storey", "space", "zone"]])
+    )
 
     try:
         campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
@@ -79,6 +92,12 @@ def list():
     campaign_scopes_by_id = {}
     for campaign_scope in campaign_scopes_resp.data:
         campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
+
+    structural_elements = {}
+    for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
+        structural_elements[struct_elmt_type] = getattr(
+            flask.g.api_client, f"{struct_elmt_type}s"
+        ).getall(campaign_id=campaign_id).data
 
     try:
         # Get timeseries list applying filters.
@@ -99,6 +118,7 @@ def list():
         filters=filters,
         is_filtered=is_filtered,
         pagination=prepare_pagination(timeseries_resp.pagination),
+        structural_elements=structural_elements,
     )
 
 
