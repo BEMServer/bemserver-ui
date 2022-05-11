@@ -66,7 +66,7 @@
                             <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
                             <ol>
                                 <li>Click on the users below to select/unselect them</li>
-                                <li>Click on <div class="btn btn-sm btn-outline-primary"><i class="bi bi-save"></i> Save selection</div> button to set selected users as members of <span class="fw-bold fst-italic">{{ user_group.name }}</span></li>
+                                <li>Click on <div class="btn btn-sm btn-primary">Set users</div> button to set selected users as members of <span class="fw-bold fst-italic">{{ user_group.name }}</span></li>
                             </ol>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                         {% endfor %}
                     </form>
                     <div class="d-flex justify-content-end gap-2 mt-3">
-                        <button class="btn btn-sm btn-outline-primary" type="submit" form="addUsersForm" title="Save"><i class="bi bi-save"></i> Save selection</button>
+                        <button class="btn btn-sm btn-primary" type="submit" form="addUsersForm" title="Save">Set users</button>
                     </div>
                     {% else %}
                     <span class="fst-italic text-muted">none</span>
