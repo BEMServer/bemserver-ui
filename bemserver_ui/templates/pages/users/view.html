@@ -17,7 +17,6 @@
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
         </form>
         {% endif %}
-        <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
 </div>
 {% endfilter %}
@@ -25,81 +24,94 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
-    <div class="row">
-        {% if self_view %}
-        <dl class="col-auto">
-            <dt>Name</dt>
-            <dd>{{ user.name }}</dd>
-        </dl>
-        {% endif %}
-        <dl class="col-auto">
-            <dt>Email address</dt>
-            <dd>{{ user.email }}</dd>
-        </dl>
-        {% if signed_user.is_admin %}
-        <dl class="col-auto">
-            <dt>Is active?</dt>
-            <dd class="d-flex">
-                {% if user.is_active %}
-                <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
-                {% else %}
-                <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
-                {% endif %}
-                {% if not self_view %}
-                <form id="setStatusForm" class="ms-4" action="{{ url_for('users.set_status', id=user.id) }}" method="POST">
-                    <div class="form-check form-switch d-none">
-                        <input class="form-check-input invisible" type="checkbox" role="switch" form="setStatusForm" id="status" name="status"{% if not user.is_active %} checked{% endif %}>
-                        <label class="form-check-label" for="status">{{ "yes" if user.is_active else "no" }}</label>
-                    </div>
-                    <input type="hidden" form="setStatusForm" id="setStatusEtag" name="setStatusEtag" value="{{ etag }}">
-                    <button type="submit" form="setStatusForm" class="btn btn-sm btn-outline-warning text-break" title="Set status"><span class="fw-bold">{% if user.is_active %}Unset{% else %}Set{% endif %}</span> active</button>
-                </form>
-                {% endif %}
-            </dd>
-        </dl>
-        <dl class="col-auto">
-            <dt>Is admin?</dt>
-            <dd class="d-flex">
-                {% if user.is_admin %}
-                <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
-                {% else %}
-                <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
-                {% endif %}
-                {% if not self_view %}
-                <form id="setRoleForm" class="ms-4" action="{{ url_for('users.set_role', id=user.id) }}" method="POST">
-                    <div class="form-check form-switch d-none">
-                        <input class="form-check-input invisible" type="checkbox" role="switch" form="setRoleForm" id="admin" name="admin"{% if not user.is_admin %} checked{% endif %}>
-                        <label class="form-check-label" for="admin">{{ "yes" if user.is_admin else "no" }}</label>
-                    </div>
-                    <input type="hidden" form="setRoleForm" id="setRoleEtag" name="setRoleEtag" value="{{ etag }}">
-                    <button type="submit" form="setRoleForm" class="btn btn-sm btn-outline-warning text-break" title="Set admin"><span class="fw-bold">{% if user.is_admin %}Unset{% else %}Set{% endif %}</span> admin</button>
-                </form>
-                {% endif %}
-            </dd>
-        </dl>
-        {% endif %}
-    </div>
-    <hr>
+<div class="container-fluid mb-4">
     <div class="row">
         <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5>Member of <span class="badge bg-secondary">{{ user_groups|length }}</span></h5>
-                {% if signed_user.is_admin %}
-                <a href="{{ url_for('users.manage_groups', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage user's groups"><i class="bi bi-person-rolodex"></i> Manage user's groups</a>
-                {% endif %}
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
+                    <div class="d-flex justify-content-between">
+                        <dl>
+                            {% if self_view %}
+                            <dt>Name</dt>
+                            <dd>{{ user.name }}</dd>
+                            {% endif %}
+                            <dt>Email address</dt>
+                            <dd>{{ user.email }}</dd>
+                            {% if signed_user.is_admin %}
+                            <dt>Is active?</dt>
+                            <dd class="d-flex gap-4">
+                                {% if user.is_active %}
+                                <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
+                                {% else %}
+                                <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
+                                {% endif %}
+                                {% if not self_view %}
+                                <form id="setStatusForm" action="{{ url_for('users.set_status', id=user.id) }}" method="POST">
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input invisible" type="checkbox" role="switch" form="setStatusForm" id="status" name="status"{% if not user.is_active %} checked{% endif %}>
+                                        <label class="form-check-label" for="status">{{ "yes" if user.is_active else "no" }}</label>
+                                    </div>
+                                    <input type="hidden" form="setStatusForm" id="setStatusEtag" name="setStatusEtag" value="{{ etag }}">
+                                    <button type="submit" form="setStatusForm" class="btn btn-sm btn-outline-warning text-break" title="Set status"><span class="fw-bold">{% if user.is_active %}Unset{% else %}Set{% endif %}</span> active</button>
+                                </form>
+                                {% endif %}
+                            </dd>
+                            <dt>Is admin?</dt>
+                            <dd class="d-flex gap-4">
+                                {% if user.is_admin %}
+                                <span class="text-success"><i class="bi bi-hand-thumbs-up"></i> yes</span>
+                                {% else %}
+                                <span class="text-danger"><i class="bi bi-hand-thumbs-down"></i> no</span>
+                                {% endif %}
+                                {% if not self_view %}
+                                <form id="setRoleForm" action="{{ url_for('users.set_role', id=user.id) }}" method="POST">
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input invisible" type="checkbox" role="switch" form="setRoleForm" id="admin" name="admin"{% if not user.is_admin %} checked{% endif %}>
+                                        <label class="form-check-label" for="admin">{{ "yes" if user.is_admin else "no" }}</label>
+                                    </div>
+                                    <input type="hidden" form="setRoleForm" id="setRoleEtag" name="setRoleEtag" value="{{ etag }}">
+                                    <button type="submit" form="setRoleForm" class="btn btn-sm btn-outline-warning text-break" title="Set admin"><span class="fw-bold">{% if user.is_admin %}Unset{% else %}Set{% endif %}</span> admin</button>
+                                </form>
+                                {% endif %}
+                            </dd>
+                            {% endif %}
+                        </dl>
+                        <div>
+                            <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
+                    <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
+                        <div class="order-1 order-lg-0">
+                            {% if user_groups|length > 0 %}
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for user_group in user_groups %}
+                                {% filter indent(width=16) %}
+                                {% include "components/user_groups/group_for_user.html" %}
+                                {% endfilter %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="fst-italic text-muted">none</span>
+                            {% endif %}
+                        </div>
+                        {% if signed_user.is_admin %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('users.manage_groups', id=user.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage user's groups"><i class="bi bi-person-rolodex"></i> Manage user's groups</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% if user_groups|length > 0 %}
-            <div class="d-flex flex-wrap mt-2 gap-2">
-                {% for user_group in user_groups %}
-                {% filter indent(width=16) %}
-                {% include "components/user_groups/group_for_user.html" %}
-                {% endfilter %}
-                {% endfor %}
-            </div>
-            {% else %}
-            <span class="fst-italic text-muted">none</span>
-            {% endif %}
         </div>
     </div>
 </div>

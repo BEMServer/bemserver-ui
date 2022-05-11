@@ -41,6 +41,8 @@ def list():
 @blp.route("/<int:id>/view")
 @auth.signin_required
 def view(id):
+    tab = flask.request.args.get("tab", "general")
+
     try:
         user = flask.g.api_client.users.getone(id)
     except bac.BEMServerAPINotFoundError:
@@ -62,7 +64,7 @@ def view(id):
 
     return flask.render_template(
         "pages/users/view.html", user=user.data, etag=user.etag,
-        user_groups=user_groups)
+        user_groups=user_groups, tab=tab)
 
 
 @blp.route("/create", methods=["GET", "POST"])

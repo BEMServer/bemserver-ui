@@ -36,7 +36,7 @@
             <span class="fst-italic text-muted">none</span>
             {% endif %}
             <div class="d-flex justify-content-end gap-2 mt-3">
-                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Cancel">Cancel</a>
+                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id, tab='groups') }}" title="Cancel">Cancel</a>
                 <button class="btn btn-sm btn-primary{% if available_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save">Set groups</button>
             </div>
         </div>
