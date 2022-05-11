@@ -70,7 +70,8 @@ def create():
                 response=exc.errors)
         else:
             flask.flash(f"New campaign scope created: {ret.data['name']}", "success")
-            return flask.redirect(flask.url_for("campaign_scopes.view", id=ret.data["id"]))
+            return flask.redirect(
+                flask.url_for("campaign_scopes.view", id=ret.data["id"]))
 
     return flask.render_template("pages/campaign_scopes/create.html")
 

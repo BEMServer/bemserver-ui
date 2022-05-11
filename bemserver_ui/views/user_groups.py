@@ -2,7 +2,7 @@
 import flask
 
 import bemserver_ui.extensions.api_client as bac
-from bemserver_ui.extensions import auth, Roles
+from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
 
 
 blp = flask.Blueprint("user_groups", __name__, url_prefix="/user_groups")
@@ -152,3 +152,60 @@ def remove_user(id):
         flask.flash("User removed from group!", "success")
 
     return flask.redirect(flask.request.args["next"])
+
+
+@blp.route("/<int:id>/manage_campaign_scopes", methods=["GET", "POST"])
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def manage_campaign_scopes(id):
+    if flask.request.method == "POST":
+        campaign_scope_ids = [x.split("-")[2] for x in flask.request.form.keys()]
+        for campaign_scope_id in campaign_scope_ids:
+            try:
+                flask.g.api_client.user_groups_by_campaign_scopes.create({
+                    "campaign_scope_id": campaign_scope_id,
+                    "user_group_id": id,
+                })
+            except bac.BEMServerAPIValidationError as exc:
+                flask.abort(
+                    409, description=(
+                        "Error while setting the campaign scope for a user group!"),
+                    response=exc.errors)
+        if len(campaign_scope_ids) > 0:
+            flask.flash("Selected campaign scope(s) added for user group!", "success")
+
+    try:
+        user_group = flask.g.api_client.user_groups.getone(id)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User group not found!")
+
+    # Get campaign scopes for user group.
+    ugbcs_resp = \
+        flask.g.api_client.user_groups_by_campaign_scopes.getall(user_group_id=id)
+    campaign_scopes = []
+    campaign_scope_ids = []
+    for x in ugbcs_resp.data:
+        try:
+            campaign_scope_resp = flask.g.api_client.campaign_scopes.getone(
+                id=x["campaign_scope_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a campaign scope has been deleted meanwhile.
+            pass
+        else:
+            campaign_scope_data = campaign_scope_resp.data
+            campaign_scope_data["rel_id"] = x["id"]
+            campaign_scopes.append(campaign_scope_data)
+            campaign_scope_ids.append(campaign_scope_data["id"])
+
+    # Get available campaign scopes (all campaign scopes - group's campaign scopes).
+    all_campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
+        campaign_id=flask.g.campaign_ctxt.id)
+    available_campaign_scopes = []
+    for x in all_campaign_scopes_resp.data:
+        if x["id"] not in campaign_scope_ids:
+            available_campaign_scopes.append(x)
+
+    return flask.render_template(
+        "pages/user_groups/manage_campaign_scopes.html", user_group=user_group.data,
+        etag=user_group.etag, campaign_scopes=campaign_scopes,
+        available_campaign_scopes=available_campaign_scopes)
