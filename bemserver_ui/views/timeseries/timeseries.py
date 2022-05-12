@@ -76,10 +76,11 @@ def list():
             filters["page_size"] = int(flask.request.form["page_size"])
         if "page" in flask.request.form and flask.request.form["page"] != "":
             filters["page"] = int(flask.request.form["page"])
-    is_filtered = (
-        filters["campaign_scope_id"] is not None
-        or any([filters[f"{x}_id"] is not None
-                for x in ["site", "building", "storey", "space", "zone"]])
+    is_filtered = filters["campaign_scope_id"] is not None or any(
+        [
+            filters[f"{x}_id"] is not None
+            for x in ["site", "building", "storey", "space", "zone"]
+        ]
     )
 
     try:
@@ -95,9 +96,11 @@ def list():
 
     structural_elements = {}
     for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
-        structural_elements[struct_elmt_type] = getattr(
-            flask.g.api_client, f"{struct_elmt_type}s"
-        ).getall(campaign_id=campaign_id).data
+        structural_elements[struct_elmt_type] = (
+            getattr(flask.g.api_client, f"{struct_elmt_type}s")
+            .getall(campaign_id=campaign_id)
+            .data
+        )
 
     try:
         # Get timeseries list applying filters.

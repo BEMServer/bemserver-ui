@@ -47,8 +47,9 @@ def view(id):
 
     # Get campaigns for group.
     campaigns = []
-    campaigns_resp = \
-        flask.g.api_client.user_groups_by_campaigns.getall(user_group_id=id)
+    campaigns_resp = flask.g.api_client.user_groups_by_campaigns.getall(
+        user_group_id=id
+    )
     for x in campaigns_resp.data:
         try:
             campaign_resp = flask.g.api_client.campaigns.getone(id=x["campaign_id"])
@@ -63,20 +64,23 @@ def view(id):
     # Get campaign scopes for group.
     campaign_scopes = {x["id"]: [] for x in flask.g.campaign_ctxt.campaigns}
     campaign_scopes_count = 0
-    campaign_scopes_resp = \
-        flask.g.api_client.user_groups_by_campaign_scopes.getall(user_group_id=id)
+    campaign_scopes_resp = flask.g.api_client.user_groups_by_campaign_scopes.getall(
+        user_group_id=id
+    )
     for x in campaign_scopes_resp.data:
         try:
-            campaign_scope_resp = \
-                flask.g.api_client.campaign_scopes.getone(id=x["campaign_scope_id"])
+            campaign_scope_resp = flask.g.api_client.campaign_scopes.getone(
+                id=x["campaign_scope_id"]
+            )
         except bac.BEMServerAPINotFoundError:
             # Here, just ignore if a campaign scope has been deleted meanwhile.
             pass
         else:
             campaign_scope_data = campaign_scope_resp.data
             campaign_scope_data["rel_id"] = x["id"]
-            campaign_scopes[
-                campaign_scope_data["campaign_id"]].append(campaign_scope_data)
+            campaign_scopes[campaign_scope_data["campaign_id"]].append(
+                campaign_scope_data
+            )
             campaign_scopes_count += 1
 
     return flask.render_template(
