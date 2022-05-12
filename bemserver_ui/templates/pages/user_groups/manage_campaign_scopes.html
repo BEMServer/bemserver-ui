@@ -7,13 +7,8 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid justify-content-center gap-2 mx-auto">
-    {% if signed_user.is_admin %}
-    <div class="hstack gap-2 mx-auto">
-        <a href="{{ url_for('user_groups.manage', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage user group">Manage user group</a>
-        <a href="{{ url_for('user_groups.manage_campaigns', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage campaigns">Manage campaigns</a>
-    </div>
+    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaign_scopes') }}" class="btn btn-sm btn-outline-secondary" title="Manage user group"><i class="bi bi-arrow-return-left"></i> Back to user group</a>
     <div class="vr d-none d-lg-block mx-2"></div>
-    {% endif %}
     <div class="hstack gap-2 mx-auto">
         {% if signed_user.is_admin %}
         <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
@@ -29,7 +24,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
+<div class="container-fluid mb-4">
     <div class="row">
         <div class="col pb-3 pb-lg-0">
             <h5>
@@ -68,6 +63,7 @@
             <div class="hstack">
                 <div class="vr d-none d-lg-block me-lg-4"></div>
                 <div class="w-100">
+                    <h4>{{ g.campaign_ctxt.campaign.name }}</h4>
                     <h5>
                         Available campaign scopes <span class="badge bg-secondary">{{ available_campaign_scopes|length }}</span>
                         {% if available_campaign_scopes|length > 0 %}

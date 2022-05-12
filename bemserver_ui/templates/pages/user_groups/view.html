@@ -1,0 +1,128 @@
+{% extends "pages/base.html" %}
+
+{% set title = "User group" %}
+{% set subtitle = user_group.name %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    <div class="hstack gap-2 mx-auto">
+        {% if signed_user.is_admin %}
+        <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+    </div>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col">
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'users' %} active{% endif %}" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-tabcontent" type="button" role="tab" aria-controls="users-tabcontent" aria-selected="{% if tab == 'users' %}true{% else %}false{% endif %}">Users <span class="badge bg-secondary">{{ users|length }}</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'campaigns' %} active{% endif %}" id="campaigns-tab" data-bs-toggle="tab" data-bs-target="#campaigns-tabcontent" type="button" role="tab" aria-controls="campaigns-tabcontent" aria-selected="{% if tab == 'campaigns' %}true{% else %}false{% endif %}">Campaigns <span class="badge bg-secondary">{{ campaigns|length }}</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'campaign_scopes' %} active{% endif %}" id="campaign-scopes-tab" data-bs-toggle="tab" data-bs-target="#campaign-scopes-tabcontent" type="button" role="tab" aria-controls="campaign-scopes-tabcontent" aria-selected="{% if tab == 'campaign_scopes' %}true{% else %}false{% endif %}">Campaign scopes <span class="badge bg-secondary">{{ campaign_scopes_count }}</span></button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane fade{% if tab == 'users' %} show active{% endif %} p-3" id="users-tabcontent" role="tabpanel" aria-labelledby="users-tab">
+                    <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
+                        <div class="order-1 order-lg-0">
+                            {% if users|length > 0 %}
+                            <div class="d-flex flex-wrap mt-2 gap-2">
+                                {% for user in users %}
+                                {% filter indent(width=16) %}
+                                {% include "components/users/user_for_group.html" %}
+                                {% endfilter %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="fst-italic text-muted">none</span>
+                            {% endif %}
+                        </div>
+                        {% if signed_user.is_admin %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('user_groups.manage', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage users">Manage users</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tab-pane fade{% if tab == 'campaigns' %} show active{% endif %} p-3" id="campaigns-tabcontent" role="tabpanel" aria-labelledby="campaigns-tab">
+                    <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
+                        <div class="order-1 order-lg-0">
+                            {% if campaigns|length > 0 %}
+                            <div class="d-flex flex-wrap mt-2 gap-2">
+                                {% for x in campaigns %}
+                                <div class="btn-group bg-white rounded" role="group" aria-label="Actions on campaign">
+                                    <a class="btn btn-outline-secondary" role="button" href="{{ url_for('campaigns.view', id=x.id) }}" title="Manage campaign">
+                                        <div class="d-flex flex-column justify-content-start">
+                                            <span class="text-start"><i class="bi bi-box"></i> {{ x.name }}</span>
+                                        </div>
+                                    </a>
+                                    <form class="btn-group" action="{{ url_for('campaigns.remove_user_group', id=x.id, rel_id=x.rel_id, next=url_for(request.endpoint, id=user_group.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ x.name }}&lt;/mark&gt; campaign for &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
+                                        <button class="btn btn-outline-danger" type="submit" title="Remove campaign"><i class="bi bi-x-lg"></i></button>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="fst-italic text-muted">none</span>
+                            {% endif %}
+                        </div>
+                        {% if signed_user.is_admin %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('user_groups.manage_campaigns', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage campaigns">Manage campaigns</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tab-pane fade{% if tab == 'campaign_scopes' %} show active{% endif %} p-3" id="campaign-scopes-tabcontent" role="tabpanel" aria-labelledby="campaign-scopes-tab">
+                    <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
+                        <div class="order-1 order-lg-0">
+                            {% if campaign_scopes_count > 0 %}
+                            {% for campaign in g.campaign_ctxt.campaigns %}
+                            {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.campaign.id == campaign.id %}
+                            <h6>{% if is_campaign_selected %}<i class="bi bi-arrow-right-circle"></i> <span class="fw-bold">{% endif %}{{ campaign.name }}{% if is_campaign_selected %}</span>{% endif %} <span class="badge bg-secondary">{{ campaign_scopes[campaign.id]|length }}</span></h6>
+                            <div class="d-flex flex-wrap my-2 gap-2">
+                                {% for x in campaign_scopes[campaign.id] %}
+                                <div class="btn-group bg-white rounded" role="group" aria-label="Actions on campaign scope">
+                                    <a class="btn btn-outline-secondary" role="button" href="{{ url_for('campaign_scopes.view', id=x.id) }}" title="Manage campaign scope">
+                                        <div class="d-flex flex-column justify-content-start">
+                                            <span class="text-start"><i class="bi bi-box"></i> {{ x.name }}</span>
+                                        </div>
+                                    </a>
+                                    <form class="btn-group" action="{{ url_for('campaign_scopes.remove_user_group', id=x.id, rel_id=x.rel_id, next=url_for(request.endpoint, id=user_group.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ x.name }}&lt;/mark&gt; campaign scope for &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
+                                        <button class="btn btn-outline-danger" type="submit" title="Remove campaign scope"><i class="bi bi-x-lg"></i></button>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <span class="fst-italic text-muted">none</span>
+                            {% endif %}
+                        </div>
+                        {% if signed_user.is_admin and g.campaign_ctxt.has_campaign %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('user_groups.manage_campaign_scopes', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage campaign scopes">Manage campaign scopes</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

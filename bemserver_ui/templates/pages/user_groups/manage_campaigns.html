@@ -7,15 +7,8 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid justify-content-center gap-2 mx-auto">
-    {% if signed_user.is_admin %}
-    <div class="hstack gap-2 mx-auto">
-        <a href="{{ url_for('user_groups.manage', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage user group">Manage user group</a>
-        {% if g.campaign_ctxt.has_campaign %}
-        <a href="{{ url_for('user_groups.manage_campaign_scopes', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary" title="Manage campaign scopes">Manage campaign scopes</a>
-        {% endif %}
-    </div>
+    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaigns') }}" class="btn btn-sm btn-outline-secondary" title="Manage user group"><i class="bi bi-arrow-return-left"></i> Back to user group</a>
     <div class="vr d-none d-lg-block mx-2"></div>
-    {% endif %}
     <div class="hstack gap-2 mx-auto">
         {% if signed_user.is_admin %}
         <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">

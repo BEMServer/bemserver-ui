@@ -21,6 +21,76 @@ def list():
     )
 
 
+@blp.route("/<int:id>/view")
+@auth.signin_required(roles=[Roles.admin])
+def view(id):
+    tab = flask.request.args.get("tab", "users")
+
+    try:
+        user_group = flask.g.api_client.user_groups.getone(id)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="User group not found!")
+
+    # Get users in group.
+    users = []
+    users_resp = flask.g.api_client.user_by_user_groups.getall(user_group_id=id)
+    for x in users_resp.data:
+        try:
+            user_resp = flask.g.api_client.users.getone(id=x["user_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a user has been deleted meanwhile.
+            pass
+        else:
+            user_data = user_resp.data
+            user_data["rel_id"] = x["id"]
+            users.append(user_data)
+
+    # Get campaigns for group.
+    campaigns = []
+    campaigns_resp = \
+        flask.g.api_client.user_groups_by_campaigns.getall(user_group_id=id)
+    for x in campaigns_resp.data:
+        try:
+            campaign_resp = flask.g.api_client.campaigns.getone(id=x["campaign_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a campaign has been deleted meanwhile.
+            pass
+        else:
+            campaign_data = campaign_resp.data
+            campaign_data["rel_id"] = x["id"]
+            campaigns.append(campaign_data)
+
+    # Get campaign scopes for group.
+    campaign_scopes = {x["id"]: [] for x in flask.g.campaign_ctxt.campaigns}
+    campaign_scopes_count = 0
+    campaign_scopes_resp = \
+        flask.g.api_client.user_groups_by_campaign_scopes.getall(user_group_id=id)
+    for x in campaign_scopes_resp.data:
+        try:
+            campaign_scope_resp = \
+                flask.g.api_client.campaign_scopes.getone(id=x["campaign_scope_id"])
+        except bac.BEMServerAPINotFoundError:
+            # Here, just ignore if a campaign scope has been deleted meanwhile.
+            pass
+        else:
+            campaign_scope_data = campaign_scope_resp.data
+            campaign_scope_data["rel_id"] = x["id"]
+            campaign_scopes[
+                campaign_scope_data["campaign_id"]].append(campaign_scope_data)
+            campaign_scopes_count += 1
+
+    return flask.render_template(
+        "pages/user_groups/view.html",
+        user_group=user_group.data,
+        etag=user_group.etag,
+        users=users,
+        campaigns=campaigns,
+        campaign_scopes=campaign_scopes,
+        campaign_scopes_count=campaign_scopes_count,
+        tab=tab,
+    )
+
+
 @blp.route("/create", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def create():
