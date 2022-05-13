@@ -43,7 +43,7 @@ body,
     }
 }
 
-@media (width > 768px) {
+@media (width >= 768px) {
     #sidebarToggler {
         visibility: hidden;
     }
@@ -123,4 +123,7 @@ body,
 
 .app-spinner {
     color: #95c11a !important;
+}
+.app-spinner-secondary {
+    color: #0088db !important;
 }

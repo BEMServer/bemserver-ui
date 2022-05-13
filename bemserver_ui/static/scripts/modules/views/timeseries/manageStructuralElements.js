@@ -64,7 +64,7 @@ class TimeseriesManageStructuralElementsView {
 
             if (event.detail.newValue != event.detail.oldValue) {
                 this.#tsItemsCountElmt.innerHTML = "";
-                this.#tsItemsCountElmt.appendChild(new Spinner({isSmallSize: true}));
+                this.#tsItemsCountElmt.appendChild(new Spinner({useSmallSize: true}));
                 this.#tsListElmt.setLoading();
                 this.refresh({page_size: event.detail.newValue});
             }
@@ -267,7 +267,7 @@ class TimeseriesManageStructuralElementsView {
             this.#tsPaginationContainerElmt.appendChild(new Spinner());
         }
         this.#tsItemsCountElmt.innerHTML = "";
-        this.#tsItemsCountElmt.appendChild(new Spinner({isSmallSize: true}));
+        this.#tsItemsCountElmt.appendChild(new Spinner({useSmallSize: true}));
         this.#tsListElmt.setLoading();
 
         let fetcherOptions = {"page_size": Parser.parseIntOrDefault(options.page_size, this.#tsPageSizeSelectorElmt.current), "page": Parser.parseIntOrDefault(options.page, 1)};
