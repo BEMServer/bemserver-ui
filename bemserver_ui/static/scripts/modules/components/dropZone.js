@@ -5,10 +5,22 @@ class DropZone extends HTMLDivElement {
 
     #allowDuplicates = false;
 
+    #dropEffect = "copy";
     #dropCount = 0;
 
-    constructor() {
+    #helpTitle = "No items yet.";
+    #helpTexts = ["Drag and drop items here."];
+
+    constructor(options = { dropEffect: "copy", helpTitle: "No items yet.", helpTexts: ["Drag and drop items here."] }) {
         super();
+
+        this.#dropEffect = options.dropEffect;
+        this.#helpTitle = options.helpTitle;
+        this.#helpTexts = options.helpTexts;
+    }
+
+    get count() {
+        return this.#dropCount;
     }
 
     connectedCallback() {
@@ -33,7 +45,7 @@ class DropZone extends HTMLDivElement {
             }
             else {
                 this.classList.add("dragover");
-                event.dataTransfer.dropEffect = "copy";
+                event.dataTransfer.dropEffect = this.#dropEffect;
             }
 
             let dragOverEvent = new CustomEvent("itemDragOver", {
@@ -123,10 +135,35 @@ class DropZone extends HTMLDivElement {
     }
 
     setHelp() {
-        this.innerHTML = `<div class="alert alert-info" role="alert">
-    <i class="bi bi-question-diamond"></i>
-    <span class="fst-italic">Drag and drop sites or zones here to locate this timeseries.</span>
-</div>`;
+        this.innerHTML = "";
+
+        let helpContainerElmt = document.createElement("div");
+        helpContainerElmt.classList.add("alert", "alert-info");
+        helpContainerElmt.setAttribute("role", "alert");
+        this.appendChild(helpContainerElmt);
+
+        let helpIconElmt = document.createElement("i");
+        helpIconElmt.classList.add("bi", "bi-question-diamond", "me-1");
+        helpContainerElmt.appendChild(helpIconElmt);
+
+        let helpTitleElmt = document.createElement("span");
+        helpTitleElmt.classList.add("fw-bold");
+        helpTitleElmt.innerText = this.#helpTitle;
+        helpContainerElmt.appendChild(helpTitleElmt);
+
+        let helpTextContainerElmt = document.createElement("div");
+        helpTextContainerElmt.classList.add("fst-italic");
+        if (this.#helpTexts.length > 0) {
+            helpTextContainerElmt.classList.add("mt-2");
+        }
+        helpContainerElmt.appendChild(helpTextContainerElmt);
+
+        for (let helpText of this.#helpTexts) {
+            let helpTextElmt = document.createElement("p");
+            helpTextElmt.classList.add("mb-0");
+            helpTextElmt.innerHTML = helpText;
+            helpTextContainerElmt.appendChild(helpTextElmt);
+        }
     }
 
     clear() {

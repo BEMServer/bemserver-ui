@@ -127,3 +127,21 @@ body,
 .app-spinner-secondary {
     color: #0088db !important;
 }
+
+@media (max-width: 992px) {
+    .app-panel-collapse .app-panel-collapse-body:first-child {
+        width: 100% !important;
+    }
+}
+
+@media (min-width: 1200px) {
+    .app-panel-collapse .app-panel-collapse-body:first-child {
+        width: 400px !important;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1200px) {
+    .app-panel-collapse .app-panel-collapse-body:first-child {
+        width: 300px !important;
+    }
+}

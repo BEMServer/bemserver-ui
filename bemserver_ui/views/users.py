@@ -51,25 +51,10 @@ def view(id):
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="User not found!")
 
-    # Get user groups.
-    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=id)
-    user_groups = []
-    for x in user_groups_resp.data:
-        try:
-            group_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
-        except bac.BEMServerAPINotFoundError:
-            # Here, just ignore if a user group has been deleted.
-            pass
-        else:
-            user_group_data = group_resp.data
-            user_group_data["rel_id"] = x["id"]
-            user_groups.append(user_group_data)
-
     return flask.render_template(
         "pages/users/view.html",
         user=user.data,
         etag=user.etag,
-        user_groups=user_groups,
         tab=tab,
     )
 
@@ -190,59 +175,3 @@ def set_role(id):
         flask.flash("User account role updated!", "success")
 
     return flask.redirect(flask.url_for("users.view", id=id))
-
-
-@blp.route("/<int:id>/manage_groups", methods=["GET", "POST"])
-@auth.signin_required(roles=[Roles.admin])
-def manage_groups(id):
-    if flask.request.method == "POST":
-        user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
-        for user_group_id in user_group_ids:
-            try:
-                flask.g.api_client.user_by_user_groups.create(
-                    {
-                        "user_id": id,
-                        "user_group_id": user_group_id,
-                    }
-                )
-            except bac.BEMServerAPIValidationError as exc:
-                flask.abort(
-                    409,
-                    description=(
-                        "An error occured while trying to add the user in a group!"
-                    ),
-                    response=exc.errors,
-                )
-        if len(user_group_ids) > 0:
-            flask.flash("User added to selected group(s)!", "success")
-
-    try:
-        user = flask.g.api_client.users.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="User not found!")
-
-    # Get user's groups.
-    user_groups_resp = flask.g.api_client.user_by_user_groups.getall(user_id=id)
-    user_groups = []
-    user_group_ids = []
-    for x in user_groups_resp.data:
-        user_group_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
-        user_group_data = user_group_resp.data
-        user_group_data["rel_id"] = x["id"]
-        user_groups.append(user_group_data)
-        user_group_ids.append(user_group_data["id"])
-
-    # Get available groups (all groups - user's groups).
-    all_groups_resp = flask.g.api_client.user_groups.getall()
-    available_groups = []
-    for x in all_groups_resp.data:
-        if x["id"] not in user_group_ids:
-            available_groups.append(x)
-
-    return flask.render_template(
-        "pages/users/manage_groups.html",
-        user=user.data,
-        etag=user.etag,
-        user_groups=user_groups,
-        available_groups=available_groups,
-    )
