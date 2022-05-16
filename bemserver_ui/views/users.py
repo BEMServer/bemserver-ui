@@ -8,6 +8,7 @@ from bemserver_ui.extensions import auth, Roles
 blp = flask.Blueprint("users", __name__, url_prefix="/users")
 
 
+# TODO: add filter by user group?
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
