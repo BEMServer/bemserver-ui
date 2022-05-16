@@ -1,18 +1,18 @@
 class Fetcher {
 
-    _abortController = null;
+    #abortController = null;
 
     constructor() {
     }
 
     cancel() {
-        if (this._abortController != null) {
-            this._abortController.abort();
-            this._abortController = null;
+        if (this.#abortController != null) {
+            this.#abortController.abort();
+            this.#abortController = null;
         }
     }
 
-    async _handleErrors(response) {
+    async #handleErrors(response) {
         if (!response.ok) {
             if (response.status == 401) {
                 // Just reload the current page, server knows what to do.
@@ -29,11 +29,11 @@ class Fetcher {
     }
 
     async get(url) {
-        this._abortController = new AbortController();
+        this.#abortController = new AbortController();
         return window.fetch(
-            url, { signal: this._abortController.signal }
+            url, { signal: this.#abortController.signal }
         ).then(
-            (response) => this._handleErrors(response)
+            (response) => this.#handleErrors(response)
         ).then(
             (response) => {
                 return response.json();
@@ -52,7 +52,7 @@ class Fetcher {
                 body: JSON.stringify(payload),
             }
         ).then(
-            (response) => this._handleErrors(response)
+            (response) => this.#handleErrors(response)
         ).then(
             (response) => {
                 return response.json();

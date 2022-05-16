@@ -8,83 +8,83 @@ import { flaskES6, signedUser } from "../../../app.js";
 
 class UserManageGroupsView {
 
-    _user = null;
+    #user = null;
 
-    _messagesElmt = null;
+    #messagesElmt = null;
 
-    _userGroupTabElmt = null;
-    _userGroupAvailableBtnElmt = null;
-    _userGroupContainerElmt = null;
-    _userGroupCountElmt = null;
+    #userGroupTabElmt = null;
+    #userGroupAvailableBtnElmt = null;
+    #userGroupContainerElmt = null;
+    #userGroupCountElmt = null;
 
-    _userGroupAvailableColumnElmt = null;
-    _userGroupAvailableCollapsePanelElmt = null;
-    _userGroupAvailableContainerElmt = null;
-    _userGroupAvailableCountElmt = null;
-    _userGroupAvailableHelpCollapsePanelElmt = null;
+    #userGroupAvailableColumnElmt = null;
+    #userGroupAvailableCollapsePanelElmt = null;
+    #userGroupAvailableContainerElmt = null;
+    #userGroupAvailableCountElmt = null;
+    #userGroupAvailableHelpCollapsePanelElmt = null;
 
-    _dropZoneElmt = null;
+    #dropZoneElmt = null;
 
     constructor(user) {
-        this._user = user;
+        this.#user = user;
 
-        this._cacheDOM();
+        this.#cacheDOM();
 
-        this._dropZoneElmt = new DropZone({ dropEffect: "move", helpTitle: `Not yet a member of any group.`, helpTexts: [`Click on <mark>${this._userGroupAvailableBtnElmt.innerText}</mark> button to get available group list.`, `Then <span class="fw-bold">drag and drop</span> a group into this zone to make the user a member.`] });
-        this._dropZoneElmt.id = `dropZone-${this._user.id}`;
-        this._userGroupContainerElmt.appendChild(this._dropZoneElmt);
+        this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpTitle: `Not yet a member of any group.`, helpTexts: [`Click on <mark>${this.#userGroupAvailableBtnElmt.innerText}</mark> button to get available group list.`, `Then <span class="fw-bold">drag and drop</span> a group into this zone to make the user a member.`] });
+        this.#dropZoneElmt.id = `dropZone-${this.#user.id}`;
+        this.#userGroupContainerElmt.appendChild(this.#dropZoneElmt);
 
-        this._initEventListeners();
+        this.#initEventListeners();
     }
 
-    _cacheDOM() {
-        this._messagesElmt = document.getElementById("messages");
-        this._userGroupTabElmt = document.getElementById("groups-tab");
-        this._userGroupAvailableBtnElmt = document.getElementById("userGroupAvailableBtn");
-        this._userGroupContainerElmt = document.getElementById("userGroupContainer");
-        this._userGroupCountElmt = document.getElementById("userGroupCount");
-        this._userGroupAvailableColumnElmt = document.getElementById("userGroupAvailableColumn");
-        this._userGroupAvailableCollapsePanelElmt = document.getElementById("userGroupAvailableCollapsePanel");
-        this._userGroupAvailableContainerElmt = document.getElementById("userGroupAvailableContainer");
-        this._userGroupAvailableCountElmt = document.getElementById("userGroupAvailableCount");
-        this._userGroupAvailableHelpCollapsePanelElmt = document.getElementById("userGroupAvailableHelpCollapsePanel");
+    #cacheDOM() {
+        this.#messagesElmt = document.getElementById("messages");
+        this.#userGroupTabElmt = document.getElementById("groups-tab");
+        this.#userGroupAvailableBtnElmt = document.getElementById("userGroupAvailableBtn");
+        this.#userGroupContainerElmt = document.getElementById("userGroupContainer");
+        this.#userGroupCountElmt = document.getElementById("userGroupCount");
+        this.#userGroupAvailableColumnElmt = document.getElementById("userGroupAvailableColumn");
+        this.#userGroupAvailableCollapsePanelElmt = document.getElementById("userGroupAvailableCollapsePanel");
+        this.#userGroupAvailableContainerElmt = document.getElementById("userGroupAvailableContainer");
+        this.#userGroupAvailableCountElmt = document.getElementById("userGroupAvailableCount");
+        this.#userGroupAvailableHelpCollapsePanelElmt = document.getElementById("userGroupAvailableHelpCollapsePanel");
     }
 
-    _initEventListeners() {
-        this._userGroupTabElmt.addEventListener("hide.bs.tab", () => {
-            let bsCollapse = bootstrap.Collapse.getOrCreateInstance(this._userGroupAvailableCollapsePanelElmt, {toggle: false});
+    #initEventListeners() {
+        this.#userGroupTabElmt.addEventListener("hide.bs.tab", () => {
+            let bsCollapse = bootstrap.Collapse.getOrCreateInstance(this.#userGroupAvailableCollapsePanelElmt, {toggle: false});
             bsCollapse.hide();
         });
 
-        this._userGroupAvailableCollapsePanelElmt.addEventListener("show.bs.collapse", (event) => {
+        this.#userGroupAvailableCollapsePanelElmt.addEventListener("show.bs.collapse", (event) => {
             // Only do this actions when main collapse element event is triggered.
-            if (event.target == this._userGroupAvailableCollapsePanelElmt) {
-                this._userGroupAvailableColumnElmt.classList.remove("d-none");
+            if (event.target == this.#userGroupAvailableCollapsePanelElmt) {
+                this.#userGroupAvailableColumnElmt.classList.remove("d-none");
 
                 let iconElmt = document.createElement("i");
                 iconElmt.classList.add("bi", "bi-arrow-bar-right");
-                this._userGroupAvailableBtnElmt.innerHTML = "";
-                this._userGroupAvailableBtnElmt.appendChild(iconElmt);
+                this.#userGroupAvailableBtnElmt.innerHTML = "";
+                this.#userGroupAvailableBtnElmt.appendChild(iconElmt);
             }
         });
 
-        this._userGroupAvailableCollapsePanelElmt.addEventListener("hidden.bs.collapse", (event) => {
+        this.#userGroupAvailableCollapsePanelElmt.addEventListener("hidden.bs.collapse", (event) => {
             // Only do this actions when main collapse element event is triggered.
-            if (event.target == this._userGroupAvailableCollapsePanelElmt) {
-                this._userGroupAvailableColumnElmt.classList.add("d-none");
+            if (event.target == this.#userGroupAvailableCollapsePanelElmt) {
+                this.#userGroupAvailableColumnElmt.classList.add("d-none");
 
                 let textElmt = document.createElement("span");
                 textElmt.innerText = "Manage user's groups";
                 let iconElmt = document.createElement("i");
                 iconElmt.classList.add("bi", "bi-arrow-bar-left", "me-1");
 
-                this._userGroupAvailableBtnElmt.innerHTML = "";
-                this._userGroupAvailableBtnElmt.appendChild(iconElmt);
-                this._userGroupAvailableBtnElmt.appendChild(textElmt);
+                this.#userGroupAvailableBtnElmt.innerHTML = "";
+                this.#userGroupAvailableBtnElmt.appendChild(iconElmt);
+                this.#userGroupAvailableBtnElmt.appendChild(textElmt);
             }
         });
 
-        this._dropZoneElmt.addEventListener("itemDrop", (event) => {
+        this.#dropZoneElmt.addEventListener("itemDrop", (event) => {
             event.preventDefault();
 
             let jsonData = JSON.parse(event.detail.dataTransfer.getData("application/json"));
@@ -92,29 +92,29 @@ class UserManageGroupsView {
             let groupName = jsonData.sourceNodeData.name;
 
             let fetcher = new Fetcher();
-            fetcher.post(flaskES6.urlFor(`api.user_groups.add_user`, {id: groupId}), {user_id: this._user.id}).then(
+            fetcher.post(flaskES6.urlFor(`api.user_groups.add_user`, {id: groupId}), {user_id: this.#user.id}).then(
                 (data) => {
-                    let userGroupItemElmt = this._createUserGroupElement({id: groupId, name: groupName, rel_id: data.data.id});
-                    this._dropZoneElmt.addElement(userGroupItemElmt);
+                    let userGroupItemElmt = this.#createUserGroupElement({id: groupId, name: groupName, rel_id: data.data.id});
+                    this.#dropZoneElmt.addElement(userGroupItemElmt);
 
                     let dropedItemElmt = document.getElementById(jsonData.sourceNodeId);
                     dropedItemElmt.classList.add("d-none", "invisible");
 
-                    this._refreshCounters();
+                    this.#refreshCounters();
 
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User added to ${groupName} group!`, isDismissible: true, delay: 4});
-                    this._messagesElmt.appendChild(flashMsgElmt);
+                    this.#messagesElmt.appendChild(flashMsgElmt);
                 }
             ).catch(
                 (error) => {
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this._messagesElmt.appendChild(flashMsgElmt);
+                    this.#messagesElmt.appendChild(flashMsgElmt);
                 }
             );
         });
     }
 
-    _createUserGroupElement(data) {
+    #createUserGroupElement(data) {
         let userGroupItemElmt = document.createElement("div");
         userGroupItemElmt.id = `group-${data.id}`;
 
@@ -153,7 +153,7 @@ class UserManageGroupsView {
             removeBtnElmt.appendChild(removeIconElmt);
 
             // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
-            let modalConfirm = new ModalConfirm(userGroupItemElmt.id, `Remove <mark>${this._user.name}</mark> user from <mark>${data.name}</mark> group`, () => {
+            let modalConfirm = new ModalConfirm(userGroupItemElmt.id, `Remove <mark>${this.#user.name}</mark> user from <mark>${data.name}</mark> group`, () => {
                 // Inside the callback to remove user from group.
                 let fetcher = new Fetcher();
                 fetcher.post(flaskES6.urlFor("api.user_groups.remove_user", {id: data.id, rel_id: data.rel_id})).then(
@@ -163,22 +163,22 @@ class UserManageGroupsView {
                             dropedItemElmt.classList.remove("d-none", "invisible");
                         }
                         else {
-                            dropedItemElmt = this._createUserGroupAvailableElement(data);
-                            this._userGroupAvailableContainerElmt.appendChild(dropedItemElmt);
+                            dropedItemElmt = this.#createUserGroupAvailableElement(data);
+                            this.#userGroupAvailableContainerElmt.appendChild(dropedItemElmt);
                         }
         
                         let userGroupItemElmt = document.getElementById(`group-${data.id}`);
-                        this._dropZoneElmt.removeElement(userGroupItemElmt);
+                        this.#dropZoneElmt.removeElement(userGroupItemElmt);
 
-                        this._refreshCounters();
+                        this.#refreshCounters();
 
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User removed from ${data.name} group!`, isDismissible: true, delay: 4});
-                        this._messagesElmt.appendChild(flashMsgElmt);
+                        this.#messagesElmt.appendChild(flashMsgElmt);
                     }
                 ).catch(
                     (error) => {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this._messagesElmt.appendChild(flashMsgElmt);
+                        this.#messagesElmt.appendChild(flashMsgElmt);
                     }
                 );
             });
@@ -196,7 +196,7 @@ class UserManageGroupsView {
         return userGroupItemElmt;
     }
 
-    _createUserGroupAvailableElement(data) {
+    #createUserGroupAvailableElement(data) {
         let userGroupItemElmt = document.createElement("div");
         userGroupItemElmt.id = `src-group-${data.id}`;
         userGroupItemElmt.classList.add("border", "border-1", "rounded", "bg-white", "p-2");
@@ -229,20 +229,20 @@ class UserManageGroupsView {
         return userGroupItemElmt;
     }
 
-    _refreshCounters() {
-        this._userGroupCountElmt.innerText = this._dropZoneElmt.count.toString();
-        let userGroupAvailableCount = this._userGroupAvailableContainerElmt.querySelectorAll(":scope > div[draggable=true]:not(.d-none)").length;
-        this._userGroupAvailableCountElmt.innerText = userGroupAvailableCount.toString();
+    #refreshCounters() {
+        this.#userGroupCountElmt.innerText = this.#dropZoneElmt.count.toString();
+        let userGroupAvailableCount = this.#userGroupAvailableContainerElmt.querySelectorAll(":scope > div[draggable=true]:not(.d-none)").length;
+        this.#userGroupAvailableCountElmt.innerText = userGroupAvailableCount.toString();
 
-        if (this._dropZoneElmt.count <= 0) {
-            this._dropZoneElmt.setHelp();
+        if (this.#dropZoneElmt.count <= 0) {
+            this.#dropZoneElmt.setHelp();
         }
-        let noUserGroupAvailableInfoElmt = this._userGroupAvailableContainerElmt.querySelector(":scope > span");
+        let noUserGroupAvailableInfoElmt = this.#userGroupAvailableContainerElmt.querySelector(":scope > span");
         if (noUserGroupAvailableInfoElmt == null) {
             noUserGroupAvailableInfoElmt = document.createElement("span");
             noUserGroupAvailableInfoElmt.classList.add("fst-italic");
             noUserGroupAvailableInfoElmt.innerText = "No groups available.";
-            this._userGroupAvailableContainerElmt.appendChild(noUserGroupAvailableInfoElmt);
+            this.#userGroupAvailableContainerElmt.appendChild(noUserGroupAvailableInfoElmt);
         }
         if (userGroupAvailableCount <= 0) {
             noUserGroupAvailableInfoElmt.classList.remove("d-none");
@@ -253,42 +253,42 @@ class UserManageGroupsView {
     }
 
     refresh() {
-        if (!this._userGroupTabElmt.isLoaded) {
-            this._userGroupCountElmt.innerHTML = "";
-            this._userGroupCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
+        if (!this.#userGroupTabElmt.isLoaded) {
+            this.#userGroupCountElmt.innerHTML = "";
+            this.#userGroupCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
 
-            this._userGroupAvailableCountElmt.innerHTML = "";
-            this._userGroupAvailableCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
+            this.#userGroupAvailableCountElmt.innerHTML = "";
+            this.#userGroupAvailableCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
 
-            this._userGroupAvailableContainerElmt.innnerHTML = "";
-            this._userGroupAvailableContainerElmt.appendChild(new Spinner());
+            this.#userGroupAvailableContainerElmt.innnerHTML = "";
+            this.#userGroupAvailableContainerElmt.appendChild(new Spinner());
 
-            this._dropZoneElmt.setLoading();
+            this.#dropZoneElmt.setLoading();
 
             let fetcher = new Fetcher();
-            fetcher.get(flaskES6.urlFor(`api.users.list_groups`, {id: this._user.id})).then(
+            fetcher.get(flaskES6.urlFor(`api.users.list_groups`, {id: this.#user.id})).then(
                 (data) => {
-                    this._dropZoneElmt.clear();
+                    this.#dropZoneElmt.clear();
                     for (let row of data.groups) {
-                        let userGroupItemElmt = this._createUserGroupElement(row);
-                        this._dropZoneElmt.addElement(userGroupItemElmt);
+                        let userGroupItemElmt = this.#createUserGroupElement(row);
+                        this.#dropZoneElmt.addElement(userGroupItemElmt);
                     }
 
-                    this._userGroupAvailableContainerElmt.innerHTML = "";
+                    this.#userGroupAvailableContainerElmt.innerHTML = "";
                     for (let row of data.available_groups) {
-                        let userGroupAvailableItemElmt = this._createUserGroupAvailableElement(row);
-                        this._userGroupAvailableContainerElmt.appendChild(userGroupAvailableItemElmt);
+                        let userGroupAvailableItemElmt = this.#createUserGroupAvailableElement(row);
+                        this.#userGroupAvailableContainerElmt.appendChild(userGroupAvailableItemElmt);
                     }
 
-                    this._refreshCounters();
+                    this.#refreshCounters();
 
-                    this._userGroupTabElmt.isLoaded = true;
+                    this.#userGroupTabElmt.isLoaded = true;
                 }
             ).catch(
                 (error) => {
                     if (error.name != "AbortError") {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this._messagesElmt.appendChild(flashMsgElmt);
+                        this.#messagesElmt.appendChild(flashMsgElmt);
                     }
                 }
             );

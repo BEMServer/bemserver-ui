@@ -1,13 +1,13 @@
 class Spinner extends HTMLDivElement {
 
-    _useSmallSize = false;
-    _useSecondaryColor = false;
+    #useSmallSize = false;
+    #useSecondaryColor = false;
 
     constructor(options = { useSmallSize: false, useSecondaryColor: false }) {
         super();
 
-        this._useSmallSize = options.useSmallSize;
-        this._useSecondaryColor = options.useSecondaryColor;
+        this.#useSmallSize = options.useSmallSize;
+        this.#useSecondaryColor = options.useSecondaryColor;
     }
 
     connectedCallback() {
@@ -16,8 +16,8 @@ class Spinner extends HTMLDivElement {
         this.classList.add("d-flex", "justify-content-center");
 
         let spinnerElmt = document.createElement("div");
-        spinnerElmt.classList.add("spinner-border", `app-spinner${this._useSecondaryColor ? "-secondary" : ""}`);
-        if (this._useSmallSize) {
+        spinnerElmt.classList.add("spinner-border", `app-spinner${this.#useSecondaryColor ? "-secondary" : ""}`);
+        if (this.#useSmallSize) {
             spinnerElmt.classList.add("spinner-border-sm");
         }
         spinnerElmt.setAttribute("role", "status");
