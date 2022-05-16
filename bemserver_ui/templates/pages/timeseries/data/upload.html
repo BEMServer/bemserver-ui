@@ -1,0 +1,35 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Upload timeseries data" %}
+{% set subtitle = g.campaign_ctxt.name %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('timeseries_data.upload') }}" enctype="multipart/form-data" method="POST">
+                <fieldset>
+                    <legend class="invisible d-none">Timeseries data files</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="data_state">Timeseries data state</label>
+                        <select class="form-select" id="data_state" name="data_state" aria-label="Select a timeseries data state" required>
+                            {% for x in ts_datastates %}
+                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="csv_file">Select a CSV file</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" aria-label="Select a CSV file" required autofocus>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-outline-secondary" title="Cancel">Cancel</a>
+                        <button type="submit" class="btn btn-sm btn-primary" title="Upload file"><i class="bi bi-upload"></i> Upload</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

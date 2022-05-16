@@ -21,6 +21,7 @@ MODULES = (
     timeseries.timeseries,
     timeseries.timeseries_datastates,
     timeseries.timeseries_properties,
+    timeseries.timeseries_data,
 )
 
 

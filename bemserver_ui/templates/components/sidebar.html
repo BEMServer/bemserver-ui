@@ -57,6 +57,13 @@
                         {% endif %}
                     </div>
                 </li>
+                {% if signed_user.is_admin %}
+                <li class="nav-item">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
+                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.upload') }}" title="Import timeseries data"><i class="bi bi-filetype-csv"></i> Import timeseries data</a>
+                    </div>
+                </li>
+                {% endif %}
             </ul>
             {% endif %}
             {% if signed_user.is_admin %}
