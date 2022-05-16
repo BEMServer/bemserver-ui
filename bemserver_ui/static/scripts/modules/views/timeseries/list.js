@@ -123,11 +123,10 @@ class TimeseriesListView {
         let contentHTML = ``;
 
         let totalLinks = 0;
-
-        for (let [structuralElementType, tsStructElmtLinks] of Object.entries(data.data)) {
+        for (let structuralElementType of data.structural_element_types) {
             let structuralElementContentHTML = ``;
             let nbLinks = 0;
-            for (let tsStructElmtLink of tsStructElmtLinks) {
+            for (let tsStructElmtLink of data.data[structuralElementType]) {
                 structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white text-muted px-2 py-1 gap-1">
 <i class="bi bi-${structuralElementType == "zone" ? "bullseye" : "building"}"></i>
 <span class="fw-bold">${tsStructElmtLink.structural_element.name}</span>`;

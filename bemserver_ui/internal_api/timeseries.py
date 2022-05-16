@@ -102,6 +102,13 @@ def retrieve_structural_elements(id):
     return flask.jsonify(
         {
             "data": data,
+            "structural_element_types": [
+                "site",
+                "building",
+                "storey",
+                "space",
+                "zone",
+            ],
         }
     )
 
