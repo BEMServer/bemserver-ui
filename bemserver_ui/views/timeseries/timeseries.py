@@ -4,6 +4,7 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
 from ..structural_elements.structural_elements import (
     _build_tree_sites,
@@ -62,13 +63,13 @@ def list():
         "campaign_id": campaign_id,
         "campaign_scope_id": None,
         "page_size": 10,
-        **{f"{x}_id": None for x in ["site", "building", "storey", "space", "zone"]},
+        **{f"{x}_id": None for x in FULL_STRUCTURAL_ELEMENT_TYPES},
     }
     # Get requested filters.
     if flask.request.method == "POST":
         if flask.request.form["campaign_scope"] != "None":
             filters["campaign_scope_id"] = flask.request.form["campaign_scope"]
-        for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
+        for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
             filter_value = flask.request.form.get(struct_elmt_type, "None") or "None"
             if filter_value != "None":
                 filters[f"{struct_elmt_type}_id"] = filter_value
@@ -77,10 +78,7 @@ def list():
         if "page" in flask.request.form and flask.request.form["page"] != "":
             filters["page"] = int(flask.request.form["page"])
     is_filtered = filters["campaign_scope_id"] is not None or any(
-        [
-            filters[f"{x}_id"] is not None
-            for x in ["site", "building", "storey", "space", "zone"]
-        ]
+        [filters[f"{x}_id"] is not None for x in FULL_STRUCTURAL_ELEMENT_TYPES]
     )
 
     try:
@@ -95,7 +93,7 @@ def list():
         campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
 
     structural_elements = {}
-    for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
+    for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
         structural_elements[struct_elmt_type] = (
             getattr(flask.g.api_client, f"{struct_elmt_type}s")
             .getall(campaign_id=campaign_id)

@@ -3,6 +3,7 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 from bemserver_ui.views.structural_elements.structural_elements import (
     _build_tree_sites,
     _build_tree_zones,
@@ -76,7 +77,7 @@ def retrieve_structural_elements(id):
     tree_zones = _build_tree_zones(campaign_id)
 
     data = {}
-    for struct_elmt_type in ["site", "building", "storey", "space", "zone"]:
+    for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
         data[struct_elmt_type] = []
         api_ts_by_struct_elmt = getattr(
             flask.g.api_client, f"timeseries_by_{struct_elmt_type}s"
@@ -102,13 +103,7 @@ def retrieve_structural_elements(id):
     return flask.jsonify(
         {
             "data": data,
-            "structural_element_types": [
-                "site",
-                "building",
-                "storey",
-                "space",
-                "zone",
-            ],
+            "structural_element_types": FULL_STRUCTURAL_ELEMENT_TYPES,
         }
     )
 

@@ -3,6 +3,7 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
+from bemserver_ui.common.const import STRUCTURAL_ELEMENT_TYPES
 
 
 blp = flask.Blueprint(
@@ -34,7 +35,7 @@ def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
 def _build_tree_sites(campaign_id, *, is_draggable=False):
     # Get all structure elements for campaign.
     structural_elements = {}
-    for structural_element_type in ["site", "building", "storey", "space"]:
+    for structural_element_type in STRUCTURAL_ELEMENT_TYPES:
         api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
         try:
             structural_elements[structural_element_type] = api_resource.getall(

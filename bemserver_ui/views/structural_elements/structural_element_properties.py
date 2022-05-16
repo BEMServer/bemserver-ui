@@ -5,6 +5,7 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, Roles
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
 
 blp = flask.Blueprint(
@@ -14,12 +15,9 @@ blp = flask.Blueprint(
 )
 
 
-STRUCTURAL_ELEMENTS = ["site", "building", "storey", "space", "zone"]
-
-
 def extend_props_data(props_data):
     prop_ids = {}
-    for struct_elmt in STRUCTURAL_ELEMENTS:
+    for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
         api_resource = getattr(flask.g.api_client, f"{struct_elmt}_properties")
         try:
             props_resp = api_resource.getall()
@@ -31,21 +29,21 @@ def extend_props_data(props_data):
 
     for prop_data in props_data:
         prop_data["used_in"] = {}
-        for struct_elmt in STRUCTURAL_ELEMENTS:
+        for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
             prop_data["used_in"][struct_elmt] = prop_data["id"] in prop_ids[struct_elmt]
         prop_data["is_orphan"] = not any(
-            [prop_data["used_in"][x] for x in STRUCTURAL_ELEMENTS]
+            [prop_data["used_in"][x] for x in FULL_STRUCTURAL_ELEMENT_TYPES]
         )
 
 
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
-    filters = {x: True for x in STRUCTURAL_ELEMENTS}
+    filters = {x: True for x in FULL_STRUCTURAL_ELEMENT_TYPES}
     filters["orphan"] = True
     # Get requested filters.
     if flask.request.method == "POST":
-        for x in STRUCTURAL_ELEMENTS:
+        for x in FULL_STRUCTURAL_ELEMENT_TYPES:
             filters[x] = x in flask.request.form
         filters["orphan"] = "orphan" in flask.request.form
 
@@ -70,7 +68,7 @@ def list():
             if filters["orphan"] and prop_data["is_orphan"]:
                 props_data.append(prop_data)
             else:
-                for struct_elmt in STRUCTURAL_ELEMENTS:
+                for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
                     if filters[struct_elmt] and prop_data["used_in"][struct_elmt]:
                         props_data.append(prop_data)
                         break
@@ -78,7 +76,7 @@ def list():
     return flask.render_template(
         "pages/structural_elements/properties/list.html",
         properties=props_data,
-        structural_elements=STRUCTURAL_ELEMENTS,
+        structural_elements=FULL_STRUCTURAL_ELEMENT_TYPES,
         filters=filters,
         is_filtered=is_filtered,
         total_count=total_count,
@@ -106,7 +104,7 @@ def create():
             flask.flash(f"New property created: {prop_name}", "success")
 
             payload = {"structural_element_property_id": ret_resp.data["id"]}
-            for x in STRUCTURAL_ELEMENTS:
+            for x in FULL_STRUCTURAL_ELEMENT_TYPES:
                 if x in flask.request.form:
                     api_resource = getattr(flask.g.api_client, f"{x}_properties")
                     try:
@@ -132,7 +130,7 @@ def create():
 
     return flask.render_template(
         "pages/structural_elements/properties/create.html",
-        structural_elements=STRUCTURAL_ELEMENTS,
+        structural_elements=FULL_STRUCTURAL_ELEMENT_TYPES,
         url_cancel=url_cancel,
     )
 
@@ -162,7 +160,7 @@ def edit(id):
             flask.flash(f"{prop_name} property updated!", "success")
 
             payload = {"structural_element_property_id": prop_resp.data["id"]}
-            for x in STRUCTURAL_ELEMENTS:
+            for x in FULL_STRUCTURAL_ELEMENT_TYPES:
                 api_resource = getattr(flask.g.api_client, f"{x}_properties")
                 x_props = api_resource.getall(structural_element_property_id=id)
                 # Property is requested to be associated to structural element.
@@ -213,7 +211,7 @@ def edit(id):
         "pages/structural_elements/properties/edit.html",
         property=prop_data,
         etag=prop_resp.etag,
-        structural_elements=STRUCTURAL_ELEMENTS,
+        structural_elements=FULL_STRUCTURAL_ELEMENT_TYPES,
     )
 
 
