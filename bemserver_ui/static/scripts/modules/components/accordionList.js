@@ -90,10 +90,6 @@ class AccordionListItem extends HTMLDivElement {
         }.bind(this));
     }
 
-    setLoading() {
-        this.refresh(new Spinner());
-    }
-
     refreshBodyContainerElement(element) {
         this.#bodyContainerElmt.innerHTML = "";
         this.#bodyContainerElmt.appendChild(element);
