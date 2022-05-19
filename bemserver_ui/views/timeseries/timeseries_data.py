@@ -35,3 +35,10 @@ def upload():
         "pages/timeseries/data/upload.html",
         ts_datastates=ts_datastates_resp.data,
     )
+
+
+@blp.route("/explore")
+@auth.signin_required
+@ensure_campaign_context
+def explore():
+    return flask.render_template("pages/timeseries/data/explore.html")

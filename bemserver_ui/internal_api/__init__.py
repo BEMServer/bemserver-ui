@@ -8,6 +8,8 @@ import flask
 from . import structural_elements
 from . import campaigns
 from . import timeseries
+from . import timeseries_data
+from . import timeseries_datastates
 from . import user_groups
 from . import users
 
@@ -19,6 +21,8 @@ MODULES = (
     structural_elements,
     campaigns,
     timeseries,
+    timeseries_data,
+    timeseries_datastates,
     user_groups,
     users,
 )

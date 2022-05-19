@@ -1,0 +1,81 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Explore timeseries" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="row d-xl-flex d-grid mb-3">
+                <div class="col pb-3 pb-xl-0" id="tsSelectContainer"></div>
+                <div class="col" id="tsDataStatesContainer"></div>
+            </div>
+            <div class="row d-xl-flex d-grid mb-3">
+                <div class="col pb-3 pb-xl-0">
+                    <div class="input-group">
+                        <span class="input-group-text">From</span>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                        <input type="time" class="form-control" id="start_time" name="start_time">
+                        <span class="input-group-text">UTC</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text">To</span>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                        <input type="time" class="form-control" id="end_time" name="end_time">
+                        <span class="input-group-text">UTC</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-xl-flex d-grid mb-3">
+                <div class="col pb-3 pb-xl-0">
+                    <div class="input-group">
+                        <span class="input-group-text">Aggregation mode</span>
+                        <select class="form-select" id="agg" name="agg" aria-label="Select an aggregation mode">
+                            <option value="none" selected>No aggregation</option>
+                            <option value="avg">average</option>
+                            <option value="sum">sum</option>
+                            <option value="min">minimum</option>
+                            <option value="max">maximum</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text">Duration</span>
+                        <input type="text" class="form-control" id="duration" name="duration">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button id="loadBtn" class="btn btn-sm btn-outline-primary" title="Load chart"><i class="bi bi-arrow-clockwise"></i> Load</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="chartContainer" class="border border-1 rounded bg-white p-2"></div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+<script type="module">
+    import { TimeseriesDataExploreView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataExplore.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        let tsDataExploreView = new TimeseriesDataExploreView();
+        tsDataExploreView.refresh();
+
+    }, false);
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
