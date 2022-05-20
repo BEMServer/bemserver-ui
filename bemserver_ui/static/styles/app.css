@@ -14,6 +14,7 @@ body,
 .app-logo {
     min-width: 75px !important;
     max-width: 150px !important;
+    max-height: 30px !important;
 }
 
 .app-header,

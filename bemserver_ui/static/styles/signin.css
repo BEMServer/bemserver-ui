@@ -4,10 +4,6 @@ body {
 }
 
 body {
-    display: flex;
-    align-items: center;
-    padding-top: 40px;
-    padding-bottom: 40px;
     min-width: 400px;
 }
 
@@ -32,4 +28,13 @@ body {
 }
 .app-messages > .alert {
     min-width: 40vw !important;
+}
+
+.app-signin-panel {
+    min-width: 370px;
+    max-width: 400px;
+}
+
+.app-logo {
+    max-height: 170px;
 }

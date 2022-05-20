@@ -1,4 +1,5 @@
 {% import "macros/flash.html" as mac_flash %}
+{% import "macros/partners.html" as mac_partners %}
 {% extends "pages/skeleton.html" %}
 
 {% set title = "Sign in" %}
@@ -12,11 +13,11 @@
 
 {% block body_content %}
 {{ super() -}}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col d-lg-flex d-grid justify-content-center gap-3">
-            <img class="mx-auto m-lg-0 my-0 my-lg-auto" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
-            <div class="vstack gap-2 p-4" style="min-width: 370px; max-width: 400px;">
+<div class="container-md container-fluid h-100">
+    <div class="d-flex flex-column gap-4 h-100">
+        <div class="d-lg-flex d-grid justify-content-center gap-3 mt-auto{% if partners is not defined %} mb-auto{% endif %}">
+            <img class="mx-auto m-lg-0 my-0 my-lg-auto app-logo" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
+            <div class="vstack gap-2 p-4 app-signin-panel">
                 <h1 class="h3 text-center d-none d-lg-block">Sign in to BEMServer</h1>
                 <form id="signinForm" class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign=True) }}" method="POST">
                     <div class="form-floating">
@@ -31,10 +32,19 @@
                 <button type="submit" form="signinForm" class="btn btn-primary w-100">Sign in</button>
             </div>
         </div>
+        {% if partners is defined %}
+        <footer class="d-flex flex-wrap justify-content-center gap-4 mt-auto p-2">
+            {% filter indent(width=12) %}
+            {{ mac_partners.render_partners(partners) -}}
+            {% endfilter %}
+        </footer>
+        {% endif %}
     </div>
 </div>
 <div id="messages" class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3 app-messages">
-    {{- mac_flash.display_messages() }}
+    {% filter indent(width=4) %}
+    {{ mac_flash.display_messages() -}}
+    {% endfilter %}
 </div>
 {% endblock body_content %}
 
