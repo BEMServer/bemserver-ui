@@ -29,6 +29,14 @@ h2 {
     background-color: #95c11a !important;
 }
 
+.text-primary {
+    color: #0088db !important;
+}
+
+.text-secondary {
+    color: #95c11a !important;
+}
+
 .accordion .accordion-button.collapsed:hover,
 .list-group .list-group-item-action:hover {
     background-color: var(--bs-gray-200) !important;
