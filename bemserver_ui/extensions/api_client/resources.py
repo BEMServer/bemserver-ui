@@ -39,6 +39,11 @@ class BaseResources(abc.ABC):
         return self._req.delete(self.enpoint_uri_by_id(id), etag=etag)
 
 
+class AboutResources(BaseResources):
+    endpoint_base_uri = "/about/"
+    disabled_endpoints = ["getone", "create", "update", "delete"]
+
+
 class UserResources(BaseResources):
     endpoint_base_uri = "/users/"
 

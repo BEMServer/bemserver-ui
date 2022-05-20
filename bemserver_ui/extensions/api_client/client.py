@@ -8,6 +8,7 @@ from requests.auth import HTTPBasicAuth  # noqa
 from io import BytesIO
 
 from .resources import (
+    AboutResources,
     UserResources,
     UserGroupResources,
     UserByUserGroupResources,
@@ -248,6 +249,8 @@ class BEMServerApiClient:
         self._request_manager = BEMServerApiClientRequest(
             base_uri, authentication_method
         )
+
+        self.about = AboutResources(self._request_manager)
 
         self.users = UserResources(self._request_manager)
         self.user_groups = UserGroupResources(self._request_manager)
