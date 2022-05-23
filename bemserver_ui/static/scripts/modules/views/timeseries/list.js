@@ -119,7 +119,7 @@ class TimeseriesListView {
 </div>`;
     }
 
-    #getStructuralElementsHTML(data, tsId) {
+    #getStructuralElementsHTML(data) {
         let contentHTML = ``;
 
         let totalLinks = 0;
@@ -130,8 +130,8 @@ class TimeseriesListView {
                 structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white text-muted px-2 py-1 gap-1">
 <i class="bi bi-${structuralElementType == "zone" ? "bullseye" : "building"}"></i>
 <span class="fw-bold">${tsStructElmtLink.structural_element.name}</span>`;
-                if (structuralElementType != "zone") {
-                    structuralElementContentHTML += `<small class="opacity-75">${tsStructElmtLink.structural_element.path}</small>`;
+                if (structuralElementType != "zone" && tsStructElmtLink.structural_element.path.length > 0) {
+                    structuralElementContentHTML += `<small class="opacity-75 ms-2">${tsStructElmtLink.structural_element.path}</small>`;
                 }
                 structuralElementContentHTML += `</div>`;
 
@@ -139,10 +139,12 @@ class TimeseriesListView {
                 nbLinks += 1;
             }
 
-            contentHTML += `<div class="mb-3">
-    <h6 class="fw-bold text-capitalize text-muted">${structuralElementType}s <span class="badge bg-secondary">${nbLinks}</span></h6>
+            if (nbLinks > 0) {
+                contentHTML += `<div class="mb-3">
+    <h6 class="fw-bold text-capitalize text-muted">${structuralElementType}s (${nbLinks})</h6>
     <div class="d-flex gap-2 mx-2">${structuralElementContentHTML}</div>
 </div>`;
+            }
         }
 
         if (totalLinks <= 0) {
@@ -194,7 +196,7 @@ class TimeseriesListView {
             let fetcher = new Fetcher();
             fetcher.get(retrieveStructuralElementsUrl).then(
                 (data) => {
-                    timeseriesStructuralElementsElmt.innerHTML = this.#getStructuralElementsHTML(data, tsId);
+                    timeseriesStructuralElementsElmt.innerHTML = this.#getStructuralElementsHTML(data);
                     timeseriesStructuralElementsElmt.setAttribute("data-ts-loaded", true);
                 }
             ).catch(
