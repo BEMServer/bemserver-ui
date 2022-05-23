@@ -249,3 +249,22 @@ class TimeseriesBySpaceResources(BaseResources):
 class TimeseriesByZoneResources(BaseResources):
     endpoint_base_uri = "/timeseries_by_zones/"
     disabled_endpoints = ["update"]
+
+
+class IOResources(BaseResources):
+    endpoint_base_uri = "/io/"
+    disabled_endpoints = ["getall", "getone", "create", "update", "delete"]
+
+    def upload_timeseries_csv(self, campaign_id, timeseries_csv):
+        endpoint = f"{self.endpoint_base_uri}timeseries"
+        q_params = {"campaign_id": campaign_id}
+        return self._req.upload(endpoint, params=q_params, files=timeseries_csv)
+
+    def upload_sites_csv(self, campaign_id, csv_files):
+        endpoint = f"{self.endpoint_base_uri}sites"
+        q_params = {"campaign_id": campaign_id}
+        return self._req.upload(
+            endpoint,
+            params=q_params,
+            files={k: v for k, v in csv_files.items() if len(v.filename) > 0},
+        )

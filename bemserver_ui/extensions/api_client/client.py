@@ -46,6 +46,7 @@ from .resources import (
     TimeseriesByStoreyResources,
     TimeseriesBySpaceResources,
     TimeseriesByZoneResources,
+    IOResources,
 )
 from .exceptions import (
     BEMServerAPIValidationError,
@@ -251,6 +252,7 @@ class BEMServerApiClient:
         )
 
         self.about = AboutResources(self._request_manager)
+        self.io = IOResources(self._request_manager)
 
         self.users = UserResources(self._request_manager)
         self.user_groups = UserGroupResources(self._request_manager)
