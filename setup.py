@@ -21,7 +21,7 @@ with open("README.rst", encoding="utf-8") as f:
 
 setup(
     name="bemserver-ui",
-    version="0.1",
+    version="0.0.1",
     description="Buildig Operation and Maintenance web interface",
     long_description=long_description,
     url="https://github.com/BEMServer/bemserver-ui",

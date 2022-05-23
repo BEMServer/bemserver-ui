@@ -6,6 +6,9 @@ from . import internal_api
 from . import views
 
 
+__version__ = "0.0.1"
+
+
 def create_app():
     """Create application"""
     app = flask.Flask(__name__)

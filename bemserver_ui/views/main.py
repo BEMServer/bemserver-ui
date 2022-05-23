@@ -1,6 +1,7 @@
 """Index page"""
 import flask
 
+import bemserver_ui
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth
 from bemserver_ui.common.const import BEMSERVER_APP_LABELS
@@ -28,6 +29,6 @@ def about():
     about_versions = {}
     for app_name, app_version in about_resp.data["versions"].items():
         about_versions[BEMSERVER_APP_LABELS[app_name]] = app_version
-    about_versions["UI"] = "0.0.1"
+    about_versions["UI"] = bemserver_ui.__version__
 
     return flask.render_template("pages/about.html", about_versions=about_versions)
