@@ -48,16 +48,16 @@ class FormController {
         // In current page, iterate through every form that contains a "data-modal-confirm-message" attribute.
         for (let confirmFormElmt of this.#confirmFormElmts) {
             // Add a modal confirm component for this form, defining an "ok" callback function.
-            let modalConfirm = new ModalConfirm(confirmFormElmt.id, confirmFormElmt.getAttribute("data-modal-confirm-message"), function() { confirmFormElmt.submit(); });
+            let modalConfirm = new ModalConfirm(confirmFormElmt.id, confirmFormElmt.getAttribute("data-modal-confirm-message"), () => { confirmFormElmt.submit(); });
             document.body.appendChild(modalConfirm);
 
             // Add an event listener to display a confirm message on form submit.
-            confirmFormElmt.addEventListener("submit", function(event) {
+            confirmFormElmt.addEventListener("submit", (event) => {
                 // Stop submit.
                 event.preventDefault();
                 // And display modal.
-                this.show();
-            }.bind(modalConfirm));
+                modalConfirm.show();
+            });
         }
 
         // Mark every required input field with red asterisk.

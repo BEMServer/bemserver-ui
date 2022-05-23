@@ -135,7 +135,7 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", () => {
 
         let availablePropertySelectElmt = document.getElementById("availableProperty");
         let availablePropertyDescriptionElmt = document.getElementById("availablePropertyDescription");
@@ -143,14 +143,13 @@
         if (availablePropertySelectElmt.selectedIndex != -1) {
             availablePropertyDescription.innerHTML = availablePropertySelectElmt.options[availablePropertySelectElmt.selectedIndex].getAttribute("data-property-description");
         }
-
-        availablePropertySelectElmt.addEventListener("change", function (event) {
+        availablePropertySelectElmt.addEventListener("change", (event) => {
             if (event.target.selectedIndex != -1) {
                 availablePropertyDescription.innerHTML = event.target.options[event.target.selectedIndex].getAttribute("data-property-description");
             }
         });
 
-    }, false);
+    });
 </script>
 {% endfilter %}
 {% endblock body_scripts %}

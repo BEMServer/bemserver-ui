@@ -10,7 +10,7 @@ import { FlashTimer } from "./modules/flashTimer.js";
 const flaskES6 = new FlaskES6(flaskEndpoints);
 
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
 
     let campaignSelector = new CampaignSelectorView();
     let sidebar = new Sidebar();
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
     formCtrl.bind();
     flashTimer.bind();
 
-}, false);
+});
 
 
 export { flaskES6, signedUser } ;

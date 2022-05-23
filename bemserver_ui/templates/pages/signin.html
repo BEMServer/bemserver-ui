@@ -54,7 +54,8 @@
 <script type="module">
     import { FlashTimer } from "{{ url_for('static', filename='scripts/modules/flashTimer.js') }}";
 
-    document.addEventListener("DOMContentLoaded", function() {
+
+    document.addEventListener("DOMContentLoaded", () => {
         let flashTimer = new FlashTimer();
         flashTimer.bind();
     });

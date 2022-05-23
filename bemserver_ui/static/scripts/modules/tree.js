@@ -54,7 +54,7 @@ class Tree {
     }
 
     #initIcons() {
-        this.#treeItemElmts.forEach(function (itemElmt) {
+        this.#treeItemElmts.forEach((itemElmt) => {
             let iconLinkElmt = itemElmt.querySelector(".nav-tree-item-icon > i");
             if (iconLinkElmt != null) {
                 if (iconLinkElmt.className == this.#defaultIconItemCollapsed) {
@@ -67,24 +67,24 @@ class Tree {
 
             let iconElmt = itemElmt.querySelector(".nav-tree-item > i");
             iconElmt?.setAttribute("class", this.#iconItem);
-        }.bind(this));
+        });
     }
 
     #initEventListeners() {
         for (let itemElmt of this.#treeItemElmts) {
             let collapsableElmt = itemElmt.querySelector("ul.collapse");
-            collapsableElmt?.addEventListener("show.bs.collapse", function(event) {
+            collapsableElmt?.addEventListener("show.bs.collapse", (event) => {
                 let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
                 iconElmt.className = this.#iconItemExpanded;
-            }.bind(this));
-            collapsableElmt?.addEventListener("hide.bs.collapse", function(event) {
+            });
+            collapsableElmt?.addEventListener("hide.bs.collapse", (event) => {
                 let iconElmt = event.target.parentElement.querySelector(".nav-tree-item-icon > i");
                 iconElmt.className = this.#iconItemCollapsed;
-            }.bind(this));
+            });
 
             let linkElmt = itemElmt.querySelector(".nav-tree-item-link");
             if (linkElmt != null) {
-                linkElmt.addEventListener("click", function(event) {
+                linkElmt.addEventListener("click", (event) => {
                     event.preventDefault();
 
                     if (this.#selectedTreeItem != event.target) {
@@ -94,7 +94,7 @@ class Tree {
                         this.selectedItemId = this.#selectedTreeItem.getAttribute("data-tree-item-id");
                         this.selectedItemType = this.#selectedTreeItem.getAttribute("data-tree-item-type");
                         this.selectedItemPath = this.#selectedTreeItem.getAttribute("data-tree-item-path");
-                        this.#onSelectedTreeItemCallback?.call(null, this.selectedItemId, this.selectedItemType, this.selectedItemPath);
+                        this.#onSelectedTreeItemCallback?.(this.selectedItemId, this.selectedItemType, this.selectedItemPath);
                         this.#getCollapsableFromItem(this.#selectedTreeItem.parentElement)?.show();
                     }
                     else if (!this.#ignoreUnselectEvent) {
@@ -103,19 +103,19 @@ class Tree {
                         this.selectedItemId = null;
                         this.selectedItemType = null;
                         this.selectedItemPath = null;
-                        this.#onUnselectedTreeItemCallback?.call();
+                        this.#onUnselectedTreeItemCallback?.();
                     }
-                }.bind(this));
+                });
 
                 let isDraggable = Parser.parseBoolOrDefault(linkElmt.getAttribute("draggable"), false);
                 if (isDraggable) {
-                    linkElmt.addEventListener("dragstart", function(event) {
-                        this.classList.add("dragging");
+                    linkElmt.addEventListener("dragstart", (event) => {
+                        linkElmt.classList.add("dragging");
 
-                        let id = this.getAttribute("data-tree-item-id");
-                        let type = this.getAttribute("data-tree-item-type");
-                        let path = this.getAttribute("data-tree-item-path");
-                        let name = this.innerText;
+                        let id = linkElmt.getAttribute("data-tree-item-id");
+                        let type = linkElmt.getAttribute("data-tree-item-type");
+                        let path = linkElmt.getAttribute("data-tree-item-path");
+                        let name = linkElmt.innerText;
 
                         event.dataTransfer.effectAllowed = "all";
                         event.dataTransfer.setData("application/json", JSON.stringify({
@@ -129,15 +129,15 @@ class Tree {
                             "sourceNodeQuerySelector": `.nav-tree-item-link[data-tree-item-id="${id}"][data-tree-item-type="${type}"]`,
                         }));
                     });
-                    linkElmt.addEventListener("dragend", function() {
-                        this.classList.remove("dragging");
+                    linkElmt.addEventListener("dragend", () => {
+                        linkElmt.classList.remove("dragging");
                     });
                 }
             }
         }
 
-        this.#collapseAllBtnElmt?.addEventListener("click", this.collapseAll.bind(this), false);
-        this.#expandAllBtnElmt?.addEventListener("click", this.expandAll.bind(this), false);
+        this.#collapseAllBtnElmt?.addEventListener("click", () => { this.collapseAll(); });
+        this.#expandAllBtnElmt?.addEventListener("click", () => { this.expandAll(); });
     }
 
     #getCollapsableFromItem(itemElmt, switchable=false) {
@@ -164,15 +164,15 @@ class Tree {
     }
 
     collapseAll() {
-        this.#treeItemElmts.reverse().forEach(function (itemElmt) {
+        this.#treeItemElmts.reverse().forEach((itemElmt) => {
             this.#collapseItem(itemElmt);
-        }.bind(this));
+        });
     }
 
     expandAll() {
-        this.#treeItemElmts.forEach(function (itemElmt) {
+        this.#treeItemElmts.forEach((itemElmt) => {
             this.#expandItem(itemElmt);
-        }.bind(this));
+        });
     }
 
     getItemData(itemType, itemId) {

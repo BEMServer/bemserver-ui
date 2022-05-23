@@ -189,7 +189,7 @@ class TimeseriesDataExploreView {
                     inputGrouElmt.classList.add("input-group");
                     let inputGroupTextElmt = document.createElement("span");
                     inputGroupTextElmt.classList.add("input-group-text");
-                    inputGroupTextElmt.innerText = "Timeseries data states";
+                    inputGroupTextElmt.innerText = "Timeseries data state";
                     inputGrouElmt.appendChild(inputGroupTextElmt);
                     inputGrouElmt.appendChild(this.#tsDataStatesSelectElmt);
                     this.#tsDataStatesContainerElmt.appendChild(inputGrouElmt);

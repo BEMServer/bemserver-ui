@@ -31,30 +31,30 @@ class CampaignSelectorView {
     }
 
     #initEventListeners() {
-        this.#selectorComponentElmt.addEventListener("show.bs.offcanvas", function(event) {
+        this.#selectorComponentElmt.addEventListener("show.bs.offcanvas", (event) => {
             if (this.#campaignSelectElmt.value != this.currentCampaign) {
                 this.#campaignSelectElmt.value = this.currentCampaign;
             }
             this.#refresh();
-        }.bind(this));
-        this.#campaignSelectElmt.addEventListener("change", function(event) {
+        });
+        this.#campaignSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
             this.#refresh();
-        }.bind(this));
-        this.#campaignBtnSelectElmt.addEventListener("click", function(event) {
+        });
+        this.#campaignBtnSelectElmt.addEventListener("click", (event) => {
             event.preventDefault();
             if (this.#campaignSelectElmt.value != this.currentCampaign) {
                 this.#selectCampaign();
             }
             else {
                 this.hide();
-            }    
-        }.bind(this));
-        this.#campaignBtnUnselectElmt.addEventListener("click", function (event) {
+            }
+        });
+        this.#campaignBtnUnselectElmt.addEventListener("click", (event) => {
             event.preventDefault();
             this.#campaignSelectElmt.value = "";
-            this.#selectCampaign();    
-        }.bind(this));
+            this.#selectCampaign();
+        });
     }
 
     #selectCampaign() {

@@ -70,12 +70,12 @@
     import { TimeseriesDataExploreView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataExplore.js') }}";
 
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", () => {
 
         let tsDataExploreView = new TimeseriesDataExploreView();
         tsDataExploreView.refresh();
 
-    }, false);
+    });
 </script>
 {% endfilter %}
 {% endblock body_scripts %}

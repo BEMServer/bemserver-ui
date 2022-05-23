@@ -70,17 +70,17 @@
     import { StructuralElementsExploreView } from "{{ url_for('static', filename='scripts/modules/views/structuralElements/explore.js') }}";
 
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", () => {
 
         let structuralElmts = new StructuralElementsExploreView();
-        let treeSites = new Tree("treeSites", {selected: structuralElmts.render.bind(structuralElmts)});
-        let treeZones = new Tree("treeZones", {selected: structuralElmts.render.bind(structuralElmts)});
+        let treeSites = new Tree("treeSites", { selected: (id, type, path) => { structuralElmts.render(id, type, path); } });
+        let treeZones = new Tree("treeZones", { selected: (id, type, path) => { structuralElmts.render(id, type, path); } });
 
         treeSites.collapseAll();
         treeZones.collapseAll();
         structuralElmts.refresh();
 
-    }, false);
+    });
 </script>
 {% endfilter %}
 {% endblock body_scripts %}

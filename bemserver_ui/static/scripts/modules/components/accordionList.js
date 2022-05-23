@@ -78,7 +78,7 @@ class AccordionListItem extends HTMLDivElement {
     }
 
     #initEventListeners() {
-        this.#collapseElmt.addEventListener("shown.bs.collapse", function(event) {
+        this.#collapseElmt.addEventListener("shown.bs.collapse", (event) => {
             let itemOpenEvent = new CustomEvent("accordionItemOpen", {
                 detail: {
                     itemId: this.#itemId,
@@ -87,7 +87,7 @@ class AccordionListItem extends HTMLDivElement {
                 bubbles: true,
             });
             this.dispatchEvent(itemOpenEvent);
-        }.bind(this));
+        });
     }
 
     refreshBodyContainerElement(element) {

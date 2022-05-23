@@ -29,7 +29,7 @@ class TimeseriesListView {
     }
 
     #initEventListeners() {
-        this.#campaignScopeElmt.addEventListener("change", function(event) {
+        this.#campaignScopeElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             if (event.target.options[event.target.selectedIndex].value != this.filters.campaign_scope_id) {
@@ -40,30 +40,30 @@ class TimeseriesListView {
                 this.#pageInputElmt.value = this.filters.page;
                 event.target.classList.add("border-info", "bg-info", "bg-opacity-10");
             }
-        }.bind(this));
+        });
 
-        this.#pageSizeElmt.addEventListener("change", function(event) {
+        this.#pageSizeElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             this.#pageInputElmt.value = 1;
             this.#formFiltersElmt.submit();
-        }.bind(this));
+        });
 
         for (let pageLinkElmt of this.#pageLinkElmts) {
-            pageLinkElmt.addEventListener("click", function(event) {
+            pageLinkElmt.addEventListener("click", (event) => {
                 event.preventDefault();
 
                 this.#pageInputElmt.value = pageLinkElmt.getAttribute("data-page");
                 this.#formFiltersElmt.submit();
-            }.bind(this));
+            });
         }
 
         for (let accordionTimeseriesBtnElmt of this.#accordionTimeseriesBtnElmts) {
-            accordionTimeseriesBtnElmt.addEventListener("show.bs.collapse", function(event) {
+            accordionTimeseriesBtnElmt.addEventListener("show.bs.collapse", (event) => {
                 let tsId = event.target.getAttribute("data-ts-id");
                 this.#renderProperties(tsId);
                 this.#renderStructuralElements(tsId);
-            }.bind(this));
+            });
         }
     }
 

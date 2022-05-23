@@ -88,7 +88,7 @@
     import { TimeseriesManageStructuralElementsView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/manageStructuralElements.js') }}";
 
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", () => {
 
         let treeSites = new Tree("treeSites");
         let treeZones = new Tree("treeZones");

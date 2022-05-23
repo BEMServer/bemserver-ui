@@ -134,7 +134,8 @@
     const editedUser = {{ user | tojson }};
     const signedUser = {{ signed_user | tojson }};
 
-    document.addEventListener("DOMContentLoaded", function() {
+
+    document.addEventListener("DOMContentLoaded", () => {
 
         let userManageGroupsView = new UserManageGroupsView(editedUser, signedUser);
         userManageGroupsView.refresh();

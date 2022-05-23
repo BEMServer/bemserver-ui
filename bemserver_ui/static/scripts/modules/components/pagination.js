@@ -30,7 +30,7 @@ class PageSizeSelector extends HTMLDivElement {
     }
 
     #initEventListeners() {
-        this.#selectElmt?.addEventListener("change", function(event) {
+        this.#selectElmt?.addEventListener("change", (event) => {
             let newPageSize = Parser.parseIntOrDefault(event.target.options[event.target.selectedIndex].value, this.#current);
             if (this.constructor.AVAILABLE_PAGE_SIZES.includes(newPageSize)) {
                 let oldPageSize = this.#current;
@@ -39,7 +39,7 @@ class PageSizeSelector extends HTMLDivElement {
                 this.#current = newPageSize;
                 this.#updateSelected();
             }
-        }.bind(this));
+        });
     }
 
     #updateSelected() {
@@ -153,12 +153,12 @@ class PaginationItem extends HTMLLIElement {
     }
 
     #initEventListeners() {
-        this.#pageLinkElmt?.addEventListener("click", function(event) {
+        this.#pageLinkElmt?.addEventListener("click", (event) => {
             event.preventDefault();
 
             let navPageItemClickEvent = new CustomEvent("pageItemClick", {detail: {page: this.#page}, bubbles: true});
             this.dispatchEvent(navPageItemClickEvent);
-        }.bind(this));
+        });
     }
 
     #update() {
@@ -297,7 +297,7 @@ class Pagination extends HTMLUListElement {
     }
 
     #initEventListeners() {
-        this.addEventListener("pageItemClick", function(event) {
+        this.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
             if (this.#page != event.detail.page) {
@@ -311,7 +311,7 @@ class Pagination extends HTMLUListElement {
                     }
                 }
             }
-        }.bind(this));
+        });
     }
 
     #update() {

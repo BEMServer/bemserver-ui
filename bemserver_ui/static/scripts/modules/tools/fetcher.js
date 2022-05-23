@@ -33,7 +33,9 @@ class Fetcher {
         return window.fetch(
             url, { signal: this.#abortController.signal }
         ).then(
-            (response) => this.#handleErrors(response)
+            (response) => {
+                return this.#handleErrors(response);
+            }
         ).then(
             (response) => {
                 return response.json();
@@ -52,7 +54,9 @@ class Fetcher {
                 body: JSON.stringify(payload),
             }
         ).then(
-            (response) => this.#handleErrors(response)
+            (response) => {
+                return this.#handleErrors(response);
+            }
         ).then(
             (response) => {
                 return response.json();

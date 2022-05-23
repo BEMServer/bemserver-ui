@@ -59,7 +59,7 @@ class TimeseriesManageStructuralElementsView {
     }
 
     #initEventListeners() {
-        this.#tsPageSizeSelectorElmt.addEventListener("pageSizeChange", function(event) {
+        this.#tsPageSizeSelectorElmt.addEventListener("pageSizeChange", (event) => {
             event.preventDefault();
 
             if (event.detail.newValue != event.detail.oldValue) {
@@ -68,15 +68,15 @@ class TimeseriesManageStructuralElementsView {
                 this.#tsListElmt.setLoading();
                 this.refresh({page_size: event.detail.newValue});
             }
-        }.bind(this));
+        });
 
-        this.#tsPaginationContainerElmt.addEventListener("pageItemClick", function(event) {
+        this.#tsPaginationContainerElmt.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
             this.refresh({"page": event.detail.page});
-        }.bind(this));
+        });
 
-        this.#searchElmt.addEventListener("input", function(event) {
+        this.#searchElmt.addEventListener("input", (event) => {
             event.preventDefault();
 
             if (event.target.value != "") {
@@ -87,18 +87,18 @@ class TimeseriesManageStructuralElementsView {
             }
 
             this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value, "search": event.target.value});
-        }.bind(this));
+        });
 
-        this.#clearSearchBtnElmt.addEventListener("click", function(event) {
+        this.#clearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
             this.#searchElmt.value = "";
             this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
 
             this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value});
-        }.bind(this));
+        });
 
-        this.#tsListElmt.addEventListener("accordionItemOpen", function(event) {
+        this.#tsListElmt.addEventListener("accordionItemOpen", (event) => {
             event.preventDefault();
 
             // load current locations of timeseries
@@ -134,7 +134,7 @@ class TimeseriesManageStructuralElementsView {
                                 let dropedItemTitle = itemData.sourceNodeData.name;
                                 let dropedItemText = itemData.sourceNodeData.path;
 
-                                let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, function() {
+                                let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, () => {
                                     this.#fetcher.post(flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}), {"type": structuralElementType, "rel_id": tsStructElmtLinkId, "etag": tsStructElmtLinkEtag}).then(
                                         () => {
                                             dropZoneElmt.removeElement(dropedItemElmt);
@@ -145,7 +145,7 @@ class TimeseriesManageStructuralElementsView {
                                             this.#messagesElmt.appendChild(flashMsgElmt);
                                         }
                                     );
-                                }.bind(this));
+                                });
 
                                 dropZoneElmt.addElement(dropedItemElmt);
                                 totalLinks += 1;
@@ -164,9 +164,9 @@ class TimeseriesManageStructuralElementsView {
                     }
                 );
             }
-        }.bind(this));
+        });
 
-        this.#tsListElmt.addEventListener("itemDrop", function(event) {
+        this.#tsListElmt.addEventListener("itemDrop", (event) => {
             event.preventDefault();
 
             let dropZoneElmt = event.detail.target;
@@ -186,7 +186,7 @@ class TimeseriesManageStructuralElementsView {
             else {
                 this.#fetcher.post(flaskES6.urlFor(`api.timeseries.post_structural_elements`, {id: tsId}), {type: jsonData.sourceNodeData.type, id: jsonData.sourceNodeData.id}).then(
                     (data) => {
-                        let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, function() {
+                        let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, () => {
 
                             this.#fetcher.post(flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}), {"type": jsonData.sourceNodeData.type, "rel_id": data.data.id, "etag": data.etag}).then(
                                 () => {
@@ -198,7 +198,7 @@ class TimeseriesManageStructuralElementsView {
                                     this.#messagesElmt.appendChild(flashMsgElmt);
                                 }
                             );
-                        }.bind(this));
+                        });
 
                         dropZoneElmt.addElement(dropedItemElmt);
                     }
@@ -209,7 +209,7 @@ class TimeseriesManageStructuralElementsView {
                     }
                 );
             }
-        }.bind(this));
+        });
     }
 
     #createDropedItemElement(id, icon, title, text, removeCallback) {
@@ -249,12 +249,11 @@ class TimeseriesManageStructuralElementsView {
         dropedItemElmt.appendChild(modalConfirm);
 
         // Add an event listener to display a confirm message on form submit.
-        dropedItemRemoveElmt.addEventListener("click", function(event) {
+        dropedItemRemoveElmt.addEventListener("click", (event) => {
             event.preventDefault();
-
             // Display modal.
-            this.show();
-        }.bind(modalConfirm));
+            modalConfirm.show();
+        });
 
         return dropedItemElmt;
     }

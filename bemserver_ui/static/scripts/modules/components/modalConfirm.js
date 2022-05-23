@@ -24,13 +24,15 @@ class ModalConfirm extends HTMLElement {
 
         this.#modalElmt = this.querySelector(`div[id=${this.modalId}]`);
         if (this.#cancelCallback != null) {
-            this.#modalElmt.querySelector("button[data-modal-confirm-cancel]").addEventListener("click", this.#cancelCallback, false);
+            this.#modalElmt.querySelector("button[data-modal-confirm-cancel]").addEventListener("click", () => {
+                this.#cancelCallback();
+            });
         }
         if (this.#okCallback != null) {
             this.#modalElmt.querySelector("button[data-modal-confirm-ok]").addEventListener("click", () => {
-                this.#okCallback.call();
+                this.#okCallback();
                 this.hide();
-            }, false);
+            });
         }
     }
 

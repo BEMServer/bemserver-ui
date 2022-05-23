@@ -32,12 +32,12 @@ class FlashTimer {
                 progressBarElmt.style.width = "100%";
                 progressBarElmt.style.transition = `width ${this.#delay}s linear`;
 
-                let timeoutId = window.setTimeout(function() {
+                let timeoutId = window.setTimeout(() => {
                     let bsAlert = bootstrap.Alert.getOrCreateInstance(alertElmt);
                     bsAlert.close();
                 }, this.#delay * 1000);
 
-                alertElmt.addEventListener("closed.bs.alert", function() {
+                alertElmt.addEventListener("closed.bs.alert", () => {
                     window.clearTimeout(timeoutId);
                 });
             }

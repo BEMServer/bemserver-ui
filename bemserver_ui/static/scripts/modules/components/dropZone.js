@@ -31,7 +31,7 @@ class DropZone extends HTMLDivElement {
     }
 
     #initEventListeners() {
-        this.addEventListener("dragover", function(event) {
+        this.addEventListener("dragover", (event) => {
             event.preventDefault();
 
             let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
@@ -57,9 +57,9 @@ class DropZone extends HTMLDivElement {
                 bubbles: true,
             });
             this.dispatchEvent(dragOverEvent);
-        }.bind(this));
+        });
 
-        this.addEventListener("dragleave", function(event) {
+        this.addEventListener("dragleave", (event) => {
             event.preventDefault();
 
             this.classList.remove("dragover");
@@ -77,9 +77,9 @@ class DropZone extends HTMLDivElement {
                 bubbles: true,
             });
             this.dispatchEvent(dragLeaveEvent);
-        }.bind(this));
+        });
 
-        this.addEventListener("drop", function(event) {
+        this.addEventListener("drop", (event) => {
             event.preventDefault();
 
             this.classList.remove("dragover");
@@ -100,7 +100,7 @@ class DropZone extends HTMLDivElement {
                 bubbles: true,
             });
             this.dispatchEvent(dropEvent);
-        }.bind(this));
+        });
     }
 
     addElement(element) {

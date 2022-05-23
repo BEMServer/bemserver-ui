@@ -44,14 +44,14 @@ class StructuralElementsExploreView {
                 this.#tabSitesSelected = tabElmt;
             }
             this.#selectedItemsPerTab[tabElmt.id] = null;
-            tabElmt.addEventListener("shown.bs.tab", function (event) {
+            tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabSitesSelected = event.target;
                 for (let tabPropertyElmt of this.#tabPropertiesElmts) {
                     this.#alreadyLoadedPerTab[tabPropertyElmt.id] = false;
                 }
                 this.refresh();
-            }.bind(this));
+            });
         }
 
         for (let tabElmt of this.#tabPropertiesElmts) {
@@ -59,11 +59,11 @@ class StructuralElementsExploreView {
                 this.#tabPropertiesSelected = tabElmt;
             }
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
-            tabElmt.addEventListener("shown.bs.tab", function (event) {
+            tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabPropertiesSelected = event.target;
                 this.refresh();
-            }.bind(this));
+            });
         }
 
         for (let tabElmt of this.#tabTimeseriesElmts) {
@@ -71,11 +71,11 @@ class StructuralElementsExploreView {
                 this.#tabTimeseriesSelected = tabElmt;
             }
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
-            tabElmt.addEventListener("shown.bs.tab", function (event) {
+            tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabTimeseriesSelected = event.target;
                 this.refresh();
-            }.bind(this));
+            });
         }
     }
 
