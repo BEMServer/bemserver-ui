@@ -337,3 +337,25 @@ def manage_structural_elements():
         sites_tree_data=sites_tree_data,
         zones_tree_data=zones_tree_data,
     )
+
+
+@blp.route("/upload", methods=["GET", "POST"])
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def upload():
+    if flask.request.method == "POST":
+        try:
+            flask.g.api_client.io.upload_timeseries_csv(
+                flask.g.campaign_ctxt.id, flask.request.files
+            )
+        except bac.BEMServerAPIValidationError as exc:
+            flask.abort(
+                422,
+                description="Error while uploading timeseries files!",
+                response=exc.errors,
+            )
+        else:
+            flask.flash("Timeseries uploaded!", "success")
+            return flask.redirect(flask.url_for("timeseries.list"))
+
+    return flask.render_template("pages/timeseries/upload.html")

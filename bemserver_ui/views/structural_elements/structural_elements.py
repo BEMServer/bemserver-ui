@@ -3,7 +3,10 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
-from bemserver_ui.common.const import STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    STRUCTURAL_ELEMENT_TYPES,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+)
 
 
 blp = flask.Blueprint(
@@ -355,4 +358,29 @@ def delete_property(type, id, property_id):
 
     return flask.redirect(
         flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
+    )
+
+
+@blp.route("/upload", methods=["GET", "POST"])
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def upload():
+    if flask.request.method == "POST":
+        try:
+            flask.g.api_client.io.upload_sites_csv(
+                flask.g.campaign_ctxt.id, flask.request.files
+            )
+        except bac.BEMServerAPIValidationError as exc:
+            flask.abort(
+                422,
+                description="Error while uploading structural elements data files!",
+                response=exc.errors,
+            )
+        else:
+            flask.flash("Sites data uploaded!", "success")
+            return flask.redirect(flask.url_for("structural_elements.explore"))
+
+    return flask.render_template(
+        "pages/structural_elements/upload.html",
+        structural_element_types=FULL_STRUCTURAL_ELEMENT_TYPES,
     )
