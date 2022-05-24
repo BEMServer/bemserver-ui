@@ -1,7 +1,6 @@
 class Sidebar {
 
     #navLinkElmts = null;
-    #dropdownMenuSitesElmt = null;
 
     constructor() {
         this.#cacheDOM();
@@ -9,7 +8,6 @@ class Sidebar {
 
     #cacheDOM() {
         this.#navLinkElmts = [].slice.call(document.querySelectorAll(".app-sidebar .nav-link"));
-        this.#dropdownMenuSitesElmt = document.getElementById("dropdownMenuSites");
     }
 
     #setActive(elmt) {
@@ -49,9 +47,11 @@ class Sidebar {
         let elmt = document.querySelector(`.app-sidebar .nav-link[href="${currentUrl}"]:not(.disabled)`);
         if (elmt == null) {
             // Then search in dropdwn items.
-            elmt = this.#dropdownMenuSitesElmt?.parentElement.querySelector(`a.dropdown-item[href="${currentUrl}"]:not(.disabled)`)
+            elmt = document.querySelector(`div.dropdown ul.dropdown-menu a.dropdown-item[href="${currentUrl}"]:not(.disabled)`)
             if (elmt != null) {
-                this.#setActive(this.#dropdownMenuSitesElmt);
+                let dropdownMenuId = elmt.parentElement.parentElement.getAttribute("aria-labelledby");
+                let dropdownMenuElmt = document.getElementById(dropdownMenuId);
+                this.#setActive(dropdownMenuElmt);
             }
         }
         if (elmt == null) {
