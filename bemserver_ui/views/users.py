@@ -90,7 +90,7 @@ def create():
 def edit(id):
     if flask.request.method == "GET":
         try:
-            user = flask.g.api_client.users.getone(id)
+            user_resp = flask.g.api_client.users.getone(id)
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="User not found!")
 
@@ -101,7 +101,7 @@ def edit(id):
             "password": flask.request.form["password"],
         }
         try:
-            user = flask.g.api_client.users.update(
+            user_resp = flask.g.api_client.users.update(
                 id, payload, etag=flask.request.form["editEtag"]
             )
         except bac.BEMServerAPIValidationError as exc:
@@ -113,11 +113,19 @@ def edit(id):
         except bac.BEMServerAPINotFoundError:
             flask.abort(404, description="User not found!")
         else:
+            # If self edit password, update session.
+            if flask.session["user"]["data"]["id"] == id:
+                flask.session["auth_data"] = {
+                    "email": payload["email"],
+                    "password": payload["password"],
+                }
+                flask.session["user"] = user_resp.toJSON()
+
             flask.flash("User account updated!", "success")
-            return flask.redirect(flask.url_for("users.view", id=user.data["id"]))
+            return flask.redirect(flask.url_for("users.view", id=user_resp.data["id"]))
 
     return flask.render_template(
-        "pages/users/edit.html", user=user.data, etag=user.etag
+        "pages/users/edit.html", user=user_resp.data, etag=user_resp.etag
     )
 
 

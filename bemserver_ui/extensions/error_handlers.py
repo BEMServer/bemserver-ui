@@ -27,6 +27,7 @@ def init_app(app):
         message = "Incorrect or missing credentials"
         if _is_from_internal_api():
             return _handle_for_internal_api(exc.code, message)
+        flask.session.clear()
         flask.flash(message, "error")
         return flask.redirect(flask.url_for("auth.signin", ignore_campaign=True))
 
