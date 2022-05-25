@@ -19,8 +19,8 @@ def init_app(app):
         if "auth_data" in flask.session:
             if app.config["BEMSERVER_API_AUTH_METHOD"] == "http_basic":
                 authentication_method = HTTPBasicAuth(
-                    flask.session["auth_data"]["email"],
-                    flask.session["auth_data"]["password"],
+                    flask.session["auth_data"]["email"].encode(encoding="utf-8"),
+                    flask.session["auth_data"]["password"].encode(encoding="utf-8"),
                 )
         return BEMServerApiClient(
             base_uri=base_uri,
