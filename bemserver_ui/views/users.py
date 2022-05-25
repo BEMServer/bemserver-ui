@@ -12,10 +12,13 @@ blp = flask.Blueprint("users", __name__, url_prefix="/users")
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
+    sort = "+name"
     filters = {"is_admin": None, "is_active": None}
 
     # Get requested filters.
     if flask.request.method == "POST":
+        sort = flask.request.form["sort"]
+
         if flask.request.form["is_admin"] == "False":
             filters["is_admin"] = False
         elif flask.request.form["is_admin"] == "True":
@@ -26,17 +29,23 @@ def list():
         elif flask.request.form["is_active"] == "True":
             filters["is_active"] = True
 
-    is_filtered = filters["is_admin"] is not None or filters["is_active"] is not None
+    is_filtered = any(
+        [
+            filters["is_admin"] is not None,
+            filters["is_active"] is not None,
+        ]
+    )
 
     try:
         # Get users list applying filters.
-        users_resp = flask.g.api_client.users.getall(**filters)
+        users_resp = flask.g.api_client.users.getall(sort=sort, **filters)
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, description=exc.errors)
 
     return flask.render_template(
         "pages/users/list.html",
         users=users_resp.data,
+        sort=sort,
         filters=filters,
         is_filtered=is_filtered,
     )

@@ -13,7 +13,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
+<div class="container-fluid mb-4">
     <div class="row mb-3">
         <div class="col">
             <div class="accordion" id="accordionFilters">
@@ -25,18 +25,18 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
-                            <form class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                <select class="form-select form-select-sm{% if filters['is_admin'] is not none %} border border-info{% endif %}" id="is_admin" name="is_admin" aria-label="Select a filter value">
+                            <form id="formFilters" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                                <select form="formFilters" class="form-select form-select-sm{% if filters['is_admin'] is not none %} border border-info{% endif %}" id="is_admin" name="is_admin" aria-label="Select a filter value">
                                     {% for val, label in {"None": "Select a role", "True": "Only admin", "False": "Only NOT admin"}.items() %}
                                     <option value="{{ val }}"{% if val == filters["is_admin"]|string %} selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                                <select class="form-select form-select-sm{% if filters['is_active'] is not none %} border border-info{% endif %}" id="is_active" name="is_active" aria-label="Select a filter value">
+                                <select form="formFilters" class="form-select form-select-sm{% if filters['is_active'] is not none %} border border-info{% endif %}" id="is_active" name="is_active" aria-label="Select a filter value">
                                     {% for val, label in {"None": "Select a status", "True": "Only active", "False": "Only inactive"}.items() %}
                                     <option value="{{ val }}"{% if val == filters["is_active"]|string %} selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                                <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
+                                <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
                                 <a class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
                             </form>
                         </div>
@@ -45,9 +45,23 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-end mb-3">
-        <div class="col-auto">
-            Current items count: <span class="fw-bold">{{ users|length }}</span>
+    <div class="row mb-3">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <input form="formFilters" type="hidden" name="sort" id="sort" value="{{ sort }}">
+                    <label class="form-label text-nowrap opacity-75 mb-0" for="sort">Sort by</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort_name_asc" autocomplete="off"{% if sort == "+name" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort_name_asc" title="Name alphabetical order"><i class="bi bi-sort-alpha-down"></i> Name</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort_name_desc" autocomplete="off"{% if sort == "-name" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort_name_desc" title="Name reverse alphabetical order"><i class="bi bi-sort-alpha-up"></i> Name</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort_email_asc" autocomplete="off"{% if sort == "+email" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort_email_asc" title="Email alphabetical order"><i class="bi bi-sort-alpha-down"></i> Email</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort_email_desc" autocomplete="off"{% if sort == "-email" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort_email_desc" title="Email reverse alphabetical order"><i class="bi bi-sort-alpha-up"></i> Email</label>
+                </div>
+                <small class="text-nowrap opacity-75">Items 1 - {{ users|length }} out of {{ users|length }}</small>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -86,3 +100,20 @@
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { UsersListView } from "{{ url_for('static', filename='scripts/modules/views/users/list.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let usersListView = new UsersListView();
+        usersListView.refresh();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
