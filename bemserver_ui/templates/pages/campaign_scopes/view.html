@@ -2,6 +2,9 @@
 
 {% set title = "Campaign scope" %}
 {% set subtitle = campaign_scope.name %}
+{% if tab is undefined %}
+    {% set tab = "general" %}
+{% endif %}
 
 {% block main_toolbar %}
 {{ super() -}}
@@ -12,7 +15,6 @@
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
         </form>
-        <a href="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
 </div>
 {% endfilter %}
@@ -20,39 +22,56 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col">
-            <h5>Campaign</h5>
-            <p>{{ g.campaign_ctxt.campaign.name }}</p>
-        </div>
-    </div>
-    <div class="row">
-        <dl class="col">
-            <dt>Description</dt>
-            <dd>{{ campaign_scope.description | default("-") }}</dd>
-        </dl>
-    </div>
-    <hr>
+<div class="container-fluid mb-4">
     <div class="row">
         <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5>Campaign scope's user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
-                {% if signed_user.is_admin %}
-                <a href="{{ url_for('campaign_scopes.manage_groups', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign scope's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign scope's groups</a>
-                {% endif %}
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
+                    <div class="d-lg-flex justify-content-between">
+                        <dl class="col">
+                            <dt>Campaign</dt>
+                            <dd>{{ g.campaign_ctxt.campaign.name }}</dd>
+                            <dt>Description</dt>
+                            <dd>{{ campaign_scope.description | default("-") }}</dd>
+                        </dl>
+                        {% if signed_user.is_admin %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
+                    <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
+                        <div class="order-1 order-lg-0">
+                            {% if user_groups|length > 0 %}
+                            <div class="d-flex flex-wrap mt-2 gap-2">
+                                {% for user_group in user_groups %}
+                                {% filter indent(width=16) %}
+                                {% include "components/user_groups/group_for_campaign_scope.html" %}
+                                {% endfilter %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <span class="fst-italic text-muted">none</span>
+                            {% endif %}
+                        </div>
+                        {% if signed_user.is_admin %}
+                        <div class="order-0 order-lg-1 text-end">
+                            <a href="{{ url_for('campaign_scopes.manage_groups', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage user groups"><i class="bi bi-person-rolodex"></i> Manage user groups</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% if user_groups|length > 0 %}
-            <div class="d-flex flex-wrap mt-2 gap-2">
-                {% for user_group in user_groups %}
-                {% filter indent(width=16) %}
-                {% include "components/user_groups/group_for_campaign_scope.html" %}
-                {% endfilter %}
-                {% endfor %}
-            </div>
-            {% else %}
-            <span class="fst-italic text-muted">none</span>
-            {% endif %}
         </div>
     </div>
 </div>

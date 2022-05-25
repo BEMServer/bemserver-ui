@@ -29,6 +29,8 @@ def list():
 @auth.signin_required
 @ensure_campaign_context
 def view(id):
+    tab = flask.request.args.get("tab", "general")
+
     try:
         campaign_scope = flask.g.api_client.campaign_scopes.getone(id)
     except bac.BEMServerAPINotFoundError:
@@ -55,6 +57,7 @@ def view(id):
         campaign_scope=campaign_scope.data,
         etag=campaign_scope.etag,
         user_groups=ugroups,
+        tab=tab,
     )
 
 

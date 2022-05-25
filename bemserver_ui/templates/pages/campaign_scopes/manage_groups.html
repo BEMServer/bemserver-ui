@@ -36,7 +36,7 @@
             <span class="fst-italic text-muted">none</span>
             {% endif %}
             <div class="d-flex justify-content-end gap-2 mt-3">
-                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('campaign_scopes.view', id=campaign_scope.id) }}" title="Cancel">Cancel</a>
+                <a class="btn btn-sm btn-outline-secondary" role="button" href="{{ url_for('campaign_scopes.view', id=campaign_scope.id, tab='groups') }}" title="Cancel">Cancel</a>
                 <button class="btn btn-sm btn-outline-primary{% if available_groups|length <= 0 %} disabled{% endif %}" type="submit" form="addGroupsForm" title="Save"><i class="bi bi-save"></i> Save selection</button>
             </div>
         </div>

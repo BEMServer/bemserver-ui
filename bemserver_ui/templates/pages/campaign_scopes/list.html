@@ -1,6 +1,7 @@
 {% extends "pages/base.html" %}
 
-{% set title = g.campaign_ctxt.name + "'s scopes" %}
+{% set title = "Campaign scopes" %}
+{% set subtitle = g.campaign_ctxt.name %}
 
 {% block main_toolbar %}
 {{ super() -}}
