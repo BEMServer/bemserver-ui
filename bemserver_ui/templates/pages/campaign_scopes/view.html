@@ -40,7 +40,7 @@
                             <dt>Campaign</dt>
                             <dd>{{ g.campaign_ctxt.campaign.name }}</dd>
                             <dt>Description</dt>
-                            <dd>{{ campaign_scope.description | default("-") }}</dd>
+                            <dd>{{ campaign_scope.description | default("-", true) }}</dd>
                         </dl>
                         {% if signed_user.is_admin %}
                         <div class="order-0 order-lg-1 text-end">
