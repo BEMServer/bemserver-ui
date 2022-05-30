@@ -113,11 +113,11 @@ class StructuralElementsExploreView {
 </div>`;
     }
 
-    #getPropertyHelpHTML(property) {
+    #getItemHelpHTML(itemDescription) {
         let ret = ``;
-        if (property.description?.length > 0) {
+        if (itemDescription?.length > 0) {
             let abbrElmt = document.createElement("abbr");
-            abbrElmt.title = property.description != null ? property.description : "";
+            abbrElmt.title = itemDescription != null ? itemDescription : "";
             let abbrContentElmt = document.createElement("i");
             abbrContentElmt.classList.add("bi", "bi-question-diamond");
             abbrElmt.appendChild(abbrContentElmt);
@@ -131,7 +131,7 @@ class StructuralElementsExploreView {
         if (data.properties.length > 0) {
             for (let property of data.properties) {
                 propertyDataHTML += `<dl>
-    <dt>${property.name}${this.#getPropertyHelpHTML(property)}</dt>
+    <dt>${property.name}${this.#getItemHelpHTML(property.description)}</dt>
     <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
 </dl>`;
             }
@@ -153,8 +153,8 @@ class StructuralElementsExploreView {
         if (data.timeseries.length > 0) {
             contentHTML += `<p class="text-muted text-end">Items count: ${data.timeseries.length}</p>`;
             for (let ts_data of data.timeseries) {
-                let tsHelp = ts_data.description != "" ? ` <sup><abbr title="${ts_data.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
-                contentHTML += `<li><span class="fw-bold">${ts_data.name}</span><span class="opacity-50 mx-1">[${ts_data.unit_symbol}]</span>${tsHelp}</li>`;
+                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${ts_data.unit_symbol}]</span>` : ``;
+                contentHTML += `<li><span class="fw-bold">${ts_data.name}</span>${unitSymbol}${this.#getItemHelpHTML(ts_data.description)}</li>`;
             }
         }
         else {
