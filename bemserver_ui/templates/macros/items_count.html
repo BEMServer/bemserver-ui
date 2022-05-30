@@ -1,0 +1,9 @@
+{% macro render_items_count(total_count, first_item = 1, last_item = none) %}
+<small class="text-nowrap opacity-75">
+    {% if total_count > 0 %}
+    Items: {{ first_item | default(1, true) }} - {{ last_item | default(total_count, true) }} out of {{ total_count }}
+    {% else %}
+    No item
+    {% endif %}
+</small>
+{% endmacro %}

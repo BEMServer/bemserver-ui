@@ -1,3 +1,4 @@
+{% import "macros/items_count.html" as mac_items_count %}
 {% extends "pages/base.html" %}
 
 {% set title = "User accounts" %}
@@ -60,7 +61,9 @@
                     <input type="radio" class="btn-check" name="sort" id="sort_email_desc" autocomplete="off"{% if sort == "-email" %} checked{% endif %}>
                     <label class="btn btn-sm btn-outline-info" for="sort_email_desc" title="Email reverse alphabetical order"><i class="bi bi-sort-alpha-up"></i> Email</label>
                 </div>
-                <small class="text-nowrap opacity-75">Items 1 - {{ users|length }} out of {{ users|length }}</small>
+                {% filter indent(width=16) %}
+                {{ mac_items_count.render_items_count(users | length) -}}
+                {% endfilter %}
             </div>
         </div>
     </div>

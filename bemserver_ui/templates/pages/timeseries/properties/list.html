@@ -1,3 +1,4 @@
+{% import "macros/items_count.html" as mac_items_count %}
 {% extends "pages/base.html" %}
 
 {% set title = "Timeseries properties" %}
@@ -18,7 +19,11 @@
         <div class="col">
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top">
-                    <caption class="fst-italic text-end">{{ properties|length }} items</caption>
+                    <caption class="text-end">
+                        {% filter indent(width=24) %}
+                        {{ mac_items_count.render_items_count(properties | length) -}}
+                        {% endfilter %}
+                    </caption>
                     <thead>
                         <tr>
                             <th scope="col">#</th>
