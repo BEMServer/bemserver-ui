@@ -90,8 +90,10 @@ class TimeseriesListView {
         let ret = ``;
         if (property.description?.length > 0) {
             let abbrElmt = document.createElement("abbr");
-            abbrElmt.title = property.description;
-            abbrElmt.innerHTML = `<i class="bi bi-question-diamond"></i>`;
+            abbrElmt.title = property.description != null ? property.description : "";
+            let abbrContentElmt = document.createElement("i");
+            abbrContentElmt.classList.add("bi", "bi-question-diamond");
+            abbrElmt.appendChild(abbrContentElmt);
             ret = `<sup class="ms-1">${abbrElmt.outerHTML}</sup>`;
         }
         return ret;

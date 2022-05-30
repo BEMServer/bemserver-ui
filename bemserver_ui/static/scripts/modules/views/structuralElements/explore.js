@@ -113,13 +113,25 @@ class StructuralElementsExploreView {
 </div>`;
     }
 
+    #getPropertyHelpHTML(property) {
+        let ret = ``;
+        if (property.description?.length > 0) {
+            let abbrElmt = document.createElement("abbr");
+            abbrElmt.title = property.description != null ? property.description : "";
+            let abbrContentElmt = document.createElement("i");
+            abbrContentElmt.classList.add("bi", "bi-question-diamond");
+            abbrElmt.appendChild(abbrContentElmt);
+            ret = `<sup class="ms-1">${abbrElmt.outerHTML}</sup>`;
+        }
+        return ret;
+    }
+
     #getPropertiesHTML(data, id) {
         let propertyDataHTML = ``;
         if (data.properties.length > 0) {
             for (let property of data.properties) {
-                let propertyHelp = property.description != "" ? ` <sup><abbr title="${property.description}"><i class="bi bi-question-diamond"></i></abbr><sup>` : ``;
                 propertyDataHTML += `<dl>
-    <dt>${property.name}${propertyHelp}</dt>
+    <dt>${property.name}${this.#getPropertyHelpHTML(property)}</dt>
     <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
 </dl>`;
             }
