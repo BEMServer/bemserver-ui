@@ -1,3 +1,7 @@
+:root {
+    --app-sidebar-bg: #f3f8e9;
+}
+
 body,
 .app-header {
     min-width: 420px;
@@ -22,7 +26,7 @@ body,
 
 .app-header,
 .app-sidebar {
-    background-color: #f3f8e9 !important;
+    background-color: var(--app-sidebar-bg) !important;
 }
 
 .app-content {
@@ -67,12 +71,12 @@ body,
 }
 
 .app-sidebar .nav-link:hover {
-    color: #ffffff;
+    color: var(--app-white);
 }
 
 .app-sidebar .nav-link:hover,
 .app-sidebar .nav-link.active {
-    background-color: #0088db !important;
+    background-color: var(--app-blue) !important;
 }
 
 .accordion.app-sidebar-accordion .accordion-item {
@@ -80,15 +84,15 @@ body,
 }
 
 .accordion.app-sidebar-accordion .accordion-button {
-    background-color: #ffffff44 !important;
+    background-color: var(--app-white-300) !important;
 }
 
 .accordion.app-sidebar-accordion .accordion-body {
-    background-color: #ffffff77 !important;
+    background-color: var(--app-white-500) !important;
 }
 
 .accordion.app-sidebar-accordion .accordion-button:not(.collapsed) {
-    background-color: #ffffff00 !important;
+    background-color: var(--app-white-0) !important;
 }
 
 .accordion.app-sidebar-accordion .accordion-button:not(.collapsed) * {
@@ -112,24 +116,24 @@ body,
 }
 
 .app-campaign-selected {
-    background-color: #0088db33 !important;
+    background-color: var(--app-blue-200) !important;
 }
 
 .app-tabs .nav-item:hover {
-    background-color: #0088db !important;
+    background-color: var(--app-blue) !important;
     border-top-left-radius: .25rem;
     border-top-right-radius: .25rem;
 }
 
 .app-tabs .nav-item:hover .nav-link:not(.active) {
-    color: #ffffff;
+    color: var(--app-white);
 }
 
 .app-spinner {
-    color: #95c11a !important;
+    color: var(--app-green) !important;
 }
 .app-spinner-secondary {
-    color: #0088db !important;
+    color: var(--app-blue) !important;
 }
 
 @media (max-width: 992px) {

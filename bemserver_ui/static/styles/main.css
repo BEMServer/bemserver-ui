@@ -1,3 +1,17 @@
+:root {
+    --app-blue: #0088bd;
+    --app-blue-200: rgba(0, 136, 189, 0.2);
+    --app-green: #95c11a;
+    --app-white: #ffffff;
+    --app-white-0: rgba(255, 255, 255, 0);
+    --app-white-300: rgba(255, 255, 255, 0.3);
+    --app-white-500: rgba(255, 255, 255, 0.5);
+    --app-white-700: rgba(255, 255, 255, 0.7);
+    --app-gray: #6e8a98;
+    --app-body-bg: #f5f5f5;
+    --app-body-color: #474747;
+}
+
 * {
     padding: 0;
     margin: 0;
@@ -6,35 +20,35 @@
 html,
 body {
     height: 100%;
-    background-color: #f5f5f5 !important;
-    color: #474747 !important;
+    background-color: var(--app-body-bg) !important;
+    color: var(--app-body-color) !important;
 }
 
 h1 {
-    color: #6e8a98;
+    color: var(--app-gray);
 }
 h2 {
-    color: #95c11a;
+    color: var(--app-green);
 }
 
 .vr {
-    color: #6e8a98 !important;
+    color: var(--app-gray) !important;
 }
 
 .badge.bg-primary {
-    background-color: #0088db !important;
+    background-color: var(--app-blue) !important;
 }
 
 .badge.bg-secondary {
-    background-color: #95c11a !important;
+    background-color: var(--app-green) !important;
 }
 
 .text-primary {
-    color: #0088db !important;
+    color: var(--app-blue) !important;
 }
 
 .text-secondary {
-    color: #95c11a !important;
+    color: var(--app-green) !important;
 }
 
 .accordion .accordion-button.collapsed:hover,
@@ -43,21 +57,21 @@ h2 {
 }
 
 .accordion .accordion-button:not(.collapsed) {
-    background-color: #95c11a !important;
+    background-color: var(--app-green) !important;
 }
 
 .accordion .accordion-button:not(.collapsed)::after {
-    background-color: #ffffffb3 !important;
+    background-color: var(--app-white-700) !important;
     border-radius: 4px;
 }
 
 .accordion .accordion-button:not(.collapsed) * {
-    color: #ffffff !important;
+    color: var(--app-white) !important;
 }
 
 .page-item.active .page-link {
-    background-color: #0088db !important;
-    border-color: #0088db !important;
+    background-color: var(--app-blue) !important;
+    border-color: var(--app-blue) !important;
 }
 
 @keyframes fadeIn {
