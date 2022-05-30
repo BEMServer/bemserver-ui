@@ -6,6 +6,13 @@
 {% set subtitle = user.name %}
 {% endif %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/dragndrop.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}

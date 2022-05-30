@@ -8,6 +8,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/dragndrop.css') }}">
 {% endfilter %}
 {% endblock head_styles %}
 

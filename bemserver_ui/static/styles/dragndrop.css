@@ -1,0 +1,22 @@
+.dragover {
+    background-color: #95c11a33 !important;
+}
+.drop-not-allowed {
+    background-color: var(--bs-gray-400) !important;
+}
+
+.dragging-duplicate {
+    background-color: rgba(var(--bs-warning-rgb), 0.4) !important;
+    color: var(--bs-gray-dark) !important;
+}
+
+*[draggable=true] {
+    cursor: grab;
+}
+
+.dragging {
+    background-color: #0088db !important;
+    color: #ffffff !important;
+    cursor: grabbing;
+    opacity: 0.4;
+}
