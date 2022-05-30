@@ -43,6 +43,8 @@ def list():
 @blp.route("/<int:id>/view")
 @auth.signin_required
 def view(id):
+    tab = flask.request.args.get("tab", "general")
+
     try:
         campaign = flask.g.api_client.campaigns.getone(id)
     except bac.BEMServerAPINotFoundError:
@@ -67,6 +69,7 @@ def view(id):
         campaign=campaign.data,
         etag=campaign.etag,
         user_groups=ugroups,
+        tab=tab,
     )
 
 

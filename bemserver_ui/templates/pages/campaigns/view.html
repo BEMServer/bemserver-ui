@@ -3,6 +3,9 @@
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
 {% set title = "Campaign" %}
 {% set subtitle = campaign.name %}
+{% if tab is undefined %}
+    {% set tab = "general" %}
+{% endif %}
 
 {% block main_toolbar %}
 {{ super() -}}
@@ -33,7 +36,6 @@
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
         </form>
-        <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
     {% endif %}
 </div>
@@ -42,7 +44,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
+<div class="container-fluid mb-4">
     {% if is_campaign_selected_edit %}
     <div class="row mb-3">
         <div class="col">
@@ -53,42 +55,51 @@
         </div>
     </div>
     {% endif %}
-    <div class="row mb-3">
-        <dl class="col-auto">
-            <dt>From</dt>
-            <dd>{{ campaign.start_time | iso_datetime_format(default="not defined") }}</dd>
-        </dl>
-        <dl class="col-auto">
-            <dt>To</dt>
-            <dd>{{ campaign.end_time | iso_datetime_format(default="not defined") }}</dd>
-        </dl>
-    </div>
-    <div class="row">
-        <dl class="col-auto">
-            <dt>Description</dt>
-            <dd>{{ campaign.description | default("-") }}</dd>
-        </dl>
-    </div>
-    <hr>
     <div class="row">
         <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5>Campaign's user groups <span class="badge bg-primary">{{ user_groups|length }}</span></h5>
-                {% if signed_user.is_admin %}
-                <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign's groups</a>
-                {% endif %}
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white">
+                <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
+                    <div class="d-flex justify-content-between">
+                        <dl>
+                            <dt>From</dt>
+                            <dd>{{ campaign.start_time | iso_datetime_format(default="not defined") }}</dd>
+                            <dt>To</dt>
+                            <dd>{{ campaign.end_time | iso_datetime_format(default="not defined") }}</dd>
+                            <dt>Description</dt>
+                            <dd>{{ campaign.description | default("-", true) }}</dd>
+                        </dl>
+                        <div>
+                            <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
+                    <div class="d-flex justify-content-between align-items-start">
+                        {% if user_groups|length > 0 %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for user_group in user_groups %}
+                            {% filter indent(width=16) %}
+                            {% include "components/user_groups/group_for_campaign.html" %}
+                            {% endfilter %}
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="fst-italic text-muted">none</span>
+                        {% endif %}
+                        {% if signed_user.is_admin %}
+                        <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign's groups</a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% if user_groups|length > 0 %}
-            <div class="d-flex flex-wrap mt-2 gap-2">
-                {% for user_group in user_groups %}
-                {% filter indent(width=16) %}
-                {% include "components/user_groups/group_for_campaign.html" %}
-                {% endfilter %}
-                {% endfor %}
-            </div>
-            {% else %}
-            <span class="fst-italic text-muted">none</span>
-            {% endif %}
         </div>
     </div>
 </div>
