@@ -20,9 +20,13 @@
             {% block main_title %}
             <div class="d-lg-flex d-grid justify-content-lg-between justify-content-center align-items-center gap-3 mb-lg-4">
                 <div class="hstack gap-3">
+                    {% if title %}
                     <h1>{{ title }}</h1>
+                    {% endif %}
                     {% if subtitle %}
+                    {% if title %}
                     <div class="vr"></div>
+                    {% endif %}
                     <h2>{{ subtitle }}</h2>
                     {% endif %}
                 </div>
@@ -31,7 +35,9 @@
                     {% endblock main_toolbar %}
                 </div>
             </div>
+            {% if title %}
             <hr class="d-lg-none d-block">
+            {% endif %}
             {% endblock main_title %}
             {% filter indent(width=12, first=True) %}
             {% block main_content %}
