@@ -1,14 +1,107 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Home" %}
-
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-auto">
-            <a class="btn btn-outline-danger" href="{{ url_for('auth.signout', ignore_campaign=True) }}" title="Sign out" role="button"><i class="bi bi-power"></i> Sign out</a>
+<div class="container-fluid mb-4">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4" data-masonry='{"percentPosition": true }'>
+        {% if g.campaign_ctxt.has_campaign %}
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header d-flex justify-content-between align-items-center">
+                    {{ g.campaign_ctxt.name }}
+                    <div class="hstack gap-2">
+                        <div class="vr"></div>
+                        <a class="link-secondary" href="{{ url_for('campaigns.view', id=g.campaign_ctxt.id) }}" title="View campaign"><i class="bi bi-eye"></i></a>
+                    </div>
+                </h5>
+                <div class="card-body text-end">
+                    <span class="d-block fw-bold text-{% if g.campaign_ctxt.campaign['state'] == 'ongoing' %}success{% else %}muted{% endif %}">{{ g.campaign_ctxt.campaign["state"] }}</span>
+                    <small class="d-block text-muted">{{ g.campaign_ctxt.campaign["description"] }}</small>
+                </div>
+                <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
+                    {% if signed_user.is_admin %}
+                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ campaign_scopes_count }}</span>
+                        <a class="stretched-link text-decoration-none opacity-75" href="{{ url_for('campaign_scopes.list') }}" title="View campaign scopes">scopes</a>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ ts_count }}</span>
+                        <a class="stretched-link text-decoration-none opacity-75" href="{{ url_for('timeseries.list') }}" title="View timeseries">timeseries</a>
+                    </div>
+                    {% for struct_elmt_type in structural_element_types %}
+                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ structural_element_count[struct_elmt_type] }}</span>
+                        <a class="stretched-link text-decoration-none opacity-75" href="{{ url_for('structural_elements.explore') }}" title="Explore structural elements">{{ struct_elmt_type }}s</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header d-flex justify-content-between align-items-center">
+                    Campaigns
+                    <div class="hstack gap-2">
+                        <div class="vr"></div>
+                        <a class="link-secondary" href="{{ url_for('campaigns.list') }}" title="View campaigns"><i class="bi bi-eye"></i></a>
+                    </div>
+                </h5>
+                <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
+                    {% for state, campaigns_by_state in g.campaign_ctxt.campaigns_by_state.items() %}
+                    <div class="d-flex flex-column justify-content-center border rounded p-2">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ campaigns_by_state | length }}</span>
+                        <span class="opacity-75">{{ state }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% if signed_user.is_admin %}
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header">Campaign scopes</h5>
+                <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
+                    <div class="d-flex flex-column justify-content-center border rounded p-2">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ campaign_scopes_count_overall }}</span>
+                        <span class="opacity-75">overall</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header">Timeseries</h5>
+                <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
+                    <div class="d-flex flex-column justify-content-center border rounded p-2">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ ts_count_overall }}</span>
+                        <span class="opacity-75">overall</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <h5 class="card-header">Structural elements</h5>
+                <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
+                    {% for struct_elmt_type in structural_element_types %}
+                    <div class="d-flex flex-column justify-content-center border rounded p-2">
+                        <span class="badge bg-primary rounded-pill mx-auto">{{ structural_element_count_overall[struct_elmt_type] }}</span>
+                        <span class="opacity-75">{{ struct_elmt_type }}s</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+{% endfilter %}
+{% endblock body_scripts %}
