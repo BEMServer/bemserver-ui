@@ -7,7 +7,9 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
+    {% if signed_user.is_admin %}
     <a href="{{ url_for('campaigns.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new campaign"><i class="bi bi-plus-circle"></i> New campaign</a>
+    {% endif %}
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -27,7 +29,8 @@
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <form class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                <select class="form-select form-select-sm{% if filters['state'] != 'all' %} border border-info{% endif %}" id="state" name="state" aria-label="Select a filter value">
+                                <select class="form-select form-select-sm{% if filters['state'] != 'overall' %} border border-info{% endif %}" id="state" name="state" aria-label="Select a filter value">
+                                    <option value="overall"{% if "overall" == filters["state"] %} selected{% endif %}>All campaigns</option>
                                     {% for x in g.campaign_ctxt.campaign_states %}
                                     <option value="{{ x }}"{% if x == filters["state"] %} selected{% endif %}>{{ x | capitalize }}</option>
                                     {% endfor %}

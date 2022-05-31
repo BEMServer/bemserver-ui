@@ -12,9 +12,7 @@
                             <span class="fst-italic">Select a campaign</span>
                             {% endif %}
                         </a>
-                        {% if signed_user.is_admin %}
                         <a class="nav-link" href="{{ url_for('campaigns.list') }}" title="Manage campaigns"><i class="bi bi-boxes"></i></a>
-                        {% endif %}
                     </div>
                 </li>
             </ul>

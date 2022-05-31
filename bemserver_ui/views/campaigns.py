@@ -23,7 +23,7 @@ def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
 
 
 @blp.route("/", methods=["GET", "POST"])
-@auth.signin_required(roles=[Roles.admin])
+@auth.signin_required
 def list():
     filters = {"state": "overall"}
 
@@ -111,7 +111,7 @@ def create():
 
 
 @blp.route("/<int:id>/edit", methods=["GET", "POST"])
-@auth.signin_required
+@auth.signin_required(roles=[Roles.admin])
 def edit(id):
     if flask.request.method == "POST":
         payload = {
