@@ -123,6 +123,7 @@ def explore():
     # To do this, just build the entire tree (sites/buildings/storeys/spaces).
 
     campaign_id = flask.g.campaign_ctxt.id
+    tab = flask.request.args.get("tab", "sites")
 
     # Structural elements tree data.
     sites_tree_data = _build_tree_sites(campaign_id)
@@ -133,6 +134,7 @@ def explore():
         "pages/structural_elements/explore.html",
         sites_tree_data=sites_tree_data,
         zones_tree_data=zones_tree_data,
+        tab=tab,
     )
 
 

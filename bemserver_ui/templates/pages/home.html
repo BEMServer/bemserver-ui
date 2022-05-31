@@ -32,7 +32,7 @@
                     {% for struct_elmt_type in structural_element_types %}
                     <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
                         <span class="badge bg-primary rounded-pill mx-auto">{{ structural_element_count[struct_elmt_type] }}</span>
-                        <a class="stretched-link text-decoration-none opacity-75" href="{{ url_for('structural_elements.explore') }}" title="Explore structural elements">{{ struct_elmt_type }}s</a>
+                        <a class="stretched-link text-decoration-none opacity-75" href="{{ url_for('structural_elements.explore', tab='sites' if struct_elmt_type != 'zone' else 'zones') }}" title="Explore structural elements">{{ struct_elmt_type }}s</a>
                     </div>
                     {% endfor %}
                 </div>
