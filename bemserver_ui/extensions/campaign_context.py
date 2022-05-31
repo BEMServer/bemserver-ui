@@ -39,12 +39,12 @@ class CampaignContext:
 
     @property
     def campaigns(self):
-        return self.campaigns_by_state["all"]
+        return self.campaigns_by_state["overall"]
 
     @property
     def campaigns_by_state(self):
         return flask.session.get(
-            "campaigns", {"all": [], **{x.value: [] for x in CampaignState}}
+            "campaigns", {"overall": [], **{x.value: [] for x in CampaignState}}
         )
 
     @property
@@ -71,12 +71,12 @@ class CampaignContext:
         except bac.BEMServerAPINotModified:
             pass
         else:
-            campaigns = {"all": [], **{x.value: [] for x in CampaignState}}
+            campaigns = {"overall": [], **{x.value: [] for x in CampaignState}}
             dt_now = dt.datetime.now(tz=dt.timezone.utc)
             for campaign_data in campaigns_resp.data:
                 campaign_state = deduce_campaign_state(campaign_data, dt_now)
                 campaign_data["state"] = campaign_state
-                campaigns["all"].append(campaign_data)
+                campaigns["overall"].append(campaign_data)
                 campaigns[campaign_state].append(campaign_data)
 
             flask.session["campaigns"] = campaigns

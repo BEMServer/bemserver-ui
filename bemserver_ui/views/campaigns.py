@@ -25,13 +25,13 @@ def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def list():
-    filters = {"state": "all"}
+    filters = {"state": "overall"}
 
     # Get requested filters.
     if flask.request.method == "POST":
         filters["state"] = flask.request.form["state"]
 
-    is_filtered = filters["state"] != "all"
+    is_filtered = filters["state"] != "overall"
 
     # /!\ No need to load campaign list from API, just use campaign context.
 
