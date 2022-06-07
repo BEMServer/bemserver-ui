@@ -233,14 +233,18 @@ class TimeseriesDataExploreView {
 
         let tsId = this.#tsSelectElmt.value;
         let tsDataStateId = this.#tsDataStatesSelectElmt.value;
-        this.#fetcher.get(flaskES6.urlFor(`api.timeseries_data.retrieve_data`, {id: tsId, data_state: tsDataStateId, start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), agg: this.#aggInputElmt.value, duration: this.#durationInputElmt.value})).then(
+        let urlParams = {id: tsId, data_state: tsDataStateId, start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), agg: this.#aggInputElmt.value, duration: this.#durationInputElmt.value};
+        this.#fetcher.get(flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams)).then(
             (data) => {
+                this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download`, urlParams));
                 this.#chart.load(data);
             }
         ).catch(
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                 this.#messagesElmt.appendChild(flashMsgElmt);
+
+                this.#chart.removeDownloadCSVLink();
             }
         ).finally(
             () => {

@@ -44,3 +44,52 @@ def upload():
 @ensure_campaign_context
 def explore():
     return flask.render_template("pages/timeseries/data/explore.html")
+
+
+@blp.route("/<int:id>/download")
+@auth.signin_required
+@ensure_campaign_context
+def download(id):
+    data_state_id = flask.request.args["data_state"]
+    start_time = flask.request.args["start_time"]
+    end_time = flask.request.args["end_time"]
+
+    aggregation = flask.request.args.get("agg")
+    if aggregation == "none":
+        aggregation = None
+    duration = flask.request.args.get("duration")
+
+    try:
+        ts_resp = flask.g.api_client.timeseries.getone(id=id)
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="Timeseries not found!")
+
+    try:
+        if aggregation is not None and duration is not None:
+            ts_data_csv = (
+                flask.g.api_client.timeseries_data.download_csv_aggregate_by_names(
+                    flask.g.campaign_ctxt.id,
+                    start_time,
+                    end_time,
+                    data_state_id,
+                    [ts_resp.data["name"]],
+                    duration,
+                    aggregation=aggregation,
+                )
+            )
+        else:
+            ts_data_csv = flask.g.api_client.timeseries_data.download_csv_by_names(
+                flask.g.campaign_ctxt.id,
+                start_time,
+                end_time,
+                data_state_id,
+                [ts_resp.data["name"]],
+            )
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(
+            422,
+            description="Error while downloading timeseries data!",
+            response=exc.errors,
+        )
+    else:
+        return ts_data_csv.send_file()
