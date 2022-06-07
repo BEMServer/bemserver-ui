@@ -7,8 +7,9 @@ class FlaskES6 {
     }
 
     urlFor(endpoint, rule) {
-        rule = rule == undefined ? {} : rule
-        // rule *must* be an Object, anything else is wrong
+        // Shallow copy `rule` using the object spread operator.
+        rule = rule == undefined ? {} : {...rule};
+        // `rule` *must* be an Object, anything else is wrong.
         if (!(rule instanceof Object)) {
             throw new TypeError(`Type for "rule" arg must be Object, got: ${typeof(rule)}`);
         }
@@ -44,9 +45,8 @@ class FlaskES6 {
 
         // Inject campaign context, if any.
         let currentLocationSearchParams = new URLSearchParams(window.location.search.replace("?", ""));
-        let campaign = currentLocationSearchParams.get("campaign");
-        if (campaign != null) {
-            rule["campaign"] = campaign;
+        if (currentLocationSearchParams.has("campaign")) {
+            rule["campaign"] = currentLocationSearchParams.get("campaign");
         }
 
         let url = "";
@@ -59,10 +59,7 @@ class FlaskES6 {
             }
         }
 
-        let urlSearchParams = new URLSearchParams();
-        for (let searchParam in rule) {
-            urlSearchParams.append(searchParam, rule[searchParam])
-        }
+        let urlSearchParams = new URLSearchParams(Object.entries(rule));
         if (Array.from(urlSearchParams).length > 0) {
             url += "?" + urlSearchParams.toString();
         }
