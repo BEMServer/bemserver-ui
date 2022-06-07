@@ -103,18 +103,57 @@ class TimeseriesDataResources(BaseResources):
     endpoint_base_uri = "/timeseries_data/"
     disabled_endpoints = ["getall", "getone", "create", "update", "delete"]
 
-    def upload_csv(self, data_state, csv_file):
-        q_params = {"data_state": data_state}
-        return self._req.upload(self.endpoint_base_uri, params=q_params, files=csv_file)
+    def enpoint_uri_by_campaign(self, campaign_id):
+        return f"{self.endpoint_base_uri}campaign/{str(campaign_id)}/"
 
-    def download_csv(self, start_time, end_time, data_state, timeseries_ids):
-        q_params = {
-            "start_time": start_time,
-            "end_time": end_time,
-            "data_state": data_state,
-            "timeseries": timeseries_ids,
-        }
-        return self._req.download(self.endpoint_base_uri, params=q_params)
+    def upload_csv(self, data_state, csv_file):
+        return self._req.upload(
+            self.endpoint_base_uri,
+            params={"data_state": data_state},
+            files=csv_file,
+        )
+
+    def upload_csv_by_names(self, campaign_id, data_state, csv_file):
+        return self._req.upload(
+            self.enpoint_uri_by_campaign(campaign_id),
+            params={"data_state": data_state},
+            files=csv_file,
+        )
+
+    def download_csv(
+        self,
+        start_time,
+        end_time,
+        data_state,
+        timeseries_ids,
+    ):
+        return self._req.download(
+            self.endpoint_base_uri,
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_ids,
+            },
+        )
+
+    def download_csv_by_names(
+        self,
+        campaign_id,
+        start_time,
+        end_time,
+        data_state,
+        timeseries_names,
+    ):
+        return self._req.download(
+            self.enpoint_uri_by_campaign(campaign_id),
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_names,
+            },
+        )
 
     def download_csv_aggregate(
         self,
@@ -126,16 +165,42 @@ class TimeseriesDataResources(BaseResources):
         timezone="UTC",
         aggregation="avg",
     ):
-        q_params = {
-            "start_time": start_time,
-            "end_time": end_time,
-            "data_state": data_state,
-            "timeseries": timeseries_ids,
-            "bucket_width": bucket_width,
-            "timezone": timezone,
-            "aggregation": aggregation,
-        }
-        return self._req.download(f"{self.endpoint_base_uri}aggregate", params=q_params)
+        return self._req.download(
+            f"{self.endpoint_base_uri}aggregate",
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_ids,
+                "bucket_width": bucket_width,
+                "timezone": timezone,
+                "aggregation": aggregation,
+            },
+        )
+
+    def download_csv_aggregate_by_names(
+        self,
+        campaign_id,
+        start_time,
+        end_time,
+        data_state,
+        timeseries_names,
+        bucket_width,
+        timezone="UTC",
+        aggregation="avg",
+    ):
+        return self._req.download(
+            f"{self.enpoint_uri_by_campaign(campaign_id)}aggregate",
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_names,
+                "bucket_width": bucket_width,
+                "timezone": timezone,
+                "aggregation": aggregation,
+            },
+        )
 
 
 class EventStateResources(BaseResources):

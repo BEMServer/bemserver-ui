@@ -14,8 +14,10 @@ blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data"
 def upload():
     if flask.request.method == "POST":
         try:
-            flask.g.api_client.timeseries_data.upload_csv(
-                flask.request.form["data_state"], flask.request.files
+            flask.g.api_client.timeseries_data.upload_csv_by_names(
+                flask.g.campaign_ctxt.id,
+                flask.request.form["data_state"],
+                flask.request.files,
             )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(
