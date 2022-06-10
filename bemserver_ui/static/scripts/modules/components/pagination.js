@@ -11,7 +11,7 @@ class PageSizeSelector extends HTMLDivElement {
     constructor(options = {}) {
         super();
 
-        this.current = options.current;
+        this.current = Parser.parseIntOrDefault(options.current, Parser.parseIntOrDefault(this.getAttribute("current"), this.#current));
     }
 
     static get AVAILABLE_PAGE_SIZES() {
@@ -31,13 +31,17 @@ class PageSizeSelector extends HTMLDivElement {
 
     #initEventListeners() {
         this.#selectElmt?.addEventListener("change", (event) => {
-            let newPageSize = Parser.parseIntOrDefault(event.target.options[event.target.selectedIndex].value, this.#current);
+            event.preventDefault();
+
+            let newPageSize = Parser.parseIntOrDefault(event.target.value, this.#current);
             if (this.constructor.AVAILABLE_PAGE_SIZES.includes(newPageSize)) {
                 let oldPageSize = this.#current;
-                let pageSizeChangeEvent = new CustomEvent("pageSizeChange", {detail: {oldValue: oldPageSize, newValue: newPageSize}, bubbles: true});
-                this.dispatchEvent(pageSizeChangeEvent);
-                this.#current = newPageSize;
-                this.#updateSelected();
+                if (newPageSize != oldPageSize) {
+                    let pageSizeChangeEvent = new CustomEvent("pageSizeChange", {detail: {oldValue: oldPageSize, newValue: newPageSize}, bubbles: true});
+                    this.#current = newPageSize;
+                    this.#updateSelected();
+                    this.dispatchEvent(pageSizeChangeEvent);
+                }
             }
         });
     }
@@ -258,6 +262,9 @@ class Pagination extends HTMLUListElement {
     get totalItems() {
         return this.#totalItems;
     }
+    get page() {
+        return this.#page;
+    }
 
     #loadOptions(options = {}) {
         this.#pageSize = Parser.parseIntOrDefault(options.pageSize, this.#pageSize);
@@ -386,8 +393,8 @@ class Pagination extends HTMLUListElement {
 }
 
 
-customElements.define("app-pagination", Pagination, { extends: "ul" });
 customElements.define("app-pagination-item", PaginationItem, { extends: "li" });
+customElements.define("app-pagination", Pagination, { extends: "ul" });
 customElements.define("app-pagesize-selector", PageSizeSelector, { extends: "div" });
 
 
