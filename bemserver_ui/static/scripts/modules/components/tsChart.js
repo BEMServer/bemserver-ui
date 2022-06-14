@@ -1,4 +1,5 @@
 import { Parser } from "../tools/parser.js";
+import { TimeDisplay } from "../tools/time.js";
 
 
 class TimeseriesChart extends HTMLDivElement {
@@ -128,7 +129,7 @@ class TimeseriesChart extends HTMLDivElement {
             source: data.ts_data.map((row) => {
                 let rowDate = new Date(row["Datetime"]);
                 return [
-                    !isNaN(rowDate) ? rowDate.toLocaleString(navigator.language, {timeZoneName: "short"}).replace(" ", "\n") : null,
+                    !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate).replace(" ", "\n") : null,
                     Parser.parseFloatOrDefault(row[data.ts_id.toString()], null),
                 ];
             }),

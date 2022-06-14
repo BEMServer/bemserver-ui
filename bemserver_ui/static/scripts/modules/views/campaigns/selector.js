@@ -1,6 +1,7 @@
 import { Fetcher } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
+import { TimeDisplay } from "../../tools/time.js";
 
 
 class CampaignSelectorView {
@@ -80,8 +81,8 @@ class CampaignSelectorView {
 
         let startTime = new Date(data.start_time);
         let endTime = new Date(data.end_time);
-        let startTimeDisplayed = !isNaN(startTime) ? startTime.toLocaleString(navigator.language, {timeZoneName: "short"}) : "not defined";
-        let endTimeDisplayed = !isNaN(endTime) ? endTime.toLocaleString(navigator.language, {timeZoneName: "short"}) : "not defined";
+        let startTimeDisplayed = !isNaN(startTime) ? TimeDisplay.toLocaleString(startTime) : "not defined";
+        let endTimeDisplayed = !isNaN(endTime) ? TimeDisplay.toLocaleString(endTime) : "not defined";
 
         return `<div class="hstack gap-2"><small class="fw-bold">State</small><small class="text-${data.state == "ongoing" ? "success": "danger"} opacity-75">${data.state.toUpperCase()}</small></div>
 <div class="vstack"><small class="fw-bold">Description</small><small id="campaignSelectedDescription" class="d-inline-block text-truncate ms-2">${descriptionDisplayed}</small></div>

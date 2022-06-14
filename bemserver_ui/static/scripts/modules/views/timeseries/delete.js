@@ -1,6 +1,7 @@
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { ModalConfirm } from "../../components/modalConfirm.js";
 import { Fetcher } from "../../tools/fetcher.js";
+import { TimeDisplay } from "../../tools/time.js";
 import { flaskES6 } from "../../../app.js";
 
 
@@ -94,7 +95,7 @@ class TimeseriesDeleteView {
 
                 let deleteModalConfirm = new ModalConfirm(
                     event.target.id,
-                    `Remove data for <mark>${this.#tsSelectorView.selectedItems.length.toString()}</mark> timeseries between ${this.#startTime.toLocaleString(navigator.language, {timeZone: "UTC", timeZoneName: "short"})} and ${this.#endTime.toLocaleString(navigator.language, {timeZone: "UTC", timeZoneName: "short"})}`,
+                    `Remove data for <mark>${this.#tsSelectorView.selectedItems.length.toString()}</mark> timeseries between ${TimeDisplay.toLocaleString(this.#startTime)} and ${TimeDisplay.toLocaleString(this.#endTime)}`,
                     () => {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.INFO, text: `Deleting timeseries data.`, isDismissible: true});
                         this.#messagesElmt.appendChild(flashMsgElmt);
