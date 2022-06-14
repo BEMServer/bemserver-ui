@@ -126,6 +126,26 @@
                         </div>
                     </div>
                     <div class="accordion-item border-0">
+                        <h2 class="accordion-header" id="panelHeadingAdminTSData">
+                            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTSData" aria-expanded="false" aria-controls="panelCollapseAdminTS">
+                                <span><i class="bi bi-server"></i> Timeseries data</span>
+                            </button>
+                        </h2>
+                        <div id="panelCollapseAdminTSData" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminTSData">
+                            <div class="accordion-body px-0 py-2">
+                                <ul class="nav nav-pills flex-column gap-1">
+                                    {% if g.campaign_ctxt.has_campaign %}
+                                    <li class="nav-item">
+                                        <div class="d-flex justify-content-between align-items-center gap-1">
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries_data.delete') }}" title="Delete timeseries data"><i class="bi bi-trash3"></i> Delete history</a>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminUsers">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminUsers" aria-expanded="false" aria-controls="panelCollapseAdminUsers">
                                 <span><i class="bi bi-person-rolodex"></i> Users & groups</span>

@@ -77,3 +77,24 @@ def retrieve_data(id):
             "ts_end_time": end_time,
         }
     )
+
+
+@blp.route("/delete_data", methods=["POST"])
+@auth.signin_required
+@ensure_campaign_context
+def delete_data():
+    try:
+        flask.g.api_client.timeseries_data.delete(
+            flask.request.json["start_time"],
+            flask.request.json["end_time"],
+            flask.request.json["data_state"],
+            flask.request.json["timeseries_ids"],
+        )
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(
+            422,
+            description="Error while deleting timeseries data!",
+            response=exc.errors,
+        )
+
+    return flask.jsonify({"success": True})

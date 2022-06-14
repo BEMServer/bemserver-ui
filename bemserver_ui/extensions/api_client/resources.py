@@ -202,6 +202,37 @@ class TimeseriesDataResources(BaseResources):
             },
         )
 
+    def delete(self, start_time, end_time, data_state, timeseries_ids):
+        return self._req._execute(
+            "DELETE",
+            self.endpoint_base_uri,
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_ids,
+            },
+        )
+
+    def delete_by_names(
+        self,
+        campaign_id,
+        start_time,
+        end_time,
+        data_state,
+        timeseries_names,
+    ):
+        return self._req._execute(
+            "DELETE",
+            self.endpoint_uri_by_campaign(campaign_id),
+            params={
+                "start_time": start_time,
+                "end_time": end_time,
+                "data_state": data_state,
+                "timeseries": timeseries_names,
+            },
+        )
+
 
 class EventStateResources(BaseResources):
     endpoint_base_uri = "/event_states/"

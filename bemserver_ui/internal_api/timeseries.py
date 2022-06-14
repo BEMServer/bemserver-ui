@@ -25,6 +25,11 @@ def retrieve_list():
         filters["page"] = flask.request.args["page"]
     if "search" in flask.request.args:
         filters["in_name"] = flask.request.args["search"]
+    if "campaign_scope_id" in flask.request.args:
+        filters["campaign_scope_id"] = flask.request.args["campaign_scope_id"]
+    for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
+        if f"{struct_elmt}_id" in flask.request.args:
+            filters[f"{struct_elmt}_id"] = flask.request.args[f"{struct_elmt}_id"]
 
     try:
         # Get timeseries list.

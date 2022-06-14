@@ -1,0 +1,78 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Delete timeseries data" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-warning border border-warning" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Warning</h4>
+                <p>You are about to <span class="fw-bold">delete timeseries data</span>!</p>
+                <p class="mb-0">Keep in mind that <span class="fw-bold">data can not be restored</span> once this operation is done.</p>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            {% filter indent(width=12, first=True) %}
+            {% include "components/timeseries/selector.html" %}
+            {% endfilter %}
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <div class="input-group">
+                <span class="input-group-text">Timeseries data state</span>
+                <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+            </div>
+        </div>
+    </div>
+    <div class="row d-xl-flex d-grid mb-4">
+        <div class="col pb-3 pb-xl-0">
+            <div class="input-group">
+                <span class="input-group-text">From</span>
+                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                <input type="time" class="form-control" id="start_time" name="start_time" required>
+                <span class="input-group-text">UTC</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <span class="input-group-text">To</span>
+                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                <input type="time" class="form-control" id="end_time" name="end_time" required>
+                <span class="input-group-text">UTC</span>
+            </div>
+            <small class="fst-italic opacity-75">(excluded from the interval)</small>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col text-center">
+            <button id="delete" class="btn btn-danger" title="Delete timeseries data">Delete</button>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { TimeseriesSelectorView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/selector.js') }}";
+    import { TimeseriesDeleteView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/delete.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let tsSelectorView = new TimeseriesSelectorView();
+        tsSelectorView.refresh();
+
+        let tsDeleteView = new TimeseriesDeleteView(tsSelectorView);
+        tsDeleteView.refresh();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

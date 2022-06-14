@@ -3,11 +3,51 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
 
 blp = flask.Blueprint(
     "structural_elements", __name__, url_prefix="/structural_elements"
 )
+
+
+@blp.route("/")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_list():
+    campaign_id = flask.g.campaign_ctxt.id
+    structural_elements = {}
+    for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
+        structural_elements[struct_elmt] = (
+            getattr(flask.g.api_client, f"{struct_elmt}s")
+            .getall(campaign_id=campaign_id, sort="+name")
+            .data
+        )
+
+    return flask.jsonify(structural_elements)
+
+
+@blp.route("/types")
+@auth.signin_required
+def retrieve_types():
+    return flask.jsonify(FULL_STRUCTURAL_ELEMENT_TYPES)
+
+
+@blp.route("/<string:type>")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_list_for(type):
+    campaign_id = flask.g.campaign_ctxt.id
+    if type[:-1] not in FULL_STRUCTURAL_ELEMENT_TYPES:
+        flask.abort(404, description=f"{type} not found!")
+
+    api_endpoint = getattr(flask.g.api_client, f"{type}")
+    try:
+        type_resp = api_endpoint.getall(campaign_id=campaign_id, sort="+name")
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, response=exc.errors)
+
+    return flask.jsonify(type_resp.data)
 
 
 @blp.route("/<string:type>/<int:id>")

@@ -93,3 +93,10 @@ def download(id):
         )
     else:
         return ts_data_csv.send_file()
+
+
+@blp.route("/delete")
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def delete():
+    return flask.render_template("pages/timeseries/data/delete.html")
