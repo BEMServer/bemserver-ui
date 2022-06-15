@@ -18,7 +18,6 @@ class TimeseriesDataExploreView {
     #tsSelectContainerElmt = null;
     #tsSelectElmt = null;
 
-    #tsDataStatesContainerElmt = null;
     #tsDataStatesSelectElmt = null;
 
     #aggInputElmt = null;
@@ -51,7 +50,7 @@ class TimeseriesDataExploreView {
         this.#loadBtnElmt = document.getElementById("loadBtn");
 
         this.#tsSelectContainerElmt = document.getElementById("tsSelectContainer");
-        this.#tsDataStatesContainerElmt = document.getElementById("tsDataStatesContainer");
+        this.#tsDataStatesSelectElmt = document.getElementById("data_states");
 
         this.#startDateElmt = document.getElementById("start_date");
         this.#startTimeElmt = document.getElementById("start_time");
@@ -70,10 +69,6 @@ class TimeseriesDataExploreView {
         this.#tsSelectElmt = document.createElement("select");
         this.#tsSelectElmt.classList.add("form-select");
         this.#tsSelectElmt.setAttribute("aria-label", "Select a timeseries");
-
-        this.#tsDataStatesSelectElmt = document.createElement("select");
-        this.#tsDataStatesSelectElmt.classList.add("form-select");
-        this.#tsDataStatesSelectElmt.setAttribute("aria-label", "Select a timeseries data state");
 
         this.#endTime = new Date(Date.now());
         this.#startTime = new Date();
@@ -132,8 +127,11 @@ class TimeseriesDataExploreView {
         this.#tsSelectContainerElmt.innerHTML = "";
         this.#tsSelectContainerElmt.appendChild(new Spinner({ useSmallSize: true }))
 
-        this.#tsDataStatesContainerElmt.innerHTML = "";
-        this.#tsDataStatesContainerElmt.appendChild(new Spinner({ useSmallSize: true }));
+        this.#tsDataStatesSelectElmt.innerHTML = "";
+        let loadingOptionElmt = document.createElement("option");
+        loadingOptionElmt.value = "None";
+        loadingOptionElmt.innerText = "loading...";
+        this.#tsDataStatesSelectElmt.appendChild(loadingOptionElmt);
 
         let getTsListPromise = this.#fetcher.get(flaskES6.urlFor(`api.timeseries.retrieve_list`, { page_size: 100 }));
         let getTsDataStatesListPromise = this.#fetcher.get(flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`));
@@ -178,21 +176,6 @@ class TimeseriesDataExploreView {
                     optionElmt.value = option.id;
                     optionElmt.innerText = option.name;
                     this.#tsDataStatesSelectElmt.appendChild(optionElmt);
-                }
-
-                this.#tsDataStatesContainerElmt.innerHTML = "";
-                if (this.#tsDataStatesSelectElmt.childElementCount <= 0) {
-                    this.#tsDataStatesContainerElmt.innerHTML = `<p class="fst-italic text-center text-muted">No data states</p>`;
-                }
-                else {
-                    let inputGrouElmt = document.createElement("div");
-                    inputGrouElmt.classList.add("input-group");
-                    let inputGroupTextElmt = document.createElement("span");
-                    inputGroupTextElmt.classList.add("input-group-text");
-                    inputGroupTextElmt.innerText = "Timeseries data state";
-                    inputGrouElmt.appendChild(inputGroupTextElmt);
-                    inputGrouElmt.appendChild(this.#tsDataStatesSelectElmt);
-                    this.#tsDataStatesContainerElmt.appendChild(inputGrouElmt);
                 }
             }
         ).catch(

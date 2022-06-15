@@ -9,22 +9,27 @@
         <div class="col">
             <div class="row d-xl-flex d-grid mb-3">
                 <div class="col pb-3 pb-xl-0" id="tsSelectContainer"></div>
-                <div class="col" id="tsDataStatesContainer"></div>
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text">Timeseries data state</span>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+                    </div>
+                </div>
             </div>
             <div class="row d-xl-flex d-grid mb-3">
                 <div class="col pb-3 pb-xl-0">
                     <div class="input-group">
                         <span class="input-group-text">From</span>
-                        <input type="date" class="form-control" id="start_date" name="start_date">
-                        <input type="time" class="form-control" id="start_time" name="start_time">
+                        <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        <input type="time" class="form-control" id="start_time" name="start_time" required>
                         <span class="input-group-text">UTC</span>
                     </div>
                 </div>
                 <div class="col">
                     <div class="input-group">
                         <span class="input-group-text">To</span>
-                        <input type="date" class="form-control" id="end_date" name="end_date">
-                        <input type="time" class="form-control" id="end_time" name="end_time">
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required>
                         <span class="input-group-text">UTC</span>
                     </div>
                 </div>
