@@ -15,9 +15,6 @@ class TimeseriesDataExploreView {
     #endDateElmt = null;
     #endTimeElmt = null;
 
-    #tsSelectContainerElmt = null;
-    #tsSelectElmt = null;
-
     #tsDataStatesSelectElmt = null;
 
     #aggInputElmt = null;
@@ -30,7 +27,11 @@ class TimeseriesDataExploreView {
     #startTime = null;
     #endTime = null;
 
-    constructor(options = { height: 400 }) {
+    #tsSelectorView = null;
+
+    constructor(tsSelectorView, options = { height: 400 }) {
+        this.#tsSelectorView = tsSelectorView;
+
         this.#cacheDOM();
 
         this.#initElements();
@@ -49,7 +50,6 @@ class TimeseriesDataExploreView {
         this.#chartContainerElmt = document.getElementById("chartContainer");
         this.#loadBtnElmt = document.getElementById("loadBtn");
 
-        this.#tsSelectContainerElmt = document.getElementById("tsSelectContainer");
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
 
         this.#startDateElmt = document.getElementById("start_date");
@@ -65,10 +65,6 @@ class TimeseriesDataExploreView {
         this.#durationInputElmt.setAttribute("placeholder", this.#durationDefault);
 
         this.#loadBtnElmt.setAttribute("disabled", "true");
-
-        this.#tsSelectElmt = document.createElement("select");
-        this.#tsSelectElmt.classList.add("form-select");
-        this.#tsSelectElmt.setAttribute("aria-label", "Select a timeseries");
 
         this.#endTime = new Date(Date.now());
         this.#startTime = new Date();
@@ -111,7 +107,13 @@ class TimeseriesDataExploreView {
         this.#loadBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            this.refreshChart();
+            if (this.#tsSelectorView.selectedItems.length > 0) {
+                this.refreshChart(this.#tsSelectorView.selectedItems[0]);
+            }
+            else {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: `No timeseries selected!`, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            }
         });
 
         this.#aggInputElmt.addEventListener("change", (event) => {
@@ -124,49 +126,13 @@ class TimeseriesDataExploreView {
     }
 
     refresh() {
-        this.#tsSelectContainerElmt.innerHTML = "";
-        this.#tsSelectContainerElmt.appendChild(new Spinner({ useSmallSize: true }))
-
         this.#tsDataStatesSelectElmt.innerHTML = "";
         let loadingOptionElmt = document.createElement("option");
         loadingOptionElmt.value = "None";
         loadingOptionElmt.innerText = "loading...";
         this.#tsDataStatesSelectElmt.appendChild(loadingOptionElmt);
 
-        let getTsListPromise = this.#fetcher.get(flaskES6.urlFor(`api.timeseries.retrieve_list`, { page_size: 100 }));
         let getTsDataStatesListPromise = this.#fetcher.get(flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`));
-
-        getTsListPromise.then(
-            (data) => {
-                this.#tsSelectElmt.innerHTML = "";
-                for (let option of data.data) {
-                    let optionElmt = document.createElement("option");
-                    optionElmt.value = option.id;
-                    optionElmt.innerText = option.name;
-                    this.#tsSelectElmt.appendChild(optionElmt);
-                }
-
-                this.#tsSelectContainerElmt.innerHTML = "";
-                if (this.#tsSelectElmt.childElementCount <= 0) {
-                    this.#tsSelectContainerElmt.innerHTML = `<p class="fst-italic text-center text-muted">No timeseries</p>`;
-                }
-                else {
-                    let inputGrouElmt = document.createElement("div");
-                    inputGrouElmt.classList.add("input-group");
-                    let inputGroupTextElmt = document.createElement("span");
-                    inputGroupTextElmt.classList.add("input-group-text");
-                    inputGroupTextElmt.innerText = "Timeseries";
-                    inputGrouElmt.appendChild(inputGroupTextElmt);
-                    inputGrouElmt.appendChild(this.#tsSelectElmt);
-                    this.#tsSelectContainerElmt.appendChild(inputGrouElmt);
-                }
-            }
-        ).catch(
-            (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
-            }
-        );
 
         getTsDataStatesListPromise.then(
             (data) => {
@@ -177,6 +143,8 @@ class TimeseriesDataExploreView {
                     optionElmt.innerText = option.name;
                     this.#tsDataStatesSelectElmt.appendChild(optionElmt);
                 }
+
+                this.#loadBtnElmt.removeAttribute("disabled");
             }
         ).catch(
             (error) => {
@@ -184,17 +152,9 @@ class TimeseriesDataExploreView {
                 this.#messagesElmt.appendChild(flashMsgElmt);
             }
         );
-
-        Promise.all([getTsListPromise, getTsDataStatesListPromise]).then(() => {
-            if (this.#tsSelectElmt.childElementCount > 0 && this.#tsDataStatesSelectElmt.childElementCount > 0) {
-                this.#loadBtnElmt.removeAttribute("disabled");
-
-                this.refreshChart();
-            }
-        });
     }
 
-    refreshChart() {
+    refreshChart(tsId) {
         this.#chart.showLoading();
 
         let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
@@ -214,7 +174,6 @@ class TimeseriesDataExploreView {
             this.#durationInputElmt.value = this.#durationDefault;
         }
 
-        let tsId = this.#tsSelectElmt.value;
         let tsDataStateId = this.#tsDataStatesSelectElmt.value;
         let urlParams = {id: tsId, data_state: tsDataStateId, start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), agg: this.#aggInputElmt.value, duration: this.#durationInputElmt.value};
         this.#fetcher.get(flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams)).then(
