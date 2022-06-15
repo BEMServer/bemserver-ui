@@ -132,9 +132,7 @@ class TimeseriesDataExploreView {
         loadingOptionElmt.innerText = "loading...";
         this.#tsDataStatesSelectElmt.appendChild(loadingOptionElmt);
 
-        let getTsDataStatesListPromise = this.#fetcher.get(flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`));
-
-        getTsDataStatesListPromise.then(
+        this.#fetcher.get(flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`)).then(
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {
