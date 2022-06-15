@@ -28,7 +28,7 @@
             <div class="list-group">
                 {% for x in campaign_scopes %}
                 <a class="list-group-item list-group-item-action d-flex gap-3 py-3" href="{{ url_for('campaign_scopes.view', id=x.id) }}" title="View details">
-                    <i class="bi bi-boxes"></i>
+                    <i class="bi bi-bounding-box-circles"></i>
                     <div class="d-sm-flex d-grid gap-2 w-100 justify-content-between">
                         <div>
                             <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
