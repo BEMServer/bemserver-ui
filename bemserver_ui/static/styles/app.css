@@ -69,6 +69,9 @@ body,
 .app-sidebar .nav-link {
     color: inherit;
 }
+.app-sidebar .nav-link.disabled {
+    color: var(--bs-gray-600);
+}
 
 .app-sidebar .nav-link:hover {
     color: var(--app-white);

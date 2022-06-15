@@ -17,7 +17,7 @@
                 </li>
             </ul>
             {% if g.campaign_ctxt.has_campaign %}
-            <ul class="nav nav-pills flex-column gap-1 mt-3">
+            <ul class="nav nav-pills flex-column gap-1 my-3">
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('structural_elements.explore') }}"><i class="bi bi-building"></i> Sites</a>
@@ -62,19 +62,32 @@
                         {% endif %}
                     </div>
                 </li>
-                {% if signed_user.is_admin %}
-                <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center gap-1">
-                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.upload') }}" title="Import timeseries data"><i class="bi bi-filetype-csv"></i> Import timeseries data</a>
-                    </div>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <div class="d-flex justify-content-between align-items-center gap-1">
-                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.explore') }}" title="Explore timeseries data"><i class="bi bi-bar-chart-line"></i> Explore timeseries data</a>
-                    </div>
-                </li>
             </ul>
+            <div class="accordion app-sidebar-accordion bg-success bg-opacity-25" id="accordionTSExplore">
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header" id="panelHeadingTSExplore">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTSExplore" aria-expanded="false" aria-controls="panelCollapseTSExplore">
+                            <span class="app-sidebar-heading"><i class="bi bi-clock-history"></i> Timeseries explore</span>
+                        </button>
+                    </h2>
+                    <div id="panelCollapseTSExplore" class="accordion-collapse collapse" aria-labelledby="panelHeadingTSExplore">
+                        <div class="accordion-body px-0 py-2">
+                            <ul class="nav nav-pills flex-column gap-1">
+                                <li class="nav-item">
+                                    <div class="d-flex justify-content-between align-items-center gap-1">
+                                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.explore') }}" title="Plots charts"><i class="bi bi-bar-chart-line"></i> Plot charts</a>
+                                    </div>
+                                </li>
+                                <li class="nav-item">
+                                    <div class="d-flex justify-content-between align-items-center gap-1">
+                                        <a class="nav-link w-100 disabled" title="Data quality"><i class="bi bi-pie-chart"></i> Data quality</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endif %}
             {% if signed_user.is_admin %}
             <hr>
@@ -84,7 +97,7 @@
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminSites">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminSites" aria-expanded="false" aria-controls="panelCollapseAdminSites">
-                                <span><i class="bi bi-building"></i> Sites</span>
+                                <span class="app-sidebar-heading"><i class="bi bi-building"></i> Sites</span>
                             </button>
                         </h2>
                         <div id="panelCollapseAdminSites" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminSites">
@@ -103,7 +116,7 @@
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminTS">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTS" aria-expanded="false" aria-controls="panelCollapseAdminTS">
-                                <span><i class="bi bi-clock-history"></i> Timeseries</span>
+                                <span class="app-sidebar-heading"><i class="bi bi-clock-history"></i> Timeseries</span>
                             </button>
                         </h2>
                         <div id="panelCollapseAdminTS" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminTS">
@@ -125,30 +138,35 @@
                             </div>
                         </div>
                     </div>
+                    {% if g.campaign_ctxt.has_campaign %}
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminTSData">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTSData" aria-expanded="false" aria-controls="panelCollapseAdminTS">
-                                <span><i class="bi bi-server"></i> Timeseries data</span>
+                                <span class="app-sidebar-heading"><i class="bi bi-server"></i> Timeseries data</span>
                             </button>
                         </h2>
                         <div id="panelCollapseAdminTSData" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminTSData">
                             <div class="accordion-body px-0 py-2">
                                 <ul class="nav nav-pills flex-column gap-1">
-                                    {% if g.campaign_ctxt.has_campaign %}
+                                    <li class="nav-item">
+                                        <div class="d-flex justify-content-between align-items-center gap-1">
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries_data.upload') }}" title="Import timeseries data"><i class="bi bi-filetype-csv"></i> Import timeseries data</a>
+                                        </div>
+                                    </li>                    
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
                                             <a class="nav-link w-100" href="{{ url_for('timeseries_data.delete') }}" title="Delete timeseries data"><i class="bi bi-trash3"></i> Delete history</a>
                                         </div>
                                     </li>
-                                    {% endif %}
                                 </ul>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminUsers">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminUsers" aria-expanded="false" aria-controls="panelCollapseAdminUsers">
-                                <span><i class="bi bi-person-rolodex"></i> Users & groups</span>
+                                <span class="app-sidebar-heading"><i class="bi bi-person-rolodex"></i> Users & groups</span>
                             </button>
                         </h2>
                         <div id="panelCollapseAdminUsers" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminUsers">
