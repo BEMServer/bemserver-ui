@@ -10,6 +10,8 @@ import { flaskES6 } from "../../../app.js";
 
 class TimeseriesSelectorView {
 
+    #allowedSelectionLimit = -1;
+
     #searchFetcher = null;
     #messagesElmt = null;
 
@@ -35,7 +37,9 @@ class TimeseriesSelectorView {
     #searchResultsCountElmt = null;
     #searchResultsPaginationElmt = null;
 
-    constructor() {
+    constructor(options = {}) {
+        this.#allowedSelectionLimit = Parser.parseIntOrDefault(options.allowedSelectionLimit, this.#allowedSelectionLimit);
+
         this.#cacheDOM();
         this.#initFilters();
         this.#initEventListeners();
@@ -239,6 +243,14 @@ class TimeseriesSelectorView {
         });
     }
 
+    #canSelect(itemId) {
+        let isLimitOK = true;
+        if (this.#allowedSelectionLimit != -1) {
+            isLimitOK = this.#selectedItems.length < this.#allowedSelectionLimit;
+        }
+        return !this.#selectedItems.includes(itemId) && isLimitOK;
+    }
+
     refresh(options = {}) {
         if (this.#searchFetcher == null) {
             this.#searchFetcher = new Fetcher();
@@ -294,7 +306,7 @@ class TimeseriesSelectorView {
                         searchResultItem.addEventListener("on", (event) => {
                             event.preventDefault();
 
-                            if (!this.#selectedItems.includes(event.detail.itemId)) {
+                            if (this.#canSelect(event.detail.itemId)) {
                                 let selectedItem = new SelectedItem(event.detail.itemId, event.detail.itemText);
 
                                 selectedItem.addEventListener("remove", (event) => {
@@ -319,6 +331,12 @@ class TimeseriesSelectorView {
                                 this.#selectedItems.push(event.detail.itemId);
 
                                 this.#updateSelectedItemsContainer();
+                            }
+                            else {
+                                let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-item-id="${event.detail.itemId.toString()}"]`);
+                                if (searchResultItemElmt != null) {
+                                    searchResultItemElmt.isActive = false;
+                                }
                             }
                         });
 
