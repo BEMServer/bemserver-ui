@@ -20,10 +20,10 @@
         </div>
         <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
             <div class="d-flex justify-content-between align-items-center gap-4 w-100">
-                <app-pagesize-selector id="searchResultsPageSizeSelector" current="50"></app-pagesize-selector>
+                <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
                 <small id="searchResultsCount" class="text-nowrap opacity-75"></small>
             </div>
-            <app-pagination id="searchResultsPagination"></app-pagination>
+            <ul is="app-pagination" id="searchResultsPagination"></ul>
         </nav>
     </div>
 </div>
