@@ -11,7 +11,7 @@ class PageSizeSelector extends HTMLDivElement {
     constructor(options = {}) {
         super();
 
-        this.current = Parser.parseIntOrDefault(options.current, Parser.parseIntOrDefault(this.getAttribute("current"), this.#current));
+        this.current = Parser.parseIntOrDefault(options.current, this.getAttribute("current"));
     }
 
     static get AVAILABLE_PAGE_SIZES() {
