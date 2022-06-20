@@ -1,10 +1,13 @@
-import { Fetcher } from "../../tools/fetcher.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 import { TimeDisplay } from "../../tools/time.js";
 
 
 class CampaignSelectorView {
+
+    #internalAPIRequester = null;
+    #campaignReqID = null;
 
     #selectorComponentElmt = null;
     #campaignSelectElmt = null;
@@ -20,6 +23,8 @@ class CampaignSelectorView {
         let searchParams = new URLSearchParams(window.location.search);
         let campaignParam = searchParams.get("campaign");
         this.currentCampaign = campaignParam != null ? campaignParam : "";
+
+        this.#internalAPIRequester = new InternalAPIRequest();
     }
 
     #cacheDOM() {
@@ -98,28 +103,30 @@ class CampaignSelectorView {
             this.#campaignSelectedPropertiesElmt.innerHTML = "";
         }
         else {
-            let selectedOptionElmnt = this.#campaignSelectElmt.item(this.#campaignSelectElmt.selectedIndex);
+            let selectedOptionElmt = this.#campaignSelectElmt.item(this.#campaignSelectElmt.selectedIndex);
 
-            this.#campaignBtnViewElmt.href = flaskES6.urlFor(`campaigns.view`, {id: selectedOptionElmnt.value});
+            this.#campaignBtnViewElmt.href = flaskES6.urlFor(`campaigns.view`, {id: selectedOptionElmt.value});
 
-            let retrieveDataUrl = flaskES6.urlFor(`api.campaigns.retrieve_data`, {id: selectedOptionElmnt.value});
-            let fetcher = new Fetcher();
-            fetcher.get(retrieveDataUrl).then(
+            if (this.#campaignReqID != null) {
+                this.#internalAPIRequester.abort(this.#campaignReqID);
+                this.#campaignReqID = null;
+            }
+            this.#campaignReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.campaigns.retrieve_data`, {id: selectedOptionElmt.value}),
                 (data) => {
                     this.#campaignSelectedPropertiesElmt.innerHTML = this.#getPropertiesHTML(data.data);
-                    // Abbrviate description if too long.
+                    // Abbreviate description if too long.
                     let campaignDescriptionElmt = this.#campaignSelectedPropertiesElmt.querySelector("#campaignSelectedDescription");
                     if (campaignDescriptionElmt.scrollWidth > campaignDescriptionElmt.clientWidth) {
                         campaignDescriptionElmt.innerHTML = `<abbr title="${campaignDescriptionElmt.innerHTML}">${campaignDescriptionElmt.innerHTML}</abbr>`;
                     }
-                }
-            ).catch(
+                },
                 (error) => {
                     this.#campaignSelectedPropertiesElmt.innerHTML = `<div class="alert alert-danger" role="alert">
     <i class="bi bi-x-octagon me-2"></i>
     ${error.message}
 </div>`;
-                }
+                },
             );
         }
     }

@@ -1,9 +1,14 @@
-import { Fetcher } from "../../tools/fetcher.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 
 
 class StructuralElementsExploreView {
+
+    #internalAPIRequester = null;
+    #generalReqID = null;
+    #propertiesReqID = null;
+    #tsReqID = null;
 
     #tabSitesElmts = null;
     #tabPropertiesElmts = null;
@@ -27,6 +32,8 @@ class StructuralElementsExploreView {
     constructor() {
         this.#cacheDOM();
         this.#initEventListeners();
+
+        this.#internalAPIRequester = new InternalAPIRequest();
     }
 
     #cacheDOM() {
@@ -182,16 +189,18 @@ class StructuralElementsExploreView {
         this.#generalTabContentElmt.innerHTML = "";
         this.#generalTabContentElmt.appendChild(new Spinner());
 
-        let retrieveDataUrl = flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id});
-        let fetcher = new Fetcher();
-        fetcher.get(retrieveDataUrl).then(
+        if (this.#generalReqID != null) {
+            this.#internalAPIRequester.abort(this.#generalReqID);
+            this.#generalReqID = null;
+        }
+        this.#generalReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id}),
             (data) => {
                 this.#generalTabContentElmt.innerHTML = this.#getGeneralHTML(data, path);
-            }
-        ).catch(
+            },
             (error) => {
                 this.#generalTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
-            }
+            },
         );
     }
 
@@ -199,16 +208,18 @@ class StructuralElementsExploreView {
         this.#propertiesTabContentElmt.innerHTML = "";
         this.#propertiesTabContentElmt.appendChild(new Spinner());
 
-        let retrievePropertiesUrl = flaskES6.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id});
-        let fetcher = new Fetcher();
-        fetcher.get(retrievePropertiesUrl).then(
+        if (this.#propertiesReqID != null) {
+            this.#internalAPIRequester.abort(this.#propertiesReqID);
+            this.#propertiesReqID = null;
+        }
+        this.#propertiesReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id}),
             (data) => {
                 this.#propertiesTabContentElmt.innerHTML = this.#getPropertiesHTML(data, id);
-            }
-        ).catch(
+            },
             (error) => {
                 this.#propertiesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
-            }
+            },
         );
     }
 
@@ -216,16 +227,18 @@ class StructuralElementsExploreView {
         this.#timeseriesTabContentElmt.innerHTML = "";
         this.#timeseriesTabContentElmt.appendChild(new Spinner());
 
-        let retrieveTimeseriesUrl = flaskES6.urlFor(`api.structural_elements.retrieve_timeseries`, {type: type, id: id});
-        let fetcher = new Fetcher();
-        fetcher.get(retrieveTimeseriesUrl).then(
+        if (this.#tsReqID != null) {
+            this.#internalAPIRequester.abort(this.#tsReqID);
+            this.#tsReqID = null;
+        }
+        this.#tsReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_timeseries`, {type: type, id: id}),
             (data) => {
                 this.#timeseriesTabContentElmt.innerHTML = this.#getTimeseriesHTML(data, id);
-            }
-        ).catch(
+            },
             (error) => {
                 this.#timeseriesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
-            }
+            },
         );
     }
 

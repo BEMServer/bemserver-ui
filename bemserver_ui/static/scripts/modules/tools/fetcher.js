@@ -1,69 +1,137 @@
-class Fetcher {
+import { generateUUID } from "./uuid.js";
+import { Parser } from "./parser.js";
 
-    #abortController = null;
 
-    constructor() {
-    }
+class InternalAPIResponseError extends Error {
+    constructor(statusCode = null, ...args) {
+        super(...args);
 
-    cancel() {
-        if (this.#abortController != null) {
-            this.#abortController.abort();
-            this.#abortController = null;
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, InternalAPIResponseError);
         }
-    }
 
-    async #handleErrors(response) {
-        if (!response.ok) {
-            if (response.status == 401) {
-                // Just reload the current page, server knows what to do.
-                document.location.reload();
-            }
-            else if (response.status == 422) {
-                // TODO: handle 422 validation errors data
-            }
-            let errorData = await response.json();
-            errorData.status = response.status;
-            throw Error(errorData.message);
-        }
-        return response;
-    }
-
-    async get(url) {
-        this.#abortController = new AbortController();
-        return window.fetch(
-            url, { signal: this.#abortController.signal }
-        ).then(
-            (response) => {
-                return this.#handleErrors(response);
-            }
-        ).then(
-            (response) => {
-                return response.json();
-            }
-        );
-    }
-
-    async post(url, payload) {
-        return window.fetch(
-            url, {
-                method: "POST",
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(payload),
-            }
-        ).then(
-            (response) => {
-                return this.#handleErrors(response);
-            }
-        ).then(
-            (response) => {
-                return response.json();
-            }
-        );
+        this.name = "InternalAPIResponseError";
+        this.statusCode = statusCode;
+        this.date = new Date();
     }
 }
 
 
-export { Fetcher };
+class InternalAPIRequest {
+
+    #abortControllers = {};
+    #fetchPromises = {};
+
+    #debugMode = false;
+
+    constructor(options = {}) {
+        this.#debugMode = Parser.parseBoolOrDefault(options.debugMode, this.#debugMode);
+
+        this.#initEventListeners();
+    }
+
+    #initEventListeners() {
+        // Ensure to abort pending fetch requests before page unloads.
+        // If not, Firefox throws "TypeError: NetworkError when attempting to fetch resource." error.
+        window.addEventListener("beforeunload", (event) => {
+            for (let abortCtrler of Object.values(this.#abortControllers)) {
+                abortCtrler.abort();
+            }
+            this.#abortControllers = {};
+        });
+    }
+
+    #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+        let reqID = generateUUID();
+
+        let abortController = new AbortController();
+        this.#abortControllers[reqID] = abortController;
+
+        params = params || {};
+        params.keepalive = true;
+        params.signal = abortController.signal;
+
+        let fetchPromise = window.fetch(url, params);
+        this.#fetchPromises[reqID] = fetchPromise;
+
+        fetchPromise.then(
+            (response) => {
+                let respJSON = response.json();
+
+                if (!response.ok) {
+                    if (response.status == 401) {
+                        // Just reload the current page, server knows what to do.
+                        document.location.reload();
+                    }
+                    else if (response.status == 422) {
+                        // TODO: handle 422 validation errors data
+                        if (this.#debugMode) {
+                            console.log(respJSON.message);
+                        }
+                    }
+                    return Promise.reject(new InternalAPIResponseError(response.status, respJSON.message));
+                }
+
+                return respJSON;
+            }
+        ).then(
+            (data) => {
+                resolveCallback?.(data);
+            }
+        ).catch(
+            (error) => {
+                if (!["AbortError"].includes(error.name)) {
+                    if (rejectCallback != null) {
+                        rejectCallback(error);
+                    }
+                    else {
+                        return Promise.reject(error);
+                    }
+                }
+                else if (this.#debugMode) {
+                    console.log(url);
+                    console.log(error);
+                }
+            }
+        ).finally(
+            () => {
+                finallyCallback?.();
+                delete this.#abortControllers[reqID];
+                delete this.#fetchPromises[reqID];
+            }
+        );
+
+        return reqID;
+    }
+
+    abort(requestID) {
+        if (requestID in this.#abortControllers) {
+            this.#abortControllers[requestID].abort();
+            delete this.#abortControllers[requestID];
+            delete this.#fetchPromises[requestID];
+        }
+    }
+
+    getPromise(requestID) {
+        return this.#fetchPromises[requestID];
+    }
+
+    get(url, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        return this.#executeRequest(url, null, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        };
+        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
+}
+
+
+export { InternalAPIRequest } ;

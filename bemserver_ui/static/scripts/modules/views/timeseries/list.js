@@ -1,9 +1,13 @@
-import { Fetcher } from "../../tools/fetcher.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 
 
 class TimeseriesListView {
+
+    #internalAPIRequester = null;
+    #getStructElmtsReqID = null;
+    #getPropDataReqID = null;
 
     #formFiltersElmt = null;
     #campaignScopeElmt = null;
@@ -14,6 +18,8 @@ class TimeseriesListView {
 
     constructor(filters) {
         this.filters = filters;
+
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
         this.#initEventListeners();
@@ -172,17 +178,19 @@ class TimeseriesListView {
             timeseriesPropertiesElmt.innerHTML = "";
             timeseriesPropertiesElmt.appendChild(new Spinner());
 
-            let retrievePropertiesUrl = flaskES6.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId});
-            let fetcher = new Fetcher();
-            fetcher.get(retrievePropertiesUrl).then(
+            if (this.#getPropDataReqID != null) {
+                this.#internalAPIRequester.abort(this.#getPropDataReqID);
+                this.#getPropDataReqID = null;
+            }
+            this.#getPropDataReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId}),
                 (data) => {
                     timeseriesPropertiesElmt.innerHTML = this.#getPropertiesHTML(data, tsId);
                     timeseriesPropertiesElmt.setAttribute("data-ts-loaded", true);
-                }
-            ).catch(
+                },
                 (error) => {
                     timeseriesPropertiesElmt.innerHTML = this.#getErrorHTML(error.message);
-                }
+                },
             );
         }
     }
@@ -194,17 +202,19 @@ class TimeseriesListView {
             timeseriesStructuralElementsElmt.innerHTML = "";
             timeseriesStructuralElementsElmt.appendChild(new Spinner());
 
-            let retrieveStructuralElementsUrl = flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId});
-            let fetcher = new Fetcher();
-            fetcher.get(retrieveStructuralElementsUrl).then(
+            if (this.#getStructElmtsReqID != null) {
+                this.#internalAPIRequester.abort(this.#getStructElmtsReqID);
+                this.#getStructElmtsReqID = null;
+            }
+            this.#getStructElmtsReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
                 (data) => {
                     timeseriesStructuralElementsElmt.innerHTML = this.#getStructuralElementsHTML(data);
                     timeseriesStructuralElementsElmt.setAttribute("data-ts-loaded", true);
-                }
-            ).catch(
+                },
                 (error) => {
                     timeseriesStructuralElementsElmt.innerHTML = this.#getErrorHTML(error.message);
-                }
+                },
             );
         }
     }

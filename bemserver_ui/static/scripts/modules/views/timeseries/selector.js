@@ -3,7 +3,7 @@ import { FilterSelect } from "../../components/filterSelect.js";
 import { Pagination, PageSizeSelector } from "../../components/pagination.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { Spinner } from "../../components/spinner.js";
-import { Fetcher } from "../../tools/fetcher.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { Parser } from "../../tools/parser.js";
 import { flaskES6 } from "../../../app.js";
 
@@ -12,7 +12,10 @@ class TimeseriesSelectorView {
 
     #allowedSelectionLimit = -1;
 
-    #searchFetcher = null;
+    #internalAPIRequester = null;
+    #filterReqIDs = {};
+    #searchReqID = null;
+
     #messagesElmt = null;
 
     #selectedItemsContainerElmt = null;
@@ -39,6 +42,8 @@ class TimeseriesSelectorView {
 
     constructor(options = {}) {
         this.#allowedSelectionLimit = Parser.parseIntOrDefault(options.allowedSelectionLimit, this.#allowedSelectionLimit);
+
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
         this.#initFilters();
@@ -145,24 +150,24 @@ class TimeseriesSelectorView {
     #initFilter(filterElmt, getFilterDataUrl, prepareFilterOptionsCallback) {
         this.#searchFiltersContainerElmt.insertBefore(filterElmt, this.#filtersRemoveBtnElmt);
 
-        let filterFetcher = new Fetcher();
-        let filterPromise = filterFetcher.get(getFilterDataUrl).then(
-            prepareFilterOptionsCallback
-        ).then(
-            (filterOptions) => {
+        if (this.#filterReqIDs[getFilterDataUrl] != null) {
+            this.#internalAPIRequester.abort(this.#filterReqIDs[getFilterDataUrl]);
+            this.#filterReqIDs[getFilterDataUrl] = null;
+        }
+        this.#filterReqIDs[getFilterDataUrl] = this.#internalAPIRequester.get(
+            getFilterDataUrl,
+            (data) => {
+                let filterOptions = prepareFilterOptionsCallback(data);
                 filterElmt.load(filterOptions);
                 this.#searchFilterElmts.push(filterElmt);
-            }
-        ).catch(
+            },
             (error) => {
-                if (error.name != "AbortError") {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
-                }
-            }
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
         );
 
-        return filterPromise;
+        return this.#internalAPIRequester.getPromise(this.#filterReqIDs[getFilterDataUrl]);
     }
 
     #initFilters() {
@@ -252,11 +257,9 @@ class TimeseriesSelectorView {
     }
 
     refresh(options = {}) {
-        if (this.#searchFetcher == null) {
-            this.#searchFetcher = new Fetcher();
-        }
-        else {
-            this.#searchFetcher.cancel();
+        if (this.#searchReqID != null) {
+            this.#internalAPIRequester.abort(this.#searchReqID);
+            this.#searchReqID = null;
         }
 
         this.#searchResultsCountElmt.innerHTML = "";
@@ -289,9 +292,10 @@ class TimeseriesSelectorView {
         if (this.#searchFilterZoneElmt.value != "None") {
             searchOptions["zone_id"] = this.#searchFilterZoneElmt.value;
         }
-        this.#searchFetcher.get(flaskES6.urlFor(`api.timeseries.retrieve_list`, searchOptions)).then(
-            (data) => {
 
+        this.#searchReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.timeseries.retrieve_list`, searchOptions),
+            (data) => {
                 this.#searchResultsContainerElmt.innerHTML = "";
 
                 if (data.data.length > 0) {
@@ -377,14 +381,11 @@ class TimeseriesSelectorView {
                 this.#searchResultsPaginationElmt.reload(paginationOpts);
 
                 this.#update();
-            }
-        ).catch(
+            },
             (error) => {
-                if (error.name != "AbortError") {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
-                }
-            }
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
         );
     }
 }

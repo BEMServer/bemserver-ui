@@ -34,6 +34,7 @@ class DropZone extends HTMLDivElement {
         this.addEventListener("dragover", (event) => {
             event.preventDefault();
 
+            // TODO: Fix bug dataTransfer.getData only works on drop event in Chrome navigator.
             let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
             let sourceElmt = this.querySelector(`#${jsonData.sourceNodeId}`);
 

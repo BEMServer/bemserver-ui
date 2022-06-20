@@ -1,4 +1,4 @@
-import { Fetcher } from "../../tools/fetcher.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { TimeseriesChart } from "../../components/tsChart.js";
@@ -6,6 +6,10 @@ import { Spinner } from "../../components/spinner.js";
 
 
 class TimeseriesDataExploreView {
+
+    #internalAPIRequester = null;
+    #tsDataStatesReqID = null;
+    #tsDataCSVReqID = null;
 
     #messagesElmt = null;
     #chartContainerElmt = null;
@@ -22,7 +26,6 @@ class TimeseriesDataExploreView {
     #durationDefault = "1 day";
 
     #chart = null;
-    #fetcher = null;
 
     #startTime = null;
     #endTime = null;
@@ -33,14 +36,13 @@ class TimeseriesDataExploreView {
         this.#tsSelectorView = tsSelectorView;
 
         this.#cacheDOM();
-
         this.#initElements();
 
         this.#chart = new TimeseriesChart();
         this.#chartContainerElmt.innerHTML = "";
         this.#chartContainerElmt.appendChild(this.#chart);
 
-        this.#fetcher = new Fetcher();
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#initEventListeners();
     }
@@ -132,7 +134,12 @@ class TimeseriesDataExploreView {
         loadingOptionElmt.innerText = "loading...";
         this.#tsDataStatesSelectElmt.appendChild(loadingOptionElmt);
 
-        this.#fetcher.get(flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`)).then(
+        if (this.#tsDataStatesReqID != null) {
+            this.#internalAPIRequester.abort(this.#tsDataStatesReqID);
+            this.#tsDataStatesReqID = null;
+        }
+        this.#tsDataStatesReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`),
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {
@@ -143,12 +150,11 @@ class TimeseriesDataExploreView {
                 }
 
                 this.#loadBtnElmt.removeAttribute("disabled");
-            }
-        ).catch(
+            },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                 this.#messagesElmt.appendChild(flashMsgElmt);
-            }
+            },
         );
     }
 
@@ -174,23 +180,28 @@ class TimeseriesDataExploreView {
 
         let tsDataStateId = this.#tsDataStatesSelectElmt.value;
         let urlParams = {id: tsId, data_state: tsDataStateId, start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), agg: this.#aggInputElmt.value, duration: this.#durationInputElmt.value};
-        this.#fetcher.get(flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams)).then(
+
+
+        if (this.#tsDataCSVReqID != null) {
+            this.#internalAPIRequester.abort(this.#tsDataCSVReqID);
+            this.#tsDataCSVReqID = null;
+        }
+        this.#tsDataCSVReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams),
             (data) => {
                 this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download`, urlParams));
                 this.#chart.load(data);
-            }
-        ).catch(
+            },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                 this.#messagesElmt.appendChild(flashMsgElmt);
 
                 this.#chart.removeDownloadCSVLink();
-            }
-        ).finally(
+            },
             () => {
                 this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
                 this.#loadBtnElmt.removeAttribute("disabled");
-            }
+            },
         );
     }
 }
