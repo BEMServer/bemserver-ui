@@ -41,10 +41,26 @@ class UserGroupItem extends HTMLDivElement {
                     },
                     "sourceNodeId": this.id,
                 }));
+
+                let itemDragStartEvent = new CustomEvent("itemDragStart", {
+                    detail: {
+                        "target": this,
+                    },
+                    bubbles: true,
+                });
+                this.dispatchEvent(itemDragStartEvent);
             });
 
             this.addEventListener("dragend", () => {
                 this.classList.remove("dragging");
+
+                let itemDragEndEvent = new CustomEvent("itemDragEnd", {
+                    detail: {
+                        "target": this,
+                    },
+                    bubbles: true,
+                });
+                this.dispatchEvent(itemDragEndEvent);
             });
         }
     }

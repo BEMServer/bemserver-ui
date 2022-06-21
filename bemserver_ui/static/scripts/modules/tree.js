@@ -3,8 +3,9 @@ import { Parser } from "./tools/parser.js"
 
 class Tree {
 
+    treeElmt = null;
+
     #treeId = "tree";
-    #treeElmt = null;
     #treeItemElmts = [];
     #toolbarElmt = null
     #collapseAllBtnElmt = null;
@@ -46,8 +47,8 @@ class Tree {
     }
 
     #cacheDOM() {
-        this.#treeElmt = document.getElementById(this.#treeId);
-        this.#treeItemElmts = [].slice.call(this.#treeElmt.querySelectorAll(".nav-tree-item"));
+        this.treeElmt = document.getElementById(this.#treeId);
+        this.#treeItemElmts = [].slice.call(this.treeElmt.querySelectorAll(".nav-tree-item"));
         this.#toolbarElmt = document.getElementById(`${this.#treeId}Toolbar`);
         this.#collapseAllBtnElmt = document.getElementById(`${this.#treeId}CollapseAll`);
         this.#expandAllBtnElmt = document.getElementById(`${this.#treeId}ExpandAll`);
@@ -114,23 +115,28 @@ class Tree {
 
                         let id = linkElmt.getAttribute("data-tree-item-id");
                         let type = linkElmt.getAttribute("data-tree-item-type");
-                        let path = linkElmt.getAttribute("data-tree-item-path");
-                        let name = linkElmt.innerText;
 
                         event.dataTransfer.effectAllowed = "all";
-                        event.dataTransfer.setData("application/json", JSON.stringify({
-                            "sourceNodeData": {
-                                "id": id,
-                                "type": type,
-                                "path": path,
-                                "name": name,
+                        event.dataTransfer.setData("application/json", JSON.stringify(this.getItemData(type, id)));
+
+                        let itemDragStartEvent = new CustomEvent("itemDragStart", {
+                            detail: {
+                                "target": linkElmt,
                             },
-                            "sourceNodeId": `${type}-${id}`,
-                            "sourceNodeQuerySelector": `.nav-tree-item-link[data-tree-item-id="${id}"][data-tree-item-type="${type}"]`,
-                        }));
+                            bubbles: true,
+                        });
+                        this.treeElmt.dispatchEvent(itemDragStartEvent);
                     });
                     linkElmt.addEventListener("dragend", () => {
                         linkElmt.classList.remove("dragging");
+
+                        let itemDragEndEvent = new CustomEvent("itemDragEnd", {
+                            detail: {
+                                "target": linkElmt,
+                            },
+                            bubbles: true,
+                        });
+                        this.treeElmt.dispatchEvent(itemDragEndEvent);
                     });
                 }
             }
@@ -177,7 +183,7 @@ class Tree {
 
     getItemData(itemType, itemId) {
         let querySelectorString = `.nav-tree-item-link[data-tree-item-type="${itemType}"][data-tree-item-id="${itemId}"]`;
-        let itemElmt = this.#treeElmt.querySelector(querySelectorString);
+        let itemElmt = this.treeElmt.querySelector(querySelectorString);
         return {
             "sourceNodeData": {
                 "id": itemElmt?.getAttribute("data-tree-item-id"),

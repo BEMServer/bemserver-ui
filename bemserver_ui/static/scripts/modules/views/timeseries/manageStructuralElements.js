@@ -29,6 +29,8 @@ class TimeseriesManageStructuralElementsView {
     #treeStructuralElements = null;
     #treeZones = null;
 
+    #draggedElmt = null;
+
     constructor(options = {}) {
         this.#treeStructuralElements = options.treeStructuralElements;
         this.#treeZones = options.treeZones;
@@ -41,7 +43,7 @@ class TimeseriesManageStructuralElementsView {
         this.#tsPageSizeSelectorContainerElmt.innerHTML = "";
         this.#tsPageSizeSelectorContainerElmt.appendChild(this.#tsPageSizeSelectorElmt);
 
-        this.#tsListElmt = new AccordionList({isDropable: true});
+        this.#tsListElmt = new AccordionList();
         this.#tsListContainerElmt.innerHTML = "";
         this.#tsListContainerElmt.appendChild(this.#tsListElmt);
 
@@ -107,7 +109,11 @@ class TimeseriesManageStructuralElementsView {
             let tsTitle = event.detail.itemTitle;
 
             if (!event.target.isLoaded) {
-                let dropZoneElmt = new DropZone();
+                let dropZoneElmt = new DropZone({ getDraggedElmtCallback: () => {
+                    let draggedElmtId = this.#draggedElmt.getAttribute("data-tree-item-id");
+                    let draggedElmtType = this.#draggedElmt.getAttribute("data-tree-item-type");
+                    return dropZoneElmt.querySelector(`#${draggedElmtType}-${draggedElmtId}`);
+                } });
                 dropZoneElmt.id = `dropZone-${tsId}`;
                 dropZoneElmt.targetId = tsId;
                 dropZoneElmt.targetTitle = tsTitle;
@@ -166,6 +172,28 @@ class TimeseriesManageStructuralElementsView {
                     },
                 );
             }
+        });
+
+        this.#treeStructuralElements.treeElmt.addEventListener("itemDragStart", (event) => {
+            event.preventDefault();
+
+            this.#draggedElmt = event.detail.target;
+        });
+        this.#treeStructuralElements.treeElmt.addEventListener("itemDragEnd", (event) => {
+            event.preventDefault();
+
+            this.#draggedElmt = null;
+        });
+
+        this.#treeZones.treeElmt.addEventListener("itemDragStart", (event) => {
+            event.preventDefault();
+
+            this.#draggedElmt = event.detail.target;
+        });
+        this.#treeZones.treeElmt.addEventListener("itemDragEnd", (event) => {
+            event.preventDefault();
+
+            this.#draggedElmt = null;
         });
 
         this.#tsListElmt.addEventListener("itemDrop", (event) => {

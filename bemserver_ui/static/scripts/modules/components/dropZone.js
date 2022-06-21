@@ -11,12 +11,15 @@ class DropZone extends HTMLDivElement {
     #helpTitle = "No items yet.";
     #helpTexts = ["Drag and drop items here."];
 
-    constructor(options = { dropEffect: "copy", helpTitle: "No items yet.", helpTexts: ["Drag and drop items here."] }) {
+    #getDraggedElmtCallback = null;
+
+    constructor(options = { dropEffect: "copy", helpTitle: "No items yet.", helpTexts: ["Drag and drop items here."], getDraggedElmtCallback: null }) {
         super();
 
         this.#dropEffect = options.dropEffect;
         this.#helpTitle = options.helpTitle;
         this.#helpTexts = options.helpTexts;
+        this.#getDraggedElmtCallback = options.getDraggedElmtCallback;
     }
 
     get count() {
@@ -34,9 +37,7 @@ class DropZone extends HTMLDivElement {
         this.addEventListener("dragover", (event) => {
             event.preventDefault();
 
-            // TODO: Fix bug dataTransfer.getData only works on drop event in Chrome navigator.
-            let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
-            let sourceElmt = this.querySelector(`#${jsonData.sourceNodeId}`);
+            let sourceElmt = this.#getDraggedElmtCallback?.();
 
             let isDuplicate = (!this.#allowDuplicates && sourceElmt != null);
             if (isDuplicate) {
@@ -48,16 +49,6 @@ class DropZone extends HTMLDivElement {
                 this.classList.add("dragover");
                 event.dataTransfer.dropEffect = this.#dropEffect;
             }
-
-            let dragOverEvent = new CustomEvent("itemDragOver", {
-                detail: {
-                    dataTransfer: event.dataTransfer,
-                    target: this,
-                    isDuplicate: isDuplicate,
-                },
-                bubbles: true,
-            });
-            this.dispatchEvent(dragOverEvent);
         });
 
         this.addEventListener("dragleave", (event) => {
@@ -66,18 +57,8 @@ class DropZone extends HTMLDivElement {
             this.classList.remove("dragover");
             this.classList.remove("drop-not-allowed");
 
-            let jsonData = JSON.parse(event.dataTransfer.getData("application/json"));
-            let sourceElmt = this.querySelector(`#${jsonData.sourceNodeId}`);
+            let sourceElmt = this.#getDraggedElmtCallback?.();
             sourceElmt?.classList.remove("dragging-duplicate");
-
-            let dragLeaveEvent = new CustomEvent("itemDragLeave", {
-                detail: {
-                    dataTransfer: event.dataTransfer,
-                    target: this,
-                },
-                bubbles: true,
-            });
-            this.dispatchEvent(dragLeaveEvent);
         });
 
         this.addEventListener("drop", (event) => {
