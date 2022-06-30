@@ -84,10 +84,6 @@ class TimeseriesSelectorView {
             event.preventDefault();
 
             let hasFilterChanged = false;
-            if (this.#searchFilterCampaignScopeElmt.value != "None") {
-                this.#searchFilterCampaignScopeElmt.value = "None";
-                hasFilterChanged = true;
-            }
             for (let searchFilterElmt of this.#searchFilterElmts) {
                 if (!searchFilterElmt.isDefaultSelected) {
                     searchFilterElmt.reset();
