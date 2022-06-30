@@ -93,9 +93,10 @@
                         <div class="order-1 order-lg-0">
                             {% if campaign_scopes_count > 0 %}
                             {% for campaign in g.campaign_ctxt.campaigns %}
+                            {% if campaign_scopes[campaign.id] | length > 0 %}
                             {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.campaign.id == campaign.id %}
-                            <h6>{% if is_campaign_selected %}<i class="bi bi-arrow-right-circle"></i> <span class="fw-bold">{% endif %}{{ campaign.name }}{% if is_campaign_selected %}</span>{% endif %} <span class="badge bg-secondary">{{ campaign_scopes[campaign.id]|length }}</span></h6>
-                            <div class="d-flex flex-wrap my-2 gap-2">
+                            <h6>{% if is_campaign_selected %}<i class="bi bi-arrow-right-circle"></i> <span class="fw-bold">{% endif %}{{ campaign.name }}{% if is_campaign_selected %}</span>{% endif %} ({{ campaign_scopes[campaign.id]|length }})</h6>
+                            <div class="d-flex flex-wrap my-2 pb-2 gap-2">
                                 {% for x in campaign_scopes[campaign.id] %}
                                 <div class="btn-group bg-white rounded" role="group" aria-label="Actions on campaign scope">
                                     <a class="btn btn-outline-secondary" role="button" href="{{ url_for('campaign_scopes.view', id=x.id) }}" title="Manage campaign scope">
@@ -109,6 +110,7 @@
                                 </div>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                             {% endfor %}
                             {% else %}
                             <span class="fst-italic text-muted">none</span>
