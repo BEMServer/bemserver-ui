@@ -155,6 +155,13 @@ class TimeseriesSelectorView {
             (data) => {
                 let filterOptions = prepareFilterOptionsCallback(data);
                 filterElmt.load(filterOptions);
+
+                filterElmt.addEventListener("change", (event) => {
+                    event.preventDefault();
+
+                    this.refresh();
+                });
+
                 this.#searchFilterElmts.push(filterElmt);
             },
             (error) => {
@@ -162,85 +169,67 @@ class TimeseriesSelectorView {
                 this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
-
-        return this.#internalAPIRequester.getPromise(this.#filterReqIDs[getFilterDataUrl]);
     }
 
     #initFilters() {
         // Campaign scopes filter.
         this.#searchFilterCampaignScopeElmt = new FilterSelect();
-        let filterCampaignScopeFetcherPromise = this.#initFilter(this.#searchFilterCampaignScopeElmt, flaskES6.urlFor(`api.campaign_scopes.retrieve_list`), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All campaign scopes"})
-            for (let row of data.data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterCampaignScopeElmt, flaskES6.urlFor(`api.campaign_scopes.retrieve_list`), (data) => {
+            let filterOptions = data.data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All campaign scopes"});
             return filterOptions;
         });
 
         // Sites filter.
         this.#searchFilterSiteElmt = new FilterSelect();
-        let filterSiteFetcherPromise = this.#initFilter(this.#searchFilterSiteElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "sites" }), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All sites"})
-            for (let row of data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterSiteElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "sites" }), (data) => {
+            let filterOptions = data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All sites"});
             return filterOptions;
         });
 
         // Buildings filter.
         this.#searchFilterBuildingElmt = new FilterSelect();
-        let filterBuildingFetcherPromise = this.#initFilter(this.#searchFilterBuildingElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "buildings" }), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All buildings"})
-            for (let row of data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterBuildingElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "buildings" }), (data) => {
+            let filterOptions = data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All buildings"});
             return filterOptions;
         });
 
         // Storeys filter.
         this.#searchFilterStoreyElmt = new FilterSelect();
-        let filterStoreyFetcherPromise = this.#initFilter(this.#searchFilterStoreyElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "storeys" }), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All storeys"})
-            for (let row of data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterStoreyElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "storeys" }), (data) => {
+            let filterOptions = data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All storeys"});
             return filterOptions;
         });
         
         // Buildings filter.
         this.#searchFilterSpaceElmt = new FilterSelect();
-        let filterSpaceFetcherPromise = this.#initFilter(this.#searchFilterSpaceElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "spaces" }), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All spaces"})
-            for (let row of data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterSpaceElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "spaces" }), (data) => {
+            let filterOptions = data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All spaces"});
             return filterOptions;
         });
 
         // Zones filter.
         this.#searchFilterZoneElmt = new FilterSelect();
-        let filterZoneFetcherPromise = this.#initFilter(this.#searchFilterZoneElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "zones" }), (data) => {
-            let filterOptions = [];
-            filterOptions.push({value: "None", text: "All zones"})
-            for (let row of data) {
-                filterOptions.push({value: row.id.toString(), text: row.name});
-            }
+        this.#initFilter(this.#searchFilterZoneElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "zones" }), (data) => {
+            let filterOptions = data.map((row) => {
+                return {value: row.id.toString(), text: row.name};
+            });
+            filterOptions.splice(0, 0, {value: "None", text: "All zones"});
             return filterOptions;
-        });
-
-        Promise.all([filterCampaignScopeFetcherPromise, filterSiteFetcherPromise, filterBuildingFetcherPromise, filterStoreyFetcherPromise, filterSpaceFetcherPromise, filterZoneFetcherPromise]).then(() => {
-            for (let searchFilterElmt of this.#searchFilterElmts) {
-                searchFilterElmt?.addEventListener("change", (event) => {
-                    event.preventDefault();
-        
-                    this.refresh();
-                });
-            }
         });
     }
 
