@@ -4,6 +4,7 @@ import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, Roles
+from bemserver_ui.extensions.campaign_context import deduce_campaign_state
 
 
 blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
@@ -25,18 +26,43 @@ def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required
 def list():
-    filters = {"state": "overall"}
-
+    ui_filters = {
+        "state": "overall",
+        "in_name": None,
+    }
+    api_filters = {}
     # Get requested filters.
     if flask.request.method == "POST":
-        filters["state"] = flask.request.form["state"]
+        ui_filters["state"] = flask.request.form["state"]
+        if flask.request.form["in_name"] != "":
+            ui_filters["in_name"] = flask.request.form["in_name"]
+            api_filters["in_name"] = flask.request.form["in_name"]
 
-    is_filtered = filters["state"] != "overall"
+    is_filtered = ui_filters["state"] != "overall" or (
+        ui_filters["in_name"] is not None and ui_filters["in_name"] != ""
+    )
 
-    # /!\ No need to load campaign list from API, just use campaign context.
+    try:
+        # Get campaign list.
+        campaigns_resp = flask.g.api_client.campaigns.getall(
+            sort="+name",
+            **api_filters,
+        )
+    except bac.BEMServerAPIValidationError as exc:
+        flask.abort(422, description=exc.errors)
+
+    campaigns = []
+    dt_now = dt.datetime.now(tz=dt.timezone.utc)
+    for x in campaigns_resp.data:
+        x["state"] = deduce_campaign_state(x, dt_now=dt_now)
+        if ui_filters["state"] == "overall" or x["state"] == ui_filters["state"]:
+            campaigns.append(x)
 
     return flask.render_template(
-        "pages/campaigns/list.html", filters=filters, is_filtered=is_filtered
+        "pages/campaigns/list.html",
+        campaigns=campaigns,
+        filters=ui_filters,
+        is_filtered=is_filtered,
     )
 
 
