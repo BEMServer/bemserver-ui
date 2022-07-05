@@ -47,6 +47,7 @@ from .resources import (
     TimeseriesBySpaceResources,
     TimeseriesByZoneResources,
     IOResources,
+    AnalysisResources,
 )
 from .exceptions import (
     BEMServerAPIValidationError,
@@ -310,3 +311,5 @@ class BEMServerApiClient:
         self.timeseries_by_storeys = TimeseriesByStoreyResources(self._request_manager)
         self.timeseries_by_spaces = TimeseriesBySpaceResources(self._request_manager)
         self.timeseries_by_zones = TimeseriesByZoneResources(self._request_manager)
+
+        self.analysis = AnalysisResources(self._request_manager)
