@@ -364,3 +364,31 @@ class IOResources(BaseResources):
             params=q_params,
             files={k: v for k, v in csv_files.items() if len(v.filename) > 0},
         )
+
+
+class AnalysisResources(BaseResources):
+    endpoint_base_uri = "/analysis/campaign/"
+    disabled_endpoints = ["getall", "getone", "create", "update", "delete"]
+
+    def get_completeness(
+        self,
+        campaign_id,
+        start_time,
+        end_time,
+        timeseries,
+        data_state,
+        bucket_width,
+        timezone="UTC",
+        *,
+        etag=None,
+    ):
+        endpoint = f"{self.endpoint_base_uri}{campaign_id}/completeness"
+        q_params = {
+            "start_time": start_time,
+            "end_time": end_time,
+            "timeseries": timeseries,
+            "data_state": data_state,
+            "bucket_width": bucket_width,
+            "timezone": timezone,
+        }
+        return self._req.getall(endpoint, etag=etag, params=q_params)
