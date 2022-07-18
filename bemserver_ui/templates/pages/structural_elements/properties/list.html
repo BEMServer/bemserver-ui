@@ -61,13 +61,14 @@
                     </caption>
                     <thead>
                         <tr>
-                            <th scope="col" colspan="3"></th>
+                            <th scope="col" colspan="4"></th>
                             <th scope="col" colspan="{{ structural_elements|length }}" class="text-center">Used in</th>
                             <th scope="col"></th>
                         </tr>
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Name</th>
+                            <th scope="col">Type</th>
                             <th scope="col">Description</th>
                             {% for struct_elmt in structural_elements %}
                             <th scope="col" class="text-center">{{ struct_elmt | capitalize }}s</th>
@@ -80,6 +81,7 @@
                         <tr class="align-middle">
                             <th scope="row">{{ prop.id }}</th>
                             <td>{{ prop.name }}</td>
+                            <td>{{ prop.value_type }}</td>
                             <td class="w-50">
                                 {% if prop.description|length > 80 %}
                                 <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>

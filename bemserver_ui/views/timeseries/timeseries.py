@@ -220,10 +220,20 @@ def edit(id):
 
             # Update property values, only if value has changed.
             for prop_id, prop_data in properties.items():
+                # Flask form is special with checkboxes, it sets:
+                #  - "on" if a checkbox input is checked
+                #  - nothing is checkbox is not checked
+                # In the second case, as the input field is not event in the request,
+                #  and assuming current property type is boolean,
+                #  we set a default value to "off".
+                prop_value = flask.request.form.get(f"property-{prop_id}", "off")
+                # For boolean properties, format value to minified "boolean" string.
+                if prop_data["value_type"] == "boolean":
+                    prop_value = "true" if prop_value == "on" else "false"
                 payload = {
-                    "id": timeseries_resp.data["id"],
+                    "timeseries_id": timeseries_resp.data["id"],
                     "property_id": prop_id,
-                    "value": flask.request.form[f"property-{prop_id}"],
+                    "value": prop_value,
                 }
                 if payload["value"] == prop_data["value"]:
                     continue
@@ -233,7 +243,8 @@ def edit(id):
                         payload,
                         etag=flask.request.form[f"property-{prop_id}-etag"],
                     )
-                except bac.BEMServerAPIValidationError:
+                except bac.BEMServerAPIValidationError as exc:
+                    flask.session["_validation_errors"] = exc.errors
                     flask.flash(
                         f"Error while setting {prop_data['name']} property!", "warning"
                     )
@@ -286,10 +297,19 @@ def delete(id):
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def create_property(id):
+    # Flask form is special with checkboxes, it sets:
+    #  - "on" if a checkbox input is checked
+    #  - nothing is checkbox is not checked
+    # In the second case, as the input field is not event in the request,
+    #  and assuming current property type is boolean, we set a default value to "off".
+    prop_value = flask.request.form.get("availablePropertyValue", "off")
+    # For boolean properties, format value to minified "boolean" string.
+    if flask.request.form["availablePropertyValueType"] == "boolean":
+        prop_value = "true" if prop_value == "on" else "false"
     payload = {
         "timeseries_id": id,
         "property_id": flask.request.form["availableProperty"],
-        "value": flask.request.form["availablePropertyValue"],
+        "value": prop_value,
     }
     try:
         flask.g.api_client.timeseries_property_data.create(payload)

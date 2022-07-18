@@ -27,6 +27,10 @@
                     <input type="text" form="editForm" class="form-control" id="name" name="name" minlength="1" maxlength="80" value="{{ property.name }}" required autofocus>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label" for="value_type">Type</label>
+                    <input type="text" class="form-control" id="value_type" name="value_type" value="{{ property.value_type }}" readonly>
+                </div>
+                <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
                     <textarea form="editForm" class="form-control" id="description" name="description" maxlength="250" rows="3">{{ property.description }}</textarea>
                 </div>
