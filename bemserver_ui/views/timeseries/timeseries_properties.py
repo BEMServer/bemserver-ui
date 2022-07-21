@@ -30,6 +30,7 @@ def create():
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
+            "value_type": flask.request.form["value_type"],
             "description": flask.request.form["description"],
         }
         try:

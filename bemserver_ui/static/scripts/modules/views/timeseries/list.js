@@ -1,6 +1,7 @@
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
+import { Parser } from "../../tools/parser.js";
 
 
 class TimeseriesListView {
@@ -109,9 +110,22 @@ class TimeseriesListView {
         let propertyDataHTML = ``;
         if (properties.length > 0) {
             for (let property of properties) {
+                let propVal = property.value;
+                switch (property.value_type) {
+                    case "integer":
+                        propVal = Parser.parseIntOrDefault(property.value, "-");
+                        break;
+                    case "float":
+                        propVal = Parser.parseFloatOrDefault(property.value, "-", 1);
+                        break;
+                    case "boolean":
+                        propVal = Parser.parseBoolOrDefault(property.value, "-");
+                        break;
+                    }
+
                 propertyDataHTML += `<dl>
     <dt>${property.name}${this.#getPropertyHelpHTML(property)}</dt>
-    <dd>${(property.value !== "" && property.value != null) ? Number.parseFloat(property.value).toFixed(1) : "-"}</dd>
+    <dd>${propVal}</dd>
 </dl>`;
             }
         }

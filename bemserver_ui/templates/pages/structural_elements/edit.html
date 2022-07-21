@@ -57,8 +57,14 @@
                             <input type="hidden" form="editForm" class="form-control" id="property-{{ property_id }}-etag" name="property-{{ property_id }}-etag" value="{{ property_data.etag }}">
                             <div class="d-flex justify-content-between align-items-top gap-3">
                                 <div class="w-100">
-                                    <input type="text" form="editForm" class="form-control" id="property-{{ property_id }}" name="property-{{ property_id }}" value="{{ property_data.value }}" maxlength="100">
-                                    <small class="fst-italic text-muted">{{ property_data.description }}</small>
+                                    {% if property_data.value_type == "boolean" %}
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox"{% if property_data.value == "true" %} checked{% endif %} form="editForm" class="form-check-input" role="switch" id="property-{{ property_id }}" name="property-{{ property_id }}">
+                                    </div>
+                                    {% else %}
+                                    <input {% if property_data.value_type == "string" %}type="text" maxlength="100"{% elif property_data.value_type in ["integer", "float"] %}type="number"{% if property_data.value_type == "float" %} step="0.01"{% endif %}{% endif %} form="editForm" class="form-control" id="property-{{ property_id }}" name="property-{{ property_id }}" value="{{ property_data.value }}" required>
+                                    {% endif %}
+                                    <small class="fst-italic text-muted">{{ [property_data.description, property_data.value_type] | select | join(", ") }}</small>
                                 </div>
                                 <form class="mt-1" id="delPropertyForm-{{ property_data.id }}" action="{{ url_for('structural_elements.delete_property', type=type, id=structural_element.id, property_id=property_data.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property_data.name }}&lt;/mark&gt; property">
                                     <input type="hidden" form="delPropertyForm-{{ property_data.id }}" id="delPropertyEtag-{{ property_data.id }}" name="delPropertyEtag-{{ property_data.id }}" value="{{ property_data.etag }}">
@@ -108,12 +114,15 @@
                         <label class="form-label" for="availableProperty">Available properties <span class="badge bg-secondary">{{ available_properties|length }}</span></label>
                         <select form="addPropertyForm" class="form-select" id="availableProperty" name="availableProperty" aria-label="Select a property">
                             {% for property_id, property_data in available_properties.items() %}
-                            <option value="{{ property_id }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}</option>
+                            <option value="{{ property_id }}" data-property-type="{{ property_data.value_type }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <input type="text" form="addPropertyForm" class="form-control" id="availablePropertyValue" name="availablePropertyValue" maxlength="100">
+                    <div class="mb-3" id="availablePropertyInputContainer">
+                        <input type="hidden" class="form-control" form="addPropertyForm" id="availablePropertyValueType" name="availablePropertyValueType">
+                        <div>
+                            <input class="form-control" form="addPropertyForm" id="availablePropertyValue" name="availablePropertyValue">
+                        </div>
                         <small class="fst-italic text-muted" id="availablePropertyDescription"></small>
                     </div>
                 </form>
@@ -138,15 +147,64 @@
     document.addEventListener("DOMContentLoaded", () => {
 
         let availablePropertySelectElmt = document.getElementById("availableProperty");
+        let availablePropertyInputContainerElmt = document.getElementById("availablePropertyInputContainer");
+        let availablePropertyInputElmt = document.getElementById("availablePropertyValue");
+        let availablePropertyValueTypeElmt = document.getElementById("availablePropertyValueType");
         let availablePropertyDescriptionElmt = document.getElementById("availablePropertyDescription");
 
+        function updatePropertyDescription() {
+            if (availablePropertySelectElmt.selectedIndex != -1) {
+                let selectedProperty = availablePropertySelectElmt.selectedOptions[0];
+                let propertyType = selectedProperty.getAttribute("data-property-type", "string");
+
+                availablePropertyInputElmt.removeAttribute("readonly");
+                availablePropertyInputElmt.removeAttribute("maxlength");
+                availablePropertyInputElmt.removeAttribute("required");
+                availablePropertyInputElmt.removeAttribute("step");
+                availablePropertyInputElmt.removeAttribute("role");
+                availablePropertyInputElmt.classList.replace("form-check-input", "form-control");
+                availablePropertyInputElmt.parentElement.className = "";
+
+                availablePropertyValueTypeElmt.value = propertyType;
+
+                switch (propertyType) {
+                    case "string":
+                        availablePropertyInputElmt.type = "text";
+                        availablePropertyInputElmt.setAttribute("maxlength", 100);
+                        availablePropertyInputElmt.setAttribute("required", true);
+                        break;
+                    case "integer":
+                        availablePropertyInputElmt.type = "number";
+                        availablePropertyInputElmt.setAttribute("required", true);
+                        break;
+                    case "float":
+                        availablePropertyInputElmt.type = "number";
+                        availablePropertyInputElmt.setAttribute("step", 0.01);
+                        availablePropertyInputElmt.setAttribute("required", true);
+                        break;
+                    case "boolean":
+                        availablePropertyInputElmt.classList.replace("form-control", "form-check-input");
+                        availablePropertyInputElmt.type = "checkbox";
+                        availablePropertyInputElmt.setAttribute("role", "switch");
+                        availablePropertyInputElmt.parentElement.classList.add("form-check", "form-switch");
+                        break;
+                }
+
+                availablePropertyDescriptionElmt.innerHTML = [selectedProperty.getAttribute("data-property-description"), propertyType].filter(Boolean).join(", ");
+            }
+            else {
+                availablePropertyInputElmt.setAttribute("readonly", true);
+                availablePropertyDescriptionElmt.innerHTML = "";
+            }
+        }
+
         if (availablePropertySelectElmt.selectedIndex != -1) {
-            availablePropertyDescription.innerHTML = availablePropertySelectElmt.options[availablePropertySelectElmt.selectedIndex].getAttribute("data-property-description");
+            updatePropertyDescription();
         }
         availablePropertySelectElmt.addEventListener("change", (event) => {
-            if (event.target.selectedIndex != -1) {
-                availablePropertyDescription.innerHTML = event.target.options[event.target.selectedIndex].getAttribute("data-property-description");
-            }
+            event.preventDefault();
+
+            updatePropertyDescription();
         });
 
     });

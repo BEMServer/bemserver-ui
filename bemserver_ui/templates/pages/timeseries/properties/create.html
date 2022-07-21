@@ -15,6 +15,15 @@
                         <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="value_type">Type</label>
+                        <select class="form-select" id="value_type" name="value_type" aria-label="Select a value" required>
+                            <option value="integer">integer</option>
+                            <option value="float">float</option>
+                            <option value="boolean">boolean</option>
+                            <option value="string">string</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="description">Description</label>
                         <textarea class="form-control" id="description" name="description" maxlength="250" rows="3"></textarea>
                     </div>
