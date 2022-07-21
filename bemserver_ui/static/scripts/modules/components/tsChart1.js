@@ -1,30 +1,27 @@
 import { Parser } from "../tools/parser.js";
 import { TimeDisplay } from "../tools/time.js";
 
-
-class TimeseriesChart extends HTMLDivElement {
+class TimeseriesCompletenessChart extends HTMLDivElement {
 
     #chart = null;
 
-    #initOptions = { height: 400 };
+    #initOptions = {};
     #theme = null;
 
     #downloadCSVUrl = null;
 
-    #defaultTitle = "Timeseries data";
+    #defaultTitle = "Data completeness";
     #defaultOptions = {
+        grid: {
+            height: "50%",
+            top: "10%"
+        },
         title: {
             left: "center",
             text: this.#defaultTitle,
         },
-        grid: {
-            bottom: 80,
-        },
         toolbox: {
             feature: {
-                magicType: {
-                    type: ["line", "bar"],
-                },
                 dataZoom: {
                     yAxisIndex: "none",
                 },
@@ -43,41 +40,71 @@ class TimeseriesChart extends HTMLDivElement {
             },
         },
         tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "cross",
-            },
-        },
-        legend: {
-            left: "left",
         },
         dataZoom: [
             {
                 type: "slider",
             },
+            {
+                type: 'slider',
+                yAxisIndex: 0,
+                zoomLock: true,
+                width: 10,
+                right: 50,
+                top: 70,
+                bottom: 20,
+                start: 40,
+                end: 100,
+                handleSize: 0,
+                showDetail: false
+            },
+            {
+                type: 'inside',
+                id: 'insideY',
+                yAxisIndex: 0,
+                zoomLock: true,
+                start: 0,
+                end: 100,
+                zoomOnMouseWheel: false,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true
+            }
         ],
         xAxis: [
             {
-                type: "category",
+                type: "time",
+                splitArea: {
+                    show: true,
+                }
             },
         ],
         yAxis: [
             {
+                type: "category",
+                splitArea: {
+                    show: true,
+                },
                 nameLocation: "middle",
                 nameGap: 40,
             },
         ],
-        series: [
-            {
-                type: 'line',
-                smooth: true,
+        visualMap: {
+            min: 0,
+            max: 1,
+            calculable: true,
+            orient: "vertical",
+            inRange: {
+                color: ["#fb4b4b", "#c0ff33"],
             },
+            right: "0%",
+            top: "center",
+        },
+        series: [
         ],
         useUTC: false,
     };
 
-    // `theme` parameter can be "dark"
-    constructor(options = { height: 400 }, theme = null, ) {
+    constructor(options = { height: 400 }, theme = null,) {
         super();
 
         this.#initOptions = options || this.#initOptions;
@@ -115,26 +142,40 @@ class TimeseriesChart extends HTMLDivElement {
 
     load(data) {
         this.hideLoading();
-
-        let legendName = `[${data.ts_datastate_name.toLowerCase()}] ${data.ts_name}`;
-        if (data.ts_unit_symbol != null && data.ts_unit_symbol.length > 0) {
-            legendName = `${legendName} [${data.ts_unit_symbol}]`;
-        }
-
         let options = this.#chart.getOption();
-        options.legend.data = [legendName];
-        options.yAxis[0].name = (data.ts_unit_symbol != null && data.ts_unit_symbol.length > 0) ? `[${data.ts_unit_symbol}]` : "";
-        options.series[0].name = legendName;
-        options.dataset = {
-            source: data.ts_data.map((row) => {
-                let rowDate = new Date(row["Datetime"]);
-                return [
-                    !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate).replace(" ", "\n") : null,
-                    Parser.parseFloatOrDefault(row[data.ts_id.toString()], null),
-                ];
-            }),
-        };
-
+        let timeseries_list_names = [];
+        let my_data = [];
+        let max_values = [];
+        for (let [ts_id, ts_data] of Object.entries(data.data["timeseries"])) {
+            timeseries_list_names.push(ts_data.name);
+            max_values.push(ts_data.expected_count);
+            for (let j = 0; j < data.data["timestamps"].length; j++) {
+                my_data.push([data.data["timestamps"][j], ts_data.name, ts_data.ratio[j]]);
+            }
+            options.tooltip = {
+                position: 'top',
+                formatter: function (p) {
+                    var msg = ts_data.undefined_interval ? "Undefined interval time interval" : " Defined time interval";
+                    var percentage = p.data[2].toFixed(2) * 100;
+                    var nb = Math.floor(percentage * ts_data.expected_count[0] / 100);
+                    return `${p.data[0]} <br/> ${ts_data.name}: <br/> ${percentage} % (${nb}/${ts_data.expected_count[0]}) <br/> interval: ${ts_data.interval}s (${msg})`;
+                }
+            }
+            options.series.push(
+                {
+                    name: `Percentage of available ${ts_data.name} smeasurements `,
+                    type: 'heatmap',
+                    data: my_data,
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowColor: "rgba(0, 0, 0, 1)"
+                        }
+                    },
+                }
+            )
+        }
+        options.yAxis[0].data = timeseries_list_names;
         this.#chart.setOption(options);
     }
 
@@ -156,7 +197,7 @@ class TimeseriesChart extends HTMLDivElement {
 }
 
 
-customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
+customElements.define("app-ts-chart", TimeseriesCompletenessChart, { extends: "div" });
 
 
-export { TimeseriesChart } ;
+export { TimeseriesCompletenessChart };

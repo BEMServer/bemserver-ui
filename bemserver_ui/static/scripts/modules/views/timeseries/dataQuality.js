@@ -1,11 +1,17 @@
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { TimeseriesChart } from "../../components/tsChart.js";
+import { TimeseriesCompletenessChart } from "../../components/tsChart1.js";
 import { Spinner } from "../../components/spinner.js";
 
+function days_year(year) {
+    if ( ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0) ) {
+        return 366;
+    }
+    return 365;
+}
 
-class TimeseriesDataExploreView {
+class TimeSeriesDataCompletenessView {
 
     #internalAPIRequester = null;
     #tsDataStatesReqID = null;
@@ -14,22 +20,18 @@ class TimeseriesDataExploreView {
     #messagesElmt = null;
     #chartContainerElmt = null;
     #loadBtnElmt = null;
-    #startDateElmt = null;
-    #startTimeElmt = null;
     #endDateElmt = null;
     #endTimeElmt = null;
-
     #tsDataStatesSelectElmt = null;
+    #periodElmt = null;
 
-    #aggInputElmt = null;
-    #durationInputElmt = null;
-    #durationDefault = "1 day";
 
     #chart = null;
 
-    #startTime = null;
+    #startDateTime = null;
     #endTime = null;
-
+    #bucketWidthValue = null;
+    #bucketWidthUnit = null;
 
     #tsSelectorView = null;
 
@@ -39,7 +41,7 @@ class TimeseriesDataExploreView {
         this.#cacheDOM();
         this.#initElements();
 
-        this.#chart = new TimeseriesChart();
+        this.#chart = new TimeseriesCompletenessChart();
         this.#chartContainerElmt.innerHTML = "";
         this.#chartContainerElmt.appendChild(this.#chart);
 
@@ -55,58 +57,55 @@ class TimeseriesDataExploreView {
 
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
 
-        this.#startDateElmt = document.getElementById("start_date");
-        this.#startTimeElmt = document.getElementById("start_time");
+        this.#periodElmt = document.getElementById("period");
         this.#endDateElmt = document.getElementById("end_date");
         this.#endTimeElmt = document.getElementById("end_time");
 
-        this.#aggInputElmt = document.getElementById("agg");
-        this.#durationInputElmt = document.getElementById("duration");
 
+
+    }
+
+    #initApiParams(date) {
+
+        if (this.#periodElmt.value == "Day") {
+            this.#startDateTime = new Date(date.getTime() - 24 * 60 * 60 * 1000);
+            this.#bucketWidthValue = 1;
+            this.#bucketWidthUnit = "hour";
+        }
+        else if (this.#periodElmt.value == "Week") {
+            this.#startDateTime = new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000);
+            this.#bucketWidthValue = 1;
+            this.#bucketWidthUnit = "day";
+        }
+        else if (this.#periodElmt.value == "Month") {
+            this.#startDateTime = new Date(date.getTime() - 30 * 24 * 60 * 60 * 1000);
+            this.#bucketWidthValue = 1;
+            this.#bucketWidthUnit = "day";
+        }
+        else if (this.#periodElmt.value == "Year") {
+            this.#startDateTime = new Date(date.getTime() - days_year( date.getYear() + 1900 ) * 24 * 60 * 60 * 1000);
+            this.#bucketWidthValue = 1;
+            this.#bucketWidthUnit = "day";
+        }
     }
 
     #initElements() {
-        this.#durationInputElmt.setAttribute("placeholder", this.#durationDefault);
-
         this.#loadBtnElmt.setAttribute("disabled", "true");
-
         this.#endTime = new Date(Date.now());
-        this.#startTime = new Date();
-        this.#startTime.setDate(this.#endTime.getDate() - 7);
-        let startTimeISO = this.#startTime.toISOString();
+
         let endTimeISO = this.#endTime.toISOString();
+        this.#initApiParams(this.#endTime);
 
-
-
-        if (this.#startDateElmt.value == "") {
-            this.#startDateElmt.value = startTimeISO.split("T")[0];
-        }
-        if (this.#startTimeElmt.value == "") {
-            this.#startTimeElmt.value = startTimeISO.substring(11, 16);
-        }
-
-        if (this.#endDateElmt.value == "") {
-            this.#endDateElmt.value = endTimeISO.split("T")[0];
-        }
-        if (this.#endTimeElmt.value == "") {
-            this.#endTimeElmt.value = endTimeISO.substring(11, 16);
-        }
-
-        this.#startDateElmt.setAttribute("max", this.#endDateElmt.value);
-        this.#endDateElmt.setAttribute("min", this.#startDateElmt.value);
     }
-
     #initEventListeners() {
-        this.#startDateElmt.addEventListener("change", (event) => {
+        this.#periodElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#endDateElmt.setAttribute("min", this.#startDateElmt.value);
+            this.#periodElmt.setAttribute("min", this.#periodElmt.value);
         });
 
         this.#endDateElmt.addEventListener("change", (event) => {
             event.preventDefault();
-
-            this.#startDateElmt.setAttribute("max", this.#endDateElmt.value);
         });
 
         this.#loadBtnElmt.addEventListener("click", (event) => {
@@ -116,18 +115,11 @@ class TimeseriesDataExploreView {
                 this.refreshChart(this.#tsSelectorView.selectedItems[0]);
             }
             else {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: `No timeseries selected!`, isDismissible: true});
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.WARNING, text: `No timeseries selected!`, isDismissible: true });
                 this.#messagesElmt.appendChild(flashMsgElmt);
             }
         });
 
-        this.#aggInputElmt.addEventListener("change", (event) => {
-            event.preventDefault();
-
-            if (this.#aggInputElmt.value != "none" && this.#durationInputElmt.value == "") {
-                this.#durationInputElmt.value = this.#durationDefault;
-            }
-        });
     }
 
     refresh() {
@@ -141,6 +133,7 @@ class TimeseriesDataExploreView {
             this.#internalAPIRequester.abort(this.#tsDataStatesReqID);
             this.#tsDataStatesReqID = null;
         }
+
         this.#tsDataStatesReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`),
             (data) => {
@@ -155,7 +148,7 @@ class TimeseriesDataExploreView {
                 this.#loadBtnElmt.removeAttribute("disabled");
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
                 this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
@@ -169,37 +162,29 @@ class TimeseriesDataExploreView {
         this.#loadBtnElmt.appendChild(new Spinner({ useSmallSize: true, useSecondaryColor: true }));
         this.#loadBtnElmt.setAttribute("disabled", "true");
 
-        // Get full start/end times.
-        if (this.#startDateElmt.value != this.#startTime.toISOString().split("T")[0] || this.#startTimeElmt.value != this.#startTime.toISOString().substring(11, 16)) {
-            this.#startTime = new Date(`${this.#startDateElmt.value}T${this.#startTimeElmt.value}Z`);
-        }
+        let tsDataStateId = this.#tsDataStatesSelectElmt.value;
+        let timeseries = this.#tsSelectorView.selectedItems;
         if (this.#endDateElmt.value != this.#endTime.toISOString().split("T")[0] || this.#endTimeElmt.value != this.#endTime.toISOString().substring(11, 16)) {
             this.#endTime = new Date(`${this.#endDateElmt.value}T${this.#endTimeElmt.value}Z`);
         }
-
-        if (this.#aggInputElmt.value != "none" && this.#durationInputElmt.value == "") {
-            this.#durationInputElmt.value = this.#durationDefault;
-        }
-
-        let tsDataStateId = this.#tsDataStatesSelectElmt.value;
-        let urlParams = {id: tsId, data_state: tsDataStateId, start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), agg: this.#aggInputElmt.value, duration: this.#durationInputElmt.value};
-
+        this.#initApiParams(this.#endTime);
+        let urlParams = { start_time: this.#startDateTime.toISOString(), end_time: this.#endTime.toISOString(), timeseries: timeseries, data_state: tsDataStateId, bucket_width_value: this.#bucketWidthValue, bucket_width_unit: this.#bucketWidthUnit, bucket_width_value: this.#bucketWidthValue };
 
         if (this.#tsDataCSVReqID != null) {
             this.#internalAPIRequester.abort(this.#tsDataCSVReqID);
             this.#tsDataCSVReqID = null;
         }
+
         this.#tsDataCSVReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams),
+            flaskES6.urlFor(`api.analysis.retrieve_completeness`, urlParams),
             (data) => {
-                this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download`, urlParams));
                 this.#chart.load(data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                console.log(error);
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
                 this.#messagesElmt.appendChild(flashMsgElmt);
 
-                this.#chart.removeDownloadCSVLink();
             },
             () => {
                 this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
@@ -210,4 +195,4 @@ class TimeseriesDataExploreView {
 }
 
 
-export { TimeseriesDataExploreView };
+export { TimeSeriesDataCompletenessView };
