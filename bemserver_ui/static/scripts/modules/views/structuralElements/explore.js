@@ -137,8 +137,9 @@ class StructuralElementsExploreView {
         let propertyDataHTML = ``;
         if (data.properties.length > 0) {
             for (let property of data.properties) {
+                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${property.unit_symbol}]</span>` : ``;
                 propertyDataHTML += `<dl>
-    <dt>${property.name}${this.#getItemHelpHTML(property.description)}</dt>
+    <dt>${property.name}${unitSymbol}${this.#getItemHelpHTML(property.description)}</dt>
     <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
 </dl>`;
             }

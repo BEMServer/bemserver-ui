@@ -58,8 +58,6 @@ def list():
     extend_props_data(props_data)
     total_count = len(props_data)
 
-    print(props_data)
-
     # Apply filters, if needed.
     is_filtered = False
     if not all(filters.values()):
@@ -74,8 +72,6 @@ def list():
                     if filters[struct_elmt] and prop_data["used_in"][struct_elmt]:
                         props_data.append(prop_data)
                         break
-
-    print(props_data)
 
     return flask.render_template(
         "pages/structural_elements/properties/list.html",
@@ -94,6 +90,7 @@ def create():
         payload = {
             "name": flask.request.form["name"],
             "value_type": flask.request.form["value_type"],
+            "unit_symbol": flask.request.form["unit_symbol"],
             "description": flask.request.form["description"],
         }
         try:
@@ -146,6 +143,7 @@ def edit(id):
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
+            "unit_symbol": flask.request.form["unit_symbol"],
             "description": flask.request.form["description"],
         }
         try:

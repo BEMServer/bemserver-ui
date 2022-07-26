@@ -123,8 +123,9 @@ class TimeseriesListView {
                         break;
                     }
 
+                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${property.unit_symbol}]</span>` : ``;
                 propertyDataHTML += `<dl>
-    <dt>${property.name}${this.#getPropertyHelpHTML(property)}</dt>
+    <dt>${property.name}${unitSymbol}${this.#getPropertyHelpHTML(property)}</dt>
     <dd>${propVal}</dd>
 </dl>`;
             }

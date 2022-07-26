@@ -31,6 +31,10 @@
                     <input type="text" class="form-control" id="value_type" name="value_type" value="{{ property.value_type }}" readonly>
                 </div>
                 <div class="mb-3">
+                    <label class="form-label" for="unit_symbol">Unit symbol</label>
+                    <input form="editForm" type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20" value="{{ property.unit_symbol }}">
+                </div>
+                <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
                     <textarea form="editForm" class="form-control" id="description" name="description" maxlength="250" rows="3">{{ property.description }}</textarea>
                 </div>

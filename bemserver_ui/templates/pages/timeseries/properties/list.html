@@ -29,6 +29,7 @@
                             <th scope="col">#</th>
                             <th scope="col">Name</th>
                             <th scope="col">Type</th>
+                            <th scope="col">Unit</th>
                             <th scope="col">Description</th>
                             <th scope="col"></th>
                         </tr>
@@ -39,6 +40,7 @@
                             <th scope="row">{{ prop.id }}</th>
                             <td>{{ prop.name }}</td>
                             <td>{{ prop.value_type }}</td>
+                            <td>{{ prop.unit_symbol }}</td>
                             <td>
                                 {% if prop.description|length > 80 %}
                                 <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
