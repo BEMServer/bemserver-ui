@@ -1,7 +1,13 @@
-{% macro render_items_count(total_count, first_item = 1, last_item = none) %}
+{% macro render_items_count(total_count, first_item = none, last_item = none) %}
 <small class="text-nowrap opacity-75">
+    {% if last_item is none %}
+        {% set last_item = total_count %}
+    {% endif %}
+    {% if first_item is none %}
+        {% set first_item = last_item %}
+    {% endif %}
     {% if total_count > 0 %}
-    Items: {{ first_item | default(1, true) }} - {{ last_item | default(total_count, true) }} out of {{ total_count }}
+    Items: {{ first_item }} - {{ last_item }} out of {{ total_count }}
     {% else %}
     No item
     {% endif %}
