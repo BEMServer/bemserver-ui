@@ -31,6 +31,7 @@ def create():
         payload = {
             "name": flask.request.form["name"],
             "value_type": flask.request.form["value_type"],
+            "unit_symbol": flask.request.form["unit_symbol"],
             "description": flask.request.form["description"],
         }
         try:
@@ -65,6 +66,7 @@ def edit(id):
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
+            "unit_symbol": flask.request.form["unit_symbol"],
             "description": flask.request.form["description"],
         }
         try:

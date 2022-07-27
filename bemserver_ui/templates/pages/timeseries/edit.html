@@ -59,7 +59,7 @@
                         <legend class="invisible d-none">Timeseries properties</legend>
                         {% for property_id, property_data in properties.items() %}
                         <div class="mb-3">
-                            <label class="form-label" for="property-{{ property_id }}">{{ property_data.name }}</label>
+                            <label class="form-label" for="property-{{ property_id }}">{{ property_data.name }}{% if property_data.unit_symbol %}<span class="opacity-50 ms-1">[{{ property_data.unit_symbol }}]</span>{% endif %}</label>
                             <input type="hidden" form="editForm" class="form-control" id="property-{{ property_id }}-etag" name="property-{{ property_id }}-etag" value="{{ property_data.etag }}">
                             <div class="d-flex justify-content-between align-items-top gap-3">
                                 <div class="w-100">
@@ -120,7 +120,7 @@
                         <label class="form-label" for="availableProperty">Available properties <span class="badge bg-secondary">{{ available_properties|length }}</span></label>
                         <select form="addPropertyForm" class="form-select" id="availableProperty" name="availableProperty" aria-label="Select a property">
                             {% for property_id, property_data in available_properties.items() %}
-                            <option value="{{ property_id }}" data-property-type="{{ property_data.value_type }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}</option>
+                            <option value="{{ property_id }}" data-property-type="{{ property_data.value_type }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}{% if property_data.unit_symbol %} [{{ property_data.unit_symbol }}]{% endif %}</option>
                             {% endfor %}
                         </select>
                     </div>
