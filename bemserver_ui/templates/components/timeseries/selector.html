@@ -1,39 +1,41 @@
-<div class="d-flex justify-content-between align-items-start gap-2">
-    <h5>Timeseries selection</h5>
-    <small id="countResultsSelected" class="opacity-75"></small>
-</div>
-<div class="btn-group bg-white w-100">
-    <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3"></div>
-    <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="false" data-bs-reference="parent" aria-expanded="false">
-        <i class="bi bi-search"></i>
-        <span class="visually-hidden">Toggle search panel</span>
-    </button>
-    <div class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownBtnSearch">
-        <div class="d-flex align-items-center gap-2 mb-2">
-            <input type="text" class="form-control" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
-            <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
-        </div>
-        <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2 mb-2">
-            <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
-        </div>
-        <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-            <small id="selectionLimit" class="text-nowrap fst-italic opacity-75">Selection limit: <i class="bi bi-infinity"></i></small>
-            <div class="d-lg-flex d-grid text-end gap-lg-3">
-                <a id="selectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">select all in page</small></a>
-                <a id="unselectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">unselect all in page</small></a>
-                <div class="vr d-none d-lg-block"></div>
-                <a id="clearAllSelectionLnk" class="link-secondary" role="button"><small class="text-nowrap">clear all selection</small></a>
+<div>
+    <div class="d-flex justify-content-between align-items-start gap-2">
+        <h5>Timeseries selection</h5>
+        <small id="countResultsSelected" class="opacity-75"></small>
+    </div>
+    <div class="btn-group bg-white w-100">
+        <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3"></div>
+        <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="false" data-bs-reference="parent" aria-expanded="false">
+            <i class="bi bi-search"></i>
+            <span class="visually-hidden">Toggle search panel</span>
+        </button>
+        <div class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownBtnSearch">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <input type="text" class="form-control" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
+                <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
             </div>
-        </div>
-        <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 mb-3">
-            <p class="fst-italic text-center opacity-75 w-100">No search results</p>
-        </div>
-        <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
-            <div class="d-flex justify-content-between align-items-center gap-4 w-100">
-                <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
-                <small id="searchResultsCount" class="text-nowrap opacity-75"></small>
+            <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2 mb-2">
+                <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
             </div>
-            <ul is="app-pagination" id="searchResultsPagination"></ul>
-        </nav>
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                <small id="selectionLimit" class="text-nowrap fst-italic opacity-75">Selection limit: <i class="bi bi-infinity"></i></small>
+                <div class="d-lg-flex d-grid text-end gap-lg-3">
+                    <a id="selectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">select all in page</small></a>
+                    <a id="unselectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">unselect all in page</small></a>
+                    <div class="vr d-none d-lg-block"></div>
+                    <a id="clearAllSelectionLnk" class="link-secondary" role="button"><small class="text-nowrap">clear all selection</small></a>
+                </div>
+            </div>
+            <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 mb-3">
+                <p class="fst-italic text-center opacity-75 w-100">No search results</p>
+            </div>
+            <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
+                <div class="d-flex justify-content-between align-items-center gap-4 w-100">
+                    <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
+                    <small id="searchResultsCount" class="text-nowrap opacity-75"></small>
+                </div>
+                <ul is="app-pagination" id="searchResultsPagination"></ul>
+            </nav>
+        </div>
     </div>
 </div>

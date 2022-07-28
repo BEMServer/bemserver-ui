@@ -101,7 +101,7 @@ class SearchResultItem extends HTMLButtonElement {
         }
         this.dispatchEvent(buttonEvent);
 
-        let buttonToggleEvent = new CustomEvent("toggle", { detail: { itemId: this.#itemId, itemText: this.#itemText, itemIsActive: this.#itemIsActive }});
+        let buttonToggleEvent = new CustomEvent("toggle", { detail: { itemId: this.#itemId, itemText: this.#itemText, itemIsActive: this.#itemIsActive }, bubbles: true});
         this.dispatchEvent(buttonToggleEvent);
     }
 
@@ -128,7 +128,7 @@ class SearchResultItem extends HTMLButtonElement {
 }
 
 
-class TimeseriesSelector {
+class TimeseriesSelector extends HTMLDivElement {
 
     #allowedSelectionLimit = -1;
 
@@ -167,6 +167,8 @@ class TimeseriesSelector {
     #clearAllSelectionLnkElmt = null;
 
     constructor(options = {}) {
+        super();
+
         this.#allowedSelectionLimit = Parser.parseIntOrDefault(options.allowedSelectionLimit, this.#allowedSelectionLimit);
 
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -553,6 +555,7 @@ class TimeseriesSelector {
 
 customElements.define("app-ts-selected-item", SelectedItem, { extends: "span" });
 customElements.define("app-ts-search-result-item", SearchResultItem, { extends: "button" });
+customElements.define("app-ts-selector", TimeseriesSelector, { extends: "div" });
 
 
 export { TimeseriesSelector, SearchResultItem, SelectedItem } ;
