@@ -30,10 +30,10 @@ class TimeseriesDataExploreView {
     #startTime = null;
     #endTime = null;
 
-    #tsSelectorView = null;
+    #tsSelector = null;
 
-    constructor(tsSelectorView, options = { height: 400 }) {
-        this.#tsSelectorView = tsSelectorView;
+    constructor(tsSelector, options = { height: 400 }) {
+        this.#tsSelector = tsSelector;
 
         this.#cacheDOM();
         this.#initElements();
@@ -109,8 +109,8 @@ class TimeseriesDataExploreView {
         this.#loadBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            if (this.#tsSelectorView.selectedItems.length > 0) {
-                this.refreshChart(this.#tsSelectorView.selectedItems[0]);
+            if (this.#tsSelector.selectedItems.length > 0) {
+                this.refreshChart(this.#tsSelector.selectedItems[0]);
             }
             else {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: `No timeseries selected!`, isDismissible: true});
