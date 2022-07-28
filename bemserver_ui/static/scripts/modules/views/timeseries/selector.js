@@ -40,6 +40,12 @@ class TimeseriesSelectorView {
     #searchResultsCountElmt = null;
     #searchResultsPaginationElmt = null;
 
+    #selectionLimitElmt = null;
+    #countResultsSelectedElmt = null;
+    #selectAllResultsLnkElmt = null;
+    #unselectAllResultsLnkElmt = null;
+    #clearAllSelectionLnkElmt = null;
+
     constructor(options = {}) {
         this.#allowedSelectionLimit = Parser.parseIntOrDefault(options.allowedSelectionLimit, this.#allowedSelectionLimit);
 
@@ -49,10 +55,18 @@ class TimeseriesSelectorView {
         this.#initFilters();
         this.#initEventListeners();
         this.#update();
+
+        if (this.#allowedSelectionLimit != -1) {
+            this.#selectionLimitElmt.innerText = `Selection limit: ${this.#allowedSelectionLimit}`;
+        }
     }
 
     get selectedItems() {
-        return this.#selectedItems;
+        let selectedItemIds = [];
+        for (let item of this.#selectedItems) {
+            selectedItemIds.push(item.itemId);
+        }
+        return selectedItemIds;
     }
 
     #cacheDOM() {
@@ -71,6 +85,12 @@ class TimeseriesSelectorView {
         this.#searchResultsPageSizeSelectorElmt = document.getElementById("searchResultsPageSizeSelector");
         this.#searchResultsCountElmt = document.getElementById("searchResultsCount");
         this.#searchResultsPaginationElmt = document.getElementById("searchResultsPagination");
+
+        this.#selectionLimitElmt = document.getElementById("selectionLimit");
+        this.#countResultsSelectedElmt = document.getElementById("countResultsSelected");
+        this.#selectAllResultsLnkElmt = document.getElementById("selectAllResultsLnk");
+        this.#unselectAllResultsLnkElmt = document.getElementById("unselectAllResultsLnk");
+        this.#clearAllSelectionLnkElmt = document.getElementById("clearAllSelectionLnk");
     }
 
     #initEventListeners() {
@@ -115,6 +135,38 @@ class TimeseriesSelectorView {
 
             this.refresh({ page: event.detail.page });
         });
+
+        this.#selectAllResultsLnkElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            let searchResultItems = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll("button"))
+            for (let item of searchResultItems) {
+                if (!item.isActive) {
+                    item.isActive = true;
+                }
+            }
+        });
+
+        this.#unselectAllResultsLnkElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            let searchResultItems = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll("button"))
+            for (let item of searchResultItems) {
+                if (item.isActive) {
+                    item.isActive = false;
+                }
+            }
+        });
+
+        this.#clearAllSelectionLnkElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            this.#unselectAllResultsLnkElmt.click();
+            if (this.#selectedItems.length > 0) {
+                this.#selectedItems = [];
+                this.#updateSelectedItemsContainer();
+            }
+        });
     }
 
     #update() {
@@ -126,20 +178,23 @@ class TimeseriesSelectorView {
         }
 
         if (this.#searchResultsPaginationElmt.totalItems > 0) {
-            this.#searchResultsCountElmt.innerText = `Items ${this.#searchResultsPaginationElmt.startItem} - ${this.#searchResultsPaginationElmt.endItem} out of ${this.#searchResultsPaginationElmt.totalItems}`;
+            this.#searchResultsCountElmt.innerText = `Items ${this.#searchResultsPaginationElmt.startItem.toString()} - ${this.#searchResultsPaginationElmt.endItem.toString()} out of ${this.#searchResultsPaginationElmt.totalItems.toString()}`;
         }
         else {
             this.#searchResultsCountElmt.innerText = "No items";
         }
+
+        this.#updateSelectedItemsContainer();
     }
 
     #updateSelectedItemsContainer() {
         if (this.#selectedItems.length <= 0) {
             this.#selectedItemsContainerElmt.innerHTML = "";
-            let noSelectedItemsElmt = document.createElement("span");
-            noSelectedItemsElmt.classList.add("fst-italic", "opacity-75");
-            noSelectedItemsElmt.innerText = "No items selected";
-            this.#selectedItemsContainerElmt.appendChild(noSelectedItemsElmt);
+        }
+
+        this.#countResultsSelectedElmt.innerText = `No items selected`;
+        if (this.#selectedItems.length > 0) {
+            this.#countResultsSelectedElmt.innerText = `${this.#selectedItems.length.toString()}${this.#allowedSelectionLimit != -1 ? `/${this.#allowedSelectionLimit.toString()}`: ""} item${this.#selectedItems.length > 1 ? "s" : ""} selected out of ${this.#searchResultsPaginationElmt.totalItems.toString()}`;
         }
     }
 
@@ -238,7 +293,7 @@ class TimeseriesSelectorView {
         if (this.#allowedSelectionLimit != -1) {
             isLimitOK = this.#selectedItems.length < this.#allowedSelectionLimit;
         }
-        return !this.#selectedItems.includes(itemId) && isLimitOK;
+        return !this.selectedItems.includes(itemId) && isLimitOK;
     }
 
     refresh(options = {}) {
@@ -289,7 +344,7 @@ class TimeseriesSelectorView {
                         if (row.unit_symbol) {
                             itemText += ` [${row.unit_symbol}]`;
                         }
-                        let itemIsAlreadySelected = this.#selectedItems.includes(row.id);
+                        let itemIsAlreadySelected = this.selectedItems.includes(row.id);
                         let searchResultItem = new SearchResultItem(row.id, itemText, itemIsAlreadySelected);
 
                         searchResultItem.addEventListener("on", (event) => {
@@ -307,7 +362,7 @@ class TimeseriesSelectorView {
                                     }
                                     else {
                                         event.target.remove();
-                                        this.#selectedItems = this.#selectedItems.filter(item => item != event.detail.itemId);
+                                        this.#selectedItems = this.#selectedItems.filter(item => item.itemId != event.detail.itemId);
                                     }
 
                                     this.#updateSelectedItemsContainer();
@@ -317,7 +372,7 @@ class TimeseriesSelectorView {
                                     this.#selectedItemsContainerElmt.innerHTML = "";
                                 }
                                 this.#selectedItemsContainerElmt.appendChild(selectedItem);
-                                this.#selectedItems.push(event.detail.itemId);
+                                this.#selectedItems.push(selectedItem);
 
                                 this.#updateSelectedItemsContainer();
                             }
@@ -332,8 +387,8 @@ class TimeseriesSelectorView {
                         searchResultItem.addEventListener("off", (event) => {
                             event.preventDefault();
 
-                            if (this.#selectedItems.includes(event.detail.itemId)) {
-                                this.#selectedItems = this.#selectedItems.filter(item => item != event.detail.itemId);
+                            if (this.selectedItems.includes(event.detail.itemId)) {
+                                this.#selectedItems = this.#selectedItems.filter(item => item.itemId != event.detail.itemId);
 
                                 let selectedItemElmt = this.#selectedItemsContainerElmt.querySelector(`span[data-item-id="${event.detail.itemId.toString()}"]`);
                                 selectedItemElmt?.remove();

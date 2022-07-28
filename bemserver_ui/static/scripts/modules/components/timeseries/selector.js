@@ -15,6 +15,10 @@ class SelectedItem extends HTMLSpanElement {
         this.#itemText = itemText;
     }
 
+    get itemId() {
+        return this.#itemId;
+    }
+
     #initEventListeners() {
         this.#removeBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
