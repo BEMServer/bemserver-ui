@@ -519,6 +519,13 @@ class TimeseriesSelector extends HTMLDivElement {
                             }
                         });
 
+                        searchResultItem.addEventListener("toggle", (event) => {
+                            event.preventDefault();
+
+                            let toggleEvent = new CustomEvent("toggleItem", { detail: event.detail, bubbles: true});
+                            this.dispatchEvent(toggleEvent);
+                        });
+
                         this.#searchResultsContainerElmt.appendChild(searchResultItem);
                     }
                 }

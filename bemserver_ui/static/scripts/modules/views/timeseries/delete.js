@@ -19,13 +19,13 @@ class TimeseriesDeleteView {
 
     #deleteBtnElmt = null;
 
-    #tsSelectorView = null;
+    #tsSelector = null;
 
     #startTime = null;
     #endTime = null;
 
-    constructor(tsSelectorView) {
-        this.#tsSelectorView = tsSelectorView;
+    constructor(tsSelector) {
+        this.#tsSelector = tsSelector;
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
@@ -73,6 +73,17 @@ class TimeseriesDeleteView {
     }
 
     #initEventListeners() {
+        this.#tsSelector.addEventListener("toggleItem", (event) => {
+            event.preventDefault();
+
+            if (this.#tsSelector.selectedItems.length > 0) {
+                this.#deleteBtnElmt.removeAttribute("disabled");
+            }
+            else {
+                this.#deleteBtnElmt.setAttribute("disabled", true);
+            }
+        });
+
         this.#startDateElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
@@ -88,7 +99,7 @@ class TimeseriesDeleteView {
         this.#deleteBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            if (this.#tsSelectorView.selectedItems.length > 0) {
+            if (this.#tsSelector.selectedItems.length > 0) {
                 // Get full start/end times.
                 if (this.#startDateElmt.value != this.#startTime.toISOString().split("T")[0] || this.#startTimeElmt.value != this.#startTime.toISOString().substring(11, 16)) {
                     this.#startTime = new Date(`${this.#startDateElmt.value}T${this.#startTimeElmt.value}Z`);
@@ -99,14 +110,14 @@ class TimeseriesDeleteView {
 
                 let deleteModalConfirm = new ModalConfirm(
                     event.target.id,
-                    `Remove data for <mark>${this.#tsSelectorView.selectedItems.length.toString()}</mark> timeseries between ${TimeDisplay.toLocaleString(this.#startTime)} and ${TimeDisplay.toLocaleString(this.#endTime)}`,
+                    `Remove data for <mark>${this.#tsSelector.selectedItems.length.toString()}</mark> timeseries between ${TimeDisplay.toLocaleString(this.#startTime)} and ${TimeDisplay.toLocaleString(this.#endTime)}`,
                     () => {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.INFO, text: `Deleting timeseries data.`, isDismissible: true});
                         this.#messagesElmt.appendChild(flashMsgElmt);
 
                         this.#internalAPIRequester.post(
                             flaskES6.urlFor(`api.timeseries_data.delete_data`),
-                            {start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), data_state: this.#dataStatesElmt.value, timeseries_ids: this.#tsSelectorView.selectedItems},
+                            {start_time: this.#startTime.toISOString(), end_time: this.#endTime.toISOString(), data_state: this.#dataStatesElmt.value, timeseries_ids: this.#tsSelector.selectedItems},
                             (data) => {
                                 let flashMsgElmt = null;
                                 if (data.success) {
@@ -115,8 +126,7 @@ class TimeseriesDeleteView {
                                 else {
                                     flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: `An error occured while deleting timeseries data!`, isDismissible: true});
                                 }
-                                if (flashMsgElmt != null)
-                                {
+                                if (flashMsgElmt != null) {
                                     this.#messagesElmt.appendChild(flashMsgElmt);
                                 }
                             },
@@ -135,10 +145,6 @@ class TimeseriesDeleteView {
                 document.body.appendChild(deleteModalConfirm);
 
                 deleteModalConfirm.show();
-            }
-            else {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: `No items selected to delete!`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
             }
         });
     }
