@@ -17,7 +17,6 @@ def retrieve_data(id):
     data_state_id = flask.request.args["data_state"]
     start_time = flask.request.args["start_time"]
     end_time = flask.request.args["end_time"]
-
     aggregation = flask.request.args.get("agg")
     if aggregation == "none":
         aggregation = None
