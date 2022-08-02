@@ -62,16 +62,16 @@
 {% filter indent(width=8, first=True) %}
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
 <script type="module">
-    import { TimeseriesSelectorView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/selector.js') }}";
+    import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { TimeSeriesDataCompletenessView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataCompleteness.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let tsSelectorView = new TimeseriesSelectorView();
-        tsSelectorView.refresh();
+        let tsSelector = new TimeseriesSelector();
+        tsSelector.refresh();
 
-        let tsDataExploreView = new TimeSeriesDataCompletenessView(tsSelectorView);
+        let tsDataExploreView = new TimeSeriesDataCompletenessView(tsSelector);
         tsDataExploreView.refresh();
 
     });
