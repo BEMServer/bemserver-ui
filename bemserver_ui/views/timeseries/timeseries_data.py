@@ -7,7 +7,14 @@ from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 
 blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
 
-periods = {"Year-Monthly": 1, "Year-Daily": 2, "Month-Daily": 3, "Week-Daily": 4, "Week-Hourly":5, "Day-Hourly": 6}
+periods = {
+    "Year-Monthly": 1,
+    "Year-Daily": 2,
+    "Month-Daily": 3,
+    "Week-Daily": 4,
+    "Week-Hourly": 5,
+    "Day-Hourly": 6,
+}
 
 
 @blp.route("/upload", methods=["GET", "POST"])

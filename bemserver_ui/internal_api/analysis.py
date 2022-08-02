@@ -1,6 +1,5 @@
 """Analysis internal API"""
 import flask
-import json
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
