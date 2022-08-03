@@ -13,7 +13,7 @@ from . import timeseries_data
 from . import timeseries_datastates
 from . import user_groups
 from . import users
-
+from . import analysis
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
 
@@ -27,6 +27,7 @@ MODULES = (
     timeseries_datastates,
     user_groups,
     users,
+    analysis,
 )
 
 

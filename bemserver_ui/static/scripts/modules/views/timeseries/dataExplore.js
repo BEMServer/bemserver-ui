@@ -61,6 +61,7 @@ class TimeseriesDataExploreView {
 
         this.#aggInputElmt = document.getElementById("agg");
         this.#durationInputElmt = document.getElementById("duration");
+
     }
 
     #initElements() {
@@ -71,9 +72,10 @@ class TimeseriesDataExploreView {
         this.#endTime = new Date(Date.now());
         this.#startTime = new Date();
         this.#startTime.setDate(this.#endTime.getDate() - 7);
-
         let startTimeISO = this.#startTime.toISOString();
         let endTimeISO = this.#endTime.toISOString();
+
+
 
         if (this.#startDateElmt.value == "") {
             this.#startDateElmt.value = startTimeISO.split("T")[0];

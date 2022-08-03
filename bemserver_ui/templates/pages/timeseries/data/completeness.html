@@ -1,0 +1,80 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Data completeness" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="row mb-3">
+                <div class="col">
+                    {% filter indent(width=20, first=True) %}
+                    {% include "components/timeseries/selector.html" %}
+                    {% endfilter %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text">Timeseries data state</span>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-xl-flex d-grid mb-3">
+                <div class="col pb-3 pb-xl-0">
+                    <div class="input-group">
+                        <span class="input-group-text">End date</span>
+                        <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required>
+                        <span class="input-group-text">UTC</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-xl-flex d-grid mb-3">
+                <div class="col pb-3 pb-xl-0">
+                    <div class="input-group">
+                        <span class="input-group-text">Period</span>
+                        <select id="period" class="form-select" aria-label="Select a period" required>
+                            {% for key, value in periods.items() %}
+                            <option value="{{ key }}">{{ key }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button id="loadBtn" class="btn btn-sm btn-outline-primary" title="Load chart"><i class="bi bi-arrow-clockwise"></i> Load chart</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="chartContainer" class="border border-1 rounded bg-white p-2"></div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+<script type="module">
+    import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
+    import { TimeSeriesDataCompletenessView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataCompleteness.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let tsSelector = new TimeseriesSelector();
+        tsSelector.refresh();
+
+        let tsDataExploreView = new TimeSeriesDataCompletenessView(tsSelector);
+        tsDataExploreView.refresh();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

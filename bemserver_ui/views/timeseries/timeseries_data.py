@@ -7,6 +7,15 @@ from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 
 blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
 
+periods = {
+    "Year-Monthly": 1,
+    "Year-Daily": 2,
+    "Month-Daily": 3,
+    "Week-Daily": 4,
+    "Week-Hourly": 5,
+    "Day-Hourly": 6,
+}
+
 
 @blp.route("/upload", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
@@ -44,6 +53,15 @@ def upload():
 @ensure_campaign_context
 def explore():
     return flask.render_template("pages/timeseries/data/explore.html")
+
+
+@blp.route("/completeness")
+@auth.signin_required
+@ensure_campaign_context
+def completeness():
+    return flask.render_template(
+        "pages/timeseries/data/completeness.html", len=len(periods), periods=periods
+    )
 
 
 @blp.route("/<int:id>/download")
