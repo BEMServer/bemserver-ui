@@ -34,7 +34,7 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
                 yAxisIndex: 0,
                 zoomLock: true,
                 width: 10,
-                right: 120,
+                right: "8%",
                 top: 40,
                 bottom: 80,
                 start: 10,
@@ -80,7 +80,7 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
             inRange: {
                 color: ["#fb4b4b", "#c0ff33"],
             },
-            right: 15,
+            right: "0%",
             top: "center",
         },
         series: [
@@ -139,7 +139,7 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
                 x_values.push(timestamp);
                 my_data.push([timestamp, ts_data.name, ts_data.ratio[j].toFixed(2)]);
             }
-            info[ts_data.name] = [ts_data.expected_count[0], ts_data.interval, ts_data.undefined_interval];
+            info[ts_data.name] = [ts_data.expected_count[0], ts_data.interval.toFixed(2), ts_data.undefined_interval];
             options.series.push(
                 {
                     name: `Number of measurements for ${ts_data.name}`,
@@ -158,12 +158,16 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
             trigger: "item",
             position: 'top',
             formatter: function (p) {
+                let start = new Date();
                 let ts_name = p.data[1];
                 var msg = info[ts_name][2] ? " (Undefined interval time interval)" : "";
                 let ratio = parseFloat(p.data[2]);
                 var percentage = ratio.toFixed(2) * 100;
-                var nb = Math.floor(percentage * info[ts_name][0] / 100);
-                return `${p.data[0]} <br/> ${ts_name}: <br/> ${percentage} % (${nb}/${info[ts_name][0]}) <br/> Interval: ${info[ts_name][1]}s${msg}`;
+                var nb = Math.floor(ratio * info[ts_name][0]);
+                let output = `${p.data[0]} <br/> ${ts_name}: <br/> ${percentage} % (${nb}/${info[ts_name][0]}) <br/> Interval: ${info[ts_name][1]}s${msg}`;
+                let end = new Date();
+                console.log(`${end - start}ms`); 
+                return output;
             }
         };
         options.xAxis[0].data = x_values;
