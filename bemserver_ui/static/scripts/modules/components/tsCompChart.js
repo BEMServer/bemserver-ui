@@ -124,20 +124,26 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
         let max_values = [];
         let info = {};
         let x_values = [];
+        let timestamps = data.data["timestamps"];
+
+        if (!displayTime) {
+            timestamps = timestamps.map((timestamp) => {
+                return timestamp.substring(0, 10);
+            })
+        }
+        else {
+            timestamps = timestamps.map((timestamp) => {
+                return timestamp.substring(0, 10) + " " + timestamp.substring(11, 16);
+            })
+        }
         for (let ts_data of Object.values(data.data["timeseries"])) {
             timeseries_list_names.push(ts_data.name);
             max_values.push(ts_data.expected_count);
             x_values = [];
             for (let j = 0; j < data.data["timestamps"].length; j++) {
-                let timestamp = data.data["timestamps"][j];
-                if ( !displayTime ) {
-                    timestamp = timestamp.substring(0, 10);
-                }
-                else {
-                    timestamp = timestamp.substring(0, 10) + " " + timestamp.substring(11, 19);
-                }
-                x_values.push(timestamp);
-                my_data.push([timestamp, ts_data.name, ts_data.ratio[j].toFixed(2)]);
+
+                x_values.push(timestamps[j]);
+                my_data.push([timestamps[j], ts_data.name, ts_data.ratio[j].toFixed(2)]);
             }
             info[ts_data.name] = [ts_data.expected_count[0], ts_data.interval.toFixed(2), ts_data.undefined_interval];
             options.series.push(
@@ -158,15 +164,12 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
             trigger: "item",
             position: 'top',
             formatter: function (p) {
-                let start = new Date();
                 let ts_name = p.data[1];
                 var msg = info[ts_name][2] ? " (Undefined interval time interval)" : "";
                 let ratio = parseFloat(p.data[2]);
                 var percentage = ratio.toFixed(2) * 100;
                 var nb = Math.floor(ratio * info[ts_name][0]);
                 let output = `${p.data[0]} <br/> ${ts_name}: <br/> ${percentage} % (${nb}/${info[ts_name][0]}) <br/> Interval: ${info[ts_name][1]}s${msg}`;
-                let end = new Date();
-                console.log(`${end - start}ms`); 
                 return output;
             }
         };
