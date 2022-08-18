@@ -25,35 +25,6 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
         },
         tooltip: {
         },
-        dataZoom: [
-            {
-                type: "slider",
-            },
-            {
-                type: 'slider',
-                yAxisIndex: 0,
-                zoomLock: true,
-                width: 10,
-                right: "8%",
-                top: 40,
-                bottom: 80,
-                start: 10,
-                end: 100,
-                handleSize: 0,
-                showDetail: false
-            },
-            {
-                type: 'inside',
-                id: 'insideY',
-                yAxisIndex: 0,
-                zoomLock: true,
-                start: 0,
-                end: 100,
-                zoomOnMouseWheel: false,
-                moveOnMouseMove: true,
-                moveOnMouseWheel: true
-            }
-        ],
         xAxis: [
             {
                 type: "category",
@@ -123,7 +94,6 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
         let my_data = [];
         let max_values = [];
         let info = {};
-        let x_values = [];
         let timestamps = data.data["timestamps"];
 
         if (!displayTime) {
@@ -136,19 +106,18 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
                 return timestamp.substring(0, 10) + " " + timestamp.substring(11, 16);
             })
         }
-        for (let ts_data of Object.values(data.data["timeseries"])) {
-            timeseries_list_names.push(ts_data.name);
-            max_values.push(ts_data.expected_count);
-            x_values = [];
-            for (let j = 0; j < data.data["timestamps"].length; j++) {
 
-                x_values.push(timestamps[j]);
-                my_data.push([timestamps[j], ts_data.name, ts_data.ratio[j].toFixed(2)]);
+        let values = Object.values(data.data["timeseries"])
+        for (let i = 0; i < values.length; i++) {
+            timeseries_list_names.push(values[i].name);
+            max_values.push(values[i].expected_count);
+            for (let j = 0; j < data.data["timestamps"].length; j++) {
+                my_data.push([j, i, values[i].ratio[j].toFixed(2)]);
             }
-            info[ts_data.name] = [ts_data.expected_count[0], ts_data.interval.toFixed(2), ts_data.undefined_interval];
+            info[values[i].name] = [values[i].expected_count[0], values[i].interval.toFixed(2), values[i].undefined_interval];
             options.series.push(
                 {
-                    name: `Number of measurements for ${ts_data.name}`,
+                    name: `Number of measurements for ${values[i].name}`,
                     type: 'heatmap',
                     data: my_data,
                     emphasis: {
@@ -160,20 +129,52 @@ class TimeseriesCompletenessChart extends HTMLDivElement {
                 }
             )
         }
+
+        options.dataZoom = [
+            {
+                type: "slider",
+            },
+            {
+                type: 'slider',
+                yAxisIndex: 0,
+                zoomLock: true,
+                width: 10,
+                right: "8%",
+                top: 40,
+                bottom: 80,
+                start: 100*Math.max(0, 1 - 15 / timeseries_list_names.length),
+                end: 100,
+                handleSize: 0,
+                showDetail: false
+            },
+            {
+                type: 'inside',
+                id: 'insideY',
+                yAxisIndex: 0,
+                zoomLock: true,
+                start: 0,
+                end: 100,
+                zoomOnMouseWheel: false,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true
+            }
+        ],
+
+
         options.tooltip = {
             trigger: "item",
             position: 'top',
             formatter: function (p) {
-                let ts_name = p.data[1];
+                let ts_name = timeseries_list_names[p.data[1]];
                 var msg = info[ts_name][2] ? " (Undefined interval time interval)" : "";
                 let ratio = parseFloat(p.data[2]);
                 var percentage = ratio.toFixed(2) * 100;
                 var nb = Math.floor(ratio * info[ts_name][0]);
-                let output = `${p.data[0]} <br/> ${ts_name}: <br/> ${percentage} % (${nb}/${info[ts_name][0]}) <br/> Interval: ${info[ts_name][1]}s${msg}`;
+                let output = `${timestamps[p.data[0]]} <br/> ${ts_name} <br/> ${percentage} % (${nb}/${info[ts_name][0].toFixed(2)}) <br/> Interval: ${info[ts_name][1]}s${msg}`;
                 return output;
             }
         };
-        options.xAxis[0].data = x_values;
+        options.xAxis[0].data = timestamps;
         options.yAxis[0].data = timeseries_list_names;
         this.#chart.setOption(options);
     }
