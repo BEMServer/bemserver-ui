@@ -97,12 +97,9 @@ class BEMServerApiClientResponse:
         """Check if the mimetype indicates JSON data, either
         :mimetype:`application/json` or :mimetype:`application/*+json`.
         """
-        return any(
-            self._mimetype == "application/json",
-            all(
-                self._mimetype.startswith("application/"),
-                self._mimetype.endswith("+json"),
-            ),
+        return self._mimetype == "application/json" or (
+            self._mimetype.startswith("application/")
+            and self._mimetype.endswith("+json")
         )
 
     @property
