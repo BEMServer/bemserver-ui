@@ -1,1 +1,1 @@
-"""BEMServer UI application common data"""
+"""BEMServer UI application common stuff"""

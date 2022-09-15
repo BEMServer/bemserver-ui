@@ -3,6 +3,7 @@ in urls and requests.
 """
 import functools
 import datetime as dt
+import zoneinfo
 import enum
 import flask
 from flask import url_for as flask_url_for
@@ -16,12 +17,13 @@ class CampaignState(enum.Enum):
 
 
 def deduce_campaign_state(campaign_data, dt_now=None):
+    campaign_tz = zoneinfo.ZoneInfo(campaign_data["timezone"])
     if dt_now is None:
-        dt_now = dt.datetime.now(tz=dt.timezone.utc)
+        dt_now = dt.datetime.now(tz=campaign_tz)
     campaign_state = CampaignState.ongoing.value
     end_time = campaign_data.get("end_time")
     if end_time is not None:
-        dt_end_time = dt.datetime.fromisoformat(end_time)
+        dt_end_time = dt.datetime.fromisoformat(end_time).astimezone(campaign_tz)
         if dt_end_time < dt_now:
             campaign_state = CampaignState.closed.value
     return campaign_state
@@ -56,6 +58,12 @@ class CampaignContext:
         if self._campaign is not None:
             return self._campaign["data"]
         return None
+
+    @property
+    def tz_name(self):
+        if self._campaign is not None:
+            return self._campaign["data"]["timezone"]
+        return flask.current_app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
 
     @property
     def name(self):

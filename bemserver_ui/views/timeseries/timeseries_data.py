@@ -1,4 +1,6 @@
 """Timeseries data views"""
+import datetime as dt
+import zoneinfo
 import flask
 
 import bemserver_ui.extensions.api_client as bac
@@ -6,15 +8,6 @@ from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 
 
 blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
-
-periods = {
-    "Year-Monthly": 1,
-    "Year-Daily": 2,
-    "Month-Daily": 3,
-    "Week-Daily": 4,
-    "Week-Hourly": 5,
-    "Day-Hourly": 6,
-}
 
 
 @blp.route("/upload", methods=["GET", "POST"])
@@ -60,7 +53,8 @@ def explore():
 @ensure_campaign_context
 def completeness():
     return flask.render_template(
-        "pages/timeseries/data/completeness.html", len=len(periods), periods=periods
+        "pages/timeseries/data/completeness.html",
+        dt_end=dt.datetime.now(tz=zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)),
     )
 
 

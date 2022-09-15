@@ -4,7 +4,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid">
+<div class="container-fluid mb-4">
     <div class="row">
         <div class="col">
             <form action="{{ url_for('campaigns.create') }}" method="POST">
@@ -15,37 +15,32 @@
                         <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label" for="timezonePicker">Timezone</label>
+                        <div is="app-timezone-picker" id="timezonePicker" input-form-bind="timezone" required>
+                            <div is="app-spinner"></div>
+                        </div>
+                        <input type="hidden" id="timezone" name="timezone" required>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label" for="description">Description</label>
                         <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
                     </div>
                     <div class="row d-xl-flex d-grid mb-3">
                         <div class="col pb-3 pb-xl-0">
-                            <label class="form-label" for="start_date">From</label>
-                            <div class="d-lg-flex d-grid gap-1">
-                                <div class="input-group">
-                                    <span class="input-group-text" id="start_date">Date</span>
-                                    <input type="date" class="form-control" id="start_date" name="start_date">
-                                </div>
-                                <div class="input-group">
-                                    <span class="input-group-text">Time</span>
-                                    <input type="time" class="form-control" id="start_time" name="start_time">
-                                    <span class="input-group-text">UTC</span>
-                                </div>
+                            <label class="form-label" for="start_datetime">From</label>
+                            <div is="app-datetime-picker" id="start_datetime" date-input-form-bind="start_date" time-input-form-bind="start_time">
+                                <div is="app-spinner"></div>
                             </div>
+                            <input type="hidden" id="start_date" name="start_date">
+                            <input type="hidden" id="start_time" name="start_time">
                         </div>
                         <div class="col">
-                            <label class="form-label" for="end_date">To</label>
-                            <div class="d-lg-flex d-grid gap-1">
-                                <div class="input-group">
-                                    <span class="input-group-text" id="end_date">Date</span>
-                                    <input type="date" class="form-control" id="end_date" name="end_date">
-                                </div>
-                                <div class="input-group">
-                                    <span class="input-group-text">Time</span>
-                                    <input type="time" class="form-control" id="end_time" name="end_time">
-                                    <span class="input-group-text">UTC</span>
-                                </div>
+                            <label class="form-label" for="end_datetime">Until</label>
+                            <div is="app-datetime-picker" id="end_datetime" date-input-form-bind="end_date" time-input-form-bind="end_time">
+                                <div is="app-spinner"></div>
                             </div>
+                            <input type="hidden" id="end_date" name="end_date">
+                            <input type="hidden" id="end_time" name="end_time">
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
@@ -58,3 +53,45 @@
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let tzPickerElmt = document.getElementById("timezonePicker");
+        let startDatetimePickerElmt = document.getElementById("start_datetime");
+        let endDatetimePickerElmt = document.getElementById("end_datetime");
+
+        startDatetimePickerElmt.tzName = tzPickerElmt.tzName;
+        endDatetimePickerElmt.tzName = tzPickerElmt.tzName;
+
+        tzPickerElmt.addEventListener("tzChange", (event) => {
+            event.preventDefault();
+
+            startDatetimePickerElmt.tzName = event.detail.tzName;
+            endDatetimePickerElmt.tzName = event.detail.tzName;
+        });
+
+        startDatetimePickerElmt.addEventListener("dateChange", (event) => {
+            event.preventDefault();
+
+            endDatetimePickerElmt.dateMin = startDatetimePickerElmt.date;
+        });
+
+        endDatetimePickerElmt.addEventListener("dateChange", (event) => {
+            event.preventDefault();
+
+            startDatetimePickerElmt.dateMax = endDatetimePickerElmt.date;
+        });
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

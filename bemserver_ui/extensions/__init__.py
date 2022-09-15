@@ -6,6 +6,7 @@ from . import auth
 from . import campaign_context
 from . import flask_es6
 from . import partners
+from . import timezones
 from .auth import Roles  # noqa
 from .campaign_context import ensure_campaign_context  # noqa
 
@@ -18,6 +19,7 @@ EXT_MODULES = (
     campaign_context,
     flask_es6,
     partners,
+    timezones,
 )
 
 

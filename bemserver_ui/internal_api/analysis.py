@@ -1,8 +1,13 @@
 """Analysis internal API"""
+import datetime as dt
+import zoneinfo
+import calendar
 import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint("analysis", __name__, url_prefix="/analysis")
@@ -12,25 +17,59 @@ blp = flask.Blueprint("analysis", __name__, url_prefix="/analysis")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_completeness():
+    timeseries_ids = [int(i) for i in flask.request.args["timeseries"].split(",")]
+    data_state_id = flask.request.args["data_state"]
+    tz_name = flask.request.args["timezone"]
+    end_date = flask.request.args["end_date"]
+    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
+    bucket_width_value = flask.request.args.get("bucket_width_value")
+    bucket_width_unit = flask.request.args.get("bucket_width_unit")
+    period = flask.request.args.get("period")
 
-    filters = {}
-    if "start_time" in flask.request.args:
-        filters["start_time"] = flask.request.args["start_time"]
-    if "end_time" in flask.request.args:
-        filters["end_time"] = flask.request.args["end_time"]
-    if "timeseries" in flask.request.args:
-        filters["timeseries"] = [
-            int(i) for i in flask.request.args["timeseries"].split(",")
-        ]
-    if "data_state" in flask.request.args:
-        filters["data_state"] = flask.request.args["data_state"]
-    if "bucket_width_value" in flask.request.args:
-        filters["bucket_width_value"] = flask.request.args["bucket_width_value"]
-    if "bucket_width_unit" in flask.request.args:
-        filters["bucket_width_unit"] = flask.request.args["bucket_width_unit"]
+    tz = zoneinfo.ZoneInfo(tz_name)
+    try:
+        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
+
+    dt_period_delta = dt.timedelta(seconds=0.0)
+    if period.startswith("Day-"):
+        dt_period_delta = dt.timedelta(days=1.0)
+    elif period.startswith("Week-"):
+        dt_period_delta = dt.timedelta(days=7.0)
+    elif period.startswith("Month-"):
+        dt_period_delta = dt.timedelta(
+            days=float(calendar.monthrange(dt_end.year, dt_end.month)[1])
+        )
+    elif period.startswith("Year-"):
+        dt_period_delta = dt.timedelta(
+            days=366.0 if calendar.isleap(dt_end.year) else 365.0
+        )
+    dt_start = dt_end - dt_period_delta
+
     try:
         # Get completeness data.
-        analysis_resp = flask.g.api_client.analysis.get_completeness(**filters)
+        analysis_resp = flask.g.api_client.analysis.get_completeness(
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            timeseries_ids,
+            data_state_id,
+            bucket_width_value,
+            bucket_width_unit,
+            timezone=tz_name,
+        )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(422, description=exc.errors)
-    return flask.jsonify({"data": analysis_resp.data})
+
+    try:
+        ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
+            id=data_state_id
+        )
+    except bac.BEMServerAPINotFoundError:
+        flask.abort(404, description="Timeseries data state not found!")
+
+    completeness_data = analysis_resp.data
+    completeness_data["datastate_name"] = ts_datastate_resp.data["name"]
+    completeness_data["period"] = period
+
+    return flask.jsonify(completeness_data)

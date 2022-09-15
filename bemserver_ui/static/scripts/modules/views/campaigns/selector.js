@@ -82,17 +82,25 @@ class CampaignSelectorView {
     }
 
     #getPropertiesHTML(data) {
-        let descriptionDisplayed = data.description ? data.description : "-";
+        let ret = ``;
+
+        if (data.description) {
+            ret += `<div class="mb-2"><small id="campaignSelectedDescription" class="d-inline-block text-truncate">${data.description}</small></div>`;
+        }
+
+        ret += `<div class="mb-1"><small class="text-${data.state == "ongoing" ? "success": "danger"} opacity-75">${data.state.toUpperCase()}</small></div>
+<div><small class="fw-bold opacity-75"><i class="bi bi-watch"></i> ${data.timezone_info["label"]}</small></div>`;
 
         let startTime = new Date(data.start_time);
+        if (!isNaN(startTime)) {
+            ret += `<div class="hstack gap-2${data.state == "ongoing" ? " text-success": ""}"><i class="bi bi-play"></i><small>${TimeDisplay.toLocaleString(startTime, {timezone: data.timezone})}</small></div>`;
+        }
         let endTime = new Date(data.end_time);
-        let startTimeDisplayed = !isNaN(startTime) ? TimeDisplay.toLocaleString(startTime) : "not defined";
-        let endTimeDisplayed = !isNaN(endTime) ? TimeDisplay.toLocaleString(endTime) : "not defined";
+        if (!isNaN(endTime)) {
+            ret += `<div class="hstack gap-2${data.state == "closed" ? " text-danger": ""}"><i class="bi bi-stop"></i><small>${TimeDisplay.toLocaleString(endTime, {timezone: data.timezone})}</small></div>`;
+        }
 
-        return `<div class="hstack gap-2"><small class="fw-bold">State</small><small class="text-${data.state == "ongoing" ? "success": "danger"} opacity-75">${data.state.toUpperCase()}</small></div>
-<div class="vstack"><small class="fw-bold">Description</small><small id="campaignSelectedDescription" class="d-inline-block text-truncate ms-2">${descriptionDisplayed}</small></div>
-<div class="hstack gap-2"><small class="fw-bold">From</small><small>${startTimeDisplayed}</small></div>
-<div class="hstack gap-2"><small class="fw-bold">To</small><small>${endTimeDisplayed}</small></div>`;
+        return ret;
     }
 
     #renderProperties() {
@@ -117,8 +125,10 @@ class CampaignSelectorView {
                     this.#campaignSelectedPropertiesElmt.innerHTML = this.#getPropertiesHTML(data.data);
                     // Abbreviate description if too long.
                     let campaignDescriptionElmt = this.#campaignSelectedPropertiesElmt.querySelector("#campaignSelectedDescription");
-                    if (campaignDescriptionElmt.scrollWidth > campaignDescriptionElmt.clientWidth) {
-                        campaignDescriptionElmt.innerHTML = `<abbr title="${campaignDescriptionElmt.innerHTML}">${campaignDescriptionElmt.innerHTML}</abbr>`;
+                    if (campaignDescriptionElmt != null) {
+                        if (campaignDescriptionElmt.scrollWidth > campaignDescriptionElmt.clientWidth) {
+                            campaignDescriptionElmt.innerHTML = `<abbr title="${campaignDescriptionElmt.innerHTML}">${campaignDescriptionElmt.innerHTML}</abbr>`;
+                        }
                     }
                 },
                 (error) => {
@@ -133,7 +143,7 @@ class CampaignSelectorView {
 
     #refresh() {
         if (this.#campaignSelectElmt.value == "") {
-            this.#campaignSelectElmt.classList.remove("border-info");
+            this.#campaignSelectElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
             this.#campaignBtnViewElmt.classList.add("invisible", "d-none");
             this.#campaignBtnViewElmt.removeAttribute("href");
             if (this.currentCampaign == this.#campaignSelectElmt.value) {
@@ -147,12 +157,12 @@ class CampaignSelectorView {
         else {
             this.#campaignBtnViewElmt.classList.remove("invisible", "d-none");
             if (this.currentCampaign == this.#campaignSelectElmt.value) {
-                this.#campaignSelectElmt.classList.add("border-info");
+                this.#campaignSelectElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
                 this.#campaignBtnSelectElmt.classList.add("invisible", "d-none");
                 this.#campaignBtnUnselectElmt.classList.remove("invisible", "d-none");
             }
             else {
-                this.#campaignSelectElmt.classList.remove("border-info");
+                this.#campaignSelectElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
                 this.#campaignBtnSelectElmt.classList.remove("invisible", "d-none");
                 this.#campaignBtnUnselectElmt.classList.add("invisible", "d-none");
             }

@@ -126,6 +126,7 @@ class TimeseriesDataResources(BaseResources):
         end_time,
         data_state,
         timeseries_ids,
+        timezone="UTC",
     ):
         return self._req.download(
             self.endpoint_base_uri,
@@ -134,6 +135,7 @@ class TimeseriesDataResources(BaseResources):
                 "end_time": end_time,
                 "data_state": data_state,
                 "timeseries": timeseries_ids,
+                "timezone": timezone,
             },
         )
 
@@ -144,6 +146,7 @@ class TimeseriesDataResources(BaseResources):
         end_time,
         data_state,
         timeseries_names,
+        timezone="UTC",
     ):
         return self._req.download(
             self.enpoint_uri_by_campaign(campaign_id),
@@ -152,6 +155,7 @@ class TimeseriesDataResources(BaseResources):
                 "end_time": end_time,
                 "data_state": data_state,
                 "timeseries": timeseries_names,
+                "timezone": timezone,
             },
         )
 
@@ -161,9 +165,10 @@ class TimeseriesDataResources(BaseResources):
         end_time,
         data_state,
         timeseries_ids,
-        bucket_width,
         timezone="UTC",
         aggregation="avg",
+        bucket_width_value="1",
+        bucket_width_unit="hour",
     ):
         return self._req.download(
             f"{self.endpoint_base_uri}aggregate",
@@ -172,9 +177,10 @@ class TimeseriesDataResources(BaseResources):
                 "end_time": end_time,
                 "data_state": data_state,
                 "timeseries": timeseries_ids,
-                "bucket_width": bucket_width,
                 "timezone": timezone,
                 "aggregation": aggregation,
+                "bucket_width_value": bucket_width_value,
+                "bucket_width_unit": bucket_width_unit,
             },
         )
 
@@ -185,9 +191,10 @@ class TimeseriesDataResources(BaseResources):
         end_time,
         data_state,
         timeseries_names,
-        bucket_width,
         timezone="UTC",
         aggregation="avg",
+        bucket_width_value="1",
+        bucket_width_unit="hour",
     ):
         return self._req.download(
             f"{self.enpoint_uri_by_campaign(campaign_id)}aggregate",
@@ -196,9 +203,10 @@ class TimeseriesDataResources(BaseResources):
                 "end_time": end_time,
                 "data_state": data_state,
                 "timeseries": timeseries_names,
-                "bucket_width": bucket_width,
                 "timezone": timezone,
                 "aggregation": aggregation,
+                "bucket_width_value": bucket_width_value,
+                "bucket_width_unit": bucket_width_unit,
             },
         )
 

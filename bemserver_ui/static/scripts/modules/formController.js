@@ -12,9 +12,9 @@ class FormController {
     }
 
     #cacheDOM() {
-        this.#confirmFormElmts = [].slice.call(document.querySelectorAll("form[data-modal-confirm-message]"));
-        this.#requiredInputElmts = [].slice.call(document.querySelectorAll("input:required, select:required"));
-        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll("input[minlength], input[maxlength], textarea[minlength], textarea[maxlength]"));
+        this.#confirmFormElmts = [].slice.call(document.querySelectorAll(`form[data-modal-confirm-message]`));
+        this.#requiredInputElmts = [].slice.call(document.querySelectorAll(`input:required, select:required, div[is^="app-"][required]`));
+        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll(`input[minlength], input[maxlength], textarea[minlength], textarea[maxlength]`));
     }
 
     #getRequiredLabelElmt() {
@@ -62,7 +62,7 @@ class FormController {
 
         // Mark every required input field with red asterisk.
         for (let requiredInputElmt of this.#requiredInputElmts) {
-            let requiredInputLabelElmt = requiredInputElmt.parentElement.querySelector(`label[for="${requiredInputElmt.id}"]`);
+            let requiredInputLabelElmt = document.querySelector(`label[for="${requiredInputElmt.id}"]`) || requiredInputElmt.querySelector(`h6`);
             requiredInputLabelElmt?.appendChild(this.#getRequiredLabelElmt());
         }
 
