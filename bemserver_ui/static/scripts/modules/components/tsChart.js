@@ -2,11 +2,13 @@ import { Parser } from "../tools/parser.js";
 import { TimeDisplay } from "../tools/time.js";
 
 
-class TimeseriesChart extends HTMLDivElement {
+export class TimeseriesChart extends HTMLDivElement {
 
     #chart = null;
 
-    #initOptions = { height: 400 };
+    #initOptions = {
+        height: 400,
+    };
     #theme = null;
 
     #downloadCSVUrl = null;
@@ -77,7 +79,7 @@ class TimeseriesChart extends HTMLDivElement {
     };
 
     // `theme` parameter can be "dark"
-    constructor(options = { height: 400 }, theme = null, ) {
+    constructor(options = null, theme = null) {
         super();
 
         this.#initOptions = options || this.#initOptions;
@@ -113,7 +115,7 @@ class TimeseriesChart extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data) {
+    load(data, tzName) {
         this.hideLoading();
 
         let legendName = `[${data.ts_datastate_name.toLowerCase()}] ${data.ts_name}`;
@@ -129,7 +131,7 @@ class TimeseriesChart extends HTMLDivElement {
             source: data.ts_data.map((row) => {
                 let rowDate = new Date(row["Datetime"]);
                 return [
-                    !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate).replace(" ", "\n") : null,
+                    !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate, { timezone: tzName }).replace(" ", "\n") : null,
                     Parser.parseFloatOrDefault(row[data.ts_id.toString()], null),
                 ];
             }),
@@ -156,7 +158,6 @@ class TimeseriesChart extends HTMLDivElement {
 }
 
 
-customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
-
-
-export { TimeseriesChart } ;
+if (customElements.get("app-ts-chart") == null) {
+    customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
+}

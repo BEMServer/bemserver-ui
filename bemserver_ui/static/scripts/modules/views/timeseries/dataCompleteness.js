@@ -4,23 +4,8 @@ import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { TimeseriesCompletenessChart } from "../../components/tsCompChart.js";
 import { Spinner } from "../../components/spinner.js";
 
-function days_year(year) {
-    if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
-        return 366;
-    }
-    return 365;
-}
 
-function days_month(year, month) {
-    if (month == 2) {
-        return days_year(year);
-    }
-    if (month == 4 || month == 6 || month == 9 || month == 11) {
-        return 30;
-    }
-    return 31;
-}
-class TimeSeriesDataCompletenessView {
+export class TimeSeriesDataCompletenessView {
 
     #internalAPIRequester = null;
     #tsDataStatesReqID = null;
@@ -29,27 +14,27 @@ class TimeSeriesDataCompletenessView {
     #messagesElmt = null;
     #chartContainerElmt = null;
     #loadBtnElmt = null;
-    #endDateElmt = null;
-    #endTimeElmt = null;
+
+    #timezonePickerElmt = null;
+    #endDatetimePickerElmt = null;
     #tsDataStatesSelectElmt = null;
     #periodElmt = null;
 
     #chart = null;
 
-    #startDateTime = null;
-    #endTime = null;
     #bucketWidthValue = null;
     #bucketWidthUnit = null;
+    #shouldDisplayTime = false;
 
-    #tsSelectorView = null;
+    #tsSelector = null;
 
-    constructor(tsSelectorView, options = { height: 400 }) {
-        this.#tsSelectorView = tsSelectorView;
+    constructor(tsSelector, options = { height: 400 }) {
+        this.#tsSelector = tsSelector;
 
         this.#cacheDOM();
         this.#initElements();
 
-        this.#chart = new TimeseriesCompletenessChart();
+        this.#chart = new TimeseriesCompletenessChart(options);
         this.#chartContainerElmt.innerHTML = "";
         this.#chartContainerElmt.appendChild(this.#chart);
 
@@ -64,74 +49,112 @@ class TimeSeriesDataCompletenessView {
         this.#loadBtnElmt = document.getElementById("loadBtn");
 
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
-
+        this.#timezonePickerElmt = document.getElementById("timezonePicker");
+        this.#endDatetimePickerElmt = document.getElementById("end_datetime");
         this.#periodElmt = document.getElementById("period");
-        this.#endDateElmt = document.getElementById("end_date");
-        this.#endTimeElmt = document.getElementById("end_time");
-    }
-
-    #initApiParams() {
-        if (this.#endDateElmt.value != this.#endTime.toISOString().split("T")[0] || this.#endTimeElmt.value != this.#endTime.toISOString().substring(11, 16)) {
-            this.#endTime = new Date(`${this.#endDateElmt.value}T${this.#endTimeElmt.value}Z`);
-        }
-
-        if (this.#periodElmt.value == "Day-Hourly") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "hour";
-        }
-        else if (this.#periodElmt.value == "Week-Daily") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - 7 * 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "day";
-        }
-        else if (this.#periodElmt.value == "Week-Hourly") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - 7 * 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "hour";
-        }
-        else if (this.#periodElmt.value == "Month-Daily") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - days_month(this.#endTime.getYear() + 1900, this.#endTime.getMonth() + 1) * 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "day";
-        }
-        else if (this.#periodElmt.value == "Year-Monthly") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - days_year(this.#endTime.getYear() + 1900) * 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "month";
-        }
-        else if (this.#periodElmt.value == "Year-Daily") {
-            this.#startDateTime = new Date(this.#endTime.getTime() - days_year(this.#endTime.getYear() + 1900) * 24 * 60 * 60 * 1000);
-            this.#bucketWidthValue = 1;
-            this.#bucketWidthUnit = "day";
-        }
     }
 
     #initElements() {
-        this.#loadBtnElmt.setAttribute("disabled", "true");
-        this.#endTime = new Date(Date.now());
-        this.#endDateElmt.value = this.#endTime.toISOString().split("T")[0];
-        this.#endTimeElmt.value = this.#endTime.toISOString().substring(11, 16);
+        this.#updateLoadBtnState();
+        this.#updateBucketWidth();
     }
 
     #initEventListeners() {
+        this.#tsSelector.addEventListener("toggleItem", (event) => {
+            event.preventDefault();
+
+            this.#updateLoadBtnState();
+        });
+
+        this.#timezonePickerElmt.addEventListener("tzChange", (event) => {
+            event.preventDefault();
+
+            this.#endDatetimePickerElmt.tzName = this.#timezonePickerElmt.tzName;
+        });
+
+        this.#endDatetimePickerElmt.addEventListener("dateChange", (event) => {
+            event.preventDefault();
+    
+            this.#updateLoadBtnState();
+        });
+
         this.#periodElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#periodElmt.setAttribute("min", this.#periodElmt.value);
+            this.#updateBucketWidth();
         });
     
         this.#loadBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            if (this.#tsSelectorView.selectedItems.length > 0) {
-                this.refreshChart(this.#tsSelectorView.selectedItems[0]);
-            }
-            else {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.WARNING, text: `No timeseries selected!`, isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
-            }
+            this.refreshChart();
         });
+    }
+
+    #updateLoadBtnState() {
+        if (this.#tsSelector.selectedItems.length > 0 && this.#endDatetimePickerElmt.hasDatetime) {
+            this.#loadBtnElmt.removeAttribute("disabled");
+        }
+        else {
+            this.#loadBtnElmt.setAttribute("disabled", true);
+        }
+    }
+
+    #updateBucketWidth() {
+        this.#bucketWidthValue = 1;
+        this.#bucketWidthUnit = null;
+        this.#shouldDisplayTime = false;
+        if (this.#periodElmt.value.endsWith("-Hourly")) {
+            this.#bucketWidthUnit = "hour";
+            this.#shouldDisplayTime = true;
+        }
+        else if (this.#periodElmt.value.endsWith("-Daily")) {
+            this.#bucketWidthUnit = "day";
+        }
+        else if (this.#periodElmt.value.endsWith("-Monthly")) {
+            this.#bucketWidthUnit = "month";
+        }
+    }
+
+    refreshChart() {
+        this.#chart.showLoading();
+
+        let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
+        this.#loadBtnElmt.innerHTML = "";
+        this.#loadBtnElmt.appendChild(new Spinner({ useSmallSize: true, useSecondaryColor: true }));
+        this.#loadBtnElmt.setAttribute("disabled", "true");
+
+        let urlParams = {
+            timeseries: this.#tsSelector.selectedItems,
+            data_state: this.#tsDataStatesSelectElmt.value,
+            bucket_width_value: this.#bucketWidthValue,
+            bucket_width_unit: this.#bucketWidthUnit,
+            end_date: this.#endDatetimePickerElmt.date,
+            end_time: this.#endDatetimePickerElmt.time,
+            timezone: this.#timezonePickerElmt.tzName,
+            period: this.#periodElmt.value,
+        };
+
+        if (this.#tsDataCompletenessReqID != null) {
+            this.#internalAPIRequester.abort(this.#tsDataCompletenessReqID);
+            this.#tsDataCompletenessReqID = null;
+        }
+
+        this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.analysis.retrieve_completeness`, urlParams),
+            (data) => {
+                this.#chart.load(data, this.#shouldDisplayTime, this.#timezonePickerElmt.tzName);
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                this.#messagesElmt.appendChild(flashMsgElmt);
+
+            },
+            () => {
+                this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
+                this.#loadBtnElmt.removeAttribute("disabled");
+            },
+        );
     }
 
     refresh() {
@@ -156,53 +179,11 @@ class TimeSeriesDataCompletenessView {
                     optionElmt.innerText = option.name;
                     this.#tsDataStatesSelectElmt.appendChild(optionElmt);
                 }
-
-                this.#loadBtnElmt.removeAttribute("disabled");
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
                 this.#messagesElmt.appendChild(flashMsgElmt);
-            },
-        );
-    }
-
-    refreshChart(tsId) {
-        this.#chart.showLoading();
-
-        let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
-        this.#loadBtnElmt.innerHTML = "";
-        this.#loadBtnElmt.appendChild(new Spinner({ useSmallSize: true, useSecondaryColor: true }));
-        this.#loadBtnElmt.setAttribute("disabled", "true");
-
-        let tsDataStateId = this.#tsDataStatesSelectElmt.value;
-        let timeseries = this.#tsSelectorView.selectedItems;
-
-        this.#initApiParams();
-        let urlParams = { start_time: this.#startDateTime.toISOString(), end_time: this.#endTime.toISOString(), timeseries: timeseries, data_state: tsDataStateId, bucket_width_value: this.#bucketWidthValue, bucket_width_unit: this.#bucketWidthUnit, bucket_width_value: this.#bucketWidthValue };
-
-        if (this.#tsDataCompletenessReqID != null) {
-            this.#internalAPIRequester.abort(this.#tsDataCompletenessReqID);
-            this.#tsDataCompletenessReqID = null;
-        }
-
-        this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.analysis.retrieve_completeness`, urlParams),
-            (data) => {
-                let displayTime = (this.#bucketWidthUnit == "hour");
-                this.#chart.load(data, displayTime);
-            },
-            (error) => {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
-
-            },
-            () => {
-                this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
-                this.#loadBtnElmt.removeAttribute("disabled");
             },
         );
     }
 }
-
-
-export { TimeSeriesDataCompletenessView };

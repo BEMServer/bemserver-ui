@@ -21,36 +21,40 @@
             {% endfilter %}
         </div>
     </div>
-    <div class="row mb-2">
-        <div class="col">
-            <div class="input-group">
-                <span class="input-group-text">Timeseries data state</span>
-                <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
-            </div>
-        </div>
-    </div>
-    <div class="row d-xl-flex d-grid mb-4">
-        <div class="col pb-3 pb-xl-0">
-            <div class="input-group">
-                <span class="input-group-text">From</span>
-                <input type="date" class="form-control" id="start_date" name="start_date" required>
-                <input type="time" class="form-control" id="start_time" name="start_time" required>
-                <span class="input-group-text">UTC</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="input-group">
-                <span class="input-group-text">To</span>
-                <input type="date" class="form-control" id="end_date" name="end_date" required>
-                <input type="time" class="form-control" id="end_time" name="end_time" required>
-                <span class="input-group-text">UTC</span>
-            </div>
-            <small class="fst-italic opacity-75">(excluded from the interval)</small>
-        </div>
-    </div>
     <div class="row mb-4">
-        <div class="col text-center">
-            <button id="delete" class="btn btn-danger" title="Delete timeseries data" disabled><i class="bi bi-exclamation-triangle"></i> Delete</button>
+        <div class="col">
+            <form id="delForm">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Timeseries data state</span>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                        <div is="app-spinner"></div>
+                    </div>
+                </div>
+
+                <div class="row d-xl-flex d-grid mb-4">
+                    <div class="col pb-2 pb-xl-0">
+                        <div is="app-datetime-picker" id="start_datetime" title="From" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                            <div is="app-spinner"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div is="app-datetime-picker" id="end_datetime" title="Until" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                            <div is="app-spinner"></div>
+                        </div>
+                        <small class="fst-italic opacity-75">(excluded from the interval)</small>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col text-center">
+                        <button id="delete" class="btn btn-danger" title="Delete timeseries data" disabled><i class="bi bi-exclamation-triangle"></i> Delete</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -62,6 +66,9 @@
 <script type="module">
     import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { TimeseriesDeleteView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/delete.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {

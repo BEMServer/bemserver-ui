@@ -9,3 +9,5 @@ class Config:
     BEMSERVER_API_AUTH_METHOD = "http_basic"
 
     BEMSERVER_PARTNERS_FILE = None
+
+    BEMSERVER_TIMEZONE_NAME = "UTC"

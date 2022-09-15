@@ -115,7 +115,8 @@ body,
 
 .app-campaign-selector {
     top: 60px;
-    height: 270px;
+    min-height: 200px;
+    max-height: 290px;
 }
 
 .app-campaign-selected {

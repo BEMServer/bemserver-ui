@@ -1,10 +1,13 @@
 """Timeseries data internal API"""
-import flask
 from io import StringIO
 import csv
+import zoneinfo
+import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
@@ -15,12 +18,26 @@ blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data"
 @ensure_campaign_context
 def retrieve_data(id):
     data_state_id = flask.request.args["data_state"]
-    start_time = flask.request.args["start_time"]
-    end_time = flask.request.args["end_time"]
+    tz_name = flask.request.args["timezone"]
+    start_date = flask.request.args["start_date"]
+    start_time = flask.request.args.get("start_time", "00:00") or "00:00"
+    end_date = flask.request.args["end_date"]
+    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
     aggregation = flask.request.args.get("agg")
     if aggregation == "none":
         aggregation = None
-    duration = flask.request.args.get("duration")
+    bucket_width_value = flask.request.args.get("bucket_width_value")
+    bucket_width_unit = flask.request.args.get("bucket_width_unit")
+
+    tz = zoneinfo.ZoneInfo(tz_name)
+    try:
+        dt_start = convert_html_form_datetime(start_date, start_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid start datetime!")
+    try:
+        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
 
     try:
         ts_resp = flask.g.api_client.timeseries.getone(id=id)
@@ -35,21 +52,28 @@ def retrieve_data(id):
         flask.abort(404, description="Timeseries data state not found!")
 
     try:
-        if aggregation is not None and duration is not None:
+        if all(
+            aggregation is not None,
+            bucket_width_value is not None,
+            bucket_width_unit is not None,
+        ):
             ts_data_csv = flask.g.api_client.timeseries_data.download_csv_aggregate(
-                start_time,
-                end_time,
+                dt_start.isoformat(),
+                dt_end.isoformat(),
                 data_state_id,
                 [id],
-                duration,
+                timezone=tz_name,
                 aggregation=aggregation,
+                bucket_width_value=bucket_width_value,
+                bucket_width_unit=bucket_width_unit,
             )
         else:
             ts_data_csv = flask.g.api_client.timeseries_data.download_csv(
-                start_time,
-                end_time,
+                dt_start.isoformat(),
+                dt_end.isoformat(),
                 data_state_id,
                 [id],
+                timezone=tz_name,
             )
     except bac.BEMServerAPIValidationError as exc:
         flask.abort(
@@ -82,10 +106,31 @@ def retrieve_data(id):
 @auth.signin_required
 @ensure_campaign_context
 def delete_data():
+    tz_name = flask.request.json["timezone"]
+    tz = zoneinfo.ZoneInfo(tz_name)
+
+    try:
+        dt_start = convert_html_form_datetime(
+            flask.request.json["start_date"],
+            flask.request.json.get("start_time", "00:00") or "00:00",
+            tz=tz,
+        )
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid start datetime!")
+
+    try:
+        dt_end = convert_html_form_datetime(
+            flask.request.json["end_date"],
+            flask.request.json.get("end_time", "00:00") or "00:00",
+            tz=tz,
+        )
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
+
     try:
         flask.g.api_client.timeseries_data.delete(
-            flask.request.json["start_time"],
-            flask.request.json["end_time"],
+            dt_start.isoformat(),
+            dt_end.isoformat(),
             flask.request.json["data_state"],
             flask.request.json["timeseries_ids"],
         )

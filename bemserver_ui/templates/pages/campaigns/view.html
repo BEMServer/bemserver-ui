@@ -71,10 +71,17 @@
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <div class="d-flex justify-content-between">
                         <dl>
+                            <dt>Status</dt>
+                            <dd class="fw-bold text-{% if campaign.state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">{{ campaign.state | upper }}</dd>
+                            <dt>Timezone</dt>
+                            <dd{% if signed_user.is_admin %} class="v-stack"{% endif %}>
+                                {% if signed_user.is_admin %}<div><small class="opacity-75">{{ campaign.timezone }}</small></div>{% endif %}
+                                <span>{{ campaign.timezone_info["label"] }}</span>
+                            </dd>
                             <dt>From</dt>
-                            <dd>{{ campaign.start_time | iso_datetime_format(default="not defined") }}</dd>
-                            <dt>To</dt>
-                            <dd>{{ campaign.end_time | iso_datetime_format(default="not defined") }}</dd>
+                            <dd>{{ campaign.start_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>
+                            <dt>Until</dt>
+                            <dd>{{ campaign.end_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>
                             <dt>Description</dt>
                             <dd>{{ campaign.description | default("-", true) }}</dd>
                         </dl>

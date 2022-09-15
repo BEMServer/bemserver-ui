@@ -8,6 +8,8 @@ class BEMServerAPIError(Exception):
 class BEMServerAPIValidationError(BEMServerAPIError):
     """BEMServer API validation error"""
 
+    __slots__ = ("errors",)
+
     def __init__(self, errors=None):
         self.errors = errors
 

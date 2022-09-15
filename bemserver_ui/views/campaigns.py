@@ -1,26 +1,16 @@
 """Campaigns views"""
-import datetime as dt
+import zoneinfo
 import flask
 
 import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, Roles
 from bemserver_ui.extensions.campaign_context import deduce_campaign_state
+from bemserver_ui.extensions.timezones import get_tz_info
+from bemserver_ui.common.time import convert_html_form_datetime, convert_from_iso
+from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
-
-
-def convert_form_datetime_to_iso(form_date, form_time, tz=dt.timezone.utc):
-    try:
-        ret = dt.datetime.strptime(f"{form_date} {form_time}", "%Y-%m-%d %H:%M")
-    except (
-        ValueError,
-        TypeError,
-    ):
-        return None
-    else:
-        ret = ret.replace(tzinfo=tz)
-        return ret.isoformat()
 
 
 @blp.route("/", methods=["GET", "POST"])
@@ -52,9 +42,9 @@ def list():
         flask.abort(422, description=exc.errors)
 
     campaigns = []
-    dt_now = dt.datetime.now(tz=dt.timezone.utc)
     for x in campaigns_resp.data:
-        x["state"] = deduce_campaign_state(x, dt_now=dt_now)
+        x["timezone_info"] = get_tz_info(x["timezone"])
+        x["state"] = deduce_campaign_state(x)
         if ui_filters["state"] == "overall" or x["state"] == ui_filters["state"]:
             campaigns.append(x)
 
@@ -72,9 +62,13 @@ def view(id):
     tab = flask.request.args.get("tab", "general")
 
     try:
-        campaign = flask.g.api_client.campaigns.getone(id)
+        campaign_resp = flask.g.api_client.campaigns.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Campaign not found!")
+
+    campaign = campaign_resp.data
+    campaign["state"] = deduce_campaign_state(campaign)
+    campaign["timezone_info"] = get_tz_info(campaign["timezone"])
 
     # Get campaign's user groups.
     ugroups_resp = flask.g.api_client.user_groups_by_campaigns.getall(campaign_id=id)
@@ -92,8 +86,8 @@ def view(id):
 
     return flask.render_template(
         "pages/campaigns/view.html",
-        campaign=campaign.data,
-        etag=campaign.etag,
+        campaign=campaign,
+        etag=campaign_resp.etag,
         user_groups=ugroups,
         tab=tab,
     )
@@ -105,21 +99,33 @@ def create():
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
+            "timezone": flask.request.form["timezone"],
             "description": flask.request.form["description"],
         }
-        start_time = convert_form_datetime_to_iso(
-            flask.request.form["start_date"],
-            flask.request.form.get("start_time", "00:00") or "00:00",
-        )
-        end_time = convert_form_datetime_to_iso(
-            flask.request.form["end_date"],
-            flask.request.form.get("end_time", "23:59") or "23:59",
-        )
-
-        if start_time is not None:
-            payload["start_time"] = start_time
-        if end_time is not None:
-            payload["end_time"] = end_time
+        # Dates/times received from the HTML POST form are not localized and tz-aware.
+        tz = zoneinfo.ZoneInfo(payload["timezone"])
+        if flask.request.form["start_date"] != "":
+            try:
+                start_time = convert_html_form_datetime(
+                    flask.request.form["start_date"],
+                    flask.request.form.get("start_time", "00:00") or "00:00",
+                    tz=tz,
+                )
+            except BEMServerUICommonInvalidDatetimeError:
+                flask.abort(422, description="Invalid start datetime!")
+            else:
+                payload["start_time"] = start_time.isoformat()
+        if flask.request.form["end_date"] != "":
+            try:
+                end_time = convert_html_form_datetime(
+                    flask.request.form["end_date"],
+                    flask.request.form.get("end_time", "23:59") or "23:59",
+                    tz=tz,
+                )
+            except BEMServerUICommonInvalidDatetimeError:
+                flask.abort(422, description="Invalid end datetime!")
+            else:
+                payload["end_time"] = end_time.isoformat()
 
         try:
             ret = flask.g.api_client.campaigns.create(payload)
@@ -142,25 +148,37 @@ def edit(id):
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
+            "timezone": flask.request.form["timezone"],
             "description": flask.request.form["description"],
         }
 
-        start_time = convert_form_datetime_to_iso(
-            flask.request.form["start_date"],
-            flask.request.form.get("start_time", "00:00") or "00:00",
-        )
-        end_time = convert_form_datetime_to_iso(
-            flask.request.form["end_date"],
-            flask.request.form.get("end_time", "23:59") or "23:59",
-        )
-
-        if start_time is not None:
-            payload["start_time"] = start_time
-        if end_time is not None:
-            payload["end_time"] = end_time
+        # Dates/times received from the HTML POST form are not localized and tz-aware.
+        tz = zoneinfo.ZoneInfo(payload["timezone"])
+        if flask.request.form["start_date"] != "":
+            try:
+                start_time = convert_html_form_datetime(
+                    flask.request.form["start_date"],
+                    flask.request.form.get("start_time", "00:00") or "00:00",
+                    tz=tz,
+                )
+            except BEMServerUICommonInvalidDatetimeError:
+                flask.abort(422, description="Invalid start datetime!")
+            else:
+                payload["start_time"] = start_time.isoformat()
+        if flask.request.form["end_date"] != "":
+            try:
+                end_time = convert_html_form_datetime(
+                    flask.request.form["end_date"],
+                    flask.request.form.get("end_time", "23:59") or "23:59",
+                    tz=tz,
+                )
+            except BEMServerUICommonInvalidDatetimeError:
+                flask.abort(422, description="Invalid end datetime!")
+            else:
+                payload["end_time"] = end_time.isoformat()
 
         try:
-            campaign = flask.g.api_client.campaigns.update(
+            flask.g.api_client.campaigns.update(
                 id, payload, etag=flask.request.form["editEtag"]
             )
         except bac.BEMServerAPIValidationError as exc:
@@ -176,36 +194,33 @@ def edit(id):
             return flask.redirect(flask.url_for("campaigns.view", id=id))
 
     try:
-        campaign = flask.g.api_client.campaigns.getone(id)
+        campaign_resp = flask.g.api_client.campaigns.getone(id)
     except bac.BEMServerAPINotFoundError:
         flask.abort(404, description="Campaign not found!")
 
-    campaign_data = campaign.data
+    campaign_data = campaign_resp.data
+    campaign_tz = zoneinfo.ZoneInfo(campaign_data["timezone"])
+
     try:
-        full_start_time = dt.datetime.fromisoformat(campaign_data["start_time"])
-    except (
-        KeyError,
-        ValueError,
-        TypeError,
-    ):
+        full_start_time = convert_from_iso(
+            campaign_data.get("start_time"), tz=campaign_tz
+        )
+    except BEMServerUICommonInvalidDatetimeError:
         campaign_data["start_date"] = ""
     else:
         campaign_data["start_date"] = full_start_time.date()
         campaign_data["start_time"] = full_start_time.time().strftime("%H:%M")
+
     try:
-        full_end_time = dt.datetime.fromisoformat(campaign_data["end_time"])
-    except (
-        KeyError,
-        ValueError,
-        TypeError,
-    ):
+        full_end_time = convert_from_iso(campaign_data.get("end_time"), tz=campaign_tz)
+    except BEMServerUICommonInvalidDatetimeError:
         campaign_data["end_date"] = ""
     else:
         campaign_data["end_date"] = full_end_time.date()
         campaign_data["end_time"] = full_end_time.time().strftime("%H:%M")
 
     return flask.render_template(
-        "pages/campaigns/edit.html", campaign=campaign_data, etag=campaign.etag
+        "pages/campaigns/edit.html", campaign=campaign_data, etag=campaign_resp.etag
     )
 
 
