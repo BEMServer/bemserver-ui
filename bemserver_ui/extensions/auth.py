@@ -40,9 +40,9 @@ def signin_required(func=None, roles=None):
                 user_resp = flask.g.api_client.users.getone(
                     flask.session["user"]["data"]["id"]
                 )
-            except wexc.NotFound:
+            except wexc.NotFound as exc:
                 flask.session.clear()
-                raise wexc.Unauthorized
+                raise wexc.Unauthorized from exc
             else:
                 # User still exist and credentials are valid.
                 flask.session["user"] = user_resp.toJSON()

@@ -52,10 +52,10 @@ def retrieve_data(id):
         flask.abort(404, description="Timeseries data state not found!")
 
     try:
-        if (
-            aggregation is not None
-            and bucket_width_value is not None
-            and bucket_width_unit is not None
+        if all(
+            aggregation is not None,
+            bucket_width_value is not None,
+            bucket_width_unit is not None,
         ):
             ts_data_csv = flask.g.api_client.timeseries_data.download_csv_aggregate(
                 dt_start.isoformat(),

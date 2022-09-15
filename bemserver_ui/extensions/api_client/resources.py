@@ -1,8 +1,7 @@
 """BEMServer API client resources"""
-import abc
 
 
-class BaseResources(abc.ABC):
+class BaseResources:
     endpoint_base_uri = None
     disabled_endpoints = []
 
