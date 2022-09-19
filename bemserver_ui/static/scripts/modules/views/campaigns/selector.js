@@ -89,7 +89,7 @@ class CampaignSelectorView {
         }
 
         ret += `<div class="mb-1"><small class="text-${data.state == "ongoing" ? "success": "danger"} opacity-75">${data.state.toUpperCase()}</small></div>
-<div><small class="fw-bold opacity-75"><i class="bi bi-watch"></i> ${data.timezone_info["label"]}</small></div>`;
+<div class="hstack align-items-start gap-2"><i class="bi bi-watch"></i><div class="vstack"><small class="fw-bold opacity-75">${data.timezone_info["area"]["label"]}</small><small class="opacity-75">${data.timezone_info["label"]}</small></div></div>`;
 
         let startTime = new Date(data.start_time);
         if (!isNaN(startTime)) {
