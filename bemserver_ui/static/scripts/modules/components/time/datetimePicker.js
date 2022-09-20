@@ -1,7 +1,9 @@
-import { tzDefaults, getTzInfo } from "../../tools/timezones.js";
+import { TimezoneTool } from "../../tools/timezones.js";
 
 
 export class DatetimePicker extends HTMLElement {
+
+    #tzTool = null;
 
     #titleSpanElmt = null;
     #dateInputElmt = null;
@@ -23,6 +25,8 @@ export class DatetimePicker extends HTMLElement {
 
     constructor(options = {}) {
         super();
+
+        this.#tzTool = new TimezoneTool();
 
         this.#loadOptions(options);
         this.#cacheDOM();
@@ -69,7 +73,7 @@ export class DatetimePicker extends HTMLElement {
         this.#timeInputFormBind = this.getAttribute("time-input-form-bind") || options.timeInputFormBind;
         this.#isRequired = options?.required == null ? this.hasAttribute("required") : options.required;
         this.#title = this.getAttribute("title") || options.title;
-        this.#tzName = this.getAttribute("tzname") || options.tzName || tzDefaults.name;
+        this.#tzName = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
         this.#dateMin = this.getAttribute("min") || options.dateMin;
         this.#dateMax = this.getAttribute("max") || options.dateMax;
         this.#date = this.getAttribute("date") || options.date;
@@ -151,8 +155,8 @@ export class DatetimePicker extends HTMLElement {
     }
 
     #updateTzInfo() {
-        let tzInfo = getTzInfo(this.#tzName);
-        this.#tzInfoElmt.setAttribute("title", `<span class="fw-bold">${tzInfo.label}</span>`);
+        let tzInfo = this.#tzTool.getTzInfo(this.#tzName);
+        this.#tzInfoElmt.setAttribute("title", `<div class="d-grid"><span class="fw-bold">${tzInfo["area"]["label"]}</span><span class="fst-italic">${tzInfo["label"]}</span></div>`);
         this.#enableOrRefreshTooltips();
     }
 

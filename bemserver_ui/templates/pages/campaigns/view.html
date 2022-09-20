@@ -74,9 +74,9 @@
                             <dt>Status</dt>
                             <dd class="fw-bold text-{% if campaign.state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">{{ campaign.state | upper }}</dd>
                             <dt>Timezone</dt>
-                            <dd{% if signed_user.is_admin %} class="v-stack"{% endif %}>
-                                {% if signed_user.is_admin %}<div><small class="opacity-75">{{ campaign.timezone }}</small></div>{% endif %}
-                                <span>{{ campaign.timezone_info["label"] }}</span>
+                            <dd class="v-stack">
+                                <span>{{ campaign.timezone_info["area"]["label"] }}</span>
+                                <div><small class="opacity-75">{{ campaign.timezone_info["label"] }}</small></div>
                             </dd>
                             <dt>From</dt>
                             <dd>{{ campaign.start_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>

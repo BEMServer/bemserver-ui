@@ -2,32 +2,46 @@
 
 import flask
 import json
-from pathlib import Path
 from textwrap import dedent
 
-
-def _load_timezones():
-    timezones_filepath = Path(__file__).parent / "timezones.json"
-    with timezones_filepath.open("r") as fp:
-        return json.load(fp)
+from .timezones import TimezoneTool
 
 
 def init_app(app):
     @app.route(f"{app.static_url_path}/scripts/modules/tools/timezones.js")
     def generate_timezones_es6_module():
-        tz_defaults = {
-            "name": (app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"),
-        }
+        tz_tool = TimezoneTool()
+        tz_tool.prepare_data()
 
-        tz_data = _load_timezones()
+        default_tz_name = app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
+        default_tz_region = tz_tool.get_tz_info(default_tz_name)["region"]
 
         module_content = dedent(
             f"""\
-            export const tzDefaults = {tz_defaults};
-            export const tzData = {tz_data};
+            export class TimezoneTool {{
 
-            export function getTzInfo(tzName) {{
-                return tzName in tzData ? tzData[tzName] : tzData[tzDefaults.name];
+                constructor() {{
+                    this.defaultTzName = "{default_tz_name}";
+                    this.defaultTzRegion = "{default_tz_region}";
+
+                    this.timezones = {json.dumps(tz_tool.timezones)};
+                    this.regions = {json.dumps(tz_tool.regions)};
+                    this.areasByRegion = {json.dumps(tz_tool.areas_by_region)};
+                    this.timezonesByRegionByArea = {json.dumps(
+                        tz_tool.timezones_by_region_by_area
+                    )};
+                }}
+
+                tzExists(tzName) {{
+                    return tzName in this.timezones;
+                }}
+
+                getTzInfo(tzName) {{
+                    if (!this.tzExists(tzName)) {{
+                        tzName = this.defaultTzName;
+                    }}
+                    return this.timezones[tzName];
+                }}
             }}
             """
         )
@@ -40,8 +54,5 @@ def init_app(app):
 
 
 def get_tz_info(tz_name):
-    tz_data = _load_timezones()
-    try:
-        return tz_data[tz_name]
-    except KeyError:
-        return tz_data["UTC"]
+    tz_tool = TimezoneTool()
+    return tz_tool.get_tz_info(tz_name)

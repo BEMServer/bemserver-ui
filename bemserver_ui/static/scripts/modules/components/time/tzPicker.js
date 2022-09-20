@@ -1,18 +1,24 @@
-import { tzDefaults, tzData } from "../../tools/timezones.js";
+import { TimezoneTool } from "../../tools/timezones.js";
 
 
 export class TimezonePicker extends HTMLElement {
 
+    #tzTool = null;
+
+    #tzRegionSelectElmt = null;
     #tzNameSelectElmt = null;
     #inputFormBindElmt = null;
 
     #title = null;
     #inputFormBind = null;
 
+    #tzRegionSelected = null;
     #tzNameSelected = null;
 
     constructor(options = {}) {
         super();
+
+        this.#tzTool = new TimezoneTool();
 
         this.#loadOptions(options);
         this.#cacheDOM();
@@ -22,10 +28,16 @@ export class TimezonePicker extends HTMLElement {
         return this.#tzNameSelected;
     }
     set tzName(value) {
-        if (value in tzData) {
+        if (this.#tzTool.tzExists(value)) {
             this.#tzNameSelected = value;
             if (this.#tzNameSelectElmt != null) {
                 this.#tzNameSelectElmt.value = this.#tzNameSelected;
+            }
+
+            let tzInfo = this.#tzTool.getTzInfo(value);
+            this.#tzRegionSelected = tzInfo["region"];
+            if (this.#tzRegionSelectElmt != null) {
+                this.#tzRegionSelectElmt.value = this.#tzRegionSelected;
             }
         }
     }
@@ -37,7 +49,7 @@ export class TimezonePicker extends HTMLElement {
     #loadOptions(options = {}) {
         this.#inputFormBind = this.getAttribute("input-form-bind") || options.inputFormBind;
         this.#title = this.getAttribute("title") || options.title;
-        this.tzName = this.getAttribute("tzname") || options.tzName || tzDefaults.name;
+        this.tzName = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
     }
 
     #cacheDOM() {
@@ -47,27 +59,64 @@ export class TimezonePicker extends HTMLElement {
     }
 
     #initEventListeners() {
+        this.#tzRegionSelectElmt.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#tzRegionSelected = this.#tzRegionSelectElmt.value;
+            this.#updateTzNameChoices();
+            this.#tzNameSelected = this.#tzNameSelectElmt.value;
+            this.#updateInputFormBind();
+
+            let tzChangeEvent = new CustomEvent("tzChange", {detail: {tzRegion: this.#tzRegionSelected, tzName: this.#tzNameSelected}, bubbles: true});
+            this.dispatchEvent(tzChangeEvent);
+        });
+
         this.#tzNameSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             this.#tzNameSelected = this.#tzNameSelectElmt.value;
             this.#updateInputFormBind();
 
-            let tzChangeEvent = new CustomEvent("tzChange", {detail: {tzName: this.#tzNameSelected}, bubbles: true});
+            let tzChangeEvent = new CustomEvent("tzChange", {detail: {tzRegion: this.#tzRegionSelected, tzName: this.#tzNameSelected}, bubbles: true});
             this.dispatchEvent(tzChangeEvent);
         });
     }
 
+    #updateTzRegionChoices() {
+        this.#tzRegionSelectElmt.innerHTML = "";
+        for (let tzRegion of this.#tzTool.regions) {
+            let optElmt = document.createElement("option");
+            optElmt.value = tzRegion;
+            optElmt.innerText = tzRegion;
+            if (tzRegion == this.#tzRegionSelected) {
+                optElmt.selected = true;
+            }
+            this.#tzRegionSelectElmt.appendChild(optElmt);
+        }
+    }
+
     #updateTzNameChoices() {
         this.#tzNameSelectElmt.innerHTML = "";
-        for (let [tzName, tzInfo] of Object.entries(tzData)) {
-            let optElmt = document.createElement("option");
-                optElmt.value = tzName;
-                optElmt.innerText = tzInfo.label;
-                if (tzName == this.#tzNameSelected) {
+
+        for (let [index, tzArea] of this.#tzTool.areasByRegion[this.#tzRegionSelected].entries()) {
+            if (index > 0) {
+                let sepOptGroupElmt = document.createElement("optgroup");
+                this.#tzNameSelectElmt.appendChild(sepOptGroupElmt);
+            }
+
+            let optGroupElmt = document.createElement("optgroup");
+            optGroupElmt.label = tzArea["label"];
+            this.#tzNameSelectElmt.appendChild(optGroupElmt);
+
+            for (let tzInfo of this.#tzTool.timezonesByRegionByArea[this.#tzRegionSelected][tzArea["label"]]) {
+                let optElmt = document.createElement("option");
+                optElmt.value = tzInfo["name"];
+                optElmt.innerText = tzInfo["label"];
+                if (tzInfo["name"] == this.#tzNameSelected) {
                     optElmt.selected = true;
                 }
                 this.#tzNameSelectElmt.appendChild(optElmt);
+            }
         }
     }
 
@@ -88,12 +137,30 @@ export class TimezonePicker extends HTMLElement {
             selectorTitleElmt.innerText = this.#title;
             this.appendChild(selectorTitleElmt);
         }
+        else {
+            this.classList.add("d-sm-flex", "d-grid");
+        }
+
+        this.#tzRegionSelectElmt = document.createElement("select");
+        this.#tzRegionSelectElmt.classList.add("form-select");
+        this.#tzRegionSelectElmt.setAttribute("aria-label", "Select a timezone");
+        this.appendChild(this.#tzRegionSelectElmt);
+
+        if (this.#title != null) {
+            let breakerElmt = document.createElement("div");
+            breakerElmt.classList.add("d-sm-none", "d-block", "w-100", "mb-1");
+            this.appendChild(breakerElmt);
+        }
+        else {
+            this.#tzRegionSelectElmt.classList.add("me-0", "me-sm-2", "mb-1", "mb-sm-0");
+        }
 
         this.#tzNameSelectElmt = document.createElement("select");
         this.#tzNameSelectElmt.classList.add("form-select");
         this.#tzNameSelectElmt.setAttribute("aria-label", "Select a timezone");
         this.appendChild(this.#tzNameSelectElmt);
 
+        this.#updateTzRegionChoices();
         this.#updateTzNameChoices();
         this.#updateInputFormBind();
 

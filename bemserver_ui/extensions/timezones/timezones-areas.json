@@ -1,0 +1,2243 @@
+{
+    "Acre Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Acre Time",
+        "label": "(UTC-05:00) Acre Time",
+        "region": "America"
+    },
+    "Afghanistan Time": {
+        "utcoffset": 16200.0,
+        "utcoffset_iso": "+04:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Afghanistan Time",
+        "label": "(UTC+04:30) Afghanistan Time",
+        "region": "Asia"
+    },
+    "Alaska Time": {
+        "utcoffset": -32400.0,
+        "utcoffset_iso": "-09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Alaska Time",
+        "label": "(UTC-09:00) Alaska Time",
+        "region": "America"
+    },
+    "Amazon Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Amazon Time",
+        "label": "(UTC-04:00) Amazon Time",
+        "region": "America"
+    },
+    "Anadyr Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Anadyr Time",
+        "label": "(UTC+12:00) Anadyr Time",
+        "region": "Asia"
+    },
+    "Antarctica (Casey) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Casey) Time",
+        "label": "(UTC+11:00) Antarctica (Casey) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Davis) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Davis) Time",
+        "label": "(UTC+07:00) Antarctica (Davis) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Dumont d\u2019Urville) Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Dumont d\u2019Urville) Time",
+        "label": "(UTC+10:00) Antarctica (Dumont d\u2019Urville) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Mawson) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Mawson) Time",
+        "label": "(UTC+05:00) Antarctica (Mawson) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Palmer) Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Palmer) Time",
+        "label": "(UTC-03:00) Antarctica (Palmer) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Rothera) Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Rothera) Time",
+        "label": "(UTC-03:00) Antarctica (Rothera) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Syowa) Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Syowa) Time",
+        "label": "(UTC+03:00) Antarctica (Syowa) Time",
+        "region": "Antarctica"
+    },
+    "Antarctica (Vostok) Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Antarctica (Vostok) Time",
+        "label": "(UTC+06:00) Antarctica (Vostok) Time",
+        "region": "Antarctica"
+    },
+    "Apia Time": {
+        "utcoffset": 46800.0,
+        "utcoffset_iso": "+13:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Apia Time",
+        "label": "(UTC+13:00) Apia Time",
+        "region": "Pacific"
+    },
+    "Arabian Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Arabian Time",
+        "label": "(UTC+03:00) Arabian Time",
+        "region": "Asia"
+    },
+    "Argentina Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Argentina Time",
+        "label": "(UTC-03:00) Argentina Time",
+        "region": "America"
+    },
+    "Armenia Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Armenia Time",
+        "label": "(UTC+04:00) Armenia Time",
+        "region": "Asia"
+    },
+    "Atlantic Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Atlantic Time",
+        "label": "(UTC-04:00) Atlantic Time",
+        "region": "Atlantic"
+    },
+    "Australian Central Western Time": {
+        "utcoffset": 31500.0,
+        "utcoffset_iso": "+08:45",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Australian Central Western Time",
+        "label": "(UTC+08:45) Australian Central Western Time",
+        "region": "Australia"
+    },
+    "Azerbaijan Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Azerbaijan Time",
+        "label": "(UTC+04:00) Azerbaijan Time",
+        "region": "Asia"
+    },
+    "Azores Time": {
+        "utcoffset": -3600.0,
+        "utcoffset_iso": "-01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Azores Time",
+        "label": "(UTC-01:00) Azores Time",
+        "region": "Atlantic"
+    },
+    "Bangladesh Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Bangladesh Time",
+        "label": "(UTC+06:00) Bangladesh Time",
+        "region": "Asia"
+    },
+    "Bhutan Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Bhutan Time",
+        "label": "(UTC+06:00) Bhutan Time",
+        "region": "Asia"
+    },
+    "Bolivia Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Bolivia Time",
+        "label": "(UTC-04:00) Bolivia Time",
+        "region": "America"
+    },
+    "Botswana Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Botswana Time",
+        "label": "(UTC+02:00) Botswana Time",
+        "region": "Africa"
+    },
+    "Brasilia Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Brasilia Time",
+        "label": "(UTC-03:00) Brasilia Time",
+        "region": "America"
+    },
+    "British Indian Ocean Territory Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "British Indian Ocean Territory Time",
+        "label": "(UTC+06:00) British Indian Ocean Territory Time",
+        "region": "Indian"
+    },
+    "Brunei Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Brunei Time",
+        "label": "(UTC+08:00) Brunei Time",
+        "region": "Asia"
+    },
+    "Burkina Faso Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Burkina Faso Time",
+        "label": "(UTC+00:00) Burkina Faso Time",
+        "region": "Africa"
+    },
+    "Burundi Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Burundi Time",
+        "label": "(UTC+02:00) Burundi Time",
+        "region": "Africa"
+    },
+    "Cambodia Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cambodia Time",
+        "label": "(UTC+07:00) Cambodia Time",
+        "region": "Asia"
+    },
+    "Canada (Dawson) Time": {
+        "utcoffset": -25200.0,
+        "utcoffset_iso": "-07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Canada (Dawson) Time",
+        "label": "(UTC-07:00) Canada (Dawson) Time",
+        "region": "America"
+    },
+    "Canada (Whitehorse) Time": {
+        "utcoffset": -25200.0,
+        "utcoffset_iso": "-07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Canada (Whitehorse) Time",
+        "label": "(UTC-07:00) Canada (Whitehorse) Time",
+        "region": "America"
+    },
+    "Cape Verde Time": {
+        "utcoffset": -3600.0,
+        "utcoffset_iso": "-01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cape Verde Time",
+        "label": "(UTC-01:00) Cape Verde Time",
+        "region": "Atlantic"
+    },
+    "Central Australia Time": {
+        "utcoffset": 34200.0,
+        "utcoffset_iso": "+09:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Central Australia Time",
+        "label": "(UTC+09:30) Central Australia Time",
+        "region": "Australia"
+    },
+    "Central European Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Central European Time",
+        "label": "(UTC+01:00) Central European Time",
+        "region": "Europe"
+    },
+    "Central Time": {
+        "utcoffset": -21600.0,
+        "utcoffset_iso": "-06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Central Time",
+        "label": "(UTC-06:00) Central Time",
+        "region": "Other"
+    },
+    "Chatham Time": {
+        "utcoffset": 45900.0,
+        "utcoffset_iso": "+12:45",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Chatham Time",
+        "label": "(UTC+12:45) Chatham Time",
+        "region": "Pacific"
+    },
+    "Chile (Punta Arenas) Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Chile (Punta Arenas) Time",
+        "label": "(UTC-03:00) Chile (Punta Arenas) Time",
+        "region": "America"
+    },
+    "Chile Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Chile Time",
+        "label": "(UTC-04:00) Chile Time",
+        "region": "America"
+    },
+    "China (Urumqi) Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "China (Urumqi) Time",
+        "label": "(UTC+06:00) China (Urumqi) Time",
+        "region": "Asia"
+    },
+    "China Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "China Time",
+        "label": "(UTC+08:00) China Time",
+        "region": "Asia"
+    },
+    "Christmas Island Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Christmas Island Time",
+        "label": "(UTC+07:00) Christmas Island Time",
+        "region": "Indian"
+    },
+    "Cocos (Keeling) Islands Time": {
+        "utcoffset": 23400.0,
+        "utcoffset_iso": "+06:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cocos (Keeling) Islands Time",
+        "label": "(UTC+06:30) Cocos (Keeling) Islands Time",
+        "region": "Indian"
+    },
+    "Colombia Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Colombia Time",
+        "label": "(UTC-05:00) Colombia Time",
+        "region": "America"
+    },
+    "Comoros Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Comoros Time",
+        "label": "(UTC+03:00) Comoros Time",
+        "region": "Indian"
+    },
+    "Congo - Kinshasa (Lubumbashi) Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Congo - Kinshasa (Lubumbashi) Time",
+        "label": "(UTC+02:00) Congo - Kinshasa (Lubumbashi) Time",
+        "region": "Africa"
+    },
+    "Cook Islands Time": {
+        "utcoffset": -36000.0,
+        "utcoffset_iso": "-10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cook Islands Time",
+        "label": "(UTC-10:00) Cook Islands Time",
+        "region": "Pacific"
+    },
+    "Cuba Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cuba Time",
+        "label": "(UTC-05:00) Cuba Time",
+        "region": "America"
+    },
+    "Cyprus (Famagusta) Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Cyprus (Famagusta) Time",
+        "label": "(UTC+02:00) Cyprus (Famagusta) Time",
+        "region": "Asia"
+    },
+    "C\u00f4te d\u2019Ivoire Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "C\u00f4te d\u2019Ivoire Time",
+        "label": "(UTC+00:00) C\u00f4te d\u2019Ivoire Time",
+        "region": "Africa"
+    },
+    "Djibouti Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Djibouti Time",
+        "label": "(UTC+03:00) Djibouti Time",
+        "region": "Africa"
+    },
+    "East Greenland Time": {
+        "utcoffset": -3600.0,
+        "utcoffset_iso": "-01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "East Greenland Time",
+        "label": "(UTC-01:00) East Greenland Time",
+        "region": "America"
+    },
+    "Easter Island Time": {
+        "utcoffset": -21600.0,
+        "utcoffset_iso": "-06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Easter Island Time",
+        "label": "(UTC-06:00) Easter Island Time",
+        "region": "Pacific"
+    },
+    "Eastern Australia Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Eastern Australia Time",
+        "label": "(UTC+10:00) Eastern Australia Time",
+        "region": "Australia"
+    },
+    "Eastern European Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Eastern European Time",
+        "label": "(UTC+02:00) Eastern European Time",
+        "region": "Europe"
+    },
+    "Eastern Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Eastern Time",
+        "label": "(UTC-05:00) Eastern Time",
+        "region": "Other"
+    },
+    "Ecuador (Galapagos) Time": {
+        "utcoffset": -21600.0,
+        "utcoffset_iso": "-06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ecuador (Galapagos) Time",
+        "label": "(UTC-06:00) Ecuador (Galapagos) Time",
+        "region": "Pacific"
+    },
+    "Ecuador (Guayaquil) Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ecuador (Guayaquil) Time",
+        "label": "(UTC-05:00) Ecuador (Guayaquil) Time",
+        "region": "America"
+    },
+    "Eritrea Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Eritrea Time",
+        "label": "(UTC+03:00) Eritrea Time",
+        "region": "Africa"
+    },
+    "Eswatini Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Eswatini Time",
+        "label": "(UTC+02:00) Eswatini Time",
+        "region": "Africa"
+    },
+    "Ethiopia Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ethiopia Time",
+        "label": "(UTC+03:00) Ethiopia Time",
+        "region": "Africa"
+    },
+    "Falkland Islands Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Falkland Islands Time",
+        "label": "(UTC-03:00) Falkland Islands Time",
+        "region": "Atlantic"
+    },
+    "Fernando de Noronha Time": {
+        "utcoffset": -7200.0,
+        "utcoffset_iso": "-02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Fernando de Noronha Time",
+        "label": "(UTC-02:00) Fernando de Noronha Time",
+        "region": "America"
+    },
+    "Fiji Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Fiji Time",
+        "label": "(UTC+12:00) Fiji Time",
+        "region": "Pacific"
+    },
+    "French Guiana Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "French Guiana Time",
+        "label": "(UTC-03:00) French Guiana Time",
+        "region": "America"
+    },
+    "French Polynesia (Gambier) Time": {
+        "utcoffset": -32400.0,
+        "utcoffset_iso": "-09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "French Polynesia (Gambier) Time",
+        "label": "(UTC-09:00) French Polynesia (Gambier) Time",
+        "region": "Pacific"
+    },
+    "French Polynesia (Marquesas) Time": {
+        "utcoffset": -34200.0,
+        "utcoffset_iso": "-10:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "French Polynesia (Marquesas) Time",
+        "label": "(UTC-10:30) French Polynesia (Marquesas) Time",
+        "region": "Pacific"
+    },
+    "French Polynesia (Tahiti) Time": {
+        "utcoffset": -36000.0,
+        "utcoffset_iso": "-10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "French Polynesia (Tahiti) Time",
+        "label": "(UTC-10:00) French Polynesia (Tahiti) Time",
+        "region": "Pacific"
+    },
+    "French Southern Territories Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "French Southern Territories Time",
+        "label": "(UTC+05:00) French Southern Territories Time",
+        "region": "Indian"
+    },
+    "Gambia Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Gambia Time",
+        "label": "(UTC+00:00) Gambia Time",
+        "region": "Africa"
+    },
+    "Georgia Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Georgia Time",
+        "label": "(UTC+04:00) Georgia Time",
+        "region": "Asia"
+    },
+    "Ghana Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ghana Time",
+        "label": "(UTC+00:00) Ghana Time",
+        "region": "Africa"
+    },
+    "Greenland (Danmarkshavn) Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Greenland (Danmarkshavn) Time",
+        "label": "(UTC+00:00) Greenland (Danmarkshavn) Time",
+        "region": "America"
+    },
+    "Guam Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Guam Time",
+        "label": "(UTC+10:00) Guam Time",
+        "region": "Pacific"
+    },
+    "Guernsey Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Guernsey Time",
+        "label": "(UTC+00:00) Guernsey Time",
+        "region": "Europe"
+    },
+    "Guinea Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Guinea Time",
+        "label": "(UTC+00:00) Guinea Time",
+        "region": "Africa"
+    },
+    "Guinea-Bissau Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Guinea-Bissau Time",
+        "label": "(UTC+00:00) Guinea-Bissau Time",
+        "region": "Africa"
+    },
+    "Guyana Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Guyana Time",
+        "label": "(UTC-04:00) Guyana Time",
+        "region": "America"
+    },
+    "Hawaii-Aleutian Time": {
+        "utcoffset": -36000.0,
+        "utcoffset_iso": "-10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Hawaii-Aleutian Time",
+        "label": "(UTC-10:00) Hawaii-Aleutian Time",
+        "region": "Pacific"
+    },
+    "Hong Kong Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Hong Kong Time",
+        "label": "(UTC+08:00) Hong Kong Time",
+        "region": "Asia"
+    },
+    "Hovd Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Hovd Time",
+        "label": "(UTC+07:00) Hovd Time",
+        "region": "Asia"
+    },
+    "Iceland Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Iceland Time",
+        "label": "(UTC+00:00) Iceland Time",
+        "region": "Atlantic"
+    },
+    "India Time": {
+        "utcoffset": 19800.0,
+        "utcoffset_iso": "+05:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "India Time",
+        "label": "(UTC+05:30) India Time",
+        "region": "Asia"
+    },
+    "Indonesia (Jakarta) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Indonesia (Jakarta) Time",
+        "label": "(UTC+07:00) Indonesia (Jakarta) Time",
+        "region": "Asia"
+    },
+    "Indonesia (Jayapura) Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Indonesia (Jayapura) Time",
+        "label": "(UTC+09:00) Indonesia (Jayapura) Time",
+        "region": "Asia"
+    },
+    "Indonesia (Makassar) Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Indonesia (Makassar) Time",
+        "label": "(UTC+08:00) Indonesia (Makassar) Time",
+        "region": "Asia"
+    },
+    "Indonesia (Pontianak) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Indonesia (Pontianak) Time",
+        "label": "(UTC+07:00) Indonesia (Pontianak) Time",
+        "region": "Asia"
+    },
+    "Iran Time": {
+        "utcoffset": 12600.0,
+        "utcoffset_iso": "+03:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Iran Time",
+        "label": "(UTC+03:30) Iran Time",
+        "region": "Asia"
+    },
+    "Ireland Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ireland Time",
+        "label": "(UTC+01:00) Ireland Time",
+        "region": "Europe"
+    },
+    "Irkutsk Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Irkutsk Time",
+        "label": "(UTC+08:00) Irkutsk Time",
+        "region": "Asia"
+    },
+    "Isle of Man Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Isle of Man Time",
+        "label": "(UTC+00:00) Isle of Man Time",
+        "region": "Europe"
+    },
+    "Israel Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Israel Time",
+        "label": "(UTC+02:00) Israel Time",
+        "region": "Asia"
+    },
+    "Japan Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Japan Time",
+        "label": "(UTC+09:00) Japan Time",
+        "region": "Asia"
+    },
+    "Jersey Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Jersey Time",
+        "label": "(UTC+00:00) Jersey Time",
+        "region": "Europe"
+    },
+    "Kazakhstan (Almaty) Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Almaty) Time",
+        "label": "(UTC+06:00) Kazakhstan (Almaty) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Aqtau) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Aqtau) Time",
+        "label": "(UTC+05:00) Kazakhstan (Aqtau) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Aqtobe) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Aqtobe) Time",
+        "label": "(UTC+05:00) Kazakhstan (Aqtobe) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Atyrau) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Atyrau) Time",
+        "label": "(UTC+05:00) Kazakhstan (Atyrau) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Kostanay) Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Kostanay) Time",
+        "label": "(UTC+06:00) Kazakhstan (Kostanay) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Oral) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Oral) Time",
+        "label": "(UTC+05:00) Kazakhstan (Oral) Time",
+        "region": "Asia"
+    },
+    "Kazakhstan (Qyzylorda) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kazakhstan (Qyzylorda) Time",
+        "label": "(UTC+05:00) Kazakhstan (Qyzylorda) Time",
+        "region": "Asia"
+    },
+    "Kenya Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kenya Time",
+        "label": "(UTC+03:00) Kenya Time",
+        "region": "Africa"
+    },
+    "Kiribati (Enderbury) Time": {
+        "utcoffset": 46800.0,
+        "utcoffset_iso": "+13:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kiribati (Enderbury) Time",
+        "label": "(UTC+13:00) Kiribati (Enderbury) Time",
+        "region": "Pacific"
+    },
+    "Kiribati (Kiritimati) Time": {
+        "utcoffset": 50400.0,
+        "utcoffset_iso": "+14:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kiribati (Kiritimati) Time",
+        "label": "(UTC+14:00) Kiribati (Kiritimati) Time",
+        "region": "Pacific"
+    },
+    "Kiribati (Tarawa) Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kiribati (Tarawa) Time",
+        "label": "(UTC+12:00) Kiribati (Tarawa) Time",
+        "region": "Pacific"
+    },
+    "Korean Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Korean Time",
+        "label": "(UTC+09:00) Korean Time",
+        "region": "Asia"
+    },
+    "Krasnoyarsk Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Krasnoyarsk Time",
+        "label": "(UTC+07:00) Krasnoyarsk Time",
+        "region": "Asia"
+    },
+    "Kyrgyzstan Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Kyrgyzstan Time",
+        "label": "(UTC+06:00) Kyrgyzstan Time",
+        "region": "Asia"
+    },
+    "Laos Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Laos Time",
+        "label": "(UTC+07:00) Laos Time",
+        "region": "Asia"
+    },
+    "Lesotho Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Lesotho Time",
+        "label": "(UTC+02:00) Lesotho Time",
+        "region": "Africa"
+    },
+    "Liberia Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Liberia Time",
+        "label": "(UTC+00:00) Liberia Time",
+        "region": "Africa"
+    },
+    "Lord Howe Time": {
+        "utcoffset": 37800.0,
+        "utcoffset_iso": "+10:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Lord Howe Time",
+        "label": "(UTC+10:30) Lord Howe Time",
+        "region": "Australia"
+    },
+    "Madagascar Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Madagascar Time",
+        "label": "(UTC+03:00) Madagascar Time",
+        "region": "Indian"
+    },
+    "Magadan Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Magadan Time",
+        "label": "(UTC+11:00) Magadan Time",
+        "region": "Asia"
+    },
+    "Malawi Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Malawi Time",
+        "label": "(UTC+02:00) Malawi Time",
+        "region": "Africa"
+    },
+    "Malaysia (Kuala Lumpur) Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Malaysia (Kuala Lumpur) Time",
+        "label": "(UTC+08:00) Malaysia (Kuala Lumpur) Time",
+        "region": "Asia"
+    },
+    "Malaysia (Kuching) Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Malaysia (Kuching) Time",
+        "label": "(UTC+08:00) Malaysia (Kuching) Time",
+        "region": "Asia"
+    },
+    "Maldives Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Maldives Time",
+        "label": "(UTC+05:00) Maldives Time",
+        "region": "Indian"
+    },
+    "Mali Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mali Time",
+        "label": "(UTC+00:00) Mali Time",
+        "region": "Africa"
+    },
+    "Marshall Islands (Kwajalein) Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Marshall Islands (Kwajalein) Time",
+        "label": "(UTC+12:00) Marshall Islands (Kwajalein) Time",
+        "region": "Pacific"
+    },
+    "Marshall Islands (Majuro) Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Marshall Islands (Majuro) Time",
+        "label": "(UTC+12:00) Marshall Islands (Majuro) Time",
+        "region": "Pacific"
+    },
+    "Mauritania Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mauritania Time",
+        "label": "(UTC+00:00) Mauritania Time",
+        "region": "Africa"
+    },
+    "Mauritius Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mauritius Time",
+        "label": "(UTC+04:00) Mauritius Time",
+        "region": "Indian"
+    },
+    "Mayotte Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mayotte Time",
+        "label": "(UTC+03:00) Mayotte Time",
+        "region": "Indian"
+    },
+    "Mexican Pacific Time": {
+        "utcoffset": -25200.0,
+        "utcoffset_iso": "-07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mexican Pacific Time",
+        "label": "(UTC-07:00) Mexican Pacific Time",
+        "region": "America"
+    },
+    "Micronesia (Chuuk) Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Micronesia (Chuuk) Time",
+        "label": "(UTC+10:00) Micronesia (Chuuk) Time",
+        "region": "Pacific"
+    },
+    "Micronesia (Kosrae) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Micronesia (Kosrae) Time",
+        "label": "(UTC+11:00) Micronesia (Kosrae) Time",
+        "region": "Pacific"
+    },
+    "Micronesia (Pohnpei) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Micronesia (Pohnpei) Time",
+        "label": "(UTC+11:00) Micronesia (Pohnpei) Time",
+        "region": "Pacific"
+    },
+    "Morocco Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Morocco Time",
+        "label": "(UTC+01:00) Morocco Time",
+        "region": "Africa"
+    },
+    "Moscow Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Moscow Time",
+        "label": "(UTC+03:00) Moscow Time",
+        "region": "Europe"
+    },
+    "Mountain Time": {
+        "utcoffset": -25200.0,
+        "utcoffset_iso": "-07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mountain Time",
+        "label": "(UTC-07:00) Mountain Time",
+        "region": "Other"
+    },
+    "Mozambique Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Mozambique Time",
+        "label": "(UTC+02:00) Mozambique Time",
+        "region": "Africa"
+    },
+    "Myanmar (Burma) Time": {
+        "utcoffset": 23400.0,
+        "utcoffset_iso": "+06:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Myanmar (Burma) Time",
+        "label": "(UTC+06:30) Myanmar (Burma) Time",
+        "region": "Asia"
+    },
+    "Namibia Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Namibia Time",
+        "label": "(UTC+02:00) Namibia Time",
+        "region": "Africa"
+    },
+    "Nauru Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Nauru Time",
+        "label": "(UTC+12:00) Nauru Time",
+        "region": "Pacific"
+    },
+    "Nepal Time": {
+        "utcoffset": 20700.0,
+        "utcoffset_iso": "+05:45",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Nepal Time",
+        "label": "(UTC+05:45) Nepal Time",
+        "region": "Asia"
+    },
+    "New Caledonia Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "New Caledonia Time",
+        "label": "(UTC+11:00) New Caledonia Time",
+        "region": "Pacific"
+    },
+    "New Zealand Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "New Zealand Time",
+        "label": "(UTC+12:00) New Zealand Time",
+        "region": "Pacific"
+    },
+    "Newfoundland Time": {
+        "utcoffset": -12600.0,
+        "utcoffset_iso": "-04:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Newfoundland Time",
+        "label": "(UTC-04:30) Newfoundland Time",
+        "region": "America"
+    },
+    "Niue Time": {
+        "utcoffset": -39600.0,
+        "utcoffset_iso": "-11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Niue Time",
+        "label": "(UTC-11:00) Niue Time",
+        "region": "Pacific"
+    },
+    "Norfolk Island Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Norfolk Island Time",
+        "label": "(UTC+11:00) Norfolk Island Time",
+        "region": "Pacific"
+    },
+    "Northern Mariana Islands Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Northern Mariana Islands Time",
+        "label": "(UTC+10:00) Northern Mariana Islands Time",
+        "region": "Pacific"
+    },
+    "Novosibirsk Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Novosibirsk Time",
+        "label": "(UTC+07:00) Novosibirsk Time",
+        "region": "Asia"
+    },
+    "Oman Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Oman Time",
+        "label": "(UTC+04:00) Oman Time",
+        "region": "Asia"
+    },
+    "Omsk Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Omsk Time",
+        "label": "(UTC+06:00) Omsk Time",
+        "region": "Asia"
+    },
+    "Pacific Time": {
+        "utcoffset": -28800.0,
+        "utcoffset_iso": "-08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Pacific Time",
+        "label": "(UTC-08:00) Pacific Time",
+        "region": "Other"
+    },
+    "Pakistan Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Pakistan Time",
+        "label": "(UTC+05:00) Pakistan Time",
+        "region": "Asia"
+    },
+    "Palau Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Palau Time",
+        "label": "(UTC+09:00) Palau Time",
+        "region": "Pacific"
+    },
+    "Papua New Guinea (Bougainville) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Papua New Guinea (Bougainville) Time",
+        "label": "(UTC+11:00) Papua New Guinea (Bougainville) Time",
+        "region": "Pacific"
+    },
+    "Papua New Guinea (Port Moresby) Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Papua New Guinea (Port Moresby) Time",
+        "label": "(UTC+10:00) Papua New Guinea (Port Moresby) Time",
+        "region": "Pacific"
+    },
+    "Paraguay Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Paraguay Time",
+        "label": "(UTC-04:00) Paraguay Time",
+        "region": "America"
+    },
+    "Peru Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Peru Time",
+        "label": "(UTC-05:00) Peru Time",
+        "region": "America"
+    },
+    "Petropavlovsk-Kamchatski Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Petropavlovsk-Kamchatski Time",
+        "label": "(UTC+12:00) Petropavlovsk-Kamchatski Time",
+        "region": "Asia"
+    },
+    "Philippine Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Philippine Time",
+        "label": "(UTC+08:00) Philippine Time",
+        "region": "Asia"
+    },
+    "Pitcairn Islands Time": {
+        "utcoffset": -28800.0,
+        "utcoffset_iso": "-08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Pitcairn Islands Time",
+        "label": "(UTC-08:00) Pitcairn Islands Time",
+        "region": "Pacific"
+    },
+    "Russia (Astrakhan) Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Astrakhan) Time",
+        "label": "(UTC+04:00) Russia (Astrakhan) Time",
+        "region": "Europe"
+    },
+    "Russia (Barnaul) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Barnaul) Time",
+        "label": "(UTC+07:00) Russia (Barnaul) Time",
+        "region": "Asia"
+    },
+    "Russia (Kirov) Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Kirov) Time",
+        "label": "(UTC+03:00) Russia (Kirov) Time",
+        "region": "Europe"
+    },
+    "Russia (Saratov) Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Saratov) Time",
+        "label": "(UTC+04:00) Russia (Saratov) Time",
+        "region": "Europe"
+    },
+    "Russia (Srednekolymsk) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Srednekolymsk) Time",
+        "label": "(UTC+11:00) Russia (Srednekolymsk) Time",
+        "region": "Asia"
+    },
+    "Russia (Tomsk) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Tomsk) Time",
+        "label": "(UTC+07:00) Russia (Tomsk) Time",
+        "region": "Asia"
+    },
+    "Russia (Ulyanovsk) Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Russia (Ulyanovsk) Time",
+        "label": "(UTC+04:00) Russia (Ulyanovsk) Time",
+        "region": "Europe"
+    },
+    "Rwanda Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Rwanda Time",
+        "label": "(UTC+02:00) Rwanda Time",
+        "region": "Africa"
+    },
+    "R\u00e9union Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "R\u00e9union Time",
+        "label": "(UTC+04:00) R\u00e9union Time",
+        "region": "Indian"
+    },
+    "Sakhalin Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Sakhalin Time",
+        "label": "(UTC+11:00) Sakhalin Time",
+        "region": "Asia"
+    },
+    "Samara Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Samara Time",
+        "label": "(UTC+04:00) Samara Time",
+        "region": "Europe"
+    },
+    "Samoa Time": {
+        "utcoffset": -39600.0,
+        "utcoffset_iso": "-11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Samoa Time",
+        "label": "(UTC-11:00) Samoa Time",
+        "region": "Pacific"
+    },
+    "Senegal Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Senegal Time",
+        "label": "(UTC+00:00) Senegal Time",
+        "region": "Africa"
+    },
+    "Seychelles Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Seychelles Time",
+        "label": "(UTC+04:00) Seychelles Time",
+        "region": "Indian"
+    },
+    "Sierra Leone Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Sierra Leone Time",
+        "label": "(UTC+00:00) Sierra Leone Time",
+        "region": "Africa"
+    },
+    "Singapore Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Singapore Time",
+        "label": "(UTC+08:00) Singapore Time",
+        "region": "Asia"
+    },
+    "Solomon Islands Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Solomon Islands Time",
+        "label": "(UTC+11:00) Solomon Islands Time",
+        "region": "Pacific"
+    },
+    "Somalia Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Somalia Time",
+        "label": "(UTC+03:00) Somalia Time",
+        "region": "Africa"
+    },
+    "South Africa Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "South Africa Time",
+        "label": "(UTC+02:00) South Africa Time",
+        "region": "Africa"
+    },
+    "South Georgia & South Sandwich Islands Time": {
+        "utcoffset": -7200.0,
+        "utcoffset_iso": "-02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "South Georgia & South Sandwich Islands Time",
+        "label": "(UTC-02:00) South Georgia & South Sandwich Islands Time",
+        "region": "Atlantic"
+    },
+    "South Sudan Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "South Sudan Time",
+        "label": "(UTC+02:00) South Sudan Time",
+        "region": "Africa"
+    },
+    "Sri Lanka Time": {
+        "utcoffset": 19800.0,
+        "utcoffset_iso": "+05:30",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Sri Lanka Time",
+        "label": "(UTC+05:30) Sri Lanka Time",
+        "region": "Asia"
+    },
+    "St. Helena Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "St. Helena Time",
+        "label": "(UTC+00:00) St. Helena Time",
+        "region": "Atlantic"
+    },
+    "St. Pierre & Miquelon Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "St. Pierre & Miquelon Time",
+        "label": "(UTC-03:00) St. Pierre & Miquelon Time",
+        "region": "America"
+    },
+    "Sudan Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Sudan Time",
+        "label": "(UTC+02:00) Sudan Time",
+        "region": "Africa"
+    },
+    "Suriname Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Suriname Time",
+        "label": "(UTC-03:00) Suriname Time",
+        "region": "America"
+    },
+    "S\u00e3o Tom\u00e9 & Pr\u00edncipe Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "S\u00e3o Tom\u00e9 & Pr\u00edncipe Time",
+        "label": "(UTC+00:00) S\u00e3o Tom\u00e9 & Pr\u00edncipe Time",
+        "region": "Africa"
+    },
+    "Taipei Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Taipei Time",
+        "label": "(UTC+08:00) Taipei Time",
+        "region": "Asia"
+    },
+    "Tajikistan Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Tajikistan Time",
+        "label": "(UTC+05:00) Tajikistan Time",
+        "region": "Asia"
+    },
+    "Tanzania Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Tanzania Time",
+        "label": "(UTC+03:00) Tanzania Time",
+        "region": "Africa"
+    },
+    "Thailand Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Thailand Time",
+        "label": "(UTC+07:00) Thailand Time",
+        "region": "Asia"
+    },
+    "Timor-Leste Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Timor-Leste Time",
+        "label": "(UTC+09:00) Timor-Leste Time",
+        "region": "Asia"
+    },
+    "Togo Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Togo Time",
+        "label": "(UTC+00:00) Togo Time",
+        "region": "Africa"
+    },
+    "Tokelau Time": {
+        "utcoffset": 46800.0,
+        "utcoffset_iso": "+13:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Tokelau Time",
+        "label": "(UTC+13:00) Tokelau Time",
+        "region": "Pacific"
+    },
+    "Tonga Time": {
+        "utcoffset": 46800.0,
+        "utcoffset_iso": "+13:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Tonga Time",
+        "label": "(UTC+13:00) Tonga Time",
+        "region": "Pacific"
+    },
+    "Turkey Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Turkey Time",
+        "label": "(UTC+03:00) Turkey Time",
+        "region": "Europe"
+    },
+    "Turkmenistan Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Turkmenistan Time",
+        "label": "(UTC+05:00) Turkmenistan Time",
+        "region": "Asia"
+    },
+    "Tuvalu Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Tuvalu Time",
+        "label": "(UTC+12:00) Tuvalu Time",
+        "region": "Pacific"
+    },
+    "U.S. Outlying Islands (Wake) Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "U.S. Outlying Islands (Wake) Time",
+        "label": "(UTC+12:00) U.S. Outlying Islands (Wake) Time",
+        "region": "Pacific"
+    },
+    "Uganda Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Uganda Time",
+        "label": "(UTC+03:00) Uganda Time",
+        "region": "Africa"
+    },
+    "Ulaanbaatar Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Ulaanbaatar Time",
+        "label": "(UTC+08:00) Ulaanbaatar Time",
+        "region": "Asia"
+    },
+    "United Arab Emirates Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "United Arab Emirates Time",
+        "label": "(UTC+04:00) United Arab Emirates Time",
+        "region": "Asia"
+    },
+    "United Kingdom Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "United Kingdom Time",
+        "label": "(UTC+00:00) United Kingdom Time",
+        "region": "Europe"
+    },
+    "Unknown Region (CET) Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (CET) Time",
+        "label": "(UTC+01:00) Unknown Region (CET) Time",
+        "region": "Other"
+    },
+    "Unknown Region (EET) Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (EET) Time",
+        "label": "(UTC+02:00) Unknown Region (EET) Time",
+        "region": "Other"
+    },
+    "Unknown Region (GMT) Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT) Time",
+        "label": "(UTC+00:00) Unknown Region (GMT) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+1) Time": {
+        "utcoffset": -3600.0,
+        "utcoffset_iso": "-01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+1) Time",
+        "label": "(UTC-01:00) Unknown Region (GMT+1) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+10) Time": {
+        "utcoffset": -36000.0,
+        "utcoffset_iso": "-10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+10) Time",
+        "label": "(UTC-10:00) Unknown Region (GMT+10) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+11) Time": {
+        "utcoffset": -39600.0,
+        "utcoffset_iso": "-11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+11) Time",
+        "label": "(UTC-11:00) Unknown Region (GMT+11) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+12) Time": {
+        "utcoffset": -43200.0,
+        "utcoffset_iso": "-12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+12) Time",
+        "label": "(UTC-12:00) Unknown Region (GMT+12) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+2) Time": {
+        "utcoffset": -7200.0,
+        "utcoffset_iso": "-02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+2) Time",
+        "label": "(UTC-02:00) Unknown Region (GMT+2) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+3) Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+3) Time",
+        "label": "(UTC-03:00) Unknown Region (GMT+3) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+4) Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+4) Time",
+        "label": "(UTC-04:00) Unknown Region (GMT+4) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+5) Time": {
+        "utcoffset": -18000.0,
+        "utcoffset_iso": "-05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+5) Time",
+        "label": "(UTC-05:00) Unknown Region (GMT+5) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+6) Time": {
+        "utcoffset": -21600.0,
+        "utcoffset_iso": "-06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+6) Time",
+        "label": "(UTC-06:00) Unknown Region (GMT+6) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+7) Time": {
+        "utcoffset": -25200.0,
+        "utcoffset_iso": "-07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+7) Time",
+        "label": "(UTC-07:00) Unknown Region (GMT+7) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+8) Time": {
+        "utcoffset": -28800.0,
+        "utcoffset_iso": "-08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+8) Time",
+        "label": "(UTC-08:00) Unknown Region (GMT+8) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT+9) Time": {
+        "utcoffset": -32400.0,
+        "utcoffset_iso": "-09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT+9) Time",
+        "label": "(UTC-09:00) Unknown Region (GMT+9) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-1) Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-1) Time",
+        "label": "(UTC+01:00) Unknown Region (GMT-1) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-10) Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-10) Time",
+        "label": "(UTC+10:00) Unknown Region (GMT-10) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-11) Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-11) Time",
+        "label": "(UTC+11:00) Unknown Region (GMT-11) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-12) Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-12) Time",
+        "label": "(UTC+12:00) Unknown Region (GMT-12) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-13) Time": {
+        "utcoffset": 46800.0,
+        "utcoffset_iso": "+13:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-13) Time",
+        "label": "(UTC+13:00) Unknown Region (GMT-13) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-14) Time": {
+        "utcoffset": 50400.0,
+        "utcoffset_iso": "+14:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-14) Time",
+        "label": "(UTC+14:00) Unknown Region (GMT-14) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-2) Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-2) Time",
+        "label": "(UTC+02:00) Unknown Region (GMT-2) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-3) Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-3) Time",
+        "label": "(UTC+03:00) Unknown Region (GMT-3) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-4) Time": {
+        "utcoffset": 14400.0,
+        "utcoffset_iso": "+04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-4) Time",
+        "label": "(UTC+04:00) Unknown Region (GMT-4) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-5) Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-5) Time",
+        "label": "(UTC+05:00) Unknown Region (GMT-5) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-6) Time": {
+        "utcoffset": 21600.0,
+        "utcoffset_iso": "+06:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-6) Time",
+        "label": "(UTC+06:00) Unknown Region (GMT-6) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-7) Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-7) Time",
+        "label": "(UTC+07:00) Unknown Region (GMT-7) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-8) Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-8) Time",
+        "label": "(UTC+08:00) Unknown Region (GMT-8) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (GMT-9) Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (GMT-9) Time",
+        "label": "(UTC+09:00) Unknown Region (GMT-9) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (MET) Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (MET) Time",
+        "label": "(UTC+01:00) Unknown Region (MET) Time",
+        "region": "Other"
+    },
+    "Unknown Region (UTC) Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (UTC) Time",
+        "label": "(UTC+00:00) Unknown Region (UTC) Time",
+        "region": "Etc"
+    },
+    "Unknown Region (WET) Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Unknown Region (WET) Time",
+        "label": "(UTC+00:00) Unknown Region (WET) Time",
+        "region": "Other"
+    },
+    "Uruguay Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Uruguay Time",
+        "label": "(UTC-03:00) Uruguay Time",
+        "region": "America"
+    },
+    "Uzbekistan Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Uzbekistan Time",
+        "label": "(UTC+05:00) Uzbekistan Time",
+        "region": "Asia"
+    },
+    "Vanuatu Time": {
+        "utcoffset": 39600.0,
+        "utcoffset_iso": "+11:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Vanuatu Time",
+        "label": "(UTC+11:00) Vanuatu Time",
+        "region": "Pacific"
+    },
+    "Venezuela Time": {
+        "utcoffset": -14400.0,
+        "utcoffset_iso": "-04:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Venezuela Time",
+        "label": "(UTC-04:00) Venezuela Time",
+        "region": "America"
+    },
+    "Vietnam Time": {
+        "utcoffset": 25200.0,
+        "utcoffset_iso": "+07:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Vietnam Time",
+        "label": "(UTC+07:00) Vietnam Time",
+        "region": "Asia"
+    },
+    "Vladivostok Time": {
+        "utcoffset": 36000.0,
+        "utcoffset_iso": "+10:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Vladivostok Time",
+        "label": "(UTC+10:00) Vladivostok Time",
+        "region": "Asia"
+    },
+    "Volgograd Time": {
+        "utcoffset": 10800.0,
+        "utcoffset_iso": "+03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Volgograd Time",
+        "label": "(UTC+03:00) Volgograd Time",
+        "region": "Europe"
+    },
+    "Wallis & Futuna Time": {
+        "utcoffset": 43200.0,
+        "utcoffset_iso": "+12:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Wallis & Futuna Time",
+        "label": "(UTC+12:00) Wallis & Futuna Time",
+        "region": "Pacific"
+    },
+    "West Africa Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "West Africa Time",
+        "label": "(UTC+01:00) West Africa Time",
+        "region": "Africa"
+    },
+    "West Greenland Time": {
+        "utcoffset": -10800.0,
+        "utcoffset_iso": "-03:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "West Greenland Time",
+        "label": "(UTC-03:00) West Greenland Time",
+        "region": "America"
+    },
+    "Western Australia Time": {
+        "utcoffset": 28800.0,
+        "utcoffset_iso": "+08:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Western Australia Time",
+        "label": "(UTC+08:00) Western Australia Time",
+        "region": "Australia"
+    },
+    "Western European Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Western European Time",
+        "label": "(UTC+00:00) Western European Time",
+        "region": "Europe"
+    },
+    "Western Sahara Time": {
+        "utcoffset": 3600.0,
+        "utcoffset_iso": "+01:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Western Sahara Time",
+        "label": "(UTC+01:00) Western Sahara Time",
+        "region": "Africa"
+    },
+    "Yakutsk Time": {
+        "utcoffset": 32400.0,
+        "utcoffset_iso": "+09:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Yakutsk Time",
+        "label": "(UTC+09:00) Yakutsk Time",
+        "region": "Asia"
+    },
+    "Yekaterinburg Time": {
+        "utcoffset": 18000.0,
+        "utcoffset_iso": "+05:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Yekaterinburg Time",
+        "label": "(UTC+05:00) Yekaterinburg Time",
+        "region": "Asia"
+    },
+    "Zambia Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Zambia Time",
+        "label": "(UTC+02:00) Zambia Time",
+        "region": "Africa"
+    },
+    "Zimbabwe Time": {
+        "utcoffset": 7200.0,
+        "utcoffset_iso": "+02:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "Zimbabwe Time",
+        "label": "(UTC+02:00) Zimbabwe Time",
+        "region": "Africa"
+    },
+    "world (Troll) Time": {
+        "utcoffset": 0.0,
+        "utcoffset_iso": "+00:00",
+        "dst": 0.0,
+        "dst_iso": "+00:00",
+        "name": "world (Troll) Time",
+        "label": "(UTC+00:00) world (Troll) Time",
+        "region": "Antarctica"
+    }
+}
