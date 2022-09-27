@@ -102,6 +102,12 @@ class CampaignContext:
                 campaign["data"]["state"] = deduce_campaign_state(campaign["data"])
                 self._campaign = campaign
 
+    def get_data_for(self, campaign_id):
+        for campaign in self.campaigns:
+            if campaign["id"] == campaign_id:
+                return campaign
+        return None
+
 
 # Inspired from https://stackoverflow.com/a/57491317
 def url_for_campaign(endpoint, **kwargs):

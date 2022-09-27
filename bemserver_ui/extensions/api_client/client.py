@@ -48,6 +48,8 @@ from .resources import (
     TimeseriesByZoneResources,
     IOResources,
     AnalysisResources,
+    ST_CleanupByCampaign,
+    ST_CleanupByTimeseries,
 )
 from .exceptions import (
     BEMServerAPIValidationError,
@@ -313,3 +315,6 @@ class BEMServerApiClient:
         self.timeseries_by_zones = TimeseriesByZoneResources(self._request_manager)
 
         self.analysis = AnalysisResources(self._request_manager)
+
+        self.st_cleanup_by_campaign = ST_CleanupByCampaign(self._request_manager)
+        self.st_cleanup_by_timeseries = ST_CleanupByTimeseries(self._request_manager)

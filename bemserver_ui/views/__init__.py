@@ -7,6 +7,7 @@ from . import campaigns
 from . import campaign_scopes
 from . import structural_elements
 from . import timeseries
+from . import services
 
 
 MODULES = (
@@ -29,3 +30,5 @@ def init_app(app):
     """Init application views"""
     for module in MODULES:
         app.register_blueprint(module.blp)
+
+    services.init_app(app)

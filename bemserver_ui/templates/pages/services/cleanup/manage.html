@@ -1,0 +1,87 @@
+{% import "macros/items_count.html" as mac_items_count %}
+{% extends "pages/base.html" %}
+
+{% set title = "Cleanup service" %}
+{% set subtitle = cleanup_campaign.campaign_name %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign state</h5>
+            <span class="fw-bold text-{% if cleanup_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">{{ cleanup_campaign.campaign_state | upper }}</span>
+        </div>
+        <div class="col">
+            <h5>Service state</h5>
+            {% if signed_user.is_admin %}
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_on" autocomplete="off"{% if cleanup_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-success" for="svc_state_on">ON</label>
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_off" autocomplete="off"{% if not cleanup_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-danger" for="svc_state_off">OFF</label>
+            <input type="hidden" name="cleanup_id" id="cleanup_id"{% if cleanup_campaign.id is not none %} value="{{ cleanup_campaign.id }}"{% endif %}>
+            <input type="hidden" name="campaign_id" id="campaign_id"{% if cleanup_campaign.campaign_id is not none %} value="{{ cleanup_campaign.campaign_id }}"{% endif %}>
+            <input type="hidden" name="etag" id="etag" value="{{ etag }}">
+            {% else %}
+            {% if cleanup_campaign.is_enabled %}
+            <span class="fw-bold text-success">ON</span>
+            {% else %}
+            <span class="fw-bold text-danger">OFF</span>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive-xl">
+                <table class="table table-sm table-hover table-bordered caption-top">
+                    <caption class="text-end">
+                        {% filter indent(width=24) %}
+                        {{ mac_items_count.render_items_count(cleanup_timeseries | length) -}}
+                        {% endfilter %}
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="3" class="text-center">Timeseries</th>
+                            <th scope="col" colspan="2" class="text-center">Cleanup</th>
+                        </tr>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name <i class="bi bi-sort-alpha-down"></i></th>
+                            <th scope="col">Unit</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Last timestamp <i class="bi bi-sort-numeric-down-alt"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cleanup_ts in cleanup_timeseries %}
+                        <tr class="align-middle">
+                            <td>{{ cleanup_ts.timeseries_id }}</td>
+                            <td>{{ cleanup_ts.timeseries_name }}</td>
+                            <td>{{ cleanup_ts.timeseries_unit_symbol }}</td>
+                            {% if cleanup_ts.id is not none %}
+                            <th scope="row">{{ cleanup_ts.id }}</th>
+                            <td{% if cleanup_ts.last_timestamp is none %} class="table-warning"{% endif %}>
+                                {{ cleanup_ts.last_timestamp | iso_datetime_format(tz_name=cleanup_campaign.campaign_timezone, default="NULL") }}
+                            </td>
+                            {% else %}
+                            <td class="table-warning" colspan="2">Not cleaned yet</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% if signed_user.is_admin %}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/cleanupManage.js') }}"></script>
+{% endfilter %}
+{% endif %}
+{% endblock body_scripts %}
