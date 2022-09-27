@@ -400,3 +400,20 @@ class AnalysisResources(BaseResources):
             "timezone": timezone,
         }
         return self._req.getall(endpoint, etag=etag, params=q_params)
+
+
+class ST_CleanupByCampaign(BaseResources):
+    endpoint_base_uri = "/st_cleanups_by_campaigns/"
+
+    def get_full(self, *, etag=None, **kwargs):
+        endpoint = f"{self.endpoint_base_uri}full"
+        return self._req.getall(endpoint, etag=etag, params=kwargs)
+
+
+class ST_CleanupByTimeseries(BaseResources):
+    endpoint_base_uri = "/st_cleanups_by_timeseries/"
+    disabled_endpoints = ["create", "update", "delete"]
+
+    def get_full(self, *, etag=None, **kwargs):
+        endpoint = f"{self.endpoint_base_uri}full"
+        return self._req.getall(endpoint, etag=etag, params=kwargs)

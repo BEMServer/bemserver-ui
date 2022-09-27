@@ -27,6 +27,9 @@ class TimezoneTool:
         with self._tz_filepath.open("r") as tz_f:
             self.timezones = json.load(tz_f)
 
+    def available_timezones(self):
+        return set(self.timezones.keys())
+
     def prepare_data(self):
         # Extract areas by region, timezones by region and by area.
         self.areas_by_region = {}

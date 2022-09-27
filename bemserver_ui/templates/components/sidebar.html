@@ -63,7 +63,7 @@
                     </div>
                 </li>
             </ul>
-            <div class="accordion app-sidebar-accordion rounded bg-success bg-opacity-25" id="accordionTSExplore">
+            <div class="accordion app-sidebar-accordion rounded bg-success bg-opacity-25 mb-3" id="accordionTSExplore">
                 <div class="accordion-item border-0">
                     <h2 class="accordion-header" id="panelHeadingTSExplore">
                         <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTSExplore" aria-expanded="false" aria-controls="panelCollapseTSExplore">
@@ -81,6 +81,26 @@
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
                                         <a class="nav-link w-100" href="{{ url_for('timeseries_data.completeness') }}" title="Data completeness"><i class="bi bi-pie-chart"></i> Data completeness</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion app-sidebar-accordion rounded bg-secondary bg-opacity-25">
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header" id="panelHeadingServices">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseServices" aria-expanded="false" aria-controls="panelCollapseServices">
+                            <span class="app-sidebar-heading"><i class="bi bi-puzzle"></i> Services</span>
+                        </button>
+                    </h2>
+                    <div id="panelCollapseServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingServices">
+                        <div class="accordion-body px-0 py-2">
+                            <ul class="nav nav-pills flex-column gap-1">
+                                <li class="nav-item">
+                                    <div class="d-flex justify-content-between align-items-center gap-1">
+                                        <a class="nav-link w-100" href="{{ url_for('services.cleanup.manage_campaign', id=g.campaign_ctxt.id) }}" title="Cleanup service"><i class="bi bi-magic"></i> Cleanup</a>
                                     </div>
                                 </li>
                             </ul>
@@ -141,7 +161,7 @@
                     {% if g.campaign_ctxt.has_campaign %}
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminTSData">
-                            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTSData" aria-expanded="false" aria-controls="panelCollapseAdminTS">
+                            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTSData" aria-expanded="false" aria-controls="panelCollapseAdminTSData">
                                 <span class="app-sidebar-heading"><i class="bi bi-server"></i> Timeseries data</span>
                             </button>
                         </h2>
@@ -163,6 +183,24 @@
                         </div>
                     </div>
                     {% endif %}
+                    <div class="accordion-item border-0">
+                        <h2 class="accordion-header" id="panelHeadingAdminServices">
+                            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminServices" aria-expanded="false" aria-controls="panelCollapseAdminServices">
+                                <span class="app-sidebar-heading"><i class="bi bi-puzzle"></i> Services</span>
+                            </button>
+                        </h2>
+                        <div id="panelCollapseAdminServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminServices">
+                            <div class="accordion-body px-0 py-2">
+                                <ul class="nav nav-pills flex-column gap-1">
+                                    <li class="nav-item">
+                                        <div class="d-flex justify-content-between align-items-center gap-1">
+                                            <a class="nav-link w-100" href="{{ url_for('services.cleanup.list') }}" title="Cleanup service"><i class="bi bi-magic"></i> Cleanup</a>
+                                        </div>
+                                    </li>                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <div class="accordion-item border-0">
                         <h2 class="accordion-header" id="panelHeadingAdminUsers">
                             <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminUsers" aria-expanded="false" aria-controls="panelCollapseAdminUsers">

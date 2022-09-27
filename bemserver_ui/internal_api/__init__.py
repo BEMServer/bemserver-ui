@@ -14,6 +14,8 @@ from . import timeseries_datastates
 from . import user_groups
 from . import users
 from . import analysis
+from . import services
+
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
 
@@ -32,7 +34,8 @@ MODULES = (
 
 
 def init_app(app):
-    """Init application API"""
+    """Init application internal API"""
     for module in MODULES:
         blp.register_blueprint(module.blp)
+    services.register_blueprint(blp)
     app.register_blueprint(blp)

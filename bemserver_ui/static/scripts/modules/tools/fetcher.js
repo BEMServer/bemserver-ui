@@ -131,6 +131,19 @@ class InternalAPIRequest {
         };
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
+
+    put(url, payload, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = {
+            method: "PUT",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "ETag": etag,
+            },
+            body: JSON.stringify(payload),
+        };
+        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
 }
 
 

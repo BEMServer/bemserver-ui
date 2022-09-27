@@ -1,0 +1,87 @@
+{% import "macros/items_count.html" as mac_items_count %}
+{% extends "pages/base.html" %}
+
+{% set title = "Cleanup service" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid mb-4">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <form class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                                <select class="form-select form-select-sm{% if filters['campaign_state'] != 'overall' %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_state" name="campaign_state" aria-label="Select a filter value">
+                                    <option value="overall"{% if "overall" == filters["campaign_state"] %} selected{% endif %}>All campaign states</option>
+                                    {% for x in g.campaign_ctxt.campaign_states %}
+                                    <option value="{{ x }}"{% if x == filters["campaign_state"] %} selected{% endif %}>{{ x | capitalize }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select class="form-select form-select-sm{% if filters['service_state'] != 'all' %} border-info bg-info bg-opacity-10{% endif %}" id="service_state" name="service_state" aria-label="Select a filter value">
+                                    <option value="all"{% if "all" == filters["service_state"] %} selected{% endif %}>All service states</option>
+                                    <option value="on"{% if "on" == filters["service_state"] %} selected{% endif %}>ON</option>
+                                    <option value="off"{% if "off" == filters["service_state"] %} selected{% endif %}>OFF</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
+                                <a class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-between">
+        <div class="col">
+            <h5>Campaigns</h5>
+        </div>
+        <div class="col-auto">
+            {% filter indent(width=12) %}
+            {{ mac_items_count.render_items_count(g.campaign_ctxt.campaigns_by_state["overall"] | length, last_item=cleanup_campaigns | length) -}}
+            {% endfilter %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="list-group">
+                {% for x in cleanup_campaigns %}
+                {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == x.campaign_id|string %}
+                {% set manage_url = url_for('services.cleanup.manage_campaign', id=x.campaign_id) %}
+                {% if x.id is not none %}
+                    {% set manage_url = url_for("services.cleanup.manage", id=x.id) %}
+                {% endif %}
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if is_campaign_selected %} app-campaign-selected{% endif %}" href="{{ manage_url }}" title="Manage campaign cleanup">
+                    <i class="bi bi-puzzle"></i>
+                    <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
+                        <div class="d-grid gap-2">
+                            <div class="d-flex gap-3">
+                                <small class="fw-bold text-{% if x.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">[{{ x.campaign_state | upper }}]</small>
+                                <h6 class="fw-bold text-nowrap mb-0">{{ x.campaign_name }}</h6>
+                            </div>
+                            {% if is_campaign_selected %}
+                            <div><small class="opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-sm-column gap-sm-0 gap-3 opacity-75">
+                            <span><small class="fw-bold text-nowrap">Cleanup state</small></span>
+                            {% if x.is_enabled %}
+                            <span class="fw-bold text-success text-sm-end">ON</span>
+                            {% else %}
+                            <span class="fw-bold text-danger text-sm-end">OFF</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
