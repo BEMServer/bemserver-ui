@@ -1,7 +1,9 @@
 :root {
     --app-blue: #0088bd;
+    --app-blue-rgb: 0, 136, 189;
     --app-blue-200: rgba(0, 136, 189, 0.2);
     --app-green: #95c11a;
+    --app-green-rgb: 149, 193, 26;
     --app-white: #ffffff;
     --app-white-0: rgba(255, 255, 255, 0);
     --app-white-300: rgba(255, 255, 255, 0.3);
@@ -10,6 +12,7 @@
     --app-gray: #6e8a98;
     --app-body-bg: #f5f5f5;
     --app-body-color: #474747;
+    --bs-link-color: var(--app-blue);
 }
 
 * {
@@ -44,11 +47,11 @@ h2 {
 }
 
 .text-primary {
-    color: var(--app-blue) !important;
+    color: rgba(var(--app-blue-rgb), var(--bs-text-opacity)) !important;
 }
 
 .text-secondary {
-    color: var(--app-green) !important;
+    color: rgba(var(--app-green-rgb), var(--bs-text-opacity)) !important;
 }
 
 .accordion .accordion-button.collapsed:hover,

@@ -62,7 +62,7 @@ class AccordionListItem extends HTMLDivElement {
         itemTitleContainerElmt.appendChild(itemTitleTextElmt);
         if (this.#itemSubtitle != null) {
             let itemSubtitleElmt = document.createElement("span");
-            itemSubtitleElmt.classList.add("opacity-50");
+            itemSubtitleElmt.classList.add("text-muted");
             itemSubtitleElmt.innerText = this.#itemSubtitle;
             itemTitleContainerElmt.appendChild(itemSubtitleElmt);
         }

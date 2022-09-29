@@ -51,7 +51,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2">
                     <input form="formFilters" type="hidden" name="sort" id="sort" value="{{ sort }}">
-                    <label class="form-label text-nowrap opacity-75 mb-0" for="sort">Sort by</label>
+                    <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
                     <input type="radio" class="btn-check" name="sort" id="sort_name_asc" autocomplete="off"{% if sort == "+name" %} checked{% endif %}>
                     <label class="btn btn-sm btn-outline-info" for="sort_name_asc" title="Name alphabetical order"><i class="bi bi-sort-alpha-down"></i> Name</label>
                     <input type="radio" class="btn-check" name="sort" id="sort_name_desc" autocomplete="off"{% if sort == "-name" %} checked{% endif %}>
@@ -71,7 +71,7 @@
         <div class="col">
             <div class="list-group">
                 {% for x in users %}
-                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if not x.is_active %} text-muted bg-warning bg-opacity-50{% endif %}" href="{{ url_for('users.view', id=x.id) }}" title="View details">
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if not x.is_active %} text-muted bg-warning bg-opacity-10{% endif %}" href="{{ url_for('users.view', id=x.id) }}" title="View details">
                     {% if x.id == signed_user.id %}
                     <i class="bi bi-incognito"></i>
                     {% else %}
@@ -82,17 +82,17 @@
                             <h6 class="mb-0">
                                 <span class="fw-bold">{{ x.name }}</span>
                                 {% if x.id == signed_user.id %}
-                                <small class="opacity-50 text-nowrap text-success fst-italic"><i class="bi bi-arrow-bar-left"></i> This is me!</small>
+                                <small class="text-nowrap text-success text-opacity-50 fst-italic"><i class="bi bi-arrow-bar-left"></i> This is me!</small>
                                 {% endif %}
                             </h6>
-                            <p class="mb-0 opacity-75">{{ x.email }}</p>
+                            <p class="text-muted mb-0">{{ x.email }}</p>
                         </div>
                         <div class="d-flex flex-column">
                             {% if x.is_admin %}
-                            <small class="opacity-50 text-nowrap"><i class="bi bi-lightning-fill text-success"></i> admin</small>
+                            <small class="text-nowrap text-black text-opacity-50"><i class="bi bi-lightning-fill text-success text-opacity-75"></i> admin</small>
                             {% endif %}
                             {% if not x.is_active %}
-                            <small class="opacity-50 text-danger text-nowrap"><i class="bi bi-lock-fill"></i> disabled</small>
+                            <small class="text-nowrap text-danger text-opacity-75"><i class="bi bi-lock-fill"></i> disabled</small>
                             {% endif %}
                         </div>
                     </div>

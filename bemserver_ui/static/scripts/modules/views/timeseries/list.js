@@ -123,7 +123,7 @@ class TimeseriesListView {
                         break;
                     }
 
-                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${property.unit_symbol}]</span>` : ``;
+                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="text-muted ms-1">[${property.unit_symbol}]</span>` : ``;
                 propertyDataHTML += `<dl>
     <dt>${property.name}${unitSymbol}${this.#getPropertyHelpHTML(property)}</dt>
     <dd>${propVal}</dd>
@@ -150,11 +150,11 @@ class TimeseriesListView {
             let structuralElementContentHTML = ``;
             let nbLinks = 0;
             for (let tsStructElmtLink of data.data[structuralElementType]) {
-                structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white text-muted px-2 py-1 gap-1">
+                structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white px-2 py-1 gap-1">
 <i class="bi bi-${structuralElementType == "zone" ? "bullseye" : "building"}"></i>
 <span class="fw-bold">${tsStructElmtLink.structural_element.name}</span>`;
                 if (structuralElementType != "zone" && tsStructElmtLink.structural_element.path.length > 0) {
-                    structuralElementContentHTML += `<small class="opacity-75 ms-2">${tsStructElmtLink.structural_element.path}</small>`;
+                    structuralElementContentHTML += `<small class="text-muted ms-2">${tsStructElmtLink.structural_element.path}</small>`;
                 }
                 structuralElementContentHTML += `</div>`;
 
@@ -164,7 +164,7 @@ class TimeseriesListView {
 
             if (nbLinks > 0) {
                 contentHTML += `<div class="mb-3">
-    <h6 class="fw-bold text-capitalize text-muted">${structuralElementType}s (${nbLinks})</h6>
+    <h6 class="fw-bold text-capitalize">${structuralElementType}s (${nbLinks})</h6>
     <div class="d-flex gap-2 mx-2">${structuralElementContentHTML}</div>
 </div>`;
             }
