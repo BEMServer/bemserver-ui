@@ -98,12 +98,7 @@ export class TimezonePicker extends HTMLElement {
     #updateTzNameChoices() {
         this.#tzNameSelectElmt.innerHTML = "";
 
-        for (let [index, tzArea] of this.#tzTool.areasByRegion[this.#tzRegionSelected].entries()) {
-            if (index > 0) {
-                let sepOptGroupElmt = document.createElement("optgroup");
-                this.#tzNameSelectElmt.appendChild(sepOptGroupElmt);
-            }
-
+        for (let tzArea of this.#tzTool.areasByRegion[this.#tzRegionSelected]) {
             let optGroupElmt = document.createElement("optgroup");
             optGroupElmt.label = tzArea["label"];
             this.#tzNameSelectElmt.appendChild(optGroupElmt);
@@ -115,7 +110,7 @@ export class TimezonePicker extends HTMLElement {
                 if (tzInfo["name"] == this.#tzNameSelected) {
                     optElmt.selected = true;
                 }
-                this.#tzNameSelectElmt.appendChild(optElmt);
+                optGroupElmt.appendChild(optElmt);
             }
         }
     }
