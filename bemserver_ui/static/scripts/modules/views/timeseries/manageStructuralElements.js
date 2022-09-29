@@ -292,7 +292,7 @@ class TimeseriesManageStructuralElementsView {
 
     refresh(options = {}) {
         if (this.#getTSListReqID != null) {
-            this.#internalAPIRequester(this.#getTSListReqID);
+            this.#internalAPIRequester.abort(this.#getTSListReqID);
             this.#getTSListReqID = null;
         }
 
