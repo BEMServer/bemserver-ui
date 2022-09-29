@@ -164,15 +164,15 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
 
             return `<div class="hstack gap-3">
     <div class="fs-6 fw-bold">${p.seriesName}</div>
-    <div class="opacity-75 ms-auto">ID #${p.seriesId}</div>
+    <div class="text-black text-opacity-50 ms-auto">ID #${p.seriesId}</div>
 </div>
 <div class="hstack gap-3 mb-2">
-    <div class="fw-bold opacity-75">Interval</div>
+    <div class="fw-bold text-black text-opacity-50">Interval</div>
     <div>${interval}</div>
 </div>
 <div class="fw-bold">${timestamps[xIndex]}<div>
 <div class="hstack gap-3">
-    <div class="fw-bold opacity-75">Completeness</div>
+    <div class="fw-bold text-black text-opacity-50">Completeness</div>
     <div class="fw-bold" style="color: ${p.color};">${p.data[2]}% (${tsInfo.count[xIndex]}/${expCount ? expCount.toFixed(0) : "?"})</div>
 </div>`;
     };

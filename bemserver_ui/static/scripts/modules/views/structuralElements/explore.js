@@ -111,9 +111,9 @@ class StructuralElementsExploreView {
     </div>
     ${this.#getEditBtnHTML(data.type, data.structural_element.id)}
 </div>
-<p class="fst-italic">${data.structural_element.description}</p>
+<p class="fst-italic text-muted">${data.structural_element.description}</p>
 <div class="row">
-    <dl class="col opacity-50">
+    <dl class="col">
         <dt>IFC ID</dt>
         <dd>${(data.structural_element.ifc_id != null && data.structural_element.ifc_id != "") ? data.structural_element.ifc_id : "-"}</dd>
     </dl>
@@ -137,7 +137,7 @@ class StructuralElementsExploreView {
         let propertyDataHTML = ``;
         if (data.properties.length > 0) {
             for (let property of data.properties) {
-                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${property.unit_symbol}]</span>` : ``;
+                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<small class="text-muted ms-1">[${property.unit_symbol}]</small>` : ``;
                 propertyDataHTML += `<dl>
     <dt>${property.name}${unitSymbol}${this.#getItemHelpHTML(property.description)}</dt>
     <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
@@ -161,7 +161,7 @@ class StructuralElementsExploreView {
         if (data.timeseries.length > 0) {
             contentHTML += `<p class="text-muted text-end">Items count: ${data.timeseries.length}</p>`;
             for (let ts_data of data.timeseries) {
-                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<span class="opacity-50 ms-1">[${ts_data.unit_symbol}]</span>` : ``;
+                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<small class="text-muted ms-1">[${ts_data.unit_symbol}]</small>` : ``;
                 contentHTML += `<li><span class="fw-bold">${ts_data.name}</span>${unitSymbol}${this.#getItemHelpHTML(ts_data.description)}</li>`;
             }
         }

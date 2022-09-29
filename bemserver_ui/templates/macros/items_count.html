@@ -1,5 +1,5 @@
 {% macro render_items_count(total_count, first_item = none, last_item = none) %}
-<small class="text-nowrap opacity-75">
+<small class="text-nowrap text-muted">
     {% if last_item is none %}
         {% set last_item = total_count %}
     {% endif %}

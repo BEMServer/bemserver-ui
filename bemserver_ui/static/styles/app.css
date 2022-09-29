@@ -114,7 +114,7 @@ body,
 }
 
 .app-campaign-selector {
-    top: 60px;
+    top: 60px !important;
     min-height: 200px;
     max-height: 340px;
 }
@@ -125,8 +125,8 @@ body,
 
 .app-tabs .nav-item:hover {
     background-color: var(--app-blue) !important;
-    border-top-left-radius: .25rem;
-    border-top-right-radius: .25rem;
+    border-top-left-radius: var(--bs-nav-tabs-border-radius);
+    border-top-right-radius: var(--bs-nav-tabs-border-radius);
 }
 
 .app-tabs .nav-item:hover .nav-link:not(.active) {

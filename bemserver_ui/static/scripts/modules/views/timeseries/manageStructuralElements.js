@@ -247,7 +247,7 @@ class TimeseriesManageStructuralElementsView {
     #createDropedItemElement(id, icon, title, text, removeCallback) {
         let dropedItemElmt = document.createElement("div");
         dropedItemElmt.id = id;
-        dropedItemElmt.classList.add("btn-group", "btn-group-sm", "rounded", "bg-white", "text-muted");
+        dropedItemElmt.classList.add("btn-group", "btn-group-sm", "rounded", "bg-white");
 
         let dropItemMainContainerElmt = document.createElement("div");
         dropItemMainContainerElmt.classList.add("d-flex", "flex-nowrap", "align-items-center", "gap-1", "border", "border-secondary", "rounded-start", "text-nowrap", "py-1", "px-2");
@@ -263,7 +263,7 @@ class TimeseriesManageStructuralElementsView {
         dropItemMainContainerElmt.appendChild(dropedItemTitleElmt);
 
         let dropedItemTextElmt = document.createElement("small");
-        dropedItemTextElmt.classList.add("opacity-75");
+        dropedItemTextElmt.classList.add("text-muted");
         dropedItemTextElmt.innerText = text;
         dropItemMainContainerElmt.appendChild(dropedItemTextElmt);
 

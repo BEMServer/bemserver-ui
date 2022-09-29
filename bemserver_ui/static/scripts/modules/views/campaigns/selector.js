@@ -85,19 +85,19 @@ class CampaignSelectorView {
         let ret = ``;
 
         if (data.description) {
-            ret += `<div class="mb-2"><small id="campaignSelectedDescription" class="d-inline-block text-truncate">${data.description}</small></div>`;
+            ret += `<div class="mb-2"><small id="campaignSelectedDescription" class="d-inline-block text-muted text-truncate">${data.description}</small></div>`;
         }
 
-        ret += `<div class="mb-1"><small class="text-${data.state == "ongoing" ? "success": "danger"} opacity-75">${data.state.toUpperCase()}</small></div>
-<div class="hstack align-items-start gap-2"><i class="bi bi-watch"></i><div class="vstack"><small class="fw-bold opacity-75">${data.timezone_info["area"]["label"]}</small><small class="opacity-75">${data.timezone_info["label"]}</small></div></div>`;
+        ret += `<div class="mb-1"><small class="fw-bold text-${data.state == "ongoing" ? "success": "danger"} text-opacity-75">${data.state.toUpperCase()}</small></div>
+<div class="hstack align-items-start gap-2"><i class="bi bi-watch"></i><div class="vstack"><small class="fw-bold text-muted">${data.timezone_info["area"]["label"]}</small><small class="fst-italic text-black text-opacity-50">${data.timezone_info["label"]}</small></div></div>`;
 
         let startTime = new Date(data.start_time);
         if (!isNaN(startTime)) {
-            ret += `<div class="hstack gap-2${data.state == "ongoing" ? " text-success": ""}"><i class="bi bi-play"></i><small>${TimeDisplay.toLocaleString(startTime, {timezone: data.timezone})}</small></div>`;
+            ret += `<div class="hstack gap-2${data.state == "ongoing" ? " text-success": " text-muted"}"><i class="bi bi-play${data.state == "ongoing" ? " text-success" : ""}"></i><small${data.state == "ongoing" ? ` class="text-success text-opacity-75"` : ``}>${TimeDisplay.toLocaleString(startTime, {timezone: data.timezone})}</small></div>`;
         }
         let endTime = new Date(data.end_time);
         if (!isNaN(endTime)) {
-            ret += `<div class="hstack gap-2${data.state == "closed" ? " text-danger": ""}"><i class="bi bi-stop"></i><small>${TimeDisplay.toLocaleString(endTime, {timezone: data.timezone})}</small></div>`;
+            ret += `<div class="hstack gap-2${data.state == "closed" ? " text-danger": " text-muted"}"><i class="bi bi-stop${data.state == "ongoing" ? "" : " text-danger"}"></i><small${data.state == "ongoing" ? `` : ` class="text-danger text-opacity-75"`}>${TimeDisplay.toLocaleString(endTime, {timezone: data.timezone})}</small></div>`;
         }
 
         return ret;

@@ -531,7 +531,7 @@ class TimeseriesSelector extends HTMLDivElement {
                 }
                 else {
                     let searchResultNoItems = document.createElement("p");
-                    searchResultNoItems.classList.add("fst-italic", "text-center", "opacity-75", "w-100");
+                    searchResultNoItems.classList.add("fst-italic", "text-center", "text-muted", "w-100");
                     searchResultNoItems.innerText = "No search results";
                     this.#searchResultsContainerElmt.appendChild(searchResultNoItems);
                 }

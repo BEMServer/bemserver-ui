@@ -62,19 +62,19 @@
                     <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
                             <div class="d-flex gap-3">
-                                <small class="fw-bold text-{% if x.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">[{{ x.campaign_state | upper }}]</small>
+                                <small class="fw-bold text-{% if x.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ x.campaign_state | upper }}]</small>
                                 <h6 class="fw-bold text-nowrap mb-0">{{ x.campaign_name }}</h6>
                             </div>
                             {% if is_campaign_selected %}
-                            <div><small class="opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
+                            <div><small class="text-opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
                             {% endif %}
                         </div>
-                        <div class="d-flex flex-sm-column gap-sm-0 gap-3 opacity-75">
+                        <div class="d-flex flex-sm-column gap-sm-0 gap-3">
                             <span><small class="fw-bold text-nowrap">Cleanup state</small></span>
                             {% if x.is_enabled %}
-                            <span class="fw-bold text-success text-sm-end">ON</span>
+                            <span class="fw-bold text-success text-opacity-75 text-sm-end">ON</span>
                             {% else %}
-                            <span class="fw-bold text-danger text-sm-end">OFF</span>
+                            <span class="fw-bold text-danger text-opacity-75 text-sm-end">OFF</span>
                             {% endif %}
                         </div>
                     </div>

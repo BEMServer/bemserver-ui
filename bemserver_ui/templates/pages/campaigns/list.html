@@ -62,25 +62,27 @@
                     <div class="d-xl-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
                             <div class="d-flex align-items-center gap-3">
-                                <small class="fw-bold text-{% if x.state == 'ongoing' %}success{% else %}danger{% endif %} opacity-75">[{{ x.state | upper }}]</small>
+                                <small class="fw-bold text-{% if x.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ x.state | upper }}]</small>
                                 <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
                             </div>
                             {% if is_campaign_selected %}
-                            <div><small class="opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
+                            <div><small class="text-opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
                             {% endif %}
-                            <div class="opacity-50 ms-2">{{ x.description }}</div>
+                            <div class="text-muted ms-2">{{ x.description }}</div>
                         </div>
                         <div class="v-stack">
                             <div class="d-flex gap-2">
                                 <i class="bi bi-watch"></i>
-                                <small class="fw-bold opacity-75">{{ x.timezone_info["area"]["label"] }}</small>
-                                <small class="opacity-75 ms-2">{{ x.timezone_info["label"] }}</small>
+                                <small class="fw-bold text-muted">{{ x.timezone_info["area"]["label"] }}</small>
+                                <small class="fst-italic text-black text-opacity-50 ms-2">{{ x.timezone_info["label"] }}</small>
                             </div>
                             {% if x.start_time is defined %}
-                            <div class="d-flex justify-content-xl-end gap-2 {% if x.state == 'ongoing' %}text-success{% endif %}"><i class="bi bi-play"></i><small class="opacity-50">{{ x.start_time | iso_datetime_format(tz_name=x.timezone, default="not defined") }}</small></div>
+                            {% set is_ongoing = x.state == "ongoing" %}
+                            <div class="d-flex justify-content-xl-end align-items-center gap-2 {% if not is_ongoing %}text-muted{% endif %}"><i class="bi bi-play{% if is_ongoing %} text-success{% endif %}"></i><small{% if is_ongoing %} class="text-success text-opacity-75"{% endif %}>{{ x.start_time | iso_datetime_format(tz_name=x.timezone, default="not defined") }}</small></div>
                             {% endif %}
                             {% if x.end_time is defined %}
-                            <div class="d-flex justify-content-xl-end gap-2 {% if x.state == 'closed' %}text-danger{% endif %}"><i class="bi bi-stop"></i><small class="opacity-50">{{ x.end_time | iso_datetime_format(tz_name=x.timezone, default="not defined") }}</small></div>
+                            {% set is_closed = x.state == "closed" %}
+                            <div class="d-flex justify-content-xl-end align-items-center gap-2 {% if not is_closed %}text-muted{% endif %}"><i class="bi bi-stop{% if is_closed %} text-danger{% endif %}"></i><small{% if is_closed %} class="text-danger text-opacity-75"{% endif %}>{{ x.end_time | iso_datetime_format(tz_name=x.timezone, default="not defined") }}</small></div>
                             {% endif %}
                         </div>
                     </div>

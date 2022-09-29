@@ -1,7 +1,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-start gap-2">
         <h5>Timeseries selection</h5>
-        <small id="countResultsSelected" class="opacity-75"></small>
+        <small id="countResultsSelected" class="text-muted"></small>
     </div>
     <div class="btn-group bg-white w-100">
         <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3"></div>
@@ -18,7 +18,7 @@
                 <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
             </div>
             <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                <small id="selectionLimit" class="text-nowrap fst-italic opacity-75">Selection limit: <i class="bi bi-infinity"></i></small>
+                <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity"></i></small>
                 <div class="d-lg-flex d-grid text-end gap-lg-3">
                     <a id="selectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">select all in page</small></a>
                     <a id="unselectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">unselect all in page</small></a>
@@ -27,12 +27,12 @@
                 </div>
             </div>
             <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 mb-3">
-                <p class="fst-italic text-center opacity-75 w-100">No search results</p>
+                <p class="fst-italic text-center text-muted w-100">No search results</p>
             </div>
             <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
                 <div class="d-flex justify-content-between align-items-center gap-4 w-100">
                     <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
-                    <small id="searchResultsCount" class="text-nowrap opacity-75"></small>
+                    <small id="searchResultsCount" class="text-nowrap text-muted"></small>
                 </div>
                 <ul is="app-pagination" id="searchResultsPagination"></ul>
             </nav>
