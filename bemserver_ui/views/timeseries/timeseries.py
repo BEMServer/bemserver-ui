@@ -366,7 +366,8 @@ def upload():
     if flask.request.method == "POST":
         try:
             flask.g.api_client.io.upload_timeseries_csv(
-                flask.g.campaign_ctxt.id, flask.request.files
+                flask.g.campaign_ctxt.id,
+                {k: v.stream for k, v in flask.request.files.items()},
             )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(

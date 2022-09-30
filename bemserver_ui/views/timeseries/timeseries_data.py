@@ -19,7 +19,7 @@ def upload():
             flask.g.api_client.timeseries_data.upload_csv_by_names(
                 flask.g.campaign_ctxt.id,
                 flask.request.form["data_state"],
-                flask.request.files,
+                {k: v.stream for k, v in flask.request.files.items()},
             )
         except bac.BEMServerAPIValidationError as exc:
             flask.abort(

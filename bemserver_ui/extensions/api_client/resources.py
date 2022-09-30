@@ -105,18 +105,30 @@ class TimeseriesDataResources(BaseResources):
     def enpoint_uri_by_campaign(self, campaign_id):
         return f"{self.endpoint_base_uri}campaign/{str(campaign_id)}/"
 
-    def upload_csv(self, data_state, csv_file):
+    def upload_csv(self, data_state, csv_files):
+        """
+
+        :param dict csv_files:
+            key is the upload field name (csv_file)
+            value is a file stream (tempfile.SpooledTemporaryFile)
+        """
         return self._req.upload(
             self.endpoint_base_uri,
             params={"data_state": data_state},
-            files=csv_file,
+            files=csv_files,
         )
 
-    def upload_csv_by_names(self, campaign_id, data_state, csv_file):
+    def upload_csv_by_names(self, campaign_id, data_state, csv_files):
+        """
+
+        :param dict csv_files:
+            key is the upload field name (csv_file)
+            value is a file stream (tempfile.SpooledTemporaryFile)
+        """
         return self._req.upload(
             self.enpoint_uri_by_campaign(campaign_id),
             params={"data_state": data_state},
-            files=csv_file,
+            files=csv_files,
         )
 
     def download_csv(
@@ -358,19 +370,27 @@ class IOResources(BaseResources):
     endpoint_base_uri = "/io/"
     disabled_endpoints = ["getall", "getone", "create", "update", "delete"]
 
-    def upload_timeseries_csv(self, campaign_id, timeseries_csv):
+    def upload_timeseries_csv(self, campaign_id, csv_files):
+        """
+
+        :param dict csv_files:
+            key is the upload field name (timeseries_csv)
+            value is a file stream (tempfile.SpooledTemporaryFile)
+        """
         endpoint = f"{self.endpoint_base_uri}timeseries"
         q_params = {"campaign_id": campaign_id}
-        return self._req.upload(endpoint, params=q_params, files=timeseries_csv)
+        return self._req.upload(endpoint, params=q_params, files=csv_files)
 
     def upload_sites_csv(self, campaign_id, csv_files):
+        """
+
+        :param dict csv_files:
+            key is the upload field name (sites_csv, buildings_csv...)
+            value is a file stream (tempfile.SpooledTemporaryFile)
+        """
         endpoint = f"{self.endpoint_base_uri}sites"
         q_params = {"campaign_id": campaign_id}
-        return self._req.upload(
-            endpoint,
-            params=q_params,
-            files={k: v for k, v in csv_files.items() if len(v.filename) > 0},
-        )
+        return self._req.upload(endpoint, params=q_params, files=csv_files)
 
 
 class AnalysisResources(BaseResources):
