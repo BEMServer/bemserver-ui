@@ -1,4 +1,5 @@
 """BEMServer API client"""
+import os
 import logging
 import json
 import flask
@@ -238,8 +239,18 @@ class BEMServerApiClientRequest:
         return self._execute("DELETE", endpoint, etag=etag)
 
     def upload(self, endpoint, files, **kwargs):
-        """Upload files."""
-        return self._execute("POST", endpoint, files=files, **kwargs)
+        """Upload files.
+
+        :param dict files:
+            key is the upload field name (csv_file, timeseries_csv or sites_csv...)
+            value is a file stream (tempfile.SpooledTemporaryFile)
+        """
+        not_empty_files = {}
+        for k, v in files.items():
+            if v.seek(0, os.SEEK_END) > 0:
+                v.seek(0, os.SEEK_SET)
+                not_empty_files[k] = v
+        return self._execute("POST", endpoint, files=not_empty_files, **kwargs)
 
     def download(self, endpoint, **kwargs):
         """Download files."""
