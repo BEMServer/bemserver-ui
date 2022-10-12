@@ -29,7 +29,7 @@
                     <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ user_group.name }}" minlength="1" maxlength="80" required autofocus>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ url_for('user_groups.manage', id=user_group.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                    <a href="{{ url_for('user_groups.view', id=user_group.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
                     <form id="editForm" action="{{ url_for('user_groups.edit', id=user_group.id) }}" method="POST">
                         <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                         <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
