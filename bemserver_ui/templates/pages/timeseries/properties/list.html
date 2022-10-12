@@ -26,7 +26,6 @@
                     </caption>
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
                             <th scope="col">Name</th>
                             <th scope="col">Type</th>
                             <th scope="col">Unit</th>
@@ -37,8 +36,7 @@
                     <tbody class="table-group-divider">
                         {% for prop in properties %}
                         <tr class="align-middle">
-                            <th scope="row">{{ prop.id }}</th>
-                            <td>{{ prop.name }}</td>
+                            <th scope="row">{{ prop.name }}</th>
                             <td>{{ prop.value_type }}</td>
                             <td>{{ prop.unit_symbol }}</td>
                             <td>

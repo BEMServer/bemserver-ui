@@ -61,12 +61,11 @@
                     </caption>
                     <thead>
                         <tr>
-                            <th scope="col" colspan="5"></th>
+                            <th scope="col" colspan="4"></th>
                             <th scope="col" colspan="{{ structural_elements|length }}" class="text-center">Used in</th>
                             <th scope="col"></th>
                         </tr>
                         <tr>
-                            <th scope="col">#</th>
                             <th scope="col">Name</th>
                             <th scope="col">Type</th>
                             <th scope="col">Unit</th>
@@ -80,8 +79,7 @@
                     <tbody class="table-group-divider">
                         {% for prop in properties %}
                         <tr class="align-middle">
-                            <th scope="row">{{ prop.id }}</th>
-                            <td>{{ prop.name }}</td>
+                            <th scope="row">{{ prop.name }}</th>
                             <td>{{ prop.value_type }}</td>
                             <td>{{ prop.unit_symbol }}</td>
                             <td class="w-50">
