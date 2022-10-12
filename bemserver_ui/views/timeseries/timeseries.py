@@ -2,7 +2,6 @@
 from copy import deepcopy
 import flask
 
-import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
@@ -81,12 +80,9 @@ def list():
         [filters[f"{x}_id"] is not None for x in FULL_STRUCTURAL_ELEMENT_TYPES]
     )
 
-    try:
-        campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
-            campaign_id=campaign_id, sort="+name"
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
+        campaign_id=campaign_id, sort="+name"
+    )
 
     campaign_scopes_by_id = {}
     for campaign_scope in campaign_scopes_resp.data:
@@ -100,11 +96,8 @@ def list():
             .data
         )
 
-    try:
-        # Get timeseries list applying filters.
-        timeseries_resp = flask.g.api_client.timeseries.getall(**filters, sort="+name")
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    # Get timeseries list applying filters.
+    timeseries_resp = flask.g.api_client.timeseries.getall(**filters, sort="+name")
 
     timeseries_data = deepcopy(timeseries_resp.data)
     for ts_data in timeseries_data:
@@ -135,24 +128,13 @@ def create():
             "description": flask.request.form["description"],
             "unit_symbol": flask.request.form["unit_symbol"],
         }
-        try:
-            ret = flask.g.api_client.timeseries.create(payload)
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(
-                422,
-                description="An error occured while creating the timeseries!",
-                response=exc.errors,
-            )
-        else:
-            flask.flash(f"New timeseries created: {ret.data['name']}", "success")
-            return flask.redirect(flask.url_for("timeseries.list"))
+        ret = flask.g.api_client.timeseries.create(payload)
+        flask.flash(f"New timeseries created: {ret.data['name']}", "success")
+        return flask.redirect(flask.url_for("timeseries.list"))
 
-    try:
-        campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
-            campaign_id=flask.g.campaign_ctxt.id, sort="+name"
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
+        campaign_id=flask.g.campaign_ctxt.id, sort="+name"
+    )
 
     return flask.render_template(
         "pages/timeseries/create.html", campaign_scopes=campaign_scopes_resp.data
@@ -163,18 +145,12 @@ def create():
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def edit(id):
-    try:
-        properties_resp = flask.g.api_client.timeseries_properties.getall()
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    properties_resp = flask.g.api_client.timeseries_properties.getall()
     available_properties = {x["id"]: x for x in properties_resp.data}
 
-    try:
-        property_data_resp = flask.g.api_client.timeseries_property_data.getall(
-            **{"timeseries_id": id}
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    property_data_resp = flask.g.api_client.timeseries_property_data.getall(
+        **{"timeseries_id": id}
+    )
 
     properties = {}
     for property in property_data_resp.data:
@@ -185,12 +161,9 @@ def edit(id):
             property[k] = v
 
         # Get ETag.
-        try:
-            property_data_resp = flask.g.api_client.timeseries_property_data.getone(
-                property["id"]
-            )
-        except bac.BEMServerAPINotFoundError:
-            flask.abort(404, f"{property['name']} property not found!")
+        property_data_resp = flask.g.api_client.timeseries_property_data.getone(
+            property["id"]
+        )
         property["etag"] = property_data_resp.etag
 
         properties[property["property_id"]] = property
@@ -201,69 +174,44 @@ def edit(id):
             "description": flask.request.form["description"],
             "unit_symbol": flask.request.form["unit_symbol"],
         }
-        try:
-            timeseries_resp = flask.g.api_client.timeseries.update(
-                id, payload, etag=flask.request.form["editEtag"]
-            )
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(
-                422,
-                description="An error occured while updating the timeseries!",
-                response=exc.errors,
-            )
-        except bac.BEMServerAPINotFoundError:
-            flask.abort(404, description="Timeseries not found!")
-        else:
-            flask.flash(
-                f"{timeseries_resp.data['name']} timeseries updated!", "success"
-            )
-
-            # Update property values, only if value has changed.
-            for prop_id, prop_data in properties.items():
-                # Flask form is special with checkboxes, it sets:
-                #  - "on" if a checkbox input is checked
-                #  - nothing is checkbox is not checked
-                # In the second case, as the input field is not event in the request,
-                #  and assuming current property type is boolean,
-                #  we set a default value to "off".
-                prop_value = flask.request.form.get(f"property-{prop_id}", "off")
-                # For boolean properties, format value to minified "boolean" string.
-                if prop_data["value_type"] == "boolean":
-                    prop_value = "true" if prop_value == "on" else "false"
-                payload = {
-                    "timeseries_id": timeseries_resp.data["id"],
-                    "property_id": prop_id,
-                    "value": prop_value,
-                }
-                if payload["value"] == prop_data["value"]:
-                    continue
-                try:
-                    flask.g.api_client.timeseries_property_data.update(
-                        prop_data["id"],
-                        payload,
-                        etag=flask.request.form[f"property-{prop_id}-etag"],
-                    )
-                except bac.BEMServerAPIValidationError as exc:
-                    flask.session["_validation_errors"] = exc.errors
-                    flask.flash(
-                        f"Error while setting {prop_data['name']} property!", "warning"
-                    )
-                else:
-                    flask.flash(f"{prop_data['name']} property updated!", "success")
-
-            return flask.redirect(flask.url_for("timeseries.list"))
-
-    try:
-        timeseries_resp = flask.g.api_client.timeseries.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Timeseries not found!")
-
-    try:
-        campaign_scopes_resp = flask.g.api_client.campaign_scopes.getone(
-            timeseries_resp.data["campaign_scope_id"]
+        timeseries_resp = flask.g.api_client.timeseries.update(
+            id, payload, etag=flask.request.form["editEtag"]
         )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+        flask.flash(f"{timeseries_resp.data['name']} timeseries updated!", "success")
+
+        # Update property values, only if value has changed.
+        for prop_id, prop_data in properties.items():
+            # Flask form is special with checkboxes, it sets:
+            #  - "on" if a checkbox input is checked
+            #  - nothing is checkbox is not checked
+            # In the second case, as the input field is not event in the request,
+            #  and assuming current property type is boolean,
+            #  we set a default value to "off".
+            prop_value = flask.request.form.get(f"property-{prop_id}", "off")
+            # For boolean properties, format value to minified "boolean" string.
+            if prop_data["value_type"] == "boolean":
+                prop_value = "true" if prop_value == "on" else "false"
+            payload = {
+                "timeseries_id": timeseries_resp.data["id"],
+                "property_id": prop_id,
+                "value": prop_value,
+            }
+            if payload["value"] == prop_data["value"]:
+                continue
+            flask.g.api_client.timeseries_property_data.update(
+                prop_data["id"],
+                payload,
+                etag=flask.request.form[f"property-{prop_id}-etag"],
+            )
+            flask.flash(f"{prop_data['name']} property updated!", "success")
+
+        return flask.redirect(flask.url_for("timeseries.list"))
+
+    timeseries_resp = flask.g.api_client.timeseries.getone(id)
+
+    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getone(
+        timeseries_resp.data["campaign_scope_id"]
+    )
 
     timeseries_data = deepcopy(timeseries_resp.data)
     timeseries_data["campaign_scope_name"] = campaign_scopes_resp.data["name"]
@@ -283,13 +231,8 @@ def edit(id):
 @blp.route("/<int:id>/delete", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
-    try:
-        flask.g.api_client.timeseries.delete(id, etag=flask.request.form["delEtag"])
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Timeseries not found!")
-    else:
-        flask.flash("Timeseries deleted!", "success")
-
+    flask.g.api_client.timeseries.delete(id, etag=flask.request.form["delEtag"])
+    flask.flash("Timeseries deleted!", "success")
     return flask.redirect(flask.url_for("timeseries.list"))
 
 
@@ -311,16 +254,8 @@ def create_property(id):
         "property_id": flask.request.form["availableProperty"],
         "value": prop_value,
     }
-    try:
-        flask.g.api_client.timeseries_property_data.create(payload)
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(
-            422,
-            description="Error while setting the timeseries property value!",
-            response=exc.errors,
-        )
-    else:
-        flask.flash("Property value defined!", "success")
+    flask.g.api_client.timeseries_property_data.create(payload)
+    flask.flash("Property value defined!", "success")
 
     return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
 
@@ -329,15 +264,10 @@ def create_property(id):
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def delete_property(id, property_id):
-    try:
-        flask.g.api_client.timeseries_property_data.delete(
-            property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
-        )
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Property not found!")
-    else:
-        flask.flash("Property value deleted!", "success")
-
+    flask.g.api_client.timeseries_property_data.delete(
+        property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
+    )
+    flask.flash("Property value deleted!", "success")
     return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
 
 
@@ -364,19 +294,11 @@ def manage_structural_elements():
 @ensure_campaign_context
 def upload():
     if flask.request.method == "POST":
-        try:
-            flask.g.api_client.io.upload_timeseries_csv(
-                flask.g.campaign_ctxt.id,
-                {k: v.stream for k, v in flask.request.files.items()},
-            )
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(
-                422,
-                description="Error while uploading timeseries files!",
-                response=exc.errors,
-            )
-        else:
-            flask.flash("Timeseries uploaded!", "success")
-            return flask.redirect(flask.url_for("timeseries.list"))
+        flask.g.api_client.io.upload_timeseries_csv(
+            flask.g.campaign_ctxt.id,
+            {k: v.stream for k, v in flask.request.files.items()},
+        )
+        flask.flash("Timeseries uploaded!", "success")
+        return flask.redirect(flask.url_for("timeseries.list"))
 
     return flask.render_template("pages/timeseries/upload.html")

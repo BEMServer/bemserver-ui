@@ -1,7 +1,6 @@
 """Timeseries internal API"""
 import flask
 
-import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 from bemserver_ui.views.structural_elements.structural_elements import (
@@ -31,11 +30,8 @@ def retrieve_list():
         if f"{struct_elmt}_id" in flask.request.args:
             filters[f"{struct_elmt}_id"] = flask.request.args[f"{struct_elmt}_id"]
 
-    try:
-        # Get timeseries list.
-        timeseries_resp = flask.g.api_client.timeseries.getall(sort="+name", **filters)
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    # Get timeseries list.
+    timeseries_resp = flask.g.api_client.timeseries.getall(sort="+name", **filters)
 
     return flask.jsonify(
         {"data": timeseries_resp.data, "pagination": timeseries_resp.pagination}
@@ -46,20 +42,14 @@ def retrieve_list():
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_property_data(id):
-    try:
-        properties_resp = flask.g.api_client.timeseries_properties.getall()
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    properties_resp = flask.g.api_client.timeseries_properties.getall()
     available_properties = {}
     for property in properties_resp.data:
         available_properties[property["id"]] = property
 
-    try:
-        property_data_resp = flask.g.api_client.timeseries_property_data.getall(
-            **{"timeseries_id": id}
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    property_data_resp = flask.g.api_client.timeseries_property_data.getall(
+        **{"timeseries_id": id}
+    )
 
     properties = []
     for property in property_data_resp.data:
@@ -87,12 +77,9 @@ def retrieve_structural_elements(id):
         api_ts_by_struct_elmt = getattr(
             flask.g.api_client, f"timeseries_by_{struct_elmt_type}s"
         )
-        try:
-            ts_struct_elmt_resp = api_ts_by_struct_elmt.getall(
-                timeseries_id=id, sort="+name"
-            )
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(422, description=exc.errors)
+        ts_struct_elmt_resp = api_ts_by_struct_elmt.getall(
+            timeseries_id=id, sort="+name"
+        )
         data[struct_elmt_type] = ts_struct_elmt_resp.data
         for ts_struct_elmt in data[struct_elmt_type]:
             # Get ETag.
@@ -124,12 +111,7 @@ def post_structural_elements(id):
         flask.g.api_client, f"timeseries_by_{struct_elmt_type}s"
     )
     payload = {"timeseries_id": id, f"{struct_elmt_type}_id": struct_elmt_id}
-    try:
-        ret_resp = api_tsbystructelmt_resource.create(payload)
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(
-            422, description="Error while locating the timeseries!", response=exc.errors
-        )
+    ret_resp = api_tsbystructelmt_resource.create(payload)
 
     return flask.jsonify(
         {
@@ -150,11 +132,6 @@ def remove_structural_elements(id):
     api_tsbystructelmt_resource = getattr(
         flask.g.api_client, f"timeseries_by_{struct_elmt_type}s"
     )
-    try:
-        api_tsbystructelmt_resource.delete(rel_id, etag=etag)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(
-            404, description="Timeseries has already been removed from this location!"
-        )
+    api_tsbystructelmt_resource.delete(rel_id, etag=etag)
 
-    return flask.jsonify()
+    return flask.jsonify({"success": True})

@@ -4,7 +4,6 @@ import csv
 import zoneinfo
 import flask
 
-import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -39,47 +38,34 @@ def retrieve_data(id):
     except BEMServerUICommonInvalidDatetimeError:
         flask.abort(422, description="Invalid end datetime!")
 
-    try:
-        ts_resp = flask.g.api_client.timeseries.getone(id=id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Timeseries not found!")
+    ts_resp = flask.g.api_client.timeseries.getone(id=id)
 
-    try:
-        ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
-            id=data_state_id
+    ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
+        id=data_state_id
+    )
+
+    if (
+        aggregation is not None
+        and bucket_width_value is not None
+        and bucket_width_unit is not None
+    ):
+        ts_data_csv = flask.g.api_client.timeseries_data.download_csv_aggregate(
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            [id],
+            timezone=tz_name,
+            aggregation=aggregation,
+            bucket_width_value=bucket_width_value,
+            bucket_width_unit=bucket_width_unit,
         )
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Timeseries data state not found!")
-
-    try:
-        if (
-            aggregation is not None
-            and bucket_width_value is not None
-            and bucket_width_unit is not None
-        ):
-            ts_data_csv = flask.g.api_client.timeseries_data.download_csv_aggregate(
-                dt_start.isoformat(),
-                dt_end.isoformat(),
-                data_state_id,
-                [id],
-                timezone=tz_name,
-                aggregation=aggregation,
-                bucket_width_value=bucket_width_value,
-                bucket_width_unit=bucket_width_unit,
-            )
-        else:
-            ts_data_csv = flask.g.api_client.timeseries_data.download_csv(
-                dt_start.isoformat(),
-                dt_end.isoformat(),
-                data_state_id,
-                [id],
-                timezone=tz_name,
-            )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(
-            422,
-            description="Error while downloading timeseries data!",
-            response=exc.errors,
+    else:
+        ts_data_csv = flask.g.api_client.timeseries_data.download_csv(
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            [id],
+            timezone=tz_name,
         )
 
     ts_headers = ["Datetime", str(id)]
@@ -127,18 +113,11 @@ def delete_data():
     except BEMServerUICommonInvalidDatetimeError:
         flask.abort(422, description="Invalid end datetime!")
 
-    try:
-        flask.g.api_client.timeseries_data.delete(
-            dt_start.isoformat(),
-            dt_end.isoformat(),
-            flask.request.json["data_state"],
-            flask.request.json["timeseries_ids"],
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(
-            422,
-            description="Error while deleting timeseries data!",
-            response=exc.errors,
-        )
+    flask.g.api_client.timeseries_data.delete(
+        dt_start.isoformat(),
+        dt_end.isoformat(),
+        flask.request.json["data_state"],
+        flask.request.json["timeseries_ids"],
+    )
 
     return flask.jsonify({"success": True})

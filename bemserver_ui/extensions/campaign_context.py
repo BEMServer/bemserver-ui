@@ -8,7 +8,7 @@ import enum
 import flask
 from flask import url_for as flask_url_for
 
-import bemserver_ui.extensions.api_client.exceptions as bac
+import bemserver_api_client.exceptions as bac
 
 
 class CampaignState(enum.Enum):

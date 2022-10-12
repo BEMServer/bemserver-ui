@@ -1,7 +1,8 @@
 """Structural elements internal API"""
 import flask
 
-import bemserver_ui.extensions.api_client as bac
+import bemserver_api_client.exceptions as bac_exc
+
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
@@ -23,7 +24,6 @@ def retrieve_list():
             .getall(campaign_id=campaign_id, sort="+name")
             .data
         )
-
     return flask.jsonify(structural_elements)
 
 
@@ -42,11 +42,7 @@ def retrieve_list_for(type):
         flask.abort(404, description=f"{type} not found!")
 
     api_endpoint = getattr(flask.g.api_client, f"{type}")
-    try:
-        type_resp = api_endpoint.getall(campaign_id=campaign_id, sort="+name")
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
-
+    type_resp = api_endpoint.getall(campaign_id=campaign_id, sort="+name")
     return flask.jsonify(type_resp.data)
 
 
@@ -54,11 +50,7 @@ def retrieve_list_for(type):
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_data(type, id):
-    try:
-        ret_resp = getattr(flask.g.api_client, f"{type}s").getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description=f"{type} not found!")
-
+    ret_resp = getattr(flask.g.api_client, f"{type}s").getone(id)
     return flask.jsonify(
         {
             "type": type,
@@ -73,19 +65,13 @@ def retrieve_data(type, id):
 @ensure_campaign_context
 def retrieve_property_data(type, id):
     api_prop_resource = getattr(flask.g.api_client, f"{type}_properties")
-    try:
-        properties_resp = api_prop_resource.getall()
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    properties_resp = api_prop_resource.getall()
     available_properties = {}
     for property in properties_resp.data:
         available_properties[property["id"]] = property
 
     api_propdata_resource = getattr(flask.g.api_client, f"{type}_property_data")
-    try:
-        property_data_resp = api_propdata_resource.getall(**{f"{type}_id": id})
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    property_data_resp = api_propdata_resource.getall(**{f"{type}_id": id})
 
     properties = []
     for property_data in property_data_resp.data:
@@ -109,10 +95,7 @@ def retrieve_property_data(type, id):
 @ensure_campaign_context
 def retrieve_timeseries(type, id):
     api_prop_resource = getattr(flask.g.api_client, f"timeseries_by_{type}s")
-    try:
-        ts_by_type_resp = api_prop_resource.getall(**{f"{type}_id": id})
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    ts_by_type_resp = api_prop_resource.getall(**{f"{type}_id": id})
 
     timeseries = []
     for ts_by_type in ts_by_type_resp.data:
@@ -120,9 +103,11 @@ def retrieve_timeseries(type, id):
             ts_resp = flask.g.api_client.timeseries.getone(
                 id=ts_by_type["timeseries_id"]
             )
-        except bac.BEMServerAPINotFoundError:
+        except bac_exc.BEMServerAPINotFoundError:
+            # Just ignore this case (timeseries not found).
             pass
-        timeseries.append(ts_resp.data)
+        else:
+            timeseries.append(ts_resp.data)
 
     return flask.jsonify(
         {

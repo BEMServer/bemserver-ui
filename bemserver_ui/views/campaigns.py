@@ -2,7 +2,8 @@
 import zoneinfo
 import flask
 
-import bemserver_ui.extensions.api_client as bac
+import bemserver_api_client.exceptions as bac_exc
+
 from bemserver_ui.extensions import auth, Roles
 from bemserver_ui.extensions.campaign_context import deduce_campaign_state
 from bemserver_ui.extensions.timezones import get_tz_info
@@ -32,14 +33,11 @@ def list():
         ui_filters["in_name"] is not None and ui_filters["in_name"] != ""
     )
 
-    try:
-        # Get campaign list.
-        campaigns_resp = flask.g.api_client.campaigns.getall(
-            sort="+name",
-            **api_filters,
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    # Get campaign list.
+    campaigns_resp = flask.g.api_client.campaigns.getall(
+        sort="+name",
+        **api_filters,
+    )
 
     campaigns = []
     for x in campaigns_resp.data:
@@ -56,15 +54,12 @@ def list():
     )
 
 
-@blp.route("/<int:id>/view")
+@blp.route("/<int:id>")
 @auth.signin_required
 def view(id):
     tab = flask.request.args.get("tab", "general")
 
-    try:
-        campaign_resp = flask.g.api_client.campaigns.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Campaign not found!")
+    campaign_resp = flask.g.api_client.campaigns.getone(id)
 
     campaign = campaign_resp.data
     campaign["state"] = deduce_campaign_state(campaign)
@@ -76,7 +71,7 @@ def view(id):
     for x in ugroups_resp.data:
         try:
             ugroup_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
-        except bac.BEMServerAPINotFoundError:
+        except bac_exc.BEMServerAPINotFoundError:
             # Here, just ignore if a user group has been deleted.
             pass
         else:
@@ -127,17 +122,9 @@ def create():
             else:
                 payload["end_time"] = end_time.isoformat()
 
-        try:
-            ret = flask.g.api_client.campaigns.create(payload)
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(
-                422,
-                description="An error occured while creating the campaign!",
-                response=exc.errors,
-            )
-        else:
-            flask.flash(f"New campaign created: {ret.data['name']}", "success")
-            return flask.redirect(flask.url_for("campaigns.list"))
+        campaign_resp = flask.g.api_client.campaigns.create(payload)
+        flask.flash(f"New campaign created: {campaign_resp.data['name']}", "success")
+        return flask.redirect(flask.url_for("campaigns.list"))
 
     return flask.render_template("pages/campaigns/create.html")
 
@@ -177,26 +164,13 @@ def edit(id):
             else:
                 payload["end_time"] = end_time.isoformat()
 
-        try:
-            flask.g.api_client.campaigns.update(
-                id, payload, etag=flask.request.form["editEtag"]
-            )
-        except bac.BEMServerAPIValidationError as exc:
-            flask.abort(
-                422,
-                description="An error occured while updating the campaign!",
-                response=exc.errors,
-            )
-        except bac.BEMServerAPINotFoundError:
-            flask.abort(404, description="Campaign not found!")
-        else:
-            flask.flash("Campaign updated!", "success")
-            return flask.redirect(flask.url_for("campaigns.view", id=id))
+        flask.g.api_client.campaigns.update(
+            id, payload, etag=flask.request.form["editEtag"]
+        )
+        flask.flash("Campaign updated!", "success")
+        return flask.redirect(flask.url_for("campaigns.view", id=id))
 
-    try:
-        campaign_resp = flask.g.api_client.campaigns.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Campaign not found!")
+    campaign_resp = flask.g.api_client.campaigns.getone(id)
 
     campaign_data = campaign_resp.data
     campaign_tz = zoneinfo.ZoneInfo(campaign_data["timezone"])
@@ -227,42 +201,25 @@ def edit(id):
 @blp.route("/<int:id>/delete", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
-    try:
-        flask.g.api_client.campaigns.delete(id, etag=flask.request.form["delEtag"])
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Campaign not found!")
-    else:
-        flask.flash("Campaign deleted!", "success")
-
+    flask.g.api_client.campaigns.delete(id, etag=flask.request.form["delEtag"])
+    flask.flash("Campaign deleted!", "success")
     return flask.redirect(flask.url_for("campaigns.list"))
 
 
 @blp.route("/<int:id>/manage_groups", methods=["GET", "POST"])
 @auth.signin_required(roles=[Roles.admin])
 def manage_groups(id):
-    try:
-        campaign = flask.g.api_client.campaigns.getone(id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Campaign not found!")
+    campaign_resp = flask.g.api_client.campaigns.getone(id)
 
     if flask.request.method == "POST":
         user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
         for user_group_id in user_group_ids:
-            try:
-                flask.g.api_client.user_groups_by_campaigns.create(
-                    {
-                        "campaign_id": id,
-                        "user_group_id": user_group_id,
-                    }
-                )
-            except bac.BEMServerAPIValidationError as exc:
-                flask.abort(
-                    409,
-                    description=(
-                        "An error occured while trying to add user group in campaign!"
-                    ),
-                    response=exc.errors,
-                )
+            flask.g.api_client.user_groups_by_campaigns.create(
+                {
+                    "campaign_id": id,
+                    "user_group_id": user_group_id,
+                }
+            )
         if len(user_group_ids) > 0:
             flask.flash("User added to selected group(s)!", "success")
 
@@ -286,8 +243,8 @@ def manage_groups(id):
 
     return flask.render_template(
         "pages/campaigns/manage_groups.html",
-        campaign=campaign.data,
-        etag=campaign.etag,
+        campaign=campaign_resp.data,
+        etag=campaign_resp.etag,
         user_groups=groups,
         available_groups=available_groups,
     )
@@ -297,13 +254,6 @@ def manage_groups(id):
 @auth.signin_required(roles=[Roles.admin])
 def remove_user_group(id):
     rel_id = flask.request.args["rel_id"]
-    try:
-        flask.g.api_client.user_groups_by_campaigns.delete(rel_id)
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(
-            404, description="User group has already been removed from this campaign!"
-        )
-    else:
-        flask.flash("User group removed from campaign!", "success")
-
+    flask.g.api_client.user_groups_by_campaigns.delete(rel_id)
+    flask.flash("User group removed from campaign!", "success")
     return flask.redirect(flask.request.args["next"])
