@@ -1,7 +1,8 @@
 """Users internal API"""
 import flask
 
-import bemserver_ui.extensions.api_client as bac
+import bemserver_api_client.exceptions as bac_exc
+
 from bemserver_ui.extensions import auth
 
 
@@ -20,7 +21,7 @@ def list_groups(id):
             user_group_resp = flask.g.api_client.user_groups.getone(
                 id=x["user_group_id"]
             )
-        except bac.BEMServerAPINotFoundError:
+        except bac_exc.BEMServerAPINotFoundError:
             # Here, just ignore if a user group has been deleted meanwhile.
             pass
         else:

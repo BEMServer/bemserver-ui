@@ -1,7 +1,8 @@
 """Cleanup service views"""
 import flask
 
-import bemserver_ui.extensions.api_client as bac
+import bemserver_api_client.exceptions as bac_exc
+
 from bemserver_ui.extensions import auth, Roles
 
 
@@ -48,15 +49,11 @@ def list():
         or ui_filters["service_state"] != "all"
     )
 
-    try:
-        # Get cleanup campaign list.
-        cleanup_campaigns_resp = flask.g.api_client.st_cleanup_by_campaign.get_full(
-            sort="+campaign_name",
-            **api_filters,
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
-
+    # Get cleanup campaign list.
+    cleanup_campaigns_resp = flask.g.api_client.st_cleanup_by_campaign.get_full(
+        sort="+campaign_name",
+        **api_filters,
+    )
     cleanup_campaigns = []
     for cleanup_camp in cleanup_campaigns_resp.data:
         cleanup_camp = _ensure_cleanup_campaign_data(cleanup_camp)
@@ -79,7 +76,7 @@ def _get_cleanup_data(cleanup_id):
         cleanup_campaign_resp = flask.g.api_client.st_cleanup_by_campaign.getone(
             cleanup_id
         )
-    except bac.BEMServerAPINotFoundError:
+    except bac_exc.BEMServerAPINotFoundError:
         cleanup_campaign = None
         cleanup_campaign_etag = None
     else:
@@ -114,13 +111,10 @@ def _get_cleanup_data_for_campaign(campaign_id):
 def _manage(cleanup_campaign, cleanup_campaign_etag):
     cleanup_campaign = _ensure_cleanup_campaign_data(cleanup_campaign)
 
-    try:
-        cleanup_ts_resp = flask.g.api_client.st_cleanup_by_timeseries.get_full(
-            campaign_id=cleanup_campaign["campaign_id"],
-            sort="-last_timestamp,+timeseries_name",
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, response=exc.errors)
+    cleanup_ts_resp = flask.g.api_client.st_cleanup_by_timeseries.get_full(
+        campaign_id=cleanup_campaign["campaign_id"],
+        sort="-last_timestamp,+timeseries_name",
+    )
 
     return flask.render_template(
         "pages/services/cleanup/manage.html",

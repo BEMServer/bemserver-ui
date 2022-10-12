@@ -26,3 +26,8 @@ def init_app(app):
             return default
 
         return ret.strftime("%d/%m/%Y, %H:%M:%S UTC%z")
+
+    @app.template_filter("is_dict")
+    def is_dict(obj_instance):
+        """Test if an object instance is of dictionary type."""
+        return isinstance(obj_instance, dict)

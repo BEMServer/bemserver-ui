@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements/install.txt setup.py
 #
+bemserver-api-client @ https://github.com/BEMServer/bemserver-api-client/archive/e548edc.tar.gz
+    # via bemserver-ui (setup.py)
 certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.12
@@ -25,7 +27,7 @@ markupsafe==2.1.1
 python-dotenv==0.20.0
     # via bemserver-ui (setup.py)
 requests==2.27.1
-    # via bemserver-ui (setup.py)
+    # via bemserver-api-client
 urllib3==1.26.9
     # via requests
 werkzeug==2.1.2

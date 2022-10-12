@@ -4,7 +4,6 @@ import zoneinfo
 import calendar
 import flask
 
-import bemserver_ui.extensions.api_client as bac
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -47,26 +46,20 @@ def retrieve_completeness():
         )
     dt_start = dt_end - dt_period_delta
 
-    try:
-        # Get completeness data.
-        analysis_resp = flask.g.api_client.analysis.get_completeness(
-            dt_start.isoformat(),
-            dt_end.isoformat(),
-            timeseries_ids,
-            data_state_id,
-            bucket_width_value,
-            bucket_width_unit,
-            timezone=tz_name,
-        )
-    except bac.BEMServerAPIValidationError as exc:
-        flask.abort(422, description=exc.errors)
+    # Get completeness data.
+    analysis_resp = flask.g.api_client.analysis.get_completeness(
+        dt_start.isoformat(),
+        dt_end.isoformat(),
+        timeseries_ids,
+        data_state_id,
+        bucket_width_value,
+        bucket_width_unit,
+        timezone=tz_name,
+    )
 
-    try:
-        ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
-            id=data_state_id
-        )
-    except bac.BEMServerAPINotFoundError:
-        flask.abort(404, description="Timeseries data state not found!")
+    ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
+        id=data_state_id
+    )
 
     completeness_data = analysis_resp.data
     completeness_data["datastate_name"] = ts_datastate_resp.data["name"]

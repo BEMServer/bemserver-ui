@@ -1,29 +1,28 @@
-"""BEMServer API client"""
+"""BEMServer API client
+
+API client exceptions are automatically handled by flask's error_handlers.
+"""
 import flask
 
-from .client import BEMServerApiClient, HTTPBasicAuth
-from .exceptions import (  # noqa
-    BEMServerAPIValidationError,
-    BEMServerAPINotFoundError,
-)
+from bemserver_api_client import BEMServerApiClient
 
 
 def init_app(app):
 
     host = app.config["BEMSERVER_API_HOST"]
     use_ssl = app.config["BEMSERVER_API_USE_SSL"]
-    base_uri = f"http{'s' if use_ssl else ''}://{host}"
 
     def make_api_client(_):
         authentication_method = None
         if "auth_data" in flask.session:
             if app.config["BEMSERVER_API_AUTH_METHOD"] == "http_basic":
-                authentication_method = HTTPBasicAuth(
-                    flask.session["auth_data"]["email"].encode(encoding="utf-8"),
-                    flask.session["auth_data"]["password"].encode(encoding="utf-8"),
+                authentication_method = BEMServerApiClient.make_http_basic_auth(
+                    flask.session["auth_data"]["email"],
+                    flask.session["auth_data"]["password"],
                 )
         return BEMServerApiClient(
-            base_uri=base_uri,
+            host,
+            use_ssl=use_ssl,
             authentication_method=authentication_method,
         )
 
