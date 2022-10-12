@@ -13,12 +13,12 @@ class DropZone extends HTMLDivElement {
 
     #getDraggedElmtCallback = null;
 
-    constructor(options = { dropEffect: "copy", helpTitle: "No items yet.", helpTexts: ["Drag and drop items here."], getDraggedElmtCallback: null }) {
+    constructor(options) {
         super();
 
-        this.#dropEffect = options.dropEffect;
-        this.#helpTitle = options.helpTitle;
-        this.#helpTexts = options.helpTexts;
+        this.#dropEffect = options.dropEffect || "copy";
+        this.#helpTitle = options.helpTitle || "No items yet.";
+        this.#helpTexts = options.helpTexts || ["Drag and drop items here."];
         this.#getDraggedElmtCallback = options.getDraggedElmtCallback;
     }
 
