@@ -3,7 +3,7 @@ import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 
 
-class StructuralElementsExploreView {
+export class StructuralElementsExploreView {
 
     #internalAPIRequester = null;
     #generalReqID = null;
@@ -264,6 +264,3 @@ class StructuralElementsExploreView {
         }
     }
 }
-
-
-export { StructuralElementsExploreView };

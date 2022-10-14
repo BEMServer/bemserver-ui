@@ -4,7 +4,7 @@ import { Spinner } from "../../components/spinner.js";
 import { Parser } from "../../tools/parser.js";
 
 
-class TimeseriesListView {
+export class TimeseriesListView {
 
     #internalAPIRequester = null;
     #getStructElmtsReqID = null;
@@ -234,6 +234,3 @@ class TimeseriesListView {
         }
     }
 }
-
-
-export { TimeseriesListView };

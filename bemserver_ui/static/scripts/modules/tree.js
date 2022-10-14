@@ -1,7 +1,7 @@
 import { Parser } from "./tools/parser.js"
 
 
-class Tree {
+export class Tree {
 
     treeElmt = null;
 
@@ -196,6 +196,3 @@ class Tree {
         };
     }
 }
-
-
-export { Tree };

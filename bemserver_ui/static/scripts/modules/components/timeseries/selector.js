@@ -7,7 +7,7 @@ import { Parser } from "../../tools/parser.js";
 import { flaskES6 } from "../../../app.js";
 
 
-class SelectedItem extends HTMLSpanElement {
+export class SelectedItem extends HTMLSpanElement {
 
     #itemId = null;
     #itemText = null;
@@ -59,7 +59,7 @@ class SelectedItem extends HTMLSpanElement {
 }
 
 
-class SearchResultItem extends HTMLButtonElement {
+export class SearchResultItem extends HTMLButtonElement {
 
     #itemId = null;
     #itemText = null;
@@ -135,7 +135,7 @@ class SearchResultItem extends HTMLButtonElement {
 }
 
 
-class TimeseriesSelector extends HTMLDivElement {
+export class TimeseriesSelector extends HTMLDivElement {
 
     #allowedSelectionLimit = -1;
 
@@ -567,9 +567,12 @@ class TimeseriesSelector extends HTMLDivElement {
 }
 
 
-customElements.define("app-ts-selected-item", SelectedItem, { extends: "span" });
-customElements.define("app-ts-search-result-item", SearchResultItem, { extends: "button" });
-customElements.define("app-ts-selector", TimeseriesSelector, { extends: "div" });
-
-
-export { TimeseriesSelector, SearchResultItem, SelectedItem } ;
+if (customElements.get("app-ts-selected-item") == null) {
+    customElements.define("app-ts-selected-item", SelectedItem, { extends: "span" });
+}
+if (customElements.get("app-ts-search-result-item") == null) {
+    customElements.define("app-ts-search-result-item", SearchResultItem, { extends: "button" });
+}
+if (customElements.get("app-ts-selector") == null) {
+    customElements.define("app-ts-selector", TimeseriesSelector, { extends: "div" });
+}

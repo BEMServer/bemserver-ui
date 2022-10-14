@@ -112,7 +112,7 @@ class AccordionListItem extends HTMLDivElement {
 }
 
 
-class AccordionList extends HTMLDivElement {
+export class AccordionList extends HTMLDivElement {
 
     constructor() {
         super();
@@ -141,8 +141,9 @@ class AccordionList extends HTMLDivElement {
 }
 
 
-customElements.define("app-accordion-list", AccordionList, { extends: "div" });
-customElements.define("app-accordion-list-item", AccordionListItem, { extends: "div" });
-
-
-export { AccordionList } ;
+if (customElements.get("app-accordion-list") == null) {
+    customElements.define("app-accordion-list", AccordionList, { extends: "div" });
+}
+if (customElements.get("app-accordion-list-item") == null) {
+    customElements.define("app-accordion-list-item", AccordionListItem, { extends: "div" });
+}

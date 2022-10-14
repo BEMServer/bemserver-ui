@@ -1,4 +1,4 @@
-class UserGroupItem extends HTMLDivElement {
+export class UserGroupItem extends HTMLDivElement {
 
     #groupId = null;
     #groupName = null;
@@ -118,7 +118,6 @@ class UserGroupItem extends HTMLDivElement {
 }
 
 
-customElements.define("app-usergroup", UserGroupItem, { extends: "div" });
-
-
-export { UserGroupItem } ;
+if (customElements.get("app-usergroup") == null) {
+    customElements.define("app-usergroup", UserGroupItem, { extends: "div" });
+}

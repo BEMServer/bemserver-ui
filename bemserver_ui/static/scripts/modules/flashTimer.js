@@ -1,7 +1,7 @@
 import { Parser } from "./tools/parser.js"
 
 
-class FlashTimer {
+export class FlashTimer {
 
     #delay = 7;
     #enable = true;
@@ -44,6 +44,3 @@ class FlashTimer {
         }
     }
 }
-
-
-export { FlashTimer };

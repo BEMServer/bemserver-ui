@@ -17,7 +17,7 @@ class InternalAPIResponseError extends Error {
 }
 
 
-class InternalAPIRequest {
+export class InternalAPIRequest {
 
     #abortControllers = {};
     #fetchPromises = {};
@@ -145,6 +145,3 @@ class InternalAPIRequest {
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 }
-
-
-export { InternalAPIRequest } ;

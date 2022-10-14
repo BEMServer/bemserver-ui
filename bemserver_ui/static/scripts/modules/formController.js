@@ -1,7 +1,7 @@
 import { ModalConfirm } from "./components/modalConfirm.js";
 
 
-class FormController {
+export class FormController {
 
     #confirmFormElmts = null;
     #requiredInputElmts = null;
@@ -74,6 +74,3 @@ class FormController {
         }
     }
 }
-
-
-export { FormController };

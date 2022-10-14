@@ -9,7 +9,7 @@ import { Parser } from "../../tools/parser.js";
 import { flaskES6 } from "../../../app.js";
 
 
-class TimeseriesManageStructuralElementsView {
+export class TimeseriesManageStructuralElementsView {
 
     #internalAPIRequester = null;
     #getTSListReqID = null;
@@ -368,6 +368,3 @@ class TimeseriesManageStructuralElementsView {
         );
     }
 }
-
-
-export { TimeseriesManageStructuralElementsView };

@@ -1,7 +1,7 @@
 import { Parser } from "../tools/parser.js";
 
 
-class PageSizeSelector extends HTMLDivElement {
+export class PageSizeSelector extends HTMLDivElement {
 
     #current = 10;
     #selectElmt = null;
@@ -216,7 +216,7 @@ class PaginationItem extends HTMLLIElement {
 }
 
 
-class Pagination extends HTMLUListElement {
+export class Pagination extends HTMLUListElement {
 
     #pageSize = 10;
     #totalItems = 0;
@@ -393,9 +393,12 @@ class Pagination extends HTMLUListElement {
 }
 
 
-customElements.define("app-pagination-item", PaginationItem, { extends: "li" });
-customElements.define("app-pagination", Pagination, { extends: "ul" });
-customElements.define("app-pagesize-selector", PageSizeSelector, { extends: "div" });
-
-
-export { Pagination, PageSizeSelector } ;
+if (customElements.get("app-pagination-item") == null) {
+    customElements.define("app-pagination-item", PaginationItem, { extends: "li" });
+}
+if (customElements.get("app-pagination") == null) {
+    customElements.define("app-pagination", Pagination, { extends: "ul" });
+}
+if (customElements.get("app-pagesize-selector") == null) {
+    customElements.define("app-pagesize-selector", PageSizeSelector, { extends: "div" });
+}

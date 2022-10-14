@@ -7,7 +7,7 @@ import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 
 
-class UserManageGroupsView {
+export class UserManageGroupsView {
 
     #user = null;
 
@@ -220,6 +220,3 @@ class UserManageGroupsView {
         }
     }
 }
-
-
-export { UserManageGroupsView };

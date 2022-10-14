@@ -4,7 +4,7 @@ import { Spinner } from "../../components/spinner.js";
 import { TimeDisplay } from "../../tools/time.js";
 
 
-class CampaignSelectorView {
+export class CampaignSelectorView {
 
     #internalAPIRequester = null;
     #campaignReqID = null;
@@ -179,6 +179,3 @@ class CampaignSelectorView {
         bootstrap.Offcanvas.getOrCreateInstance(this.#selectorComponentElmt).hide();
     }
 }
-
-
-export { CampaignSelectorView };
