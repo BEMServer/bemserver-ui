@@ -98,7 +98,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let tsSelector = new TimeseriesSelector({ allowedSelectionLimit: 1 });
+        let tsSelector = new TimeseriesSelector();
         tsSelector.refresh();
 
         let tsDataExploreView = new TimeseriesDataExploreView(tsSelector);

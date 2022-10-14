@@ -71,12 +71,7 @@ export class TimeseriesChart extends HTMLDivElement {
                 nameGap: 40,
             },
         ],
-        series: [
-            {
-                type: "line",
-                smooth: true,
-            },
-        ],
+        series: [],
         useUTC: true,
     };
 
@@ -120,25 +115,33 @@ export class TimeseriesChart extends HTMLDivElement {
     load(data, tzName) {
         this.hideLoading();
 
-        let serieName = `[${data.ts_datastate_name.toLowerCase()}] ${data.ts_name}`;
-        let unitSymbol = "";
-        if (data.ts_unit_symbol != null && data.ts_unit_symbol.length > 0) {
-            unitSymbol = `[${data.ts_unit_symbol}]`;
-            serieName = `${serieName} [${unitSymbol}]`;
-        }
-
         let options = this.#chart.getOption();
-        options.yAxis[0].name = unitSymbol;
-        options.series[0].name = serieName;
-        options.dataset = {
-            source: data.ts_data.map((row) => {
-                let rowDate = new Date(row["Datetime"]);
-                return [
-                    !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate, { timezone: tzName }).replace(" ", "\n") : null,
-                    Parser.parseFloatOrDefault(row[data.ts_id.toString()], null),
-                ];
-            }),
-        };
+
+        let timestamps = data.ts_data.map((row) => {
+            let rowDate = new Date(row["Datetime"]);
+            return !isNaN(rowDate) ? TimeDisplay.toLocaleString(rowDate, { timezone: tzName }).replace(" ", "\n") : null;
+        });
+
+        options.series.length = 0;
+        options.series = data.ts_headers.reduce((result, header) => {
+            if (header != "Datetime") {
+              result.push({
+                    // id: tsId,
+                    name: header,
+                    type: "line",
+                    smooth: true,
+                    data: data.ts_data.map((row) => {
+                        return Parser.parseFloatOrDefault(row[header], null, 2);
+                    }),
+                });
+            }
+            return result;
+        }, []);
+
+        options.xAxis[0].data = timestamps;
+        options.yAxis[0].data = options.series.map((serie) => {
+            return serie.name;
+        });
 
         this.#chart.setOption(options);
     }

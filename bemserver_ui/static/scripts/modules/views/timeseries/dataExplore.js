@@ -108,7 +108,7 @@ export class TimeseriesDataExploreView {
     }
 
     #updateLoadBtnState() {
-        if (this.#tsSelector.selectedItems.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
+        if (this.#tsSelector.selectedItemNames.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
             this.#loadBtnElmt.removeAttribute("disabled");
         }
         else {
@@ -135,10 +135,9 @@ export class TimeseriesDataExploreView {
         this.#loadBtnElmt.appendChild(new Spinner({ useSmallSize: true, useSecondaryColor: true }));
         this.#loadBtnElmt.setAttribute("disabled", true);
 
-        let tsDataStateId = this.#tsDataStatesSelectElmt.value;
         let urlParams = {
-            id: this.#tsSelector.selectedItems[0],
-            data_state: tsDataStateId,
+            timeseries: this.#tsSelector.selectedItemNames,
+            data_state: this.#tsDataStatesSelectElmt.value,
             start_date: this.#startDatetimePickerElmt.date,
             start_time: this.#startDatetimePickerElmt.time,
             end_date: this.#endDatetimePickerElmt.date,
@@ -156,7 +155,7 @@ export class TimeseriesDataExploreView {
             this.#tsDataCSVReqID = null;
         }
         this.#tsDataCSVReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_data.retrieve_data`, urlParams),
+            flaskES6.urlFor(`api.timeseries_data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download`, urlParams));
                 this.#chart.load(data, this.#timezonePickerElmt.tzName);
