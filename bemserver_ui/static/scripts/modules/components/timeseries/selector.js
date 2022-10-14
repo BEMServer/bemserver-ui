@@ -10,26 +10,33 @@ import { flaskES6 } from "../../../app.js";
 export class SelectedItem extends HTMLSpanElement {
 
     #itemId = null;
-    #itemText = null;
+    #itemName = null;
+    #itemSymbol = null;
+    #itemLabel = null;
 
     #removeBtnElmt = null;
 
-    constructor(itemId, itemText) {
+    constructor(itemId, itemName, itemSymbol, itemLabel) {
         super();
 
         this.#itemId = itemId;
-        this.#itemText = itemText;
+        this.#itemName = itemName;
+        this.#itemSymbol = itemSymbol;
+        this.#itemLabel = itemLabel;
     }
 
     get itemId() {
         return this.#itemId;
+    }
+    get itemName() {
+        return this.#itemName;
     }
 
     #initEventListeners() {
         this.#removeBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            let removeEvent = new CustomEvent("remove", { detail: { itemId: this.#itemId }});
+            let removeEvent = new CustomEvent("remove", { detail: { itemId: this.#itemId, itemName: this.#itemName, itemSymbol: this.#itemSymbol, itemLabel: this.#itemLabel }});
             this.dispatchEvent(removeEvent);
         });
     }
@@ -45,8 +52,8 @@ export class SelectedItem extends HTMLSpanElement {
         let textContentElmt = document.createElement("span");
         textContentElmt.style.maxWidth = "200px";
         textContentElmt.classList.add("d-inline-block", "text-truncate");
-        textContentElmt.innerText = this.#itemText;
-        textContentElmt.title = this.#itemText;
+        textContentElmt.innerText = this.#itemLabel;
+        textContentElmt.title = this.#itemLabel;
         this.appendChild(textContentElmt)
 
         this.#removeBtnElmt = document.createElement("i");
@@ -62,17 +69,27 @@ export class SelectedItem extends HTMLSpanElement {
 export class SearchResultItem extends HTMLButtonElement {
 
     #itemId = null;
-    #itemText = null;
+    #itemName = null;
+    #itemSymbol = null;
     #itemIsActive = false;
 
-    constructor(itemId, itemText, itemIsActive = false) {
+    constructor(itemId, itemName, itemSymbol, itemIsActive = false) {
         super();
 
         this.#itemId = itemId;
-        this.#itemText = itemText;
+        this.#itemName = itemName;
+        this.#itemSymbol = itemSymbol;
         this.#itemIsActive = itemIsActive;
 
         this.#update();
+    }
+
+    get itemLabel() {
+        let ret = this.#itemName;
+        if (this.#itemSymbol) {
+            ret += ` [${this.#itemSymbol}]`;
+        }
+        return ret;
     }
 
     get isActive() {
@@ -99,14 +116,14 @@ export class SearchResultItem extends HTMLButtonElement {
     #dispatchEvents() {
         let buttonEvent = null;
         if (this.#itemIsActive) {
-            buttonEvent = new CustomEvent("on", { detail: { itemId: this.#itemId, itemText: this.#itemText }, bubbles: true });
+            buttonEvent = new CustomEvent("on", { detail: { itemId: this.#itemId, itemName: this.#itemName, itemSymbol: this.#itemSymbol, itemLabel: this.itemLabel }, bubbles: true });
         }
         else {
             buttonEvent = new CustomEvent("off", { detail: { itemId: this.#itemId }, bubbles: true });
         }
         this.dispatchEvent(buttonEvent);
 
-        let buttonToggleEvent = new CustomEvent("toggle", { detail: { itemId: this.#itemId, itemText: this.#itemText, itemIsActive: this.#itemIsActive }, bubbles: true});
+        let buttonToggleEvent = new CustomEvent("toggle", { detail: { itemId: this.#itemId, itemName: this.#itemName, itemSymbol: this.#itemSymbol, itemLabel: this.itemLabel, itemIsActive: this.#itemIsActive }, bubbles: true});
         this.dispatchEvent(buttonToggleEvent);
     }
 
@@ -127,8 +144,8 @@ export class SearchResultItem extends HTMLButtonElement {
         this.setAttribute("type", "button");
         this.setAttribute("data-bs-toggle", "button");
         this.setAttribute("data-item-id", this.#itemId?.toString());
-        this.innerText = this.#itemText;
-        this.title = this.#itemText;
+        this.innerText = this.itemLabel;
+        this.title = this.itemLabel;
 
         this.#initEventListeners();
     }
@@ -190,12 +207,20 @@ export class TimeseriesSelector extends HTMLDivElement {
         }
     }
 
-    get selectedItems() {
+    get selectedItemIds() {
         let selectedItemIds = [];
         for (let item of this.#selectedItems) {
             selectedItemIds.push(item.itemId);
         }
         return selectedItemIds;
+    }
+
+    get selectedItemNames() {
+        let selectedItemNames = [];
+        for (let item of this.#selectedItems) {
+            selectedItemNames.push(item.itemName);
+        }
+        return selectedItemNames;
     }
 
     #cacheDOM() {
@@ -422,7 +447,7 @@ export class TimeseriesSelector extends HTMLDivElement {
         if (this.#allowedSelectionLimit != -1) {
             isLimitOK = this.#selectedItems.length < this.#allowedSelectionLimit;
         }
-        return !this.selectedItems.includes(itemId) && isLimitOK;
+        return !this.selectedItemIds.includes(itemId) && isLimitOK;
     }
 
     refresh(options = {}) {
@@ -469,18 +494,14 @@ export class TimeseriesSelector extends HTMLDivElement {
 
                 if (data.data.length > 0) {
                     for (let row of data.data) {
-                        let itemText = row.name;
-                        if (row.unit_symbol) {
-                            itemText += ` [${row.unit_symbol}]`;
-                        }
-                        let itemIsAlreadySelected = this.selectedItems.includes(row.id);
-                        let searchResultItem = new SearchResultItem(row.id, itemText, itemIsAlreadySelected);
+                        let itemIsAlreadySelected = this.selectedItemIds.includes(row.id);
+                        let searchResultItem = new SearchResultItem(row.id, row.name, row.unit_symbol, itemIsAlreadySelected);
 
                         searchResultItem.addEventListener("on", (event) => {
                             event.preventDefault();
 
                             if (this.#canSelect(event.detail.itemId)) {
-                                let selectedItem = new SelectedItem(event.detail.itemId, event.detail.itemText);
+                                let selectedItem = new SelectedItem(event.detail.itemId, event.detail.itemName, event.detail.itemSymbol, event.detail.itemLabel);
 
                                 selectedItem.addEventListener("remove", (event) => {
                                     event.preventDefault();
@@ -516,7 +537,7 @@ export class TimeseriesSelector extends HTMLDivElement {
                         searchResultItem.addEventListener("off", (event) => {
                             event.preventDefault();
 
-                            if (this.selectedItems.includes(event.detail.itemId)) {
+                            if (this.selectedItemIds.includes(event.detail.itemId)) {
                                 this.#selectedItems = this.#selectedItems.filter(item => item.itemId != event.detail.itemId);
 
                                 let selectedItemElmt = this.#selectedItemsContainerElmt.querySelector(`span[data-item-id="${event.detail.itemId.toString()}"]`);
