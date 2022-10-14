@@ -1,4 +1,4 @@
-class ModalConfirm extends HTMLElement {
+export class ModalConfirm extends HTMLElement {
 
     #targetId = null;
     #modalElmt = null;
@@ -67,7 +67,6 @@ class ModalConfirm extends HTMLElement {
 }
 
 
-customElements.define("modal-confirm", ModalConfirm);
-
-
-export { ModalConfirm };
+if (customElements.get("modal-confirm") == null) {
+    customElements.define("modal-confirm", ModalConfirm);
+}

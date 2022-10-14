@@ -1,4 +1,4 @@
-class Spinner extends HTMLDivElement {
+export class Spinner extends HTMLDivElement {
 
     #useSmallSize = false;
     #useSecondaryColor = false;
@@ -32,7 +32,6 @@ class Spinner extends HTMLDivElement {
 }
 
 
-customElements.define("app-spinner", Spinner, { extends: "div" });
-
-
-export { Spinner } ;
+if (customElements.get("app-spinner") == null) {
+    customElements.define("app-spinner", Spinner, { extends: "div" });
+}

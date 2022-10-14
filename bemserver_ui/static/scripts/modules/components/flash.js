@@ -1,7 +1,7 @@
 import { Parser } from "../tools/parser.js";
 
 
-const FlashMessageTypes = Object.freeze({
+export const FlashMessageTypes = Object.freeze({
     MESSAGE: Symbol("message"),
     INFO: Symbol("info"),
     WARNING: Symbol("warning"),
@@ -10,7 +10,7 @@ const FlashMessageTypes = Object.freeze({
 });
 
 
-class FlashMessage extends HTMLDivElement {
+export class FlashMessage extends HTMLDivElement {
 
     #messageType = FlashMessageTypes.MESSAGE;
     #messageText = "";
@@ -143,6 +143,7 @@ class FlashMessage extends HTMLDivElement {
         messageContainerElmt.appendChild(iconElmt);
 
         let textElmt = document.createElement("span");
+        textElmt.classList.add("text-break");
         textElmt.innerText = this.#messageText;
         messageContainerElmt.appendChild(textElmt);
 
@@ -161,7 +162,6 @@ class FlashMessage extends HTMLDivElement {
 }
 
 
-customElements.define("app-flash-message", FlashMessage, { extends: "div" });
-
-
-export { FlashMessage, FlashMessageTypes } ;
+if (customElements.get("app-flash-message") == null) {
+    customElements.define("app-flash-message", FlashMessage, { extends: "div" });
+}

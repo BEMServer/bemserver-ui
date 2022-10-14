@@ -1,7 +1,7 @@
 import { Parser } from "../tools/parser.js";
 
 
-class FilterSelect extends HTMLSelectElement {
+export class FilterSelect extends HTMLSelectElement {
 
     #defaultOptionIndex = 0;
 
@@ -66,7 +66,6 @@ class FilterSelect extends HTMLSelectElement {
 }
 
 
-customElements.define("app-filter-select", FilterSelect, { extends: "select" });
-
-
-export { FilterSelect } ;
+if (customElements.get("app-filter-select") == null) {
+    customElements.define("app-filter-select", FilterSelect, { extends: "select" });
+}

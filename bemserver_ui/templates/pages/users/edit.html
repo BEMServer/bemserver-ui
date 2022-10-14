@@ -4,19 +4,17 @@
 
 {% set title = "User account" if not self_edit else "My profile" %}
 {% if not self_edit %}
-{% set subtitle = user.name %}
+{% set subtitle = "Edit" %}
 {% endif %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 {% if not self_edit %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-    </form>
-</div>
+<form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
 {% endif %}
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -24,6 +22,16 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    {% if not self_edit %}
+    <div class="row mb-3">
+        <div class="col">
+            <dl>
+                <dt>User</dt>
+                <dd class="text-break">{{ user.name }}</dd>
+            </dl>
+        </div>
+    </div>
+    {% endif %}
     <div class="row">
         <div class="col">
             <fieldset>

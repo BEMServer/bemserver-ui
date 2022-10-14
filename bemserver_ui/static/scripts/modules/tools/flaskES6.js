@@ -1,4 +1,4 @@
-class FlaskES6 {
+export class FlaskES6 {
 
     #endpoints = null;
 
@@ -75,6 +75,3 @@ class FlaskES6 {
         return url;
     }
 }
-
-
-export { FlaskES6 };

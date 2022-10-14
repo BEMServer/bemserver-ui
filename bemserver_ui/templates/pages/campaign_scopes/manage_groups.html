@@ -1,11 +1,21 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Manage campaign scope's user groups" %}
-{% set subtitle = campaign_scope.name %}
+{% set title = "Campaign scope" %}
+{% set subtitle = "Manage user groups" %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p class="text-break">{{ g.campaign_ctxt.campaign.name }}</p>
+        </div>
+        <div class="col">
+            <h5>Campaign scope</h5>
+            <p class="text-break">{{ campaign_scope.name }}</p>
+        </div>
+    </div>
     <div class="row d-lg-flex d-grid">
         <div class="col col-lg-6 pb-3 pb-lg-0">
             <div class="vr float-end ms-4 d-none d-lg-block h-100"></div>

@@ -1,4 +1,4 @@
-class Parser {
+export class Parser {
     static parseIntOrDefault(value, defaultValue = 0) {
         let valueInt = Number.parseInt(value);
         if (Number.isNaN(valueInt)) {
@@ -27,6 +27,3 @@ class Parser {
         }
     }
 }
-
-
-export { Parser };

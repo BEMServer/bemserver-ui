@@ -1,4 +1,4 @@
-class UsersListView {
+export class UsersListView {
 
     #formFiltersElmt = null;
     #sortInputElmt = null;
@@ -35,6 +35,3 @@ class UsersListView {
     refresh() {
     }
 }
-
-
-export { UsersListView };

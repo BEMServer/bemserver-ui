@@ -1,13 +1,12 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Create a new timeseries" %}
-{% set subtitle = g.campaign_ctxt.name %}
 
 {% set has_campaign_scopes = campaign_scopes|length > 0 %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     {% if not has_campaign_scopes %}
     <div class="row mb-3">
         <div class="col">
@@ -19,6 +18,12 @@
         </div>
     </div>
     {% endif %}
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p class="text-break">{{ g.campaign_ctxt.name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <form action="{{ url_for('timeseries.create') }}" method="POST">

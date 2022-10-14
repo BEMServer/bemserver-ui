@@ -1,22 +1,22 @@
 {% extends "pages/base.html" %}
 
-{% set title = user_group.name %}
+{% set title = "User group" %}
 {% set subtitle = "Manage campaigns" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-lg-flex d-grid justify-content-center gap-2 mx-auto">
-    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaigns') }}" class="btn btn-sm btn-outline-secondary" title="Manage user group"><i class="bi bi-arrow-return-left"></i> Back to user group</a>
+<div class="d-lg-flex d-grid gap-2">
+    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaigns') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage user group"><i class="bi bi-arrow-return-left"></i> Back to user group</a>
     <div class="vr d-none d-lg-block mx-2"></div>
-    <div class="hstack gap-2 mx-auto">
+    <div class="hstack gap-2 ms-auto">
         {% if signed_user.is_admin %}
         <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
         </form>
         {% endif %}
-        <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+        <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
     </div>
 </div>
 {% endfilter %}
@@ -25,6 +25,12 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Group</h5>
+            <p class="text-break">{{ user_group.name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col pb-3 pb-lg-0">
             <h5>

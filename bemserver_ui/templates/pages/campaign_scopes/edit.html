@@ -1,17 +1,15 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Campaign scope" %}
-{% set subtitle = campaign_scope.name %}
+{% set subtitle = "Edit" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xl-flex d-grid justify-content-center gap-2 mx-auto">
-    <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-    </form>
-</div>
+<form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -21,7 +19,11 @@
     <div class="row mb-3">
         <div class="col">
             <h5>Campaign</h5>
-            <p>{{ g.campaign_ctxt.campaign.name }}</p>
+            <p class="text-break">{{ g.campaign_ctxt.campaign.name }}</p>
+        </div>
+        <div class="col">
+            <h5>Campaign scope</h5>
+            <p class="text-break">{{ campaign_scope.name }}</p>
         </div>
     </div>
     <div class="row">

@@ -1,7 +1,7 @@
 import { Spinner } from "./spinner.js";
 
 
-class DropZone extends HTMLDivElement {
+export class DropZone extends HTMLDivElement {
 
     #allowDuplicates = false;
 
@@ -155,7 +155,6 @@ class DropZone extends HTMLDivElement {
 }
 
 
-customElements.define("app-drop-zone", DropZone, { extends: "div" });
-
-
-export { DropZone };
+if (customElements.get("app-drop-zone") == null) {
+    customElements.define("app-drop-zone", DropZone, { extends: "div" });
+}

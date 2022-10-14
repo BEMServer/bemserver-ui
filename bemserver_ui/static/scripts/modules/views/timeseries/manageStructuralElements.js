@@ -9,7 +9,7 @@ import { Parser } from "../../tools/parser.js";
 import { flaskES6 } from "../../../app.js";
 
 
-class TimeseriesManageStructuralElementsView {
+export class TimeseriesManageStructuralElementsView {
 
     #internalAPIRequester = null;
     #getTSListReqID = null;
@@ -248,27 +248,38 @@ class TimeseriesManageStructuralElementsView {
         let dropedItemElmt = document.createElement("div");
         dropedItemElmt.id = id;
         dropedItemElmt.classList.add("btn-group", "btn-group-sm", "rounded", "bg-white");
+        dropedItemElmt.style.maxWidth = "350px";
 
         let dropItemMainContainerElmt = document.createElement("div");
-        dropItemMainContainerElmt.classList.add("d-flex", "flex-nowrap", "align-items-center", "gap-1", "border", "border-secondary", "rounded-start", "text-nowrap", "py-1", "px-2");
+        dropItemMainContainerElmt.classList.add("d-flex", "flex-wrap", "align-items-center", "gap-1", "border", "border-secondary", "rounded-start", "py-1", "px-2");
         dropedItemElmt.appendChild(dropItemMainContainerElmt);
+
+        let dropedItemHeaderElmt = document.createElement("div");
+        dropedItemHeaderElmt.classList.add("d-flex", "align-items-center", "gap-1");
+        dropedItemHeaderElmt.style.maxWidth = "280px";
+        dropItemMainContainerElmt.appendChild(dropedItemHeaderElmt);
 
         let dropedItemIconElmt = document.createElement("i");
         dropedItemIconElmt.classList.add("bi", `bi-${icon}`);
-        dropItemMainContainerElmt.appendChild(dropedItemIconElmt);
+        dropedItemHeaderElmt.appendChild(dropedItemIconElmt);
 
         let dropedItemTitleElmt = document.createElement("span");
-        dropedItemTitleElmt.classList.add("fw-bold");
+        dropedItemTitleElmt.classList.add("fw-bold", "text-truncate");
         dropedItemTitleElmt.innerText = title;
-        dropItemMainContainerElmt.appendChild(dropedItemTitleElmt);
+        dropedItemTitleElmt.title = title;
+        dropedItemHeaderElmt.appendChild(dropedItemTitleElmt);
 
-        let dropedItemTextElmt = document.createElement("small");
-        dropedItemTextElmt.classList.add("text-muted");
-        dropedItemTextElmt.innerText = text;
-        dropItemMainContainerElmt.appendChild(dropedItemTextElmt);
+        if (text != null && text.length > 0) {
+            let dropedItemTextElmt = document.createElement("small");
+            dropedItemTextElmt.classList.add("text-muted", "text-truncate");
+            dropedItemTextElmt.style.maxWidth = "280px";
+            dropedItemTextElmt.innerText = text;
+            dropedItemTextElmt.title = text;
+            dropItemMainContainerElmt.appendChild(dropedItemTextElmt);
+        }
 
         let dropedItemRemoveElmt = document.createElement("a");
-        dropedItemRemoveElmt.classList.add("btn", "btn-outline-danger", "rounded-end");
+        dropedItemRemoveElmt.classList.add("btn", "btn-outline-danger", "rounded-end", "d-flex", "align-items-center");
         dropedItemRemoveElmt.setAttribute("role", "button");
         dropedItemRemoveElmt.title = "Remove";
         let dropedItemRemoveIconElmt = document.createElement("i");
@@ -317,7 +328,7 @@ class TimeseriesManageStructuralElementsView {
             (data) => {
                 for (let row of data.data) {
                     row.icon = "clock-history";
-                    if (row.unit_symbol != null) {
+                    if (row.unit_symbol != null && row.unit_symbol != "") {
                         row.subtitle = `[${row.unit_symbol}]`;
                     }
                 }
@@ -357,6 +368,3 @@ class TimeseriesManageStructuralElementsView {
         );
     }
 }
-
-
-export { TimeseriesManageStructuralElementsView };

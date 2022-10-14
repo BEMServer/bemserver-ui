@@ -6,15 +6,13 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <a href="{{ url_for('timeseries_properties.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new timeseries property"><i class="bi bi-plus-circle"></i> New property</a>
-</div>
+<a href="{{ url_for('timeseries_properties.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new timeseries property"><i class="bi bi-plus-circle"></i> New property</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             <div class="table-responsive-xl">
@@ -26,7 +24,6 @@
                     </caption>
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
                             <th scope="col">Name</th>
                             <th scope="col">Type</th>
                             <th scope="col">Unit</th>
@@ -37,8 +34,7 @@
                     <tbody class="table-group-divider">
                         {% for prop in properties %}
                         <tr class="align-middle">
-                            <th scope="row">{{ prop.id }}</th>
-                            <td>{{ prop.name }}</td>
+                            <th scope="row">{{ prop.name }}</th>
                             <td>{{ prop.value_type }}</td>
                             <td>{{ prop.unit_symbol }}</td>
                             <td>

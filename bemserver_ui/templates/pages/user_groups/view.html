@@ -1,31 +1,31 @@
 {% extends "pages/base.html" %}
 
 {% set title = "User group" %}
-{% set subtitle = user_group.name %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <div class="hstack gap-2 mx-auto">
-        {% if signed_user.is_admin %}
-        <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
-            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-        </form>
-        {% endif %}
-        <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
-    </div>
+<div class="hstack gap-2">
+    {% if signed_user.is_admin %}
+    <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('user_groups.edit', id=user_group.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
+                </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link{% if tab == 'users' %} active{% endif %}" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-tabcontent" type="button" role="tab" aria-controls="users-tabcontent" aria-selected="{% if tab == 'users' %}true{% else %}false{% endif %}">Users <span class="badge bg-secondary">{{ users|length }}</span></button>
                 </li>
@@ -37,6 +37,12 @@
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
+                    <dl>
+                        <dt>Name</dt>
+                        <dd class="text-break">{{ user_group.name }}</dd>
+                    </dl>
+                </div>
                 <div class="tab-pane fade{% if tab == 'users' %} show active{% endif %} p-3" id="users-tabcontent" role="tabpanel" aria-labelledby="users-tab">
                     <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
                         <div class="order-1 order-lg-0">
@@ -122,6 +128,12 @@
                         </div>
                         {% endif %}
                     </div>
+                    {% if signed_user.is_admin and not g.campaign_ctxt.has_campaign %}
+                    <div class="alert alert-info mt-3" role="alert">
+                        <i class="bi bi-info-square me-2"></i>
+                        You must select a campaign to manage the campaign scopes.
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

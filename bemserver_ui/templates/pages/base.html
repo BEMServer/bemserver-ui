@@ -16,28 +16,22 @@
         {% filter indent(width=8, first=True) %}
         {% include "components/sidebar.html" %}
         {% endfilter +%}
-        <main class="col-md-9 ms-sm-auto col-xl-10 px-md-4 app-content">
+        <main class="col-md-9 ms-sm-auto col-xl-10 px-md-4 pb-4 app-content">
             {% block main_title %}
-            <div class="d-lg-flex d-grid justify-content-lg-between justify-content-center align-items-center gap-3 mb-lg-4">
-                <div class="hstack gap-3">
+            <div class="d-flex justify-content-between gap-3 mb-4">
+                <div class="d-lg-flex d-grid gap-lg-3">
                     {% if title %}
-                    <h1>{{ title }}</h1>
+                    <h1 class="text-nowrap">{{ title }}</h1>
                     {% endif %}
                     {% if subtitle %}
-                    {% if title %}
-                    <div class="vr"></div>
-                    {% endif %}
-                    <h2>{{ subtitle }}</h2>
+                    <h2 class="align-self-end text-break">{{ subtitle }}</h2>
                     {% endif %}
                 </div>
-                <div class="me-lg-4">
+                <div class="my-2">
                     {% block main_toolbar %}
                     {% endblock main_toolbar %}
                 </div>
             </div>
-            {% if title %}
-            <hr class="d-lg-none d-block">
-            {% endif %}
             {% endblock main_title %}
             {% filter indent(width=12, first=True) %}
             {% block main_content %}

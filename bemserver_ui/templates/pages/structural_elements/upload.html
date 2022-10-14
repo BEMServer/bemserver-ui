@@ -1,11 +1,16 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Upload sites" %}
-{% set subtitle = g.campaign_ctxt.name %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p class="text-break">{{ g.campaign_ctxt.name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <form action="{{ url_for('structural_elements.upload') }}" enctype="multipart/form-data" method="POST">

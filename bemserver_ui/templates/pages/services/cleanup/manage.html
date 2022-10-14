@@ -2,15 +2,17 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Cleanup service" %}
-{% set subtitle = cleanup_campaign.campaign_name %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
-    <div class="row mb-3">
+<div class="container-fluid">
+    <div class="row g-5 mb-3">
         <div class="col">
-            <h5>Campaign state</h5>
-            <span class="fw-bold text-{% if cleanup_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">{{ cleanup_campaign.campaign_state | upper }}</span>
+            <div class="d-flex align-items-start gap-3">
+                <h5>Campaign</h5>
+                <span class="fw-bold text-{% if cleanup_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ cleanup_campaign.campaign_state | upper }}]</span>
+            </div>
+            <p class="text-break">{{ cleanup_campaign.campaign_name }}</p>
         </div>
         <div class="col">
             <h5>Service state</h5>
@@ -42,30 +44,26 @@
                     </caption>
                     <thead>
                         <tr>
-                            <th scope="col" colspan="3" class="text-center">Timeseries</th>
-                            <th scope="col" colspan="2" class="text-center">Cleanup</th>
+                            <th scope="col" colspan="2">Timeseries</th>
+                            <th scope="col">Cleanup</th>
                         </tr>
                         <tr>
-                            <th scope="col">ID</th>
                             <th scope="col">Name <i class="bi bi-sort-alpha-down"></i></th>
                             <th scope="col">Unit</th>
-                            <th scope="col">ID</th>
                             <th scope="col">Last timestamp <i class="bi bi-sort-numeric-down-alt"></i></th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
                         {% for cleanup_ts in cleanup_timeseries %}
                         <tr class="align-middle">
-                            <td>{{ cleanup_ts.timeseries_id }}</td>
-                            <td>{{ cleanup_ts.timeseries_name }}</td>
+                            <th scope="row" class="text-break">{{ cleanup_ts.timeseries_name }}</th>
                             <td>{{ cleanup_ts.timeseries_unit_symbol }}</td>
                             {% if cleanup_ts.id is not none %}
-                            <th scope="row">{{ cleanup_ts.id }}</th>
                             <td{% if cleanup_ts.last_timestamp is none %} class="table-warning"{% endif %}>
                                 {{ cleanup_ts.last_timestamp | iso_datetime_format(tz_name=cleanup_campaign.campaign_timezone, default="NULL") }}
                             </td>
                             {% else %}
-                            <td class="table-warning" colspan="2">Not cleaned yet</td>
+                            <td class="table-warning">Not cleaned yet</td>
                             {% endif %}
                         </tr>
                         {% endfor %}

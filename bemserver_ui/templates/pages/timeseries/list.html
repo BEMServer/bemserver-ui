@@ -7,19 +7,17 @@
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid gap-2">
     {% if signed_user.is_admin %}
-    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary" title="Manage timeseries structural elements">Manage structural elements</a>
+    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage timeseries structural elements">Manage structural elements</a>
     <div class="vr d-none d-lg-block mx-2"></div>
     {% endif %}
-    <div class="hstack gap-2">
-        <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary mx-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
-    </div>
+    <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
 </div>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
             <div class="accordion" id="accordionFilters">
@@ -105,8 +103,9 @@
                     <h2 class="accordion-header" id="panelHeadingTimeseries-{{ x.id }}">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTimeseries-{{ x.id }}" aria-expanded="false" aria-controls="panelCollapseTimeseries-{{ x.id }}">
                             <div class="d-sm-flex justify-content-sm-between d-grid gap-3 w-100 me-3">
-                                <div class="d-flex gap-1 text-nowrap">
-                                    <span class="fw-bold"><i class="bi bi-clock-history me-1"></i> {{ x.name }}</span>
+                                <div class="d-flex gap-1">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    <span class="fw-bold text-break">{{ x.name }}</span>
                                     {% if x.unit_symbol %}
                                     <span class="text-muted">[{{ x.unit_symbol }}]</span>
                                     {% endif %}

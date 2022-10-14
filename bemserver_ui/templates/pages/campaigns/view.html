@@ -2,7 +2,6 @@
 
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
 {% set title = "Campaign" %}
-{% set subtitle = campaign.name %}
 {% if tab is undefined %}
     {% set tab = "general" %}
 {% endif %}
@@ -14,27 +13,23 @@
     {% if is_campaign_selected_edit %}
     <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0 mt-lg-2 mt-0 mt-xl-0">
         {% if signed_user.is_admin %}
-        <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Add a new campaign scope">New campaign scope</a>
-        <div class="vr"></div>
-        {% endif %}
-        <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Unselect">Unselect</a>
-        {% if signed_user.is_admin %}
+        <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
         <div class="vr d-none d-xl-block me-xl-2"></div>
         {% endif %}
     </div>
     {% else %}
     <div class="hstack gap-3 ms-auto">
-        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-break" role="button" title="Select">Select</a>
+        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
         {% if signed_user.is_admin %}
         <div class="vr me-2"></div>
         {% endif %}
     </div>
     {% endif %}
     {% if signed_user.is_admin %}
-    <div class="hstack gap-2{% if is_campaign_selected_edit %} mx-auto ms-lg-auto me-lg-0{% else %} me-auto{% endif %}">
+    <div class="hstack gap-2{% if is_campaign_selected_edit %} ms-auto ms-lg-auto me-lg-0{% else %} me-auto{% endif %}">
         <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
+            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
         </form>
     </div>
     {% endif %}
@@ -44,13 +39,16 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     {% if is_campaign_selected_edit and signed_user.is_admin %}
     <div class="row mb-3">
         <div class="col">
-            <div class="alert alert-info" role="alert">
-                <i class="bi bi-info-square me-2"></i>
-                This is the campaign currently selected. <span class="fw-bold fst-italic">Deletion is disabled.</span>
+            <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
+                <div>
+                    <i class="bi bi-info-square me-2"></i>
+                    This is the campaign currently selected. <span class="fw-bold fst-italic">Deletion is disabled.</span>
+                </div>
+                <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign=True) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect">Unselect</a>
             </div>
         </div>
     </div>
@@ -69,8 +67,10 @@
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white">
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between gap-3">
                         <dl>
+                            <dt>Name</dt>
+                            <dd class="text-break">{{ campaign.name }}</dd>
                             <dt>Status</dt>
                             <dd class="fw-bold text-{% if campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">{{ campaign.state | upper }}</dd>
                             <dt>Timezone</dt>
@@ -83,18 +83,18 @@
                             <dt>Until</dt>
                             <dd>{{ campaign.end_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>
                             <dt>Description</dt>
-                            <dd>{{ campaign.description | default("-", true) }}</dd>
+                            <dd class="text-break">{{ campaign.description | default("-", true) }}</dd>
                         </dl>
                         <div>
                             {% if signed_user.is_admin %}
-                            <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                            <a href="{{ url_for('campaigns.edit', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
                             {% endif %}
                         </div>
                     </div>
                 </div>
                 {% if signed_user.is_admin %}
                 <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
-                    <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
                         {% if user_groups|length > 0 %}
                         <div class="d-flex flex-wrap gap-2">
                             {% for user_group in user_groups %}
@@ -107,7 +107,7 @@
                         <span class="fst-italic text-muted">none</span>
                         {% endif %}
                         {% if signed_user.is_admin %}
-                        <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Manage campaign's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign's groups</a>
+                        <a href="{{ url_for('campaigns.manage_groups', id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Manage campaign's user groups"><i class="bi bi-person-rolodex"></i> Manage campaign's groups</a>
                         {% endif %}
                     </div>
                 </div>

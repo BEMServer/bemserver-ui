@@ -1,19 +1,17 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Campaign" %}
-{% set subtitle = campaign.name %}
+{% set subtitle = "Edit" %}
 
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
-    </form>
-</div>
+<form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
+</form>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -30,6 +28,12 @@
         </div>
     </div>
     {% endif %}
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p class="text-break">{{ campaign.name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <fieldset>
