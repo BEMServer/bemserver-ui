@@ -1,10 +1,10 @@
 {% if not signed_user.is_admin %}
-<div class="border border-1 rounded bg-white p-2">
+<div class="border border-1 rounded bg-white text-truncate p-2" style="max-width: 250px;">
     <i class="bi bi-people"></i> {{ user_group.name }}
 </div>
 {% else %}
-<div class="btn-group bg-white rounded" role="group" aria-label="Actions on user group">
-    <a class="btn btn-outline-secondary" role="button" href="{{ url_for('user_groups.manage', id=user_group.id) }}" title="Manage user group"><i class="bi bi-people"></i> {{ user_group.name }}</a>
+<div class="btn-group bg-white rounded" role="group" aria-label="Actions on user group" style="max-width: 250px;">
+    <a class="btn btn-outline-secondary text-truncate" role="button" href="{{ url_for('user_groups.manage', id=user_group.id) }}" title="Manage user group {{ user_group.name }}"><i class="bi bi-people"></i> {{ user_group.name }}</a>
     <form class="btn-group" action="{{ url_for('campaigns.remove_user_group', id=campaign.id, rel_id=user_group.rel_id, next=url_for(request.endpoint, id=campaign.id)) }}" method="POST" data-modal-confirm-message="Remove &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group from &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
         <button class="btn btn-outline-danger" type="submit" title="Remove user group from campaign"><i class="bi bi-x-lg"></i></button>
     </form>

@@ -4,7 +4,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
             <div class="alert alert-warning border border-warning" role="alert">
@@ -12,6 +12,12 @@
                 <p>You are about to <span class="fw-bold">delete timeseries data</span>!</p>
                 <p class="mb-0">Keep in mind that <span class="fw-bold">data can not be restored</span> once this operation is done.</p>
             </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p>{{ g.campaign_ctxt.name }}</p>
         </div>
     </div>
     <div class="row mb-3">

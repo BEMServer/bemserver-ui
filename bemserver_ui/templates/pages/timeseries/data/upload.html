@@ -1,11 +1,14 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Upload timeseries data" %}
-{% set subtitle = g.campaign_ctxt.name %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
+    <div class="row mb-3">
+        <h5>Campaign</h5>
+        <p>{{ g.campaign_ctxt.name }}</p>
+    </div>
     <div class="row">
         <div class="col">
             <form action="{{ url_for('timeseries_data.upload') }}" enctype="multipart/form-data" method="POST">

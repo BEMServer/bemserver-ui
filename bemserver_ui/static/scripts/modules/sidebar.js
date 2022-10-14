@@ -1,13 +1,39 @@
-class Sidebar {
+import { Parser } from "./tools/parser.js"
+
+
+export class Sidebar {
 
     #navLinkElmts = null;
 
+    #sidebarMenuInnerElmt = null;
+    #campaignSelectorNavLinkElmt = null;
+    #campaignsNavLinkElmt = null;
+
     constructor() {
         this.#cacheDOM();
+        this.#initEventListeners();
     }
 
     #cacheDOM() {
         this.#navLinkElmts = [].slice.call(document.querySelectorAll(".app-sidebar .nav-link"));
+
+        this.#sidebarMenuInnerElmt = document.querySelector("#sidebarMenu div.position-sticky");
+        this.#campaignSelectorNavLinkElmt = document.getElementById("campaignSelectorNavLink");
+        this.#campaignsNavLinkElmt = document.getElementById("campaignsNavLink");
+    }
+
+    #initEventListeners() {
+        window.addEventListener("resize", () => {
+            this.#updateCampaignSelectorWidth();
+        });
+    }
+
+    #updateCampaignSelectorWidth() {
+        let campaignNavStyle = window.getComputedStyle(this.#campaignSelectorNavLinkElmt.parentElement);
+        let remainingWidth = this.#sidebarMenuInnerElmt.clientWidth - this.#campaignsNavLinkElmt.clientWidth - Parser.parseFloatOrDefault(campaignNavStyle.gap);
+        if (Parser.parseFloatOrDefault(this.#campaignSelectorNavLinkElmt.style.maxWidth) != remainingWidth) {
+            this.#campaignSelectorNavLinkElmt.style.maxWidth = `${remainingWidth}px`;
+        }
     }
 
     #setActive(elmt) {
@@ -64,8 +90,7 @@ class Sidebar {
             }
         }
         this.#setActive(elmt);
+
+        this.#updateCampaignSelectorWidth();
     }
 }
-
-
-export { Sidebar };

@@ -5,7 +5,7 @@
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
             <div class="accordion" id="accordionFilters">
@@ -61,9 +61,9 @@
                     <i class="bi bi-puzzle"></i>
                     <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
-                            <div class="d-flex gap-3">
+                            <div class="d-flex flex-wrap gap-1">
                                 <small class="fw-bold text-{% if x.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ x.campaign_state | upper }}]</small>
-                                <h6 class="fw-bold text-nowrap mb-0">{{ x.campaign_name }}</h6>
+                                <h6 class="fw-bold text-break ms-2 mb-0">{{ x.campaign_name }}</h6>
                             </div>
                             {% if is_campaign_selected %}
                             <div><small class="text-opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>

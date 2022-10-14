@@ -94,7 +94,7 @@ class StructuralElementsExploreView {
             }
             try {
                 let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
-                return `<a class="btn btn-sm btn-outline-secondary" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
+                return `<a class="btn btn-sm btn-outline-primary text-nowrap" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
             }
             catch (error) {
                 console.error(error);
@@ -104,14 +104,14 @@ class StructuralElementsExploreView {
     }
 
     #getGeneralHTML(data, path) {
-        return `<div class="d-flex justify-content-between align-items-center mb-3">
+        return `<div class="d-flex justify-content-between align-items-start gap-3 mb-3">
     <div>
-        <h5>${data.structural_element.name}</h5>
-        <h6>${path}</h6>
+        <h5 class="text-break">${data.structural_element.name}</h5>
+        <h6 class="text-break">${path}</h6>
     </div>
     ${this.#getEditBtnHTML(data.type, data.structural_element.id)}
 </div>
-<p class="fst-italic text-muted">${data.structural_element.description}</p>
+<p class="fst-italic text-muted text-break">${data.structural_element.description}</p>
 <div class="row">
     <dl class="col">
         <dt>IFC ID</dt>
@@ -120,7 +120,7 @@ class StructuralElementsExploreView {
 </div>`;
     }
 
-    #getItemHelpHTML(itemDescription) {
+    #getItemHelpHTML(itemDescription, withSpace = true) {
         let ret = ``;
         if (itemDescription?.length > 0) {
             let abbrElmt = document.createElement("abbr");
@@ -128,7 +128,7 @@ class StructuralElementsExploreView {
             let abbrContentElmt = document.createElement("i");
             abbrContentElmt.classList.add("bi", "bi-question-diamond");
             abbrElmt.appendChild(abbrContentElmt);
-            ret = `<sup class="ms-1">${abbrElmt.outerHTML}</sup>`;
+            ret = `<sup${withSpace ? ` class="ms-1"`: ``}>${abbrElmt.outerHTML}</sup>`;
         }
         return ret;
     }
@@ -161,8 +161,8 @@ class StructuralElementsExploreView {
         if (data.timeseries.length > 0) {
             contentHTML += `<p class="text-muted text-end">Items count: ${data.timeseries.length}</p>`;
             for (let ts_data of data.timeseries) {
-                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<small class="text-muted ms-1">[${ts_data.unit_symbol}]</small>` : ``;
-                contentHTML += `<li><span class="fw-bold">${ts_data.name}</span>${unitSymbol}${this.#getItemHelpHTML(ts_data.description)}</li>`;
+                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<small class="text-black text-opacity-50">[${ts_data.unit_symbol}]</small>` : ``;
+                contentHTML += `<li class="d-flex gap-1"><i class="bi bi-clock-history"></i><span class="fw-bold text-break">${ts_data.name}</span>${unitSymbol}${this.#getItemHelpHTML(ts_data.description, false)}</li>`;
             }
         }
         else {

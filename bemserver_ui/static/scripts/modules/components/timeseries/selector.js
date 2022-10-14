@@ -37,11 +37,16 @@ class SelectedItem extends HTMLSpanElement {
     connectedCallback() {
         this.innerHTML = "";
 
+        this.style.maxWidth = "250px";
+
         this.classList.add("badge", "rounded-pill", "bg-info", "text-dark");
         this.setAttribute("data-item-id", this.#itemId?.toString());
 
         let textContentElmt = document.createElement("span");
+        textContentElmt.style.maxWidth = "200px";
+        textContentElmt.classList.add("d-inline-block", "text-truncate");
         textContentElmt.innerText = this.#itemText;
+        textContentElmt.title = this.#itemText;
         this.appendChild(textContentElmt)
 
         this.#removeBtnElmt = document.createElement("i");
@@ -117,11 +122,13 @@ class SearchResultItem extends HTMLButtonElement {
 
     connectedCallback() {
         this.innerHTML = "";
-        this.classList.add("btn", "btn-outline-secondary");
+        this.style.maxWidth = "250px";
+        this.classList.add("btn", "btn-outline-secondary", "text-truncate");
         this.setAttribute("type", "button");
         this.setAttribute("data-bs-toggle", "button");
         this.setAttribute("data-item-id", this.#itemId?.toString());
         this.innerText = this.#itemText;
+        this.title = this.#itemText;
 
         this.#initEventListeners();
     }

@@ -13,8 +13,8 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    <div class="row d-sm-flex d-grid mb-3 mb-sm-0 h-100">
-        <div class="col col-sm-6 pb-3 pb-sm-0">
+    <div class="row d-lg-flex d-grid mb-3 mb-lg-0 h-100">
+        <div class="col col-lg-6 pb-3 pb-lg-0">
             <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link{% if tab == 'sites' %} active{% endif %}" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="{% if tab == 'sites' %}true{% else %}false{% endif %}"><i class="bi bi-building"></i> Sites / Buildings...</button>

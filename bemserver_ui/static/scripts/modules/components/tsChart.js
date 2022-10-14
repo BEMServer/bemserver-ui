@@ -7,7 +7,7 @@ export class TimeseriesChart extends HTMLDivElement {
     #chart = null;
 
     #initOptions = {
-        height: 400,
+        height: 500,
     };
     #theme = null;
 
@@ -20,7 +20,7 @@ export class TimeseriesChart extends HTMLDivElement {
             text: this.#defaultTitle,
         },
         grid: {
-            bottom: 80,
+            bottom: 120,
         },
         toolbox: {
             feature: {
@@ -51,11 +51,13 @@ export class TimeseriesChart extends HTMLDivElement {
             },
         },
         legend: {
-            left: "left",
+            type: "scroll",
+            bottom: 10,
         },
         dataZoom: [
             {
                 type: "slider",
+                bottom: 50,
             },
         ],
         xAxis: [
@@ -118,15 +120,16 @@ export class TimeseriesChart extends HTMLDivElement {
     load(data, tzName) {
         this.hideLoading();
 
-        let legendName = `[${data.ts_datastate_name.toLowerCase()}] ${data.ts_name}`;
+        let serieName = `[${data.ts_datastate_name.toLowerCase()}] ${data.ts_name}`;
+        let unitSymbol = "";
         if (data.ts_unit_symbol != null && data.ts_unit_symbol.length > 0) {
-            legendName = `${legendName} [${data.ts_unit_symbol}]`;
+            unitSymbol = `[${data.ts_unit_symbol}]`;
+            serieName = `${serieName} [${unitSymbol}]`;
         }
 
         let options = this.#chart.getOption();
-        options.legend.data = [legendName];
-        options.yAxis[0].name = (data.ts_unit_symbol != null && data.ts_unit_symbol.length > 0) ? `[${data.ts_unit_symbol}]` : "";
-        options.series[0].name = legendName;
+        options.yAxis[0].name = unitSymbol;
+        options.series[0].name = serieName;
         options.dataset = {
             source: data.ts_data.map((row) => {
                 let rowDate = new Date(row["Datetime"]);

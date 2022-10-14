@@ -143,6 +143,7 @@ class FlashMessage extends HTMLDivElement {
         messageContainerElmt.appendChild(iconElmt);
 
         let textElmt = document.createElement("span");
+        textElmt.classList.add("text-break");
         textElmt.innerText = this.#messageText;
         messageContainerElmt.appendChild(textElmt);
 

@@ -6,15 +6,13 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <a href="{{ url_for('structural_element_properties.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new property"><i class="bi bi-plus-circle"></i> New property</a>
-</div>
+<a href="{{ url_for('structural_element_properties.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new property"><i class="bi bi-plus-circle"></i> New property</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
             <div class="accordion" id="accordionFilters">
@@ -26,7 +24,7 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
-                            <form class="d-lg-flex justify-content-end d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                            <form class="d-sm-flex justify-content-end d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for struct_elmt in structural_elements %}
                                     <div class="form-check form-switch me-4">
@@ -39,7 +37,7 @@
                                         <label class="form-check-label" for="orphan">Orphan</label>
                                     </div>
                                 </div>
-                                <div class="d-lg-flex d-grid gap-2">
+                                <div class="d-lg-flex d-grid gap-2 my-auto">
                                     <button class="btn btn-sm btn-outline-info text-nowrap w-100" type="submit" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
                                     <a class="btn btn-sm btn-outline-secondary text-nowrap w-100" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
                                 </div>
@@ -66,10 +64,10 @@
                             <th scope="col"></th>
                         </tr>
                         <tr>
-                            <th scope="col">Name</th>
+                            <th scope="col" class="w-25">Name</th>
                             <th scope="col">Type</th>
                             <th scope="col">Unit</th>
-                            <th scope="col">Description</th>
+                            <th scope="col" class="w-25">Description</th>
                             {% for struct_elmt in structural_elements %}
                             <th scope="col" class="text-center">{{ struct_elmt | capitalize }}s</th>
                             {% endfor %}
@@ -79,10 +77,10 @@
                     <tbody class="table-group-divider">
                         {% for prop in properties %}
                         <tr class="align-middle">
-                            <th scope="row">{{ prop.name }}</th>
+                            <th scope="row" class="text-break">{{ prop.name }}</th>
                             <td>{{ prop.value_type }}</td>
                             <td>{{ prop.unit_symbol }}</td>
-                            <td class="w-50">
+                            <td>
                                 {% if prop.description|length > 80 %}
                                 <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
                                 {% else %}

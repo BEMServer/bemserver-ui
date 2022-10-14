@@ -1,11 +1,17 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Manage campaign's user groups" %}
-{% set subtitle = campaign.name %}
+{% set title = "Campaign" %}
+{% set subtitle = "Manage user groups" %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Campaign</h5>
+            <p class="text-break">{{ campaign.name }}</p>
+        </div>
+    </div>
     <div class="row d-lg-flex d-grid">
         <div class="col col-lg-6 pb-3 pb-lg-0">
             <div class="vr float-end ms-4 d-none d-lg-block h-100"></div>

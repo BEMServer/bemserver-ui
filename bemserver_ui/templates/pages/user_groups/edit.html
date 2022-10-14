@@ -1,18 +1,16 @@
 {% extends "pages/base.html" %}
 
 {% set title = "User group" %}
-{% set subtitle = user_group.name %}
+{% set subtitle = "Edit" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 {% if not self_edit %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
-        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-    </form>
-</div>
+<form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
 {% endif %}
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -20,6 +18,12 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5>Group</h5>
+            <p class="text-break">{{ user_group.name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <fieldset>

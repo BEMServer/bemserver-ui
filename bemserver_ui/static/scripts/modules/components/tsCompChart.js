@@ -19,6 +19,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
         },
         grid: {
             bottom: 80,
+            left: 100,
             right: 120,
         },
         toolbox: {
@@ -75,7 +76,11 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                     show: true,
                 },
                 nameLocation: "middle",
-                nameGap: 40,
+                axisLabel: {
+                    width: 90,
+                    overflow: "breakAll",
+                    hideOverlap: false,
+                },
             },
         ],
         visualMap: {
@@ -162,8 +167,8 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
             let expCount = tsInfo.expected_count[xIndex];
             let interval = tsInfo.interval ? `${tsInfo.interval}s${tsInfo.undefined_interval ? " (auto)": ""}` : "no interval";
 
-            return `<div class="hstack gap-3">
-    <div class="fs-6 fw-bold">${p.seriesName}</div>
+            return `<div class="hstack gap-3" style="max-width: 400px;">
+    <div class="fs-6 fw-bold text-truncate">${p.seriesName}</div>
     <div class="text-black text-opacity-50 ms-auto">ID #${p.seriesId}</div>
 </div>
 <div class="hstack gap-3 mb-2">

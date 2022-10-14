@@ -52,12 +52,12 @@ class AccordionListItem extends HTMLDivElement {
 
         // Build title.
         let itemTitleContainerElmt = document.createElement("div");
-        itemTitleContainerElmt.classList.add("d-flex", "gap-1", "text-nowrap");
+        itemTitleContainerElmt.classList.add("d-flex", "gap-1");
         let itemTitleIconElmt = document.createElement("i");
         itemTitleIconElmt.classList.add("bi", `bi-${this.#itemIcon}`, "me-1");
         itemTitleContainerElmt.appendChild(itemTitleIconElmt);
         let itemTitleTextElmt = document.createElement("span");
-        itemTitleTextElmt.classList.add("fw-bold");
+        itemTitleTextElmt.classList.add("fw-bold", "text-break");
         itemTitleTextElmt.innerText = this.#itemTitle;
         itemTitleContainerElmt.appendChild(itemTitleTextElmt);
         if (this.#itemSubtitle != null) {

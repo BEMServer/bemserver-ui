@@ -6,15 +6,13 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <a href="{{ url_for('timeseries_datastates.create') }}" class="btn btn-sm btn-outline-primary" title="Add a new timeseries data state"><i class="bi bi-plus-circle"></i> New data state</a>
-</div>
+<a href="{{ url_for('timeseries_datastates.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new timeseries data state"><i class="bi bi-plus-circle"></i> New data state</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row justify-content-end mb-3">
         <div class="col-auto">
             {% filter indent(width=12) %}
@@ -28,9 +26,7 @@
                 {% for x in timeseries_datastates %}
                 <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" href="{{ url_for('timeseries_datastates.edit', id=x.id) }}" title="Edit">
                     <i class="bi bi-inbox"></i>
-                    <h6 class="mb-0">
-                        <span class="fw-bold">{{ x.name }}</span>
-                    </h6>
+                    <h6 class="fw-bold text-break mb-0">{{ x.name }}</h6>
                 </a>
                 {% endfor %}
             </div>

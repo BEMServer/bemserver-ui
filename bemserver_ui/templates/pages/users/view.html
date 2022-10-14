@@ -2,9 +2,6 @@
 
 {% set self_view = signed_user.id == user.id %}
 {% set title = "User profile" if not self_view else "My profile" %}
-{% if not self_view %}
-{% set subtitle = user.name %}
-{% endif %}
 
 {% block head_styles %}
 {{ super() -}}
@@ -16,22 +13,18 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-xs-flex d-grid justify-content-center gap-2 mx-auto">
-    <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0">
-        {% if not self_view %}
-        <form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
-            <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-            <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-break" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-        </form>
-        {% endif %}
-    </div>
-</div>
+{% if not self_view %}
+<form id="delForm" action="{{ url_for('users.delete', id=user.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user.name }}&lt;/mark&gt;'s account">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
+{% endif %}
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
-<div class="container-fluid mb-4">
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             <ul class="nav nav-tabs app-tabs" role="tablist">
@@ -46,9 +39,9 @@
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <div class="d-flex justify-content-between">
                         <dl>
-                            {% if self_view %}
+                            {% if not self_view %}
                             <dt>Name</dt>
-                            <dd>{{ user.name }}</dd>
+                            <dd class="text-break">{{ user.name }}</dd>
                             {% endif %}
                             <dt>Email address</dt>
                             <dd>{{ user.email }}</dd>
@@ -92,7 +85,7 @@
                             {% endif %}
                         </dl>
                         <div>
-                            <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-break" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
+                            <a href="{{ url_for('users.edit', id=user.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Edit"><i class="bi bi-pencil"></i> Edit</a>
                         </div>
                     </div>
                 </div>
