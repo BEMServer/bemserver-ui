@@ -31,7 +31,7 @@ def deduce_campaign_state(campaign_data, dt_now=None):
 
 class CampaignContext:
     def __init__(self, campaign_id=None):
-        self.id = campaign_id
+        self.id = int(campaign_id) if campaign_id is not None else campaign_id
         self._load_campaigns()
         self._load_campaign()
 
