@@ -159,6 +159,7 @@ export class TimeseriesSelector extends HTMLDivElement {
     #internalAPIRequester = null;
     #filterReqIDs = {};
     #searchReqID = null;
+    #selectReqID = null;
 
     #messagesElmt = null;
 
@@ -205,22 +206,17 @@ export class TimeseriesSelector extends HTMLDivElement {
         if (this.#allowedSelectionLimit != -1) {
             this.#selectionLimitElmt.innerText = `Selection limit: ${this.#allowedSelectionLimit}`;
         }
+        if (this.#allowedSelectionLimit == 1) {
+            this.#selectAllResultsLnkElmt.classList.add("d-none", "invisible");
+        }
     }
 
     get selectedItemIds() {
-        let selectedItemIds = [];
-        for (let item of this.#selectedItems) {
-            selectedItemIds.push(item.itemId);
-        }
-        return selectedItemIds;
+        return this.#selectedItems.map((item) => { return item.itemId; });
     }
 
     get selectedItemNames() {
-        let selectedItemNames = [];
-        for (let item of this.#selectedItems) {
-            selectedItemNames.push(item.itemName);
-        }
-        return selectedItemNames;
+        return this.#selectedItems.map((item) => { return item.itemName; });
     }
 
     #cacheDOM() {
@@ -315,11 +311,7 @@ export class TimeseriesSelector extends HTMLDivElement {
         this.#clearAllSelectionLnkElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            this.#unselectAllResultsLnkElmt.click();
-            if (this.#selectedItems.length > 0) {
-                this.#selectedItems = [];
-                this.#updateSelectedItemsContainer();
-            }
+            this.clearAllSelection();
         });
     }
 
@@ -448,6 +440,78 @@ export class TimeseriesSelector extends HTMLDivElement {
             isLimitOK = this.#selectedItems.length < this.#allowedSelectionLimit;
         }
         return !this.selectedItemIds.includes(itemId) && isLimitOK;
+    }
+
+    clearAllSelection() {
+        this.#unselectAllResultsLnkElmt.click();
+        if (this.#selectedItems.length > 0) {
+            this.#selectedItems = [];
+            this.#updateSelectedItemsContainer();
+        }
+    }
+
+    select(tsId, afterSelectCallback = null) {
+        let itemId = Parser.parseIntOrDefault(tsId);
+
+        let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-item-id="${itemId.toString()}"]`);
+        if (searchResultItemElmt != null) {
+            searchResultItemElmt.click();
+        }
+        else {
+            if (this.#selectReqID != null) {
+                this.#internalAPIRequester.abort(this.#selectReqID);
+                this.#selectReqID = null;
+            }
+
+            this.#selectReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.timeseries.retrieve_one`, {id: itemId}),
+                (data) => {
+                    let itemIsAlreadySelected = this.selectedItemIds.includes(data.data.id);
+                    searchResultItemElmt = new SearchResultItem(data.data.id, data.data.name, data.data.unit_symbol, itemIsAlreadySelected);
+
+                    // XXX: this code is duplicated... (almost same code as in "refresh", see below...)
+                    if (this.#canSelect(itemId)) {
+                        let selectedItem = new SelectedItem(itemId, data.data.name, data.data.unit_symbol, searchResultItemElmt.itemLabel);
+
+                        selectedItem.addEventListener("remove", (event) => {
+                            event.preventDefault();
+
+                            let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-item-id="${itemId.toString()}"]`);
+                            if (searchResultItemElmt != null) {
+                                searchResultItemElmt.isActive = false;
+                            }
+                            else {
+                                event.target.remove();
+                                this.#selectedItems = this.#selectedItems.filter(item => item.itemId != itemId);
+                            }
+
+                            this.#updateSelectedItemsContainer();
+
+                            afterSelectCallback?.();
+                        });
+
+                        if (this.#selectedItems.length <= 0) {
+                            this.#selectedItemsContainerElmt.innerHTML = "";
+                        }
+                        this.#selectedItemsContainerElmt.appendChild(selectedItem);
+                        this.#selectedItems.push(selectedItem);
+
+                        this.#updateSelectedItemsContainer();
+                    }
+
+                    searchResultItemElmt.click();
+                },
+                (error) => {
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
+                },
+                () => {
+                    afterSelectCallback?.();
+
+                    this.#update();
+                },
+            );
+        }
     }
 
     refresh(options = {}) {

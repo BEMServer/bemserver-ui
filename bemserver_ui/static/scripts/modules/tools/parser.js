@@ -13,7 +13,10 @@ export class Parser {
             valueFloat = defaultValue;
         }
         else if (fractionDigits != null) {
-            valueFloat = valueFloat.toFixed(fractionDigits);
+            let valueFloatParts = valueFloat.toString().split(".");
+            if (valueFloatParts.length > 1 && Parser.parseIntOrDefault(valueFloatParts[1]) > 0) {
+                valueFloat = valueFloat.toFixed(fractionDigits);
+            }
         }
         return valueFloat;
     }

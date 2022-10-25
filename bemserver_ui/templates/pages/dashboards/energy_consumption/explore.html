@@ -1,0 +1,114 @@
+{% import "macros/tree.html" as mac_tree %}
+{% extends "pages/base.html" %}
+
+{% set title = "Energy consumption" %}
+
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a id="dashboardSetupBtn" class="btn btn-sm btn-outline-secondary text-nowrap d-none invisible" title="View energy consumption dashboard configuration"><i class="bi bi-tools"></i> Dashboard configuration</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="accordion" id="accordionSites">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingSites">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSites" aria-controls="collapseSites" aria-expanded="true">
+                            <span class="fw-bold text-secondary"><i class="bi bi-easel"></i> Dashboard parameters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseSites" class="accordion-collapse collapse show" aria-labelledby="headingSites" data-bs-parent="#accordionSites">
+                        <div class="accordion-body">
+                            <div class="row row-cols-1 row-cols-xl-2 g-3 g-xl-4">
+                                <div class="col">
+                                    <h5 class="text-secondary"><i class="bi bi-building"></i> Sites and buildings</h5>
+                                    <div class="d-flex justify-content-between align-items-start border rounded p-2 gap-3">
+                                        {% filter indent(width=20) %}
+                                        {{ mac_tree.render_tree("treeSites", sites_tree_data) }}
+                                        {% endfilter %}
+                                        <div class="d-sm-flex d-grid justify-content-end gap-sm-3 gap-1">
+                                            <a id="treeSitesCollapseAll" class="link-primary text-nowrap text-decoration-none" role="button"><i class="bi bi-arrows-collapse"></i> <small>collapse all</small></a>
+                                            <a id="treeSitesExpandAll" class="link-primary text-nowrap text-decoration-none" role="button"><i class="bi bi-arrows-expand"></i> <small>expand all</small></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <h5 class="text-secondary"><i class="bi bi-calendar4-range"></i> Period</h5>
+                                    <div class="d-grid gap-2">
+                                        <select id="periodType" class="form-select" aria-label="Select a period" required>
+                                            <option value="Month-Daily" selected>Daily consumption over 1 month</option>
+                                            <option value="Year-Monthly">Monthly consumption over 1 year</option>
+                                            <option value="Yearly">Yearly consumption</option>
+                                        </select>
+                                        <div class="d-flex gap-2">
+                                            <select id="periodMonth" class="form-select" aria-label="Select a period month" required>
+                                                <option value="1">January</option>
+                                                <option value="2">February</option>
+                                                <option value="3">March</option>
+                                                <option value="4">April</option>
+                                                <option value="5">May</option>
+                                                <option value="6">June</option>
+                                                <option value="7">July</option>
+                                                <option value="8">August</option>
+                                                <option value="9">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                            <select id="periodYear" class="form-select" aria-label="Select a period year" required></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="chartContainer" class="row justify-content-center row-cols-1 row-cols-xxl-2 g-4">
+                <div class="col">
+                    <div class="alert alert-info mb-0 pb-0" role="alert">
+                        <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                        <p>To see the energy consumptions, <span class="fw-bold">select a site or a building</span> in the tree and <span class="fw-bold">choose a period</span>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
+<script type="module">
+    import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
+    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/dashboards/energyConsumptionExplore.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let energyConsExploreView = new EnergyConsumptionExploreView("{{ g.campaign_ctxt.tz_name }}");
+        let treeSites = new Tree("treeSites", { selected: (id, type, path, name) => { energyConsExploreView.onTreeSelectItem(id, type); } });
+        treeSites.collapseAll();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
