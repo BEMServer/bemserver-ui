@@ -43,6 +43,9 @@ def signin_required(func=None, roles=None):
             except wexc.NotFound as exc:
                 flask.session.clear()
                 raise wexc.Unauthorized from exc
+            except wexc.Forbidden as exc:
+                # Case of deactivated user while already using app.
+                raise wexc.Unauthorized from exc
             else:
                 # User still exist and credentials are valid.
                 flask.session["user"] = user_resp.toJSON()
