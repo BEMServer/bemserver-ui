@@ -38,6 +38,14 @@ def retrieve_list():
     )
 
 
+@blp.route("/<int:id>")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_one(id):
+    timeseries_resp = flask.g.api_client.timeseries.getone(id)
+    return flask.jsonify(timeseries_resp.toJSON())
+
+
 @blp.route("/<int:id>/properties")
 @auth.signin_required
 @ensure_campaign_context

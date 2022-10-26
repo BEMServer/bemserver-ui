@@ -1,7 +1,7 @@
 {% include "components/campaigns/selector.html" +%}
 <nav id="sidebarMenu" class="col-md-3 col-xl-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
     <div class="position-sticky">
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column gap-3">
             <ul class="nav nav-pills flex-column">
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
@@ -17,7 +17,7 @@
                 </li>
             </ul>
             {% if g.campaign_ctxt.has_campaign %}
-            <ul class="nav nav-pills flex-column gap-1 my-3">
+            <ul class="nav nav-pills flex-column gap-1">
                 <li class="nav-item">
                     <div class="d-flex justify-content-between align-items-center gap-1">
                         <a class="nav-link w-100" href="{{ url_for('structural_elements.explore') }}" title="Manage locations"><i class="bi bi-building"></i> Sites</a>
@@ -63,7 +63,7 @@
                     </div>
                 </li>
             </ul>
-            <div class="accordion app-sidebar-accordion rounded bg-success bg-opacity-25 mb-3" id="accordionTSExplore">
+            <div class="accordion app-sidebar-accordion rounded bg-success bg-opacity-25" id="accordionTSExplore">
                 <div class="accordion-item border-0">
                     <h2 class="accordion-header" id="panelHeadingTSExplore">
                         <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTSExplore" aria-expanded="false" aria-controls="panelCollapseTSExplore">
@@ -81,6 +81,26 @@
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
                                         <a class="nav-link w-100" href="{{ url_for('timeseries_data.completeness') }}" title="Data completeness"><i class="bi bi-pie-chart"></i> Data completeness</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion app-sidebar-accordion rounded bg-info bg-opacity-25">
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header" id="panelHeadingDashboards">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseDashboards" aria-expanded="false" aria-controls="panelCollapseDashboards">
+                            <span class="app-sidebar-heading"><i class="bi bi-easel"></i> Dashboards</span>
+                        </button>
+                    </h2>
+                    <div id="panelCollapseDashboards" class="accordion-collapse collapse" aria-labelledby="panelHeadingDashboards">
+                        <div class="accordion-body px-0 py-2">
+                            <ul class="nav nav-pills flex-column gap-1">
+                                <li class="nav-item">
+                                    <div class="d-flex justify-content-between align-items-center gap-1">
+                                        <a class="nav-link w-100" href="{{ url_for('dashboards.energy_consumption.explore') }}" title="Energy consumption"><i class="bi bi-fire"></i> Energy consumption</a>
                                     </div>
                                 </li>
                             </ul>

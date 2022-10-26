@@ -2,21 +2,6 @@ import { generateUUID } from "./uuid.js";
 import { Parser } from "./parser.js";
 
 
-class InternalAPIResponseError extends Error {
-    constructor(statusCode = null, ...args) {
-        super(...args);
-
-        if (Error.captureStackTrace) {
-            Error.captureStackTrace(this, InternalAPIResponseError);
-        }
-
-        this.name = "InternalAPIResponseError";
-        this.statusCode = statusCode;
-        this.date = new Date();
-    }
-}
-
-
 export class InternalAPIRequest {
 
     #abortControllers = {};
@@ -56,23 +41,10 @@ export class InternalAPIRequest {
 
         fetchPromise.then(
             (response) => {
-                let respJSON = response.json();
-
-                if (!response.ok) {
-                    if (response.status == 401) {
-                        // Just reload the current page, server knows what to do.
-                        document.location.reload();
-                    }
-                    else if (response.status == 422) {
-                        // TODO: handle 422 validation errors data
-                        if (this.#debugMode) {
-                            console.log(respJSON.message);
-                        }
-                    }
-                    return Promise.reject(new InternalAPIResponseError(response.status, respJSON.message));
+                if (response.ok) {
+                    return response.json();
                 }
-
-                return respJSON;
+                return Promise.reject(response);
             }
         ).then(
             (data) => {
@@ -80,12 +52,49 @@ export class InternalAPIRequest {
             }
         ).catch(
             (error) => {
-                if (!["AbortError"].includes(error.name)) {
-                    if (rejectCallback != null) {
-                        rejectCallback(error);
+                if (error.status == 401) {
+                    // Just reload the current page, server knows what to do.
+                    document.location.reload();
+                }
+                else if (!["AbortError"].includes(error.name)) {
+
+                    console.log(error);
+
+                    try {
+                        error.json().then((errorJSON) => {
+                            let errorMsg = errorJSON.message;
+                            // TODO: handle validation errors data (422, 409)
+                            if (error.status == 409) {
+
+                            }
+                            else if (error.status == 422) {
+                                for (let [fieldName, fieldErrors] of Object.entries(errorJSON._validation_errors)) {
+                                    errorMsg += ` (${fieldName} : ${fieldErrors})`;
+                                }
+                            }
+
+                            if (rejectCallback != null) {
+                                rejectCallback(errorMsg);
+                            }
+                            else {
+                                return Promise.reject(errorMsg);
+                            }
+                        }).catch((innerError) => {
+                            if (rejectCallback != null) {
+                                rejectCallback(innerError);
+                            }
+                            else {
+                                return Promise.reject(innerError);
+                            }
+                        });
                     }
-                    else {
-                        return Promise.reject(error);
+                    catch {
+                        if (rejectCallback != null) {
+                            rejectCallback(`Internal error [${error}]`);
+                        }
+                        else {
+                            return Promise.reject(`Internal error [${error}]`);
+                        }
                     }
                 }
                 else if (this.#debugMode) {
@@ -141,6 +150,18 @@ export class InternalAPIRequest {
                 "ETag": etag,
             },
             body: JSON.stringify(payload),
+        };
+        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "ETag": etag,
+            },
         };
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }

@@ -45,12 +45,12 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "flask>=2.0.3",
-        "python-dotenv>=0.19.2",
+        "flask>=2.2.2",
+        "python-dotenv>=0.21.0",
         (
             # https://github.com/jazzband/pip-tools/issues/1359
             "bemserver-api-client @ "
-            "https://github.com/BEMServer/bemserver-api-client/archive/e548edc.tar.gz"
+            "https://github.com/BEMServer/bemserver-api-client/archive/d7006e4.tar.gz"
         ),
     ],
     extras_require=EXTRAS_REQUIRE,

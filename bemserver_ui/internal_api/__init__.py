@@ -15,6 +15,7 @@ from . import user_groups
 from . import users
 from . import analysis
 from . import services
+from . import dashboards
 
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
@@ -38,4 +39,5 @@ def init_app(app):
     for module in MODULES:
         blp.register_blueprint(module.blp)
     services.register_blueprint(blp)
+    dashboards.register_blueprint(blp)
     app.register_blueprint(blp)

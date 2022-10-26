@@ -73,8 +73,8 @@
     document.addEventListener("DOMContentLoaded", () => {
 
         let structuralElmts = new StructuralElementsExploreView();
-        let treeSites = new Tree("treeSites", { selected: (id, type, path) => { structuralElmts.render(id, type, path); } });
-        let treeZones = new Tree("treeZones", { selected: (id, type, path) => { structuralElmts.render(id, type, path); } });
+        let treeSites = new Tree("treeSites", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
+        let treeZones = new Tree("treeZones", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
 
         treeSites.collapseAll();
         treeZones.collapseAll();

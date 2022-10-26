@@ -30,6 +30,7 @@ export class TimeseriesChart extends HTMLDivElement {
                 dataZoom: {
                     yAxisIndex: "none",
                 },
+                dataView: {},
                 saveAsImage: {},
                 myDownloadCSV: {
                     show: false,
@@ -84,9 +85,13 @@ export class TimeseriesChart extends HTMLDivElement {
     }
 
     #initEventListeners() {
-        window.onresize = () => {
-            this.#chart.resize();
-        };
+        window.addEventListener("resize", (event) => {
+            this.resize();
+        });
+
+        window.addEventListener("unload", (event) => {
+            this.dispose();
+        });
     }
 
     connectedCallback() {
@@ -102,6 +107,14 @@ export class TimeseriesChart extends HTMLDivElement {
             link.setAttribute("href", this.#downloadCSVUrl);
             link.click();
         }
+    }
+
+    resize() {
+        this.#chart.resize();
+    }
+
+    dispose() {
+        this.#chart.dispose();
     }
 
     showLoading() {
@@ -123,25 +136,29 @@ export class TimeseriesChart extends HTMLDivElement {
         });
 
         options.series.length = 0;
-        options.series = data.ts_headers.reduce((result, header) => {
-            if (header != "Datetime") {
-              result.push({
-                    // id: tsId,
-                    name: header,
-                    type: "line",
-                    smooth: true,
-                    data: data.ts_data.map((row) => {
-                        return Parser.parseFloatOrDefault(row[header], null, 2);
-                    }),
-                });
-            }
-            return result;
-        }, []);
+        options.series = data.ts_headers.filter((header) => {
+            return header != "Datetime";
+        }).map((header) => {
+            return {
+                id: header,
+                name: header,
+                type: "line",
+                smooth: true,
+                data: data.ts_data.map((row) => {
+                    return Parser.parseFloatOrDefault(row[header], null, 2);
+                }),
+            };
+        });
+
+        console.log(options.series);
 
         options.xAxis[0].data = timestamps;
         options.yAxis[0].data = options.series.map((serie) => {
             return serie.name;
         });
+
+        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
+        this.#chart.clear();
 
         this.#chart.setOption(options);
     }

@@ -36,31 +36,36 @@ def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
     }
 
 
-def _build_tree_sites(campaign_id, *, is_draggable=False):
+def _build_tree_sites(
+    campaign_id,
+    *,
+    structural_element_types=STRUCTURAL_ELEMENT_TYPES,
+    is_draggable=False,
+):
     # Get all structure elements for campaign.
     structural_elements = {}
-    for structural_element_type in STRUCTURAL_ELEMENT_TYPES:
+    for structural_element_type in structural_element_types:
         api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
         api_resource_resp = api_resource.getall(campaign_id=campaign_id, sort="+name")
         structural_elements[structural_element_type] = api_resource_resp.data
 
     # Build structural elements tree.
     tree_data = []
-    for site in structural_elements["site"]:
+    for site in structural_elements.get("site", []):
         site_data = _extract_data(site, "site", is_draggable=is_draggable)
-        for building in structural_elements["building"]:
+        for building in structural_elements.get("building", []):
             if building["site_id"] != site["id"]:
                 continue
             building_data = _extract_data(
                 building, "building", site_data, is_draggable=is_draggable
             )
-            for storey in structural_elements["storey"]:
+            for storey in structural_elements.get("storey", []):
                 if storey["building_id"] != building["id"]:
                     continue
                 storey_data = _extract_data(
                     storey, "storey", building_data, is_draggable=is_draggable
                 )
-                for space in structural_elements["space"]:
+                for space in structural_elements.get("space", []):
                     if space["storey_id"] != storey["id"]:
                         continue
                     space_data = _extract_data(
