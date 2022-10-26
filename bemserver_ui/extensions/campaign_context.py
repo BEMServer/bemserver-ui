@@ -7,6 +7,7 @@ import zoneinfo
 import enum
 import flask
 from flask import url_for as flask_url_for
+import werkzeug.exceptions as wexc
 
 import bemserver_api_client.exceptions as bac
 
@@ -122,7 +123,7 @@ def url_for_campaign(endpoint, **kwargs):
     if not ignore_campaign:
         if forced_campaign is not None:
             kwargs["campaign"] = forced_campaign
-        elif flask.g.campaign_ctxt.has_campaign:
+        elif hasattr(flask.g, "campaign_ctxt") and flask.g.campaign_ctxt.has_campaign:
             kwargs["campaign"] = flask.g.campaign_ctxt.id
 
     return flask_url_for(endpoint, **kwargs)
@@ -135,10 +136,14 @@ def init_app(app):
             "static",
             "flask_es6_endpoints",
         ):
-            flask.g.campaign_ctxt = CampaignContext(
-                flask.request.args.get("forced_campaign", None)
-                or flask.request.args.get("campaign")
-            )
+            try:
+                flask.g.campaign_ctxt = CampaignContext(
+                    flask.request.args.get("forced_campaign", None)
+                    or flask.request.args.get("campaign")
+                )
+            except bac.BEMServerAPIAuthenticationError as exc:
+                # XXX: Case of deactivated user while already using app.
+                raise wexc.Unauthorized from exc
 
     # Monkey patch flask.url_for used in jinja templates.
     app.jinja_env.globals["url_for"] = url_for_campaign
