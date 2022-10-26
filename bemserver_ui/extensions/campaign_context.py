@@ -34,7 +34,7 @@ class CampaignContext:
     def __init__(self, campaign_id=None):
         self.id = int(campaign_id) if campaign_id is not None else campaign_id
         self._load_campaigns()
-        self._load_campaign()
+        self._campaign = self._load_campaign()
 
     @property
     def campaign_states(self):
@@ -92,7 +92,6 @@ class CampaignContext:
             flask.session["campaigns_etag"] = campaigns_resp.etag
 
     def _load_campaign(self):
-        self._campaign = None
         if self.id is not None:
             try:
                 campaign_resp = flask.g.api_client.campaigns.getone(self.id)
@@ -101,7 +100,8 @@ class CampaignContext:
             else:
                 campaign = campaign_resp.toJSON()
                 campaign["data"]["state"] = deduce_campaign_state(campaign["data"])
-                self._campaign = campaign
+                return campaign
+        return None
 
     def get_data_for(self, campaign_id):
         for campaign in self.campaigns:
@@ -135,6 +135,8 @@ def init_app(app):
         if "user" in flask.session and flask.request.endpoint not in (
             "static",
             "flask_es6_endpoints",
+            "es6_signed_user",
+            "generate_timezones_es6_module",
         ):
             try:
                 flask.g.campaign_ctxt = CampaignContext(
