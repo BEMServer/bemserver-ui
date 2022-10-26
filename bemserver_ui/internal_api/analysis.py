@@ -79,9 +79,13 @@ def retrieve_energy_consumption(structural_element_type, structural_element_id):
     year_reference = int(flask.request.args["year_reference"])
 
     bucket_width_value = 1
-    bucket_width_unit = "day"
+    bucket_width_unit = "hour"
     tz = zoneinfo.ZoneInfo(tz_name)
-    if period_type == "Month-Daily":
+    if period_type == "Month-Hourly":
+        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
+        dt_end = dt.datetime(period_year, period_month + 1, 1, 1, 0, 0, tzinfo=tz)
+    elif period_type == "Month-Daily":
+        bucket_width_unit = "day"
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
         dt_end = dt.datetime(period_year, period_month + 1, 1, 0, 0, 0, tzinfo=tz)
     elif period_type == "Year-Monthly":

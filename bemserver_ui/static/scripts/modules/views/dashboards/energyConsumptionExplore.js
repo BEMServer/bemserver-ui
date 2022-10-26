@@ -26,6 +26,9 @@ export class EnergyConsumptionExploreView {
     #structuralElementId = null;
     #chartByEnergySource = {};
 
+    #previousPeriodType = null;
+    #previousYearSelected = null;
+
     constructor(tzName = "UTC", year = null, month = null) {
         this.#tzName = tzName || "UTC";
 
@@ -68,42 +71,65 @@ export class EnergyConsumptionExploreView {
         this.#periodYearSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
+            this.#updatePreviousYearSelected();
             this.#generateCharts();
         });
     }
 
     #updatePeriodSelect() {
-        if (this.#periodTypeSelectElmt.value == "Month-Daily" || this.#periodTypeSelectElmt.value == "Year-Monthly") {
-            this.#periodYearSelectElmt.innerHTML = "";
-            for (let offsetPastYear = 0 ; offsetPastYear < this.#maxPastYears ; offsetPastYear++) {
-                let year = this.#yearRef - offsetPastYear;
-                let optionElmt = document.createElement("option");
-                optionElmt.value = year.toString();
-                optionElmt.innerText = year.toString();
-                this.#periodYearSelectElmt.appendChild(optionElmt);
+        if (this.#periodTypeSelectElmt.value == "Yearly") {
+            if (this.#previousPeriodType != this.#periodTypeSelectElmt.value) {
+                this.#periodYearSelectElmt.innerHTML = "";
+                let offsetPastYear = 0;
+                let offsetStep = 5;
+                let isOptSelected = false;
+                while (offsetPastYear <= this.#maxPastYears) {
+                    let yearMin = this.#yearRef - (offsetPastYear + offsetStep);
+                    let optionElmt = document.createElement("option");
+                    optionElmt.value = offsetPastYear + offsetStep;
+                    optionElmt.innerText = `Last ${offsetPastYear + offsetStep} years [${this.#yearRef} - ${yearMin}]`;
+                    if (!isOptSelected) {
+                        isOptSelected = (this.#previousYearSelected != null && this.#previousYearSelected >= yearMin);
+                        optionElmt.selected = isOptSelected;
+                    }
+                    this.#periodYearSelectElmt.appendChild(optionElmt);
+                    offsetPastYear += offsetStep;
+                }
             }
 
-            if (this.#periodTypeSelectElmt.value == "Month-Daily") {
-                this.#periodMonthSelectElmt.value = this.#monthRef.toString();
+            this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
+        }
+        else {
+            if (this.#previousPeriodType == null || this.#previousPeriodType == "Yearly") {
+                this.#periodYearSelectElmt.innerHTML = "";
+                for (let offsetPastYear = 0 ; offsetPastYear < this.#maxPastYears ; offsetPastYear++) {
+                    let year = this.#yearRef - offsetPastYear;
+                    let optionElmt = document.createElement("option");
+                    optionElmt.value = year.toString();
+                    optionElmt.innerText = year.toString();
+                    optionElmt.selected = ((this.#previousYearSelected != null && year == this.#previousYearSelected) || offsetPastYear == 0);
+                    this.#periodYearSelectElmt.appendChild(optionElmt);
+                }
+            }
+
+            if (this.#periodTypeSelectElmt.value.startsWith("Month-")) {
+                if (this.#previousPeriodType == null) {
+                    this.#periodMonthSelectElmt.value = this.#monthRef.toString();
+                }
                 this.#periodMonthSelectElmt.classList.remove("d-none", "invisible");
             }
             else {
                 this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
             }
         }
-        else if (this.#periodTypeSelectElmt.value == "Yearly") {
-            this.#periodYearSelectElmt.innerHTML = "";
-            let offsetPastYear = 0;
-            let offsetStep = 5;
-            while (offsetPastYear <= this.#maxPastYears) {
-                let optionElmt = document.createElement("option");
-                optionElmt.value = offsetPastYear + offsetStep;
-                optionElmt.innerText = `Last ${offsetPastYear + offsetStep} years [${this.#yearRef} - ${this.#yearRef - (offsetPastYear + offsetStep)}]`;
-                this.#periodYearSelectElmt.appendChild(optionElmt);
-                offsetPastYear += offsetStep;
-            }
 
-            this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
+        this.#previousPeriodType = this.#periodTypeSelectElmt.value;
+        this.#updatePreviousYearSelected();
+    }
+
+    #updatePreviousYearSelected() {
+        if (this.#periodTypeSelectElmt.value != "Yearly") {
+            this.#previousYearSelected = this.#periodYearSelectElmt.value;
         }
     }
 
@@ -205,6 +231,8 @@ export class EnergyConsumptionExploreView {
                     }
                 },
                 (error) => {
+                    this.#mainChartContainerElmt.innerHTML = "";
+
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                     this.#messagesElmt.appendChild(flashMsgElmt);
                 },
