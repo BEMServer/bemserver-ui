@@ -1,7 +1,7 @@
 import { TimezoneTool } from "../../tools/timezones.js";
 
 
-export class TimezonePicker extends HTMLElement {
+export class TimezonePicker extends HTMLDivElement {
 
     #tzTool = null;
 
@@ -165,5 +165,5 @@ export class TimezonePicker extends HTMLElement {
 
 
 if (customElements.get("app-timezone-picker") == null) {
-    customElements.define("app-timezone-picker", TimezonePicker);
+    customElements.define("app-timezone-picker", TimezonePicker, { extends: "div" });
 }

@@ -1,7 +1,7 @@
 import { TimezoneTool } from "../../tools/timezones.js";
 
 
-export class DatetimePicker extends HTMLElement {
+export class DatetimePicker extends HTMLDivElement {
 
     #tzTool = null;
 
@@ -211,5 +211,5 @@ export class DatetimePicker extends HTMLElement {
 
 
 if (customElements.get("app-datetime-picker") == null) {
-    customElements.define("app-datetime-picker", DatetimePicker);
+    customElements.define("app-datetime-picker", DatetimePicker, { extends: "div" });
 }
