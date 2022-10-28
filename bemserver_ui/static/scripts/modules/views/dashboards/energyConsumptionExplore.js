@@ -98,6 +98,7 @@ export class EnergyConsumptionExploreView {
             }
 
             this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
+            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
         }
         else {
             if (this.#previousPeriodType == null || this.#previousPeriodType == "Yearly") {
@@ -121,6 +122,7 @@ export class EnergyConsumptionExploreView {
             else {
                 this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
             }
+            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
         }
 
         this.#previousPeriodType = this.#periodTypeSelectElmt.value;
