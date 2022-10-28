@@ -1,3 +1,4 @@
+import "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js";
 import { Parser } from "../tools/parser.js";
 import { TimeDisplay } from "../tools/time.js";
 
@@ -149,8 +150,6 @@ export class TimeseriesChart extends HTMLDivElement {
                 }),
             };
         });
-
-        console.log(options.series);
 
         options.xAxis[0].data = timestamps;
         options.yAxis[0].data = options.series.map((serie) => {
