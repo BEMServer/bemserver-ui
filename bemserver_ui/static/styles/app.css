@@ -15,13 +15,13 @@ body,
     min-width: 40vw !important;
 }
 
-.app-logo {
-    max-height: 140px;
+.app-header .app-logo,
+.app-header .app-logo-partner {
+    max-height: 40px !important;
 }
 .app-header .app-logo {
     min-width: 75px !important;
     max-width: 150px !important;
-    max-height: 30px !important;
 }
 
 .app-header,
