@@ -29,6 +29,13 @@ export class EnergyConsumptionExploreView {
     #previousPeriodType = null;
     #previousYearSelected = null;
 
+    #timeFormatPerPeriodType = {
+        "Month-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
+        "Month-Daily": "{dd} {MMMM} {yyyy}",
+        "Year-Monthly": "{MMMM} {yyyy}",
+        "Yearly": "{yyyy}",
+    };
+
     constructor(tzName = "UTC", year = null, month = null) {
         this.#tzName = tzName || "UTC";
 
@@ -98,6 +105,7 @@ export class EnergyConsumptionExploreView {
             }
 
             this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
+            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
         }
         else {
             if (this.#previousPeriodType == null || this.#previousPeriodType == "Yearly") {
@@ -121,6 +129,7 @@ export class EnergyConsumptionExploreView {
             else {
                 this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
             }
+            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
         }
 
         this.#previousPeriodType = this.#periodTypeSelectElmt.value;
@@ -198,19 +207,6 @@ export class EnergyConsumptionExploreView {
                         this.#mainChartContainerElmt.appendChild(colElmt);
                     }
                     else {
-                        let timestamps = data["timestamps"].map((timestamp) => {
-                            if (this.#periodTypeSelectElmt.value == "Month-Daily") {
-                                return timestamp.substring(0, 10);
-                            }
-                            else if (this.#periodTypeSelectElmt.value == "Year-Monthly") {
-                                return timestamp.substring(0, 7);
-                            }
-                            else if (this.#periodTypeSelectElmt.value == "Yearly") {
-                                return timestamp.substring(0, 4);
-                            }
-                            return timestamp;
-                        });
-
                         for (let [energySource, energyUses] of Object.entries(data["energy"])) {
                             let energySourceChart = new TimeseriesEnergyConsumptionChart();
                             this.#chartByEnergySource[energySource] = energySourceChart;
@@ -226,7 +222,7 @@ export class EnergyConsumptionExploreView {
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
                             energySourceChart.showLoading();
-                            energySourceChart.load(energySource, energyUses, timestamps);
+                            energySourceChart.load(data["timestamps"], energySource, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
                         }
                     }
                 },

@@ -22,7 +22,10 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
             },
         },
         grid: {
-            bottom: 110,
+            left: "3%",
+            right: "5%",
+            bottom: 90,
+            containLabel: true,
         },
         toolbox: {
             feature: {
@@ -31,7 +34,6 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
                 },
                 dataView: {
                     readOnly: true,
-                    optionToContent: (opt) => { return this.#optionToContent(opt); },
                     buttonColor: "#95c11a",
                 },
                 saveAsImage: {},
@@ -55,17 +57,18 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
         ],
         xAxis: [
             {
-                type: "category",
+                type: "time",
             },
         ],
         yAxis: [
             {
+                type: "value",
                 nameLocation: "middle",
-                nameGap: 40,
+                axisLabel: {},
             },
         ],
         series: [],
-        useUTC: true,
+        useUTC: false,
     };
 
     #energyUseColors = {
@@ -94,51 +97,102 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
         });
     }
 
-    #optionToContent(opt) {
-        let axisData = opt.xAxis[0].data;
-        let series = opt.series;
+    #optionToContent(opt, unit, timeFormat) {
+        let timestamps = opt.series[0].data.map((serieData) => {
+            return echarts.time.format(serieData[0], timeFormat);
+        });
 
         let mainContainerElmt = document.createElement("div");
-        mainContainerElmt.classList.add("table-responsive", "m-2", "me-3");
+        mainContainerElmt.classList.add("m-2", "me-3");
+
+        let subtitleElmt = document.createElement("h5");
+        subtitleElmt.innerText = opt.title[0].subtext;
+        mainContainerElmt.appendChild(subtitleElmt);
+
+        let tableContainerElmt = document.createElement("div");
+        tableContainerElmt.classList.add("table-responsive");
 
         let tableElmt = document.createElement("table");
-        tableElmt.classList.add("table", "table-sm", "table-hover", "table-bordered", "caption-top");
+        tableElmt.classList.add("table", "table-sm", "table-hover", "table-bordered", "caption-top", "user-select-all");
         let tableCaptionElmt = document.createElement("caption");
         tableCaptionElmt.classList.add("fst-italic", "text-muted", "text-end");
-        tableCaptionElmt.innerText = `${axisData.length.toString()} rows`;
+        tableCaptionElmt.innerText = `${timestamps.length.toString()} rows`;
         tableElmt.appendChild(tableCaptionElmt);
         let tableHeadElmt = document.createElement("thead");
         let tableHeadTrElmt = document.createElement("tr");
+        tableHeadTrElmt.classList.add("align-middle");
         let tableHeadTimestampElmt = document.createElement("th");
         tableHeadTimestampElmt.setAttribute("scope", "col");
         tableHeadTimestampElmt.innerText = "Timestamp";
         tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-        for (let serie of series) {
+        for (let serie of opt.series) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = serie.name;
+            tableHeadThElmt.innerText = `${serie.name} (${unit})`;
             tableHeadTrElmt.appendChild(tableHeadThElmt);
         }
         tableHeadElmt.appendChild(tableHeadTrElmt);
         tableElmt.appendChild(tableHeadElmt);
         let tableBodyElmt = document.createElement("tbody");
         tableBodyElmt.classList.add("table-group-divider");
-        for (let i = 0 ; i < axisData.length ; i++) {
+        for (let [index, timestamp] of timestamps.entries()) {
             let tableTrElmt = document.createElement("tr");
             let tableCellTimestampElmt = document.createElement("td");
-            tableCellTimestampElmt.innerText = axisData[i];
+            tableCellTimestampElmt.innerText = timestamp;
             tableTrElmt.appendChild(tableCellTimestampElmt);
-            for (let j = 0 ; j < series.length ; j++) {
+            for (let serie of opt.series) {
                 let tableCellElmt = document.createElement("td");
-                tableCellElmt.innerText = series[j].data[i];
+                tableCellElmt.innerText = Parser.parseFloatOrDefault(serie.data[index][1], null, 2).toString();
                 tableTrElmt.appendChild(tableCellElmt);
             }
             tableBodyElmt.appendChild(tableTrElmt);
         }
         tableElmt.appendChild(tableBodyElmt);
 
-        mainContainerElmt.appendChild(tableElmt);
+        tableContainerElmt.appendChild(tableElmt);
+        mainContainerElmt.appendChild(tableContainerElmt);
         return mainContainerElmt;
+    }
+
+    #tooltipFormatter(params, unit, timeFormat) {
+        let tooltipContainerElmt = document.createElement("div");
+
+        let ulElmt = document.createElement("ul");
+        ulElmt.classList.add("list-unstyled", "mx-2", "mt-2", "mb-0");
+
+        for (let [index, serieParams] of params.entries()) {
+            if (index == 0) {
+                let timeElmt = document.createElement("h6");
+                timeElmt.innerText = echarts.time.format(serieParams.value[0], timeFormat);
+                tooltipContainerElmt.appendChild(timeElmt);
+            }
+
+            let liElmt = document.createElement("li");
+            liElmt.classList.add("d-flex", "justify-content-between", "gap-4");
+            ulElmt.appendChild(liElmt);
+
+            let serieNameElmt = document.createElement("div");
+            serieNameElmt.classList.add("d-flex", "align-items-center", "gap-1");
+            serieNameElmt.innerHTML = `${serieParams.marker}<span>${serieParams.seriesName}</span>`;
+
+            let serieValueContainerElmt = document.createElement("div");
+            serieValueContainerElmt.classList.add("d-flex", "gap-1");
+
+            let serieValueElmt = document.createElement("span");
+            serieValueElmt.classList.add("fw-bold");
+            serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], null, 2).toString();
+            serieValueContainerElmt.appendChild(serieValueElmt);
+
+            let serieValueUnitElmt = document.createElement("small");
+            serieValueUnitElmt.innerText = unit;
+            serieValueContainerElmt.appendChild(serieValueUnitElmt);
+
+            liElmt.appendChild(serieNameElmt);
+            liElmt.appendChild(serieValueContainerElmt);
+        }
+
+        tooltipContainerElmt.appendChild(ulElmt);
+        return tooltipContainerElmt;
     }
 
     connectedCallback() {
@@ -164,13 +218,16 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(energySource, energyUses, timestamps) {
+    load(timestamps, energySource, energyUses, unit, timeFormat) {
         this.hideLoading();
 
         let options = this.#chart.getOption();
 
         options.title[0].subtext = `energy source: ${energySource}`;
-        options.toolbox[0].feature.dataView.lang[0] = `Energy consumption data [${energySource}]`;
+        options.toolbox[0].feature.dataView.lang[0] = `Energy consumption data`;
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
+
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
 
         options.series.length = 0;
         options.series = Object.entries(energyUses).map(([energyUse, consumptions]) => {
@@ -178,8 +235,8 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
                 id: energyUse,
                 name: energyUse,
                 type: "bar",
-                data: consumptions.map((consumption) => {
-                    return Parser.parseFloatOrDefault(consumption, null, 2);
+                data: timestamps.map((time, index) => {
+                    return [time, Parser.parseFloatOrDefault(consumptions[index], null, 2)];
                 }),
                 emphasis: {
                     focus: "series",
@@ -195,10 +252,10 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
             return serie;
         });
 
-        options.xAxis[0].data = timestamps;
         options.yAxis[0].data = options.series.map((serie) => {
             return serie.name;
         });
+        options.yAxis[0].axisLabel.formatter = `{value} ${unit}`;
 
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
