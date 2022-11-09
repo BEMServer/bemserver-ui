@@ -128,7 +128,7 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
         for (let serie of opt.series) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = `${serie.name} (${unit})`;
+            tableHeadThElmt.innerText = `${serie.name}${unit ? ` (${unit})`: ""}`;
             tableHeadTrElmt.appendChild(tableHeadThElmt);
         }
         tableHeadElmt.appendChild(tableHeadTrElmt);
@@ -142,7 +142,7 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
             tableTrElmt.appendChild(tableCellTimestampElmt);
             for (let serie of opt.series) {
                 let tableCellElmt = document.createElement("td");
-                tableCellElmt.innerText = Parser.parseFloatOrDefault(serie.data[index][1], null, 2).toString();
+                tableCellElmt.innerText = Parser.parseFloatOrDefault(serie.data[index][1], Number.NaN, 2).toString();
                 tableTrElmt.appendChild(tableCellElmt);
             }
             tableBodyElmt.appendChild(tableTrElmt);
@@ -180,7 +180,7 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
 
             let serieValueElmt = document.createElement("span");
             serieValueElmt.classList.add("fw-bold");
-            serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], null, 2).toString();
+            serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], Number.NaN, 2).toString();
             serieValueContainerElmt.appendChild(serieValueElmt);
 
             let serieValueUnitElmt = document.createElement("small");
@@ -224,7 +224,7 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
         let options = this.#chart.getOption();
 
         options.title[0].subtext = `energy source: ${energySource}`;
-        options.toolbox[0].feature.dataView.lang[0] = `Energy consumption data`;
+        options.toolbox[0].feature.dataView.lang[0] = `${this.#defaultTitle} data`;
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
 
         options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
@@ -236,7 +236,7 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
                 name: energyUse,
                 type: "bar",
                 data: timestamps.map((time, index) => {
-                    return [time, Parser.parseFloatOrDefault(consumptions[index], null, 2)];
+                    return [time, Parser.parseFloatOrDefault(consumptions[index], Number.NaN, 2)];
                 }),
                 emphasis: {
                     focus: "series",
