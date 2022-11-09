@@ -12,6 +12,9 @@ import werkzeug.exceptions as wexc
 import bemserver_api_client.exceptions as bac
 
 
+CAMPAIGN_STATE_OVERALL = "overall"
+
+
 class CampaignState(enum.Enum):
     ongoing = "ongoing"
     closed = "closed"
@@ -41,13 +44,18 @@ class CampaignContext:
         return [x.value for x in CampaignState]
 
     @property
+    def campaign_state_overall(self):
+        return CAMPAIGN_STATE_OVERALL
+
+    @property
     def campaigns(self):
-        return self.campaigns_by_state["overall"]
+        return self.campaigns_by_state[CAMPAIGN_STATE_OVERALL]
 
     @property
     def campaigns_by_state(self):
         return flask.session.get(
-            "campaigns", {"overall": [], **{x.value: [] for x in CampaignState}}
+            "campaigns",
+            {CAMPAIGN_STATE_OVERALL: [], **{x.value: [] for x in CampaignState}},
         )
 
     @property
@@ -80,12 +88,15 @@ class CampaignContext:
         except bac.BEMServerAPINotModified:
             pass
         else:
-            campaigns = {"overall": [], **{x.value: [] for x in CampaignState}}
+            campaigns = {
+                CAMPAIGN_STATE_OVERALL: [],
+                **{x.value: [] for x in CampaignState},
+            }
             dt_now = dt.datetime.now(tz=dt.timezone.utc)
             for campaign_data in campaigns_resp.data:
                 campaign_state = deduce_campaign_state(campaign_data, dt_now)
                 campaign_data["state"] = campaign_state
-                campaigns["overall"].append(campaign_data)
+                campaigns[CAMPAIGN_STATE_OVERALL].append(campaign_data)
                 campaigns[campaign_state].append(campaign_data)
 
             flask.session["campaigns"] = campaigns

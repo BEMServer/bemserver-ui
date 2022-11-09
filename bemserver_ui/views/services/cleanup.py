@@ -4,6 +4,7 @@ import flask
 import bemserver_api_client.exceptions as bac_exc
 
 from bemserver_ui.extensions import auth, Roles
+from bemserver_ui.extensions.campaign_context import CAMPAIGN_STATE_OVERALL
 
 
 blp = flask.Blueprint("cleanup", __name__, url_prefix="/cleanup")
@@ -31,7 +32,7 @@ def _ensure_cleanup_campaign_data(cleanup_campaign):
 @auth.signin_required(roles=[Roles.admin])
 def list():
     ui_filters = {
-        "campaign_state": "overall",
+        "campaign_state": CAMPAIGN_STATE_OVERALL,
         "service_state": "all",
     }
     api_filters = {}
@@ -45,7 +46,7 @@ def list():
             api_filters["is_enabled"] = False
 
     is_filtered = (
-        ui_filters["campaign_state"] != "overall"
+        ui_filters["campaign_state"] != CAMPAIGN_STATE_OVERALL
         or ui_filters["service_state"] != "all"
     )
 
@@ -58,7 +59,7 @@ def list():
     for cleanup_camp in cleanup_campaigns_resp.data:
         cleanup_camp = _ensure_cleanup_campaign_data(cleanup_camp)
         if (
-            ui_filters["campaign_state"] == "overall"
+            ui_filters["campaign_state"] == CAMPAIGN_STATE_OVERALL
             or cleanup_camp["campaign_state"] == ui_filters["campaign_state"]
         ):
             cleanup_campaigns.append(cleanup_camp)

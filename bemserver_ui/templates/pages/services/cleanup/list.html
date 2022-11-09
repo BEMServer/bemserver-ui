@@ -18,8 +18,8 @@
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <form class="d-sm-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                <select class="form-select form-select-sm{% if filters['campaign_state'] != 'overall' %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_state" name="campaign_state" aria-label="Select a filter value">
-                                    <option value="overall"{% if "overall" == filters["campaign_state"] %} selected{% endif %}>All campaign states</option>
+                                <select class="form-select form-select-sm{% if filters['campaign_state'] != g.campaign_ctxt.campaign_state_overall %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_state" name="campaign_state" aria-label="Select a filter value">
+                                    <option value="{{ g.campaign_ctxt.campaign_state_overall }}"{% if g.campaign_ctxt.campaign_state_overall == filters["campaign_state"] %} selected{% endif %}>All campaign states</option>
                                     {% for x in g.campaign_ctxt.campaign_states %}
                                     <option value="{{ x }}"{% if x == filters["campaign_state"] %} selected{% endif %}>{{ x | capitalize }}</option>
                                     {% endfor %}
@@ -44,7 +44,7 @@
         </div>
         <div class="col-auto">
             {% filter indent(width=12) %}
-            {{ mac_items_count.render_items_count(g.campaign_ctxt.campaigns_by_state["overall"] | length, last_item=cleanup_campaigns | length) -}}
+            {{ mac_items_count.render_items_count(g.campaign_ctxt.campaigns_by_state[g.campaign_ctxt.campaign_state_overall] | length, last_item=cleanup_campaigns | length) -}}
             {% endfilter %}
         </div>
     </div>
