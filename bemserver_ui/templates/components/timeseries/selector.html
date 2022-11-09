@@ -5,11 +5,11 @@
     </div>
     <div class="btn-group bg-white w-100">
         <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3"></div>
-        <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="false" data-bs-reference="parent" aria-expanded="false">
+        <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-reference="parent" aria-expanded="false">
             <i class="bi bi-search"></i>
             <span class="visually-hidden">Toggle search panel</span>
         </button>
-        <div class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownBtnSearch">
+        <div id="dropdownSearchPanel" class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownSearchBtn">
             <div class="d-flex align-items-center gap-2 mb-2">
                 <input type="text" class="form-control" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
                 <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none" title="Clear search filter"><i class="bi bi-x-circle"></i></a>

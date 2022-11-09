@@ -165,6 +165,8 @@ export class TimeseriesSelector extends HTMLDivElement {
 
     #selectedItemsContainerElmt = null;
     #selectedItems = [];
+    #dropdownSearchPanelElmt = null;
+    #bsDropdownSearchPanel = null;
 
     #searchInputElmt = null;
 
@@ -223,6 +225,8 @@ export class TimeseriesSelector extends HTMLDivElement {
         this.#messagesElmt = document.getElementById("messages");
 
         this.#selectedItemsContainerElmt = document.getElementById("selectedItemsContainer");
+        this.#dropdownSearchPanelElmt = document.getElementById("dropdownSearchPanel");
+        this.#bsDropdownSearchPanel = bootstrap.Dropdown.getOrCreateInstance(this.#dropdownSearchPanelElmt);
 
         this.#searchInputElmt = document.getElementById("search");
 
@@ -613,6 +617,9 @@ export class TimeseriesSelector extends HTMLDivElement {
 
                         searchResultItem.addEventListener("toggle", (event) => {
                             event.preventDefault();
+
+                            // Update dropdown-menu position, taking in account selected items container height.
+                            this.#dropdownSearchPanelElmt.style.transform = `translate(0px, ${this.#selectedItemsContainerElmt.offsetHeight + this.#bsDropdownSearchPanel._config.offset[1]}px)`;
 
                             let toggleEvent = new CustomEvent("toggleItem", { detail: event.detail, bubbles: true});
                             this.dispatchEvent(toggleEvent);
