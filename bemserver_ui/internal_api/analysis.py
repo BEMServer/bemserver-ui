@@ -83,11 +83,15 @@ def retrieve_energy_consumption(structural_element_type, structural_element_id):
     tz = zoneinfo.ZoneInfo(tz_name)
     if period_type == "Month-Hourly":
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        dt_end = dt.datetime(period_year, period_month + 1, 1, 1, 0, 0, tzinfo=tz)
+        end_year = period_year + (period_month // 12)
+        end_month = (period_month % 12) + 1
+        dt_end = dt.datetime(end_year, end_month, 1, 1, 0, 0, tzinfo=tz)
     elif period_type == "Month-Daily":
         bucket_width_unit = "day"
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        dt_end = dt.datetime(period_year, period_month + 1, 1, 0, 0, 0, tzinfo=tz)
+        end_year = period_year + (period_month // 12)
+        end_month = (period_month % 12) + 1
+        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
     elif period_type == "Year-Monthly":
         bucket_width_unit = "month"
         dt_start = dt.datetime(period_year, 1, 1, 0, 0, 0, tzinfo=tz)
