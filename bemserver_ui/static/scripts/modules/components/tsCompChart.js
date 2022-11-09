@@ -17,11 +17,15 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
         title: {
             left: "center",
             text: this.#defaultTitle,
+            subtextStyle: {
+                fontSize: 14,
+            },
         },
         grid: {
-            bottom: 80,
-            left: 100,
+            bottom: 60,
+            left: "3%",
             right: 120,
+            containLabel: true,
         },
         toolbox: {
             feature: {
@@ -44,7 +48,6 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 zoomLock: true,
                 width: 20,
                 right: 100,
-                bottom: 80,
                 start: 0,
                 end: 100,
                 handleSize: 0,
