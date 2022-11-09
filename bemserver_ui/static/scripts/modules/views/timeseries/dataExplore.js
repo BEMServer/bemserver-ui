@@ -158,7 +158,7 @@ export class TimeseriesDataExploreView {
             flaskES6.urlFor(`api.timeseries_data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download`, urlParams));
-                this.#chart.load(data, this.#timezonePickerElmt.tzName);
+                this.#chart.load(data, this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text, this.#timezonePickerElmt.tzName);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
