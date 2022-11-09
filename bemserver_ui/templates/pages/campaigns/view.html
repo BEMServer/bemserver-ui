@@ -19,7 +19,7 @@
     </div>
     {% else %}
     <div class="hstack gap-3 ms-auto">
-        <a href="{{ url_for('campaigns.view', id=campaign.id, forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
+        <a href="{{ url_for('structural_elements.explore', forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
         {% if signed_user.is_admin %}
         <div class="vr me-2"></div>
         {% endif %}

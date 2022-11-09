@@ -5,7 +5,10 @@ import flask
 import bemserver_api_client.exceptions as bac_exc
 
 from bemserver_ui.extensions import auth, Roles
-from bemserver_ui.extensions.campaign_context import deduce_campaign_state
+from bemserver_ui.extensions.campaign_context import (
+    deduce_campaign_state,
+    CAMPAIGN_STATE_OVERALL,
+)
 from bemserver_ui.extensions.timezones import get_tz_info
 from bemserver_ui.common.time import convert_html_form_datetime, convert_from_iso
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -18,18 +21,23 @@ blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
 @auth.signin_required
 def list():
     ui_filters = {
-        "state": "overall",
+        "state": CAMPAIGN_STATE_OVERALL,
         "in_name": None,
     }
     api_filters = {}
     # Get requested filters.
-    if flask.request.method == "POST":
+    if flask.request.method == "GET":
+        ui_filters["state"] = flask.request.args.get("state", CAMPAIGN_STATE_OVERALL)
+        if "in_name" in flask.request.args:
+            ui_filters["in_name"] = flask.request.args["in_name"]
+            api_filters["in_name"] = ui_filters["in_name"]
+    elif flask.request.method == "POST":
         ui_filters["state"] = flask.request.form["state"]
         if flask.request.form["in_name"] != "":
             ui_filters["in_name"] = flask.request.form["in_name"]
-            api_filters["in_name"] = flask.request.form["in_name"]
+            api_filters["in_name"] = ui_filters["in_name"]
 
-    is_filtered = ui_filters["state"] != "overall" or (
+    is_filtered = ui_filters["state"] != CAMPAIGN_STATE_OVERALL or (
         ui_filters["in_name"] is not None and ui_filters["in_name"] != ""
     )
 
@@ -43,7 +51,10 @@ def list():
     for x in campaigns_resp.data:
         x["timezone_info"] = get_tz_info(x["timezone"])
         x["state"] = deduce_campaign_state(x)
-        if ui_filters["state"] == "overall" or x["state"] == ui_filters["state"]:
+        if (
+            ui_filters["state"] == CAMPAIGN_STATE_OVERALL
+            or x["state"] == ui_filters["state"]
+        ):
             campaigns.append(x)
 
     return flask.render_template(

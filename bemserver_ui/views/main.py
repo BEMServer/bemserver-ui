@@ -5,6 +5,7 @@ from bemserver_api_client import __version__ as api_client_version
 
 import bemserver_ui
 from bemserver_ui.extensions import auth
+from bemserver_ui.extensions.campaign_context import CampaignState
 from bemserver_ui.common.const import (
     BEMSERVER_APP_LABELS,
     FULL_STRUCTURAL_ELEMENT_TYPES,
@@ -16,9 +17,18 @@ blp = flask.Blueprint("main", __name__)
 
 @blp.route("/")
 @blp.route("/index")
-@blp.route("/home")
 @auth.signin_required
 def index():
+    if flask.g.campaign_ctxt.has_campaign:
+        return flask.redirect(flask.url_for("structural_elements.explore"))
+    return flask.redirect(
+        flask.url_for("campaigns.list", state=CampaignState.ongoing.value)
+    )
+
+
+@blp.route("/home")
+@auth.signin_required
+def home():
 
     campaign_scopes_count_overall = 0
     cs_resp = flask.g.api_client.campaign_scopes.getall()
