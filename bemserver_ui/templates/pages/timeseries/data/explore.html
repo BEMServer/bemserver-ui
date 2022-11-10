@@ -39,7 +39,6 @@
                     <div is="app-datetime-picker" id="end_datetime" title="Until" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
                         <div is="app-spinner"></div>
                     </div>
-                    <small class="fst-italic text-muted">(excluded from the interval)</small>
                 </div>
             </div>
             <div class="row d-xl-flex d-grid mb-3">
@@ -56,19 +55,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="input-group">
-                        <span class="input-group-text">Duration</span>
-                        <input type="number" class="form-control" id="bucket_width_value" name="bucket_width_value" value="1" min="1" step="1">
-                        <select class="form-select" id="bucket_width_unit" name="bucket_width_unit" aria-label="Select a duration">
-                            <option value="second">second</option>
-                            <option value="minute">minute</option>
-                            <option value="hour" selected>hour</option>
-                            <option value="day">day</option>
-                            <option value="week">week</option>
-                            <option value="month">month</option>
-                            <option value="year">year</option>
-                        </select>
-                    </div>
+                    <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="day" value="1"></div>
                 </div>
             </div>
             <div class="d-flex justify-content-end gap-2">
@@ -90,6 +77,7 @@
 <script type="module">
     import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/timeseries/bucketWidth.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
     import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { TimeseriesDataExploreView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataExplore.js') }}";

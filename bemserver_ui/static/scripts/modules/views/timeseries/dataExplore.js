@@ -21,8 +21,7 @@ export class TimeseriesDataExploreView {
     #tsDataStatesSelectElmt = null;
 
     #aggInputElmt = null;
-    #bucketWidthValueElmt = null;
-    #bucketWidthUnitElmt = null;
+    #bucketElmt = null;
 
     #chart = null;
     #tsSelector = null;
@@ -54,8 +53,7 @@ export class TimeseriesDataExploreView {
         this.#endDatetimePickerElmt = document.getElementById("end_datetime");
 
         this.#aggInputElmt = document.getElementById("agg");
-        this.#bucketWidthValueElmt = document.getElementById("bucket_width_value");
-        this.#bucketWidthUnitElmt = document.getElementById("bucket_width_unit");
+        this.#bucketElmt = document.getElementById("bucket");
     }
 
     #initElements() {
@@ -118,12 +116,10 @@ export class TimeseriesDataExploreView {
 
     #updateAggregationBucketState() {
         if (this.#aggInputElmt.value == "none") {
-            this.#bucketWidthValueElmt.setAttribute("disabled", true);
-            this.#bucketWidthUnitElmt.setAttribute("disabled", true);
+            this.#bucketElmt.setAttribute("disabled", true);
         }
         else {
-            this.#bucketWidthValueElmt.removeAttribute("disabled");
-            this.#bucketWidthUnitElmt.removeAttribute("disabled");
+            this.#bucketElmt.removeAttribute("disabled");
         }
     }
 
@@ -146,8 +142,8 @@ export class TimeseriesDataExploreView {
         };
         if (this.#aggInputElmt.value != "none") {
             urlParams.agg = this.#aggInputElmt.value;
-            urlParams.bucket_width_value = this.#bucketWidthValueElmt.value;
-            urlParams.bucket_width_unit = this.#bucketWidthUnitElmt.value;
+            urlParams.bucket_width_value = this.#bucketElmt.bucketWidthValue;
+            urlParams.bucket_width_unit = this.#bucketElmt.bucketWidthUnit;
         }
 
         if (this.#tsDataCSVReqID != null) {
