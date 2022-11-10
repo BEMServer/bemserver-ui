@@ -65,17 +65,17 @@
             </ul>
             <div class="accordion app-sidebar-accordion rounded bg-success bg-opacity-25" id="accordionTSExplore">
                 <div class="accordion-item border-0">
-                    <h2 class="accordion-header" id="panelHeadingTSExplore">
-                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTSExplore" aria-expanded="false" aria-controls="panelCollapseTSExplore">
-                            <span class="app-sidebar-heading"><i class="bi bi-clock-history"></i> Timeseries explore</span>
+                    <h2 class="accordion-header" id="panelHeadingTSData">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTSData" aria-expanded="false" aria-controls="panelCollapseTSData">
+                            <span class="app-sidebar-heading"><i class="bi bi-clock-history"></i> Timeseries data</span>
                         </button>
                     </h2>
-                    <div id="panelCollapseTSExplore" class="accordion-collapse collapse" aria-labelledby="panelHeadingTSExplore">
+                    <div id="panelCollapseTSData" class="accordion-collapse collapse" aria-labelledby="panelHeadingTSData">
                         <div class="accordion-body px-0 py-2">
                             <ul class="nav nav-pills flex-column gap-1">
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
-                                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.explore') }}" title="Plots charts"><i class="bi bi-bar-chart-line"></i> Plot charts</a>
+                                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.explore') }}" title="Explore data"><i class="bi bi-bar-chart-line"></i> Explore data</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">
@@ -90,17 +90,17 @@
             </div>
             <div class="accordion app-sidebar-accordion rounded bg-info bg-opacity-25">
                 <div class="accordion-item border-0">
-                    <h2 class="accordion-header" id="panelHeadingDashboards">
-                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseDashboards" aria-expanded="false" aria-controls="panelCollapseDashboards">
-                            <span class="app-sidebar-heading"><i class="bi bi-easel"></i> Dashboards</span>
+                    <h2 class="accordion-header" id="panelHeadingAnalysis">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAnalysis" aria-expanded="false" aria-controls="panelCollapseAnalysis">
+                            <span class="app-sidebar-heading"><i class="bi bi-speedometer"></i> Analysis</span>
                         </button>
                     </h2>
-                    <div id="panelCollapseDashboards" class="accordion-collapse collapse" aria-labelledby="panelHeadingDashboards">
+                    <div id="panelCollapseAnalysis" class="accordion-collapse collapse" aria-labelledby="panelHeadingAnalysis">
                         <div class="accordion-body px-0 py-2">
                             <ul class="nav nav-pills flex-column gap-1">
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
-                                        <a class="nav-link w-100" href="{{ url_for('dashboards.energy_consumption.explore') }}" title="Energy consumption"><i class="bi bi-fire"></i> Energy consumption</a>
+                                        <a class="nav-link w-100" href="{{ url_for('analysis.energy_consumption.explore') }}" title="Energy consumption"><i class="bi bi-fire"></i> Energy consumption</a>
                                     </div>
                                 </li>
                             </ul>

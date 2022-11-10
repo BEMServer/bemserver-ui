@@ -68,10 +68,12 @@ def retrieve_completeness():
     return flask.jsonify(completeness_data)
 
 
-@blp.route("/<string:structural_element_type>/<int:structural_element_id>")
+@blp.route(
+    "/ener_cons_brkd/<string:structural_element_type>/<int:structural_element_id>"
+)
 @auth.signin_required
 @ensure_campaign_context
-def retrieve_energy_consumption(structural_element_type, structural_element_id):
+def retrieve_ener_cons_brkd(structural_element_type, structural_element_id):
     tz_name = flask.request.args.get("timezone", flask.g.campaign_ctxt.tz_name)
     period_type = flask.request.args["period_type"]
     period_month = int(flask.request.args["period_month"])

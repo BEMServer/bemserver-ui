@@ -8,7 +8,7 @@ from . import campaign_scopes
 from . import structural_elements
 from . import timeseries
 from . import services
-from . import dashboards
+from . import analysis
 
 
 MODULES = (
@@ -33,4 +33,4 @@ def init_app(app):
         app.register_blueprint(module.blp)
 
     services.init_app(app)
-    dashboards.init_app(app)
+    analysis.init_app(app)

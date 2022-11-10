@@ -13,15 +13,15 @@ export class EnergyConsumptionConfigView {
 
     #messagesElmt = null;
 
-    #dashboardConfigTableElmt = null;
-    #dashboardConfigTableBodyElmt = null;
-    #dashboardConfigTableFooterElmt = null;
+    #configTableElmt = null;
+    #configTableBodyElmt = null;
+    #configTableFooterElmt = null;
     #addEnergySourceBtnElmt = null;
     #addEnergySourceMenuElmt = null;
     #saveSelectedTimeseriesBtnElmt = null;
 
     #structuralElement = {};
-    #dashboardConfig = null;
+    #config = null;
     #energySources = {};
     #energyUses = {};
     #availableEnergySources = [];
@@ -36,9 +36,9 @@ export class EnergyConsumptionConfigView {
     #editedEnergyUseNameElmt = null;
     #editedWhFactorInputElmt = null;
 
-    constructor(structuralElement, dashboardConfig, energySources, energyUses, availableEnergySources, tsSelector, isEditable) {
+    constructor(structuralElement, enerConsConfig, energySources, energyUses, availableEnergySources, tsSelector, isEditable) {
         this.#structuralElement = structuralElement;
-        this.#dashboardConfig = dashboardConfig;
+        this.#config = enerConsConfig;
         this.#energySources = energySources;
         this.#energyUses = energyUses;
         this.#availableEnergySources = availableEnergySources;
@@ -54,9 +54,9 @@ export class EnergyConsumptionConfigView {
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
 
-        this.#dashboardConfigTableElmt = document.getElementById("dashboardConfigTable");
-        this.#dashboardConfigTableBodyElmt = this.#dashboardConfigTableElmt.querySelector("tbody");
-        this.#dashboardConfigTableFooterElmt = this.#dashboardConfigTableElmt.querySelector("tfoot");
+        this.#configTableElmt = document.getElementById("configTable");
+        this.#configTableBodyElmt = this.#configTableElmt.querySelector("tbody");
+        this.#configTableFooterElmt = this.#configTableElmt.querySelector("tfoot");
 
         if (this.#isEditable) {
             this.#addEnergySourceBtnElmt = document.getElementById("addEnergySourceBtn");
@@ -108,17 +108,17 @@ export class EnergyConsumptionConfigView {
             if (energyConsTs.id == null) {
                 // Create (post).
                 this.#postReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.dashboards.energy_consumption.create`),
+                    flaskES6.urlFor(`api.energy_consumption.create`),
                     payload,
                     (data) => {
-                        let confData = this.#dashboardConfig[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
+                        let confData = this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
                         confData.id = data.data.id;
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
                         confData.wh_factor = data.data.wh_conversion_factor;
                         confData.etag = data.etag;
-                        this.#dashboardConfig[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
+                        this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
                         this.#refreshConf(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
                     },
@@ -137,17 +137,17 @@ export class EnergyConsumptionConfigView {
             else {
                 // Update (put).
                 this.#putReqID = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.dashboards.energy_consumption.update`, {id: energyConsTs.id}),
+                    flaskES6.urlFor(`api.energy_consumption.update`, {id: energyConsTs.id}),
                     payload,
                     energyConsTs.etag,
                     (data) => {
-                        let confData = this.#dashboardConfig[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
+                        let confData = this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
                         confData.wh_factor = data.data.wh_conversion_factor;
                         confData.etag = data.etag;
-                        this.#dashboardConfig[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
+                        this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
                         this.#refreshConf(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
                     },
@@ -222,7 +222,7 @@ export class EnergyConsumptionConfigView {
     }
 
     #getEnergyConsTs(energySourceId, energyUseId) {
-        return this.#dashboardConfig[energySourceId].energy_uses[energyUseId];
+        return this.#config[energySourceId].energy_uses[energyUseId];
     }
 
     #addEnergySourceFromConfig(energySourceConfigData) {
@@ -305,17 +305,17 @@ export class EnergyConsumptionConfigView {
 
                     let energyConsTs = this.#getEnergyConsTs(energySourceConfigData.energy_source_id, configData.energy_use_id);
                     this.#deleteReqID = this.#internalAPIRequester.delete(
-                        flaskES6.urlFor(`api.dashboards.energy_consumption.delete`, {id: energyConsTs.id, structural_element_type: this.#structuralElement.type}),
+                        flaskES6.urlFor(`api.energy_consumption.delete`, {id: energyConsTs.id, structural_element_type: this.#structuralElement.type}),
                         energyConsTs.etag,
                         () => {
-                            let confData = this.#dashboardConfig[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id];
+                            let confData = this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id];
                             confData.id = null;
                             confData.ts_id = null;
                             confData.ts_name = null;
                             confData.ts_unit = null;
                             confData.wh_factor = 1;
                             confData.etag = null;
-                            this.#dashboardConfig[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id] = confData;
+                            this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id] = confData;
 
                             this.#refreshConf(energySourceConfigData.energy_source_id, configData.energy_use_id);
 
@@ -348,13 +348,13 @@ export class EnergyConsumptionConfigView {
             rowElmt.appendChild(tsConfigTdElmt);
         }
 
-        this.#dashboardConfigTableBodyElmt.appendChild(rowElmt);
+        this.#configTableBodyElmt.appendChild(rowElmt);
     }
 
     refresh() {
-        this.#dashboardConfigTableBodyElmt.innerHTML = "";
+        this.#configTableBodyElmt.innerHTML = "";
 
-        for (let energySourceConfigData of Object.values(this.#dashboardConfig)) {
+        for (let energySourceConfigData of Object.values(this.#config)) {
             this.#addEnergySourceFromConfig(energySourceConfigData);
         }
 
@@ -388,26 +388,26 @@ export class EnergyConsumptionConfigView {
                         };
                     }
 
-                    this.#dashboardConfig[energySourceId] = {
+                    this.#config[energySourceId] = {
                         energy_source_id: energySourceId,
                         energy_source_name: this.#energySources[energySourceId],
                         energy_uses: energyUsesConfigData,
                     };
 
-                    this.#addEnergySourceFromConfig(this.#dashboardConfig[energySourceId]);
+                    this.#addEnergySourceFromConfig(this.#config[energySourceId]);
 
                     if (this.#availableEnergySources.length <= 0) {
-                        this.#dashboardConfigTableFooterElmt.classList.add("d-none");
+                        this.#configTableFooterElmt.classList.add("d-none");
                     }
                 });
             };
 
             if (this.#availableEnergySources.length <= 0) {
-                this.#dashboardConfigTableFooterElmt.classList.add("d-none");
+                this.#configTableFooterElmt.classList.add("d-none");
             }
         }
         else {
-            this.#dashboardConfigTableFooterElmt?.classList.add("d-none");
+            this.#configTableFooterElmt?.classList.add("d-none");
         }
     }
 }

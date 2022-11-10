@@ -13,7 +13,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a id="dashboardSetupBtn" class="btn btn-sm btn-outline-secondary text-nowrap d-none invisible" title="View energy consumption dashboard configuration"><i class="bi bi-tools"></i> Dashboard configuration</a>
+<a id="setupBtn" class="btn btn-sm btn-outline-secondary text-nowrap d-none invisible" title="View energy consumption configuration"><i class="bi bi-tools"></i> Setup</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -22,14 +22,14 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <div class="accordion" id="accordionSites">
+            <div class="accordion" id="accordionParams">
                 <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingSites">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSites" aria-controls="collapseSites" aria-expanded="true">
-                            <span class="fw-bold text-secondary"><i class="bi bi-easel"></i> Dashboard parameters</span>
+                    <h2 class="accordion-header" id="headingParams">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParams" aria-controls="collapseParams" aria-expanded="true">
+                            <span class="fw-bold text-secondary"><i class="bi bi-easel"></i> Analysis parameters</span>
                         </button>
                     </h2>
-                    <div id="collapseSites" class="accordion-collapse collapse show" aria-labelledby="headingSites" data-bs-parent="#accordionSites">
+                    <div id="collapseParams" class="accordion-collapse collapse show" aria-labelledby="headingParams" data-bs-parent="#accordionParams">
                         <div class="accordion-body">
                             <div class="row row-cols-1 row-cols-xl-2 g-3 g-xl-4">
                                 <div class="col">
@@ -99,7 +99,7 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
     import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
-    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/dashboards/energyConsumptionExplore.js') }}";
+    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumptionExplore.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
