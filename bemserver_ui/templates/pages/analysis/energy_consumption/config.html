@@ -2,14 +2,14 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Energy consumption" %}
-{% set subtitle = "Dashboard configuration" %}
+{% set subtitle = "Analysis configuration" %}
 
 {% set is_editable = signed_user.is_admin %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('dashboards.energy_consumption.explore') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Back to energy consumption dashboard"><i class="bi bi-arrow-return-left"></i> Back to dashboard</a>
+<a href="{{ url_for('analysis.energy_consumption.explore') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Back to energy consumption analysis"><i class="bi bi-arrow-return-left"></i> Back to analysis</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -20,10 +20,10 @@
         <div class="col">
             <h5>{{ structural_element.type | capitalize }} {{ structural_element.name }} - energy consumption timeseries</h5>
             <div class="table-responsive-xl">
-                <table class="table table-sm table-hover table-bordered caption-top" id="dashboardConfigTable">
+                <table class="table table-sm table-hover table-bordered caption-top" id="configTable">
                     <caption class="text-end">
                         {% filter indent(width=24) %}
-                        {{ mac_items_count.render_items_count(dashboard_config | length) -}}
+                        {{ mac_items_count.render_items_count(ener_cons_config | length) -}}
                         {% endfilter %}
                     </caption>
                     <thead>
@@ -101,7 +101,7 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
     import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
-    import { EnergyConsumptionConfigView } from "{{ url_for('static', filename='scripts/modules/views/dashboards/energyConsumptionConfig.js') }}";
+    import { EnergyConsumptionConfigView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumptionConfig.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -116,7 +116,7 @@
 
         let energyConsConfigView = new EnergyConsumptionConfigView(
             {{ structural_element | tojson }},
-            {{ dashboard_config | tojson }},
+            {{ ener_cons_config | tojson }},
             {{ all_energy_sources | tojson }},
             {{ all_energy_end_uses | tojson }},
             {{ available_energy_sources | tojson }},

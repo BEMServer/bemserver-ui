@@ -1,10 +1,10 @@
-"""All dashboards views (energy consumption, ...)"""
+"""All analysis views (energy consumption, ...)"""
 import flask
 
 from . import energy_consumption  # noqa
 
 
-blp = flask.Blueprint("dashboards", __name__, url_prefix="/dashboards")
+blp = flask.Blueprint("analysis", __name__, url_prefix="/analysis")
 
 
 def init_app(app):

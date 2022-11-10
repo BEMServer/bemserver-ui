@@ -1,4 +1,4 @@
-"""Dashboard energy consumption views"""
+"""Energy consumption analysis views"""
 import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
@@ -21,7 +21,7 @@ def explore():
     )
 
     return flask.render_template(
-        "pages/dashboards/energy_consumption/explore.html",
+        "pages/analysis/energy_consumption/explore.html",
         sites_tree_data=sites_tree_data,
     )
 
@@ -47,9 +47,9 @@ def config(structural_element_type, structural_element_id):
                 break
 
     # Check if campaign context is equal to this structural element campaign.
-    #  Yes -> continue. No -> redirect to dashboard explore page.
+    #  Yes -> continue. No -> redirect to energy consumption explore page.
     if struct_elmt is None or struct_elmt["campaign_id"] != flask.g.campaign_ctxt.id:
-        return flask.redirect(flask.url_for("dashboards.energy_consumption.explore"))
+        return flask.redirect(flask.url_for("analysis.energy_consumption.explore"))
 
     energy_sources_resp = flask.g.api_client.energy_sources.getall()
     energy_end_uses_resp = flask.g.api_client.energy_end_uses.getall()
@@ -65,13 +65,13 @@ def config(structural_element_type, structural_element_id):
     energy_source_by_id = {x["id"]: x["name"] for x in energy_sources_resp.data}
     energy_use_by_id = {x["id"]: x["name"] for x in energy_end_uses_resp.data}
 
-    dashboard_config = {}
+    ener_cons_config = {}
     defined_energy_sources = []
     defined_energy_uses = []
     for x in all_energy_cons_ts_resp.data:
         if x["source_id"] not in defined_energy_sources:
             defined_energy_sources.append(x["source_id"])
-            dashboard_config[x["source_id"]] = {
+            ener_cons_config[x["source_id"]] = {
                 "energy_source_id": x["source_id"],
                 "energy_source_name": energy_source_by_id[x["source_id"]],
                 "energy_uses": {},
@@ -79,10 +79,10 @@ def config(structural_element_type, structural_element_id):
         if x["end_use_id"] not in defined_energy_uses:
             defined_energy_uses.append(x["end_use_id"])
 
-        if x["end_use_id"] not in dashboard_config[x["source_id"]]["energy_uses"]:
+        if x["end_use_id"] not in ener_cons_config[x["source_id"]]["energy_uses"]:
             # get timeseries name and unit symbol
             ts_resp = flask.g.api_client.timeseries.getone(x["timeseries_id"])
-            dashboard_config[x["source_id"]]["energy_uses"][x["end_use_id"]] = {
+            ener_cons_config[x["source_id"]]["energy_uses"][x["end_use_id"]] = {
                 "energy_use_id": x["end_use_id"],
                 "energy_use_name": energy_use_by_id[x["end_use_id"]],
                 "id": x["id"],
@@ -93,7 +93,7 @@ def config(structural_element_type, structural_element_id):
                 "etag": api_resource.getone(x["id"]).etag,
             }
 
-    for x in dashboard_config.values():
+    for x in ener_cons_config.values():
         for energy_use_id, energy_use_name in energy_use_by_id.items():
             if energy_use_id not in x["energy_uses"]:
                 x["energy_uses"][energy_use_id] = {
@@ -113,9 +113,9 @@ def config(structural_element_type, structural_element_id):
             available_energy_sources.append(x["id"])
 
     return flask.render_template(
-        "pages/dashboards/energy_consumption/config.html",
+        "pages/analysis/energy_consumption/config.html",
         structural_element=struct_elmt,
-        dashboard_config=dashboard_config,
+        ener_cons_config=ener_cons_config,
         all_energy_sources=energy_source_by_id,
         defined_energy_sources=defined_energy_sources,
         available_energy_sources=available_energy_sources,

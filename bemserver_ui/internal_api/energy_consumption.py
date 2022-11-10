@@ -1,4 +1,4 @@
-"""Cleanup service internal API"""
+"""Energy consumption internal API"""
 import flask
 
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context

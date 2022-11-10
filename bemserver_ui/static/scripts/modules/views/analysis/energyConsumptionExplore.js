@@ -11,7 +11,7 @@ export class EnergyConsumptionExploreView {
     #retrieveDataReqID = null;
 
     #messagesElmt = null;
-    #dashboardSetupBtnElmt = null;
+    #setupBtnElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
     #periodMonthSelectElmt = null;
@@ -53,7 +53,7 @@ export class EnergyConsumptionExploreView {
 
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
-        this.#dashboardSetupBtnElmt = document.getElementById("dashboardSetupBtn");
+        this.#setupBtnElmt = document.getElementById("setupBtn");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
         this.#periodTypeSelectElmt = document.getElementById("periodType");
@@ -143,14 +143,14 @@ export class EnergyConsumptionExploreView {
     }
 
     #updateConfigBtn() {
-        this.#dashboardSetupBtnElmt.href = flaskES6.urlFor(
-            `dashboards.energy_consumption.config`,
+        this.#setupBtnElmt.href = flaskES6.urlFor(
+            `analysis.energy_consumption.config`,
             {
                 structural_element_type: this.#structuralElementType,
                 structural_element_id: this.#structuralElementId,
             }
         );
-        this.#dashboardSetupBtnElmt.classList.remove("d-none", "invisible");
+        this.#setupBtnElmt.classList.remove("d-none", "invisible");
     }
 
     #generateCharts() {
@@ -169,7 +169,7 @@ export class EnergyConsumptionExploreView {
             }
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(
-                    `api.analysis.retrieve_energy_consumption`,
+                    `api.analysis.retrieve_ener_cons_brkd`,
                     {
                         structural_element_type: this.#structuralElementType,
                         structural_element_id: this.#structuralElementId,
@@ -193,7 +193,7 @@ export class EnergyConsumptionExploreView {
                         colElmt.appendChild(pNoDataElmt);
 
                         let pHelpElmt = document.createElement("p");
-                        pHelpElmt.innerText = `Maybe the dashboard is not configured for this ${this.#structuralElementType}.`;
+                        pHelpElmt.innerText = `Maybe the view is not configured for this ${this.#structuralElementType}.`;
                         colElmt.appendChild(pHelpElmt);
 
                         if (!signedUser.is_admin) {
