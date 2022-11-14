@@ -50,7 +50,7 @@ setup(
         (
             # https://github.com/jazzband/pip-tools/issues/1359
             "bemserver-api-client @ "
-            "https://github.com/BEMServer/bemserver-api-client/archive/d7006e4.tar.gz"
+            "https://github.com/BEMServer/bemserver-api-client/archive/b832ff1.tar.gz"
         ),
     ],
     extras_require=EXTRAS_REQUIRE,

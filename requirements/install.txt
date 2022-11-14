@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/install.txt setup.py
 #
-bemserver-api-client @ https://github.com/BEMServer/bemserver-api-client/archive/d7006e4.tar.gz
+bemserver-api-client @ https://github.com/BEMServer/bemserver-api-client/archive/b832ff1.tar.gz
     # via bemserver-ui (setup.py)
 certifi==2021.10.8
     # via requests
@@ -26,6 +26,10 @@ markupsafe==2.1.1
     # via
     #   jinja2
     #   werkzeug
+packaging==21.3
+    # via bemserver-api-client
+pyparsing==3.0.9
+    # via packaging
 python-dotenv==0.21.0
     # via bemserver-ui (setup.py)
 requests==2.27.1
