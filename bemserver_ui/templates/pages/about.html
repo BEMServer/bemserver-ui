@@ -23,7 +23,9 @@
         <div class="col">
             <h4 class="font-monospace text-black-75">Project partners</h4>
             <div class="d-grid gap-4 p-2">
-                {{- mac_partners.render_partners(partners) }}
+                {% filter indent(width=16, first=False) %}
+                {{ mac_partners.render_partners(partners) -}}
+                {% endfilter %}
             </div>
         </div>
     </div>
