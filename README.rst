@@ -19,7 +19,7 @@ BEMSERVER_API_USE_SSL = True
 BEMSERVER_API_AUTH_METHOD = "http_basic"
     API authentication method
 BEMSERVER_PARTNERS_FILE = None
-    json file that describes the project's partners
+    Absolute path of json file that describes the project's partners
 
     Example of ``BEMSERVER_PARTNERS_FILE`` file structure::
 
