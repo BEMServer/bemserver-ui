@@ -1,4 +1,5 @@
-<div>
+{% macro render_ts_selector(element_id=none, selection_limit=-1, filters={}) %}
+<div is="app-ts-selector"{% if element_id %} id="{{ element_id }}"{% endif %} selection-limit="{{ selection_limit }}"{% for filter_name, filter_value in filters.items() %} {{ filter_name }}={{ filter_value }}{% endfor %}>
     <div class="d-flex justify-content-between align-items-start gap-2">
         <h5>Timeseries selection</h5>
         <small id="countResultsSelected" class="text-muted"></small>
@@ -39,3 +40,4 @@
         </div>
     </div>
 </div>
+{% endmacro %}

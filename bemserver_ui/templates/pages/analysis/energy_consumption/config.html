@@ -1,4 +1,5 @@
 {% import "macros/items_count.html" as mac_items_count %}
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
 {% extends "pages/base.html" %}
 
 {% set title = "Energy consumption" %}
@@ -55,7 +56,7 @@
                                 <div class="collapse" id="addEnergySourceHelpCollapsePanel">
                                     <div class="alert alert-info mb-0 pb-0" role="alert" style="max-width: 700px;">
                                         <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
-                                        <p>You can <span class="fw-bold">add an energy source</span> to select <span class="fw-bold">timeseries that defines energy end uses</span>.</p>
+                                        <p>You can <span class="fw-bold">add an energy source</span> to select the <span class="fw-bold">timeseries that defines energy end uses</span>.</p>
                                     </div>
                                 </div>
                             </td>
@@ -69,15 +70,15 @@
 </div>
 {% if is_editable %}
 <div class="modal fade" id="selectTimeseries" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="selectTimeseriesLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="selectTimeseriesLabel">Energy consumption configuration [<span id="editedEnergySourceName"></span>] [<span id="editedEnergyUseName"></span>]</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                {% filter indent(width=16, first=True) %}
-                {% include "components/timeseries/selector.html" %}
+                {% filter indent(width=16, first=False) %}
+                {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorConfig", filters={structural_element.type: structural_element.id}) -}}
                 {% endfilter %}
                 <div class="mt-3">
                     <label for="editedWhFactor" class="form-label">Wh conversion factor</label>
@@ -100,19 +101,10 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { EnergyConsumptionConfigView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumptionConfig.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
-
-        let isEditable = {{ is_editable | tojson }};
-
-        let tsSelector = null;
-        if (isEditable) {
-            tsSelector = new TimeseriesSelector({ allowedSelectionLimit: 1 });
-            tsSelector.refresh();
-        }
 
         let energyConsConfigView = new EnergyConsumptionConfigView(
             {{ structural_element | tojson }},
@@ -120,8 +112,7 @@
             {{ all_energy_sources | tojson }},
             {{ all_energy_end_uses | tojson }},
             {{ available_energy_sources | tojson }},
-            tsSelector,
-            isEditable,
+            {{ is_editable | tojson }},
         );
         energyConsConfigView.refresh();
 

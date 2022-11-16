@@ -3,6 +3,7 @@ import { flaskES6 } from "../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { TimeseriesCompletenessChart } from "../../components/tsCompChart.js";
 import { Spinner } from "../../components/spinner.js";
+import { TimeseriesSelector } from "../../components/timeseries/selector.js";
 
 
 export class TimeSeriesDataCompletenessView {
@@ -28,8 +29,8 @@ export class TimeSeriesDataCompletenessView {
 
     #tsSelector = null;
 
-    constructor(tsSelector, options = { height: 400 }) {
-        this.#tsSelector = tsSelector;
+    constructor(options = { height: 400 }) {
+        this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorCompleteness");
 
         this.#cacheDOM();
         this.#initElements();
