@@ -39,7 +39,7 @@ def retrieve_types():
 def retrieve_list_for(type):
     campaign_id = flask.g.campaign_ctxt.id
     if type[:-1] not in FULL_STRUCTURAL_ELEMENT_TYPES:
-        flask.abort(404, description=f"{type} not found!")
+        flask.abort(404, description=f'"{type}" structural element not found!')
 
     api_endpoint = getattr(flask.g.api_client, f"{type}")
     type_resp = api_endpoint.getall(campaign_id=campaign_id, sort="+name")
