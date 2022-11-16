@@ -57,6 +57,7 @@ export class FilterSelect extends HTMLSelectElement {
         }
 
         this.selectedIndex = Parser.parseIntOrDefault(selectedOptionIndex, this.#defaultOptionIndex);
+        this.#update();
     }
 
     reset() {

@@ -3,6 +3,7 @@ import { flaskES6 } from "../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { TimeseriesChart } from "../../components/tsChart.js";
 import { Spinner } from "../../components/spinner.js";
+import { TimeseriesSelector } from "../../components/timeseries/selector.js";
 
 
 export class TimeseriesDataExploreView {
@@ -26,8 +27,8 @@ export class TimeseriesDataExploreView {
     #chart = null;
     #tsSelector = null;
 
-    constructor(tsSelector, options = { height: 400 }) {
-        this.#tsSelector = tsSelector;
+    constructor(options = { height: 400 }) {
+        this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorExplore");
 
         this.#cacheDOM();
         this.#initElements();

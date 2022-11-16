@@ -2,6 +2,7 @@ import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { ModalConfirm } from "../../components/modalConfirm.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
+import { TimeseriesSelector } from  "../../components/timeseries/selector.js";
 
 
 export class EnergyConsumptionConfigView {
@@ -36,14 +37,17 @@ export class EnergyConsumptionConfigView {
     #editedEnergyUseNameElmt = null;
     #editedWhFactorInputElmt = null;
 
-    constructor(structuralElement, enerConsConfig, energySources, energyUses, availableEnergySources, tsSelector, isEditable) {
+    constructor(structuralElement, enerConsConfig, energySources, energyUses, availableEnergySources, isEditable) {
         this.#structuralElement = structuralElement;
         this.#config = enerConsConfig;
         this.#energySources = energySources;
         this.#energyUses = energyUses;
         this.#availableEnergySources = availableEnergySources;
-        this.#tsSelector = tsSelector;
         this.#isEditable = isEditable;
+
+        if (this.#isEditable) {
+            this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorConfig");
+        }
 
         this.#cacheDOM();
         this.#initEventListeners();

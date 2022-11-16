@@ -1,3 +1,4 @@
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
 {% extends "pages/base.html" %}
 
 {% set title = "Delete timeseries data" %}
@@ -22,8 +23,8 @@
     </div>
     <div class="row mb-3">
         <div class="col">
-            {% filter indent(width=12, first=True) %}
-            {% include "components/timeseries/selector.html" %}
+            {% filter indent(width=12, first=False) %}
+            {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorDelete") -}}
             {% endfilter %}
         </div>
     </div>
@@ -70,7 +71,6 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { TimeseriesDeleteView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/delete.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
@@ -79,10 +79,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let tsSelector = new TimeseriesSelector();
-        tsSelector.refresh();
-
-        let tsDeleteView = new TimeseriesDeleteView(tsSelector);
+        let tsDeleteView = new TimeseriesDeleteView();
         tsDeleteView.refresh();
 
     });

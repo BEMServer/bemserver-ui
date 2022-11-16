@@ -26,7 +26,7 @@ export class InternalAPIRequest {
         });
     }
 
-    #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+    #fetch(url, params = {}) {
         let reqID = generateUUID();
 
         let abortController = new AbortController();
@@ -39,85 +39,100 @@ export class InternalAPIRequest {
         let fetchPromise = window.fetch(url, params);
         this.#fetchPromises[reqID] = fetchPromise;
 
-        fetchPromise.then(
-            (response) => {
-                if (response.ok) {
-                    return response.json();
-                }
-                return Promise.reject(response);
+        return reqID;
+    }
+
+    #processRawResponse(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return Promise.reject(response);
+    }
+
+    #processError(error, rejectCallback = null) {
+        if (this.#debugMode) {
+            let url = new URL(error.url);
+            console.log(`${url.pathname}${url.search}`);
+            console.log(error);
+        }
+
+        if (error.status == 401) {
+            // Just reload the current page, server knows what to do.
+            document.location.reload();
+        }
+        else if (!["AbortError"].includes(error.name)) {
+
+            try {
+                error.json().then((errorJSON) => {
+                    let errorMsg = errorJSON.message;
+                    // TODO: handle validation errors data (422, 409)
+                    if (error.status == 409) {
+
+                    }
+                    else if (error.status == 422) {
+                        for (let [fieldName, fieldErrors] of Object.entries(errorJSON._validation_errors)) {
+                            errorMsg += ` (${fieldName} : ${fieldErrors})`;
+                        }
+                    }
+
+                    if (rejectCallback != null) {
+                        rejectCallback(errorMsg);
+                    }
+                    else {
+                        return Promise.reject(errorMsg);
+                    }
+                }).catch((innerError) => {
+                    if (rejectCallback != null) {
+                        rejectCallback(innerError);
+                    }
+                    else {
+                        return Promise.reject(innerError);
+                    }
+                });
             }
+            catch {
+                if (rejectCallback != null) {
+                    rejectCallback(`Internal error [${error}]`);
+                }
+                else {
+                    return Promise.reject(`Internal error [${error}]`);
+                }
+            }
+        }
+    }
+
+    #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+        let reqID = this.#fetch(url, params);
+
+        this.#fetchPromises[reqID].then(
+            this.#processRawResponse
         ).then(
             (data) => {
                 resolveCallback?.(data);
             }
         ).catch(
             (error) => {
-                if (error.status == 401) {
-                    // Just reload the current page, server knows what to do.
-                    document.location.reload();
-                }
-                else if (!["AbortError"].includes(error.name)) {
-
-                    console.log(error);
-
-                    try {
-                        error.json().then((errorJSON) => {
-                            let errorMsg = errorJSON.message;
-                            // TODO: handle validation errors data (422, 409)
-                            if (error.status == 409) {
-
-                            }
-                            else if (error.status == 422) {
-                                for (let [fieldName, fieldErrors] of Object.entries(errorJSON._validation_errors)) {
-                                    errorMsg += ` (${fieldName} : ${fieldErrors})`;
-                                }
-                            }
-
-                            if (rejectCallback != null) {
-                                rejectCallback(errorMsg);
-                            }
-                            else {
-                                return Promise.reject(errorMsg);
-                            }
-                        }).catch((innerError) => {
-                            if (rejectCallback != null) {
-                                rejectCallback(innerError);
-                            }
-                            else {
-                                return Promise.reject(innerError);
-                            }
-                        });
-                    }
-                    catch {
-                        if (rejectCallback != null) {
-                            rejectCallback(`Internal error [${error}]`);
-                        }
-                        else {
-                            return Promise.reject(`Internal error [${error}]`);
-                        }
-                    }
-                }
-                else if (this.#debugMode) {
-                    console.log(url);
-                    console.log(error);
-                }
+                this.#processError(error, rejectCallback);
             }
         ).finally(
             () => {
                 finallyCallback?.();
-                delete this.#abortControllers[reqID];
-                delete this.#fetchPromises[reqID];
+                this.#purge(reqID);
             }
         );
 
         return reqID;
     }
 
+    #purge(requestID) {
+        delete this.#abortControllers[requestID];
+        delete this.#fetchPromises[requestID];
+    }
+
     abort(requestID) {
         if (requestID in this.#abortControllers) {
             this.#abortControllers[requestID].abort();
-            delete this.#abortControllers[requestID];
-            delete this.#fetchPromises[requestID];
+            this.#purge(requestID);
         }
     }
 
@@ -127,6 +142,41 @@ export class InternalAPIRequest {
 
     get(url, resolveCallback, rejectCallback = null, finallyCallback = null) {
         return this.#executeRequest(url, null, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    // Inspired by https://gomakethings.com/waiting-for-multiple-all-api-responses-to-complete-with-the-vanilla-js-promise.all-method/#calling-multiple-apis-at-once
+    gets(urls, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let reqIDs = {};
+        for (let url of urls) {
+            reqIDs[url] = this.#fetch(url);
+        }
+
+        Promise.all(
+            Object.values(reqIDs).map((reqID) => { return this.getPromise(reqID); })
+        ).then(
+            (responses) => {
+                return Promise.all(
+                    responses.map((response) => { return this.#processRawResponse(response); })
+                );
+            }
+        ).then(
+            (data) => {
+                resolveCallback?.(data);
+            }
+        ).catch(
+            (error) => {
+                this.#processError(error, rejectCallback);
+            }
+        ).finally(
+            () => {
+                finallyCallback?.();
+                for (let reqID of Object.values(reqIDs)) {
+                    this.#purge(reqID);
+                }
+            }
+        );
+
+        return reqIDs;
     }
 
     post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {

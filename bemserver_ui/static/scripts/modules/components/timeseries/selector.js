@@ -155,6 +155,7 @@ export class SearchResultItem extends HTMLButtonElement {
 export class TimeseriesSelector extends HTMLDivElement {
 
     #allowedSelectionLimit = -1;
+    #defaultFilters = {};
 
     #internalAPIRequester = null;
     #filterReqIDs = {};
@@ -174,13 +175,7 @@ export class TimeseriesSelector extends HTMLDivElement {
     #filtersRemoveBtnElmt = null;
 
     #searchFiltersContainerElmt = null;
-    #searchFilterCampaignScopeElmt = null;
-    #searchFilterSiteElmt = null;
-    #searchFilterBuildingElmt = null;
-    #searchFilterStoreyElmt = null;
-    #searchFilterSpaceElmt = null;
-    #searchFilterZoneElmt = null;
-    #searchFilterElmts = [];
+    #searchSelectFilters = {};
 
     #searchResultsContainerElmt = null;
     #searchResultsPageSizeSelectorElmt = null;
@@ -196,14 +191,10 @@ export class TimeseriesSelector extends HTMLDivElement {
     constructor(options = {}) {
         super();
 
-        this.#allowedSelectionLimit = Parser.parseIntOrDefault(options.allowedSelectionLimit, this.#allowedSelectionLimit);
-
         this.#internalAPIRequester = new InternalAPIRequest();
 
+        this.#loadOptions(options);
         this.#cacheDOM();
-        this.#initFilters();
-        this.#initEventListeners();
-        this.#update();
 
         if (this.#allowedSelectionLimit != -1) {
             this.#selectionLimitElmt.innerText = `Selection limit: ${this.#allowedSelectionLimit}`;
@@ -219,6 +210,23 @@ export class TimeseriesSelector extends HTMLDivElement {
 
     get selectedItemNames() {
         return this.#selectedItems.map((item) => { return item.itemName; });
+    }
+
+    #loadOptions(options = {}) {
+        this.#allowedSelectionLimit = Parser.parseIntOrDefault(this.getAttribute("selection-limit") || options.allowedSelectionLimit, this.#allowedSelectionLimit);
+
+        let attrFilters = {};
+        for (let filterAttrName of ["campaign-scope", "site", "building", "storey", "space", "zone"]) {
+            if (this.hasAttribute(filterAttrName)) {
+                attrFilters[filterAttrName] = this.getAttribute(filterAttrName);
+            }
+        }
+        if (Object.keys(attrFilters).length > 0) {
+            this.#defaultFilters = attrFilters;
+        }
+        for (let [optFilterName, optFilterValue] of Object.entries(options.filters || {})) {
+            this.#defaultFilters[optFilterName] = optFilterValue;
+        }
     }
 
     #cacheDOM() {
@@ -258,7 +266,7 @@ export class TimeseriesSelector extends HTMLDivElement {
             event.preventDefault();
 
             let hasFilterChanged = false;
-            for (let searchFilterElmt of this.#searchFilterElmts) {
+            for (let searchFilterElmt of Object.values(this.#searchSelectFilters).map((filterOpts) => { return filterOpts["htmlElement"]; })) {
                 if (!searchFilterElmt.isDefaultSelected) {
                     searchFilterElmt.reset();
                     hasFilterChanged = true;
@@ -348,26 +356,80 @@ export class TimeseriesSelector extends HTMLDivElement {
         }
     }
 
-    #initFilter(filterElmt, getFilterDataUrl, prepareFilterOptionsCallback) {
-        this.#searchFiltersContainerElmt.insertBefore(filterElmt, this.#filtersRemoveBtnElmt);
+    #initFilters() {
+        this.#searchSelectFilters = {
+            "campaign_scope_id": {
+                "label": "campaign scopes",
+                "fetchUrl": flaskES6.urlFor(`api.campaign_scopes.retrieve_list`),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
+            },
+            "site_id": {
+                "label": "sites",
+                "fetchUrl": flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "sites" }),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["site"] || null)?.toString(),
+            },
+            "building_id": {
+                "label": "buildings",
+                "fetchUrl": flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "buildings" }),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters.building || null)?.toString(),
+            },
+            "storey_id": {
+                "label": "storeys",
+                "fetchUrl": flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "storeys" }),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["storey"] || null)?.toString(),
+            },
+            "space_id": {
+                "label": "spaces",
+                "fetchUrl": flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "spaces" }),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["space"] || null)?.toString(),
+            },
+            "zone_id": {
+                "label": "zones",
+                "fetchUrl": flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "zones" }),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["zone"] || null)?.toString(),
+            },
+        };
 
-        if (this.#filterReqIDs[getFilterDataUrl] != null) {
-            this.#internalAPIRequester.abort(this.#filterReqIDs[getFilterDataUrl]);
-            this.#filterReqIDs[getFilterDataUrl] = null;
+        for (let [filterFetchUrl, filterReqID] of Object.entries(this.#filterReqIDs)) {
+            this.#internalAPIRequester.abort(filterReqID);
+            this.#filterReqIDs[filterFetchUrl] = null;
         }
-        this.#filterReqIDs[getFilterDataUrl] = this.#internalAPIRequester.get(
-            getFilterDataUrl,
+
+        this.#filterReqIDs = this.#internalAPIRequester.gets(
+            Object.values(this.#searchSelectFilters).map((filterOpts) => { return filterOpts["fetchUrl"]; }),
             (data) => {
-                let filterOptions = prepareFilterOptionsCallback(data);
-                filterElmt.load(filterOptions);
+                for (let [index, filterData] of Object.entries(data)) {
+                    filterData = filterData.data != undefined ? filterData.data : filterData;
 
-                filterElmt.addEventListener("change", (event) => {
-                    event.preventDefault();
+                    let searchSelectFilterKey = Object.keys(this.#searchSelectFilters)[index];
+                    let searchSelectFilterOpts = this.#searchSelectFilters[searchSelectFilterKey];
 
-                    this.refresh();
-                });
+                    let selectedOptionIndex = 0;
+                    let selectOptions = filterData.map((row, filterIndex) => {
+                        if (searchSelectFilterOpts["defaultValue"] == row.id.toString()) {
+                            selectedOptionIndex = filterIndex + 1;
+                        }
+                        return {value: row.id.toString(), text: row.name};
+                    });
+                    selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
 
-                this.#searchFilterElmts.push(filterElmt);
+                    let searchSelectFilterElmt = searchSelectFilterOpts["htmlElement"];
+                    this.#searchFiltersContainerElmt.insertBefore(searchSelectFilterElmt, this.#filtersRemoveBtnElmt);
+                    searchSelectFilterElmt.load(selectOptions, selectedOptionIndex);
+                    searchSelectFilterElmt.addEventListener("change", (event) => {
+                        event.preventDefault();
+
+                        this.refresh();
+                    });
+                }
+
+                this.refresh();
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
@@ -376,74 +438,18 @@ export class TimeseriesSelector extends HTMLDivElement {
         );
     }
 
-    #initFilters() {
-        // Campaign scopes filter.
-        this.#searchFilterCampaignScopeElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterCampaignScopeElmt, flaskES6.urlFor(`api.campaign_scopes.retrieve_list`), (data) => {
-            let filterOptions = data.data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All campaign scopes"});
-            return filterOptions;
-        });
-
-        // Sites filter.
-        this.#searchFilterSiteElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterSiteElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "sites" }), (data) => {
-            let filterOptions = data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All sites"});
-            return filterOptions;
-        });
-
-        // Buildings filter.
-        this.#searchFilterBuildingElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterBuildingElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "buildings" }), (data) => {
-            let filterOptions = data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All buildings"});
-            return filterOptions;
-        });
-
-        // Storeys filter.
-        this.#searchFilterStoreyElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterStoreyElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "storeys" }), (data) => {
-            let filterOptions = data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All storeys"});
-            return filterOptions;
-        });
-        
-        // Buildings filter.
-        this.#searchFilterSpaceElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterSpaceElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "spaces" }), (data) => {
-            let filterOptions = data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All spaces"});
-            return filterOptions;
-        });
-
-        // Zones filter.
-        this.#searchFilterZoneElmt = new FilterSelect();
-        this.#initFilter(this.#searchFilterZoneElmt, flaskES6.urlFor(`api.structural_elements.retrieve_list_for`, { type: "zones" }), (data) => {
-            let filterOptions = data.map((row) => {
-                return {value: row.id.toString(), text: row.name};
-            });
-            filterOptions.splice(0, 0, {value: "None", text: "All zones"});
-            return filterOptions;
-        });
-    }
-
     #canSelect(itemId) {
         let isLimitOK = true;
         if (this.#allowedSelectionLimit != -1) {
             isLimitOK = this.#selectedItems.length < this.#allowedSelectionLimit;
         }
         return !this.selectedItemIds.includes(itemId) && isLimitOK;
+    }
+
+    connectedCallback() {
+        this.#initFilters();
+        this.#initEventListeners();
+        this.#update();
     }
 
     clearAllSelection() {
@@ -530,29 +536,13 @@ export class TimeseriesSelector extends HTMLDivElement {
         this.#searchResultsContainerElmt.appendChild(new Spinner());
 
         let searchOptions = {"page_size": Parser.parseIntOrDefault(options.pageSize, this.#searchResultsPageSizeSelectorElmt.current), "page": Parser.parseIntOrDefault(options.page, 1)};
-        if ("search" in options) {
-            searchOptions["search"] = options.search;
-        }
-        else if (this.#searchInputElmt.value != "") {
+        if (this.#searchInputElmt.value != "") {
             searchOptions["search"] = this.#searchInputElmt.value;
         }
-        if (this.#searchFilterCampaignScopeElmt.value != "None") {
-            searchOptions["campaign_scope_id"] = this.#searchFilterCampaignScopeElmt.value;
-        }
-        if (this.#searchFilterSiteElmt.value != "None") {
-            searchOptions["site_id"] = this.#searchFilterSiteElmt.value;
-        }
-        if (this.#searchFilterBuildingElmt.value != "None") {
-            searchOptions["building_id"] = this.#searchFilterBuildingElmt.value;
-        }
-        if (this.#searchFilterStoreyElmt.value != "None") {
-            searchOptions["storey_id"] = this.#searchFilterStoreyElmt.value;
-        }
-        if (this.#searchFilterSpaceElmt.value != "None") {
-            searchOptions["space_id"] = this.#searchFilterSpaceElmt.value;
-        }
-        if (this.#searchFilterZoneElmt.value != "None") {
-            searchOptions["zone_id"] = this.#searchFilterZoneElmt.value;
+        for (let [searchOptName, searchOpts] of Object.entries(this.#searchSelectFilters)) {
+            if (searchOpts["htmlElement"].value != "None") {
+                searchOptions[searchOptName] = searchOpts["htmlElement"].value;
+            }
         }
 
         this.#searchReqID = this.#internalAPIRequester.get(
@@ -655,6 +645,14 @@ export class TimeseriesSelector extends HTMLDivElement {
                 this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
+    }
+
+    static getInstance(elementId = null) {
+        let queryId = "";
+        if (elementId != null) {
+            queryId = `[id="${elementId}"]`;
+        }
+        return document.querySelector(`div[is="app-ts-selector"]${queryId}`);
     }
 }
 

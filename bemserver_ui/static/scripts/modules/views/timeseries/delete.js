@@ -2,6 +2,7 @@ import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { ModalConfirm } from "../../components/modalConfirm.js";
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
+import { TimeseriesSelector } from "../../components/timeseries/selector.js";
 
 
 export class TimeseriesDeleteView {
@@ -20,8 +21,8 @@ export class TimeseriesDeleteView {
 
     #tsSelector = null;
 
-    constructor(tsSelector) {
-        this.#tsSelector = tsSelector;
+    constructor() {
+        this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorDelete");
 
         this.#internalAPIRequester = new InternalAPIRequest();
 

@@ -1,3 +1,4 @@
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
 {% extends "pages/base.html" %}
 
 {% set title = "Explore timeseries" %}
@@ -9,8 +10,8 @@
         <div class="col">
             <div class="row mb-3">
                 <div class="col">
-                    {% filter indent(width=20, first=True) %}
-                    {% include "components/timeseries/selector.html" %}
+                    {% filter indent(width=20, first=False) %}
+                    {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExplore") -}}
                     {% endfilter %}
                 </div>
             </div>
@@ -79,16 +80,12 @@
     import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/timeseries/bucketWidth.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
-    import { TimeseriesSelector } from "{{ url_for('static', filename='scripts/modules/components/timeseries/selector.js') }}";
     import { TimeseriesDataExploreView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/dataExplore.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let tsSelector = new TimeseriesSelector();
-        tsSelector.refresh();
-
-        let tsDataExploreView = new TimeseriesDataExploreView(tsSelector);
+        let tsDataExploreView = new TimeseriesDataExploreView();
         tsDataExploreView.refresh();
 
     });
