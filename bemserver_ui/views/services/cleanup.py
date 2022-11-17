@@ -3,7 +3,7 @@ import flask
 
 import bemserver_api_client.exceptions as bac_exc
 
-from bemserver_ui.extensions import auth, Roles
+from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
 from bemserver_ui.extensions.campaign_context import CAMPAIGN_STATE_OVERALL
 
 
@@ -125,15 +125,27 @@ def _manage(cleanup_campaign, cleanup_campaign_etag):
     )
 
 
-@blp.route("/<int:id>/manage")
+@blp.route("/<int:id>/state")
 @auth.signin_required
-def manage(id):
+def cleanup_state(id):
     cleanup_data, cleanup_etag = _get_cleanup_data(id)
     return _manage(cleanup_data, cleanup_etag)
 
 
-@blp.route("/manage/campaign/<int:id>")
+@blp.route("/state")
 @auth.signin_required
-def manage_campaign(id):
+@ensure_campaign_context
+def state():
+    campaign_id = flask.g.campaign_ctxt.id
+    cleanup_data, cleanup_etag = _get_cleanup_data_for_campaign(campaign_id)
+    return _manage(cleanup_data, cleanup_etag)
+
+
+@blp.route("/campaign/<int:id>/state")
+@auth.signin_required
+def campaign_state(id):
+    if flask.g.campaign_ctxt.has_campaign and flask.g.campaign_ctxt.id == id:
+        return flask.redirect(flask.url_for("services.cleanup.state"))
+
     cleanup_data, cleanup_etag = _get_cleanup_data_for_campaign(id)
     return _manage(cleanup_data, cleanup_etag)
