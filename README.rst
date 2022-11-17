@@ -10,7 +10,7 @@ Installation
 Settings
 --------
 
-Flask var config available::
+Flask custom var config available::
 
 BEMSERVER_API_HOST = "localhost"
     API host name (and port)
@@ -18,7 +18,7 @@ BEMSERVER_API_USE_SSL = True
     Is API published through SSL?
 BEMSERVER_API_AUTH_METHOD = "http_basic"
     API authentication method
-BEMSERVER_PARTNERS_FILE = None
+*(optional)* BEMSERVER_PARTNERS_FILE = None
     Absolute path of json file that describes the project's partners
 
     Example of ``BEMSERVER_PARTNERS_FILE`` file structure::
