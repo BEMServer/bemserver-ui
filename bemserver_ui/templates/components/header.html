@@ -14,14 +14,14 @@
             {% endif %}
         </div>
         <div class="d-flex flex-nowrap justify-content-end gap-4 me-3">
-            <a class="link-secondary position-relative" href="#" role="button">
+            <a class="link-secondary position-relative" href="#" title="Notifications" role="button">
                 <i class="bi bi-bell"></i>
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle">
+                <span class="position-absolute top-0 start-100 translate-middle-x p-1 bg-danger rounded-circle">
                     <span class="visually-hidden">New notifications</span>
                 </span>
             </a>
             <div class="dropdown">
-                <a href="#" class="link-secondary text-decoration-none dropdown-toggle d-flex align-items-center" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <a role="button" title="{{ signed_user.name }}" class="link-secondary text-decoration-none dropdown-toggle d-flex align-items-center" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-person-circle me-1"></i>
                     <span class="fw-bold">{{ signed_user.name }}</span>
                 </a>
