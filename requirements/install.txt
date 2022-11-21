@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/install.txt setup.py
 #
-bemserver-api-client @ https://github.com/BEMServer/bemserver-api-client/archive/b832ff1.tar.gz
+bemserver-api-client @ https://github.com/BEMServer/bemserver-api-client/archive/dc8bb74.tar.gz
     # via bemserver-ui (setup.py)
 certifi==2021.10.8
     # via requests
