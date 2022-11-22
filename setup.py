@@ -24,6 +24,7 @@ setup(
     version="0.1.0",
     description="BEMServer web interface",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/BEMServer/bemserver-ui",
     author="NOBATEK/INEF4",
     author_email="dfrederique@nobatek.inef4.com",
