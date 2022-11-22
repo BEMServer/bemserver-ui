@@ -2,6 +2,24 @@
 BEMServer UI
 ============
 
+.. image:: https://img.shields.io/pypi/v/bemserver-ui.svg
+    :target: https://pypi.org/project/bemserver-ui/
+    :alt: Latest version
+
+.. image:: https://img.shields.io/pypi/pyversions/bemserver-ui.svg
+    :target: https://pypi.org/project/bemserver-ui/
+    :alt: Python versions
+
+.. image:: https://github.com/BEMServer/bemserver-ui/actions/workflows/build-release.yaml/badge.svg
+    :target: https://github.com/bemserver/bemserver-ui/actions?query=workflow%3Abuild
+    :alt: Build status
+
+
+BEMServer is a free Building Energy Management software platform.
+
+Its purpose is to store data collected in buildings and produce useful information such as performance indicators or alerts.
+
+
 
 Installation
 ============

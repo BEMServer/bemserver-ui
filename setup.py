@@ -22,7 +22,7 @@ with open("README.rst", encoding="utf-8") as f:
 setup(
     name="bemserver-ui",
     version="0.1.0",
-    description="Buildig Operation and Maintenance web interface",
+    description="BEMServer web interface",
     long_description=long_description,
     url="https://github.com/BEMServer/bemserver-ui",
     author="NOBATEK/INEF4",
@@ -47,11 +47,7 @@ setup(
     install_requires=[
         "flask>=2.2.2",
         "python-dotenv>=0.21.0",
-        (
-            # https://github.com/jazzband/pip-tools/issues/1359
-            "bemserver-api-client @ "
-            "https://github.com/BEMServer/bemserver-api-client/archive/dc8bb74.tar.gz"
-        ),
+        "bemserver-api-client>=0.1.0,<0.2.0",
     ],
     extras_require=EXTRAS_REQUIRE,
     packages=find_packages(exclude=["tests*"]),
