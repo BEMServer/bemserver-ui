@@ -51,8 +51,10 @@ export class InternalAPIRequest {
 
     #processError(error, rejectCallback = null) {
         if (this.#debugMode) {
-            let url = new URL(error.url);
-            console.log(`${url.pathname}${url.search}`);
+            if (error.url) {
+                let url = new URL(error.url);
+                console.log(`${url.pathname}${url.search}`);
+            }
             console.log(error);
         }
 
@@ -61,7 +63,6 @@ export class InternalAPIRequest {
             document.location.reload();
         }
         else if (!["AbortError"].includes(error.name)) {
-
             try {
                 error.json().then((errorJSON) => {
                     let errorMsg = errorJSON.message;
