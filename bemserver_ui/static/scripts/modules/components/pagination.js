@@ -265,14 +265,18 @@ export class Pagination extends HTMLUListElement {
     get page() {
         return this.#page;
     }
+    set page(value) {
+        let cleanValue = Parser.parseIntOrDefault(value, 1);
+        this.reload({ pageSize: this.#pageSize, totalItems: this.#totalItems, totalPages: this.#totalPages, firstPage: this.#firstPage, lastPage: this.#lastPage, page: cleanValue, previousPage: this.#previousPage, nextPage: this.#nextPage });
+    }
 
     #loadOptions(options = {}) {
         this.#pageSize = Parser.parseIntOrDefault(options.pageSize, this.#pageSize);
-        this.#totalItems = Parser.parseIntOrDefault(options.totalItems, this.#totalItems);
-        this.#totalPages = Parser.parseIntOrDefault(options.totalPages, this.#totalPages);
-        this.#firstPage = Parser.parseIntOrDefault(options.firstPage, this.#firstPage);
-        this.#lastPage = Parser.parseIntOrDefault(options.lastPage, this.#lastPage);
-        this.#page = Parser.parseIntOrDefault(options.page, this.#page);
+        this.#totalItems = Parser.parseIntOrDefault(options.totalItems, 0);
+        this.#totalPages = Parser.parseIntOrDefault(options.totalPages, 1);
+        this.#firstPage = Parser.parseIntOrDefault(options.firstPage, 1);
+        this.#lastPage = Parser.parseIntOrDefault(options.lastPage, 1);
+        this.#page = Parser.parseIntOrDefault(options.page, 1);
         this.#previousPage = Parser.parseIntOrDefault(options.previousPage, null);
         this.#nextPage = Parser.parseIntOrDefault(options.nextPage, null);
     }
@@ -288,14 +292,14 @@ export class Pagination extends HTMLUListElement {
 
         let oldStartPageItem = this.#startPageItem;
         this.#startPageItem = this.#firstPage;
-        if (this.#previousPage != null) {
+        if (this.#previousPage != Number.NaN) {
             this.#startPageItem = Math.max(this.#startPageItem, this.#page - startNbLinks);
         }
         this.#hasStartEllipsis = this.#startPageItem > this.#firstPage;
 
         let oldEndPageItem = this.#endPageItem;
         this.#endPageItem = this.#lastPage;
-        if (this.#nextPage != null) {
+        if (this.#nextPage != Number.NaN) {
             this.#endPageItem = Math.min(this.#endPageItem, this.#page + endNbLinks);
         }
         this.#hasEndEllipsis = this.#endPageItem < this.#lastPage;
@@ -318,17 +322,20 @@ export class Pagination extends HTMLUListElement {
                     }
                 }
             }
+            else {
+                event.stopPropagation();
+            }
         });
     }
 
     #update() {
         this.#firstPageItemElmt.isEnabled = (this.#page != this.#firstPage);
-        this.#previousPageItemElmt.isEnabled = (this.#previousPage != null);
+        this.#previousPageItemElmt.isEnabled = !Number.isNaN(this.#previousPage);
         this.#previousPageItemElmt.page = this.#previousPage;
         this.#startEllipsisPageItemElmt.isVisible = this.#hasStartEllipsis;
 
         this.#endEllipsisPageItemElmt.isVisible = this.#hasEndEllipsis;
-        this.#nextPageItemElmt.isEnabled = (this.#nextPage != null);
+        this.#nextPageItemElmt.isEnabled = !Number.isNaN(this.#nextPage);
         this.#nextPageItemElmt.page = this.#nextPage;
         this.#lastPageItemElmt.isEnabled = (this.#page != this.#lastPage);
         this.#lastPageItemElmt.page = this.#lastPage;
@@ -367,7 +374,7 @@ export class Pagination extends HTMLUListElement {
         this.#firstPageItemElmt = new PaginationItem({isActivable: false, isEnabled: this.#page != this.#firstPage, page: this.#firstPage, title: "First page", innerHTML: `<i class="bi bi-chevron-double-left"></i>`});
         this.appendChild(this.#firstPageItemElmt);
         // Previous page.
-        this.#previousPageItemElmt = new PaginationItem({isActivable: false, isEnabled: this.#previousPage != null, page: this.#previousPage, title: "Previous page", innerHTML: `<i class="bi bi-chevron-left"></i>`});
+        this.#previousPageItemElmt = new PaginationItem({isActivable: false, isEnabled: !Number.isNaN(this.#previousPage), page: this.#previousPage, title: "Previous page", innerHTML: `<i class="bi bi-chevron-left"></i>`});
         this.appendChild(this.#previousPageItemElmt);
         // Start ellipsis.
         this.#startEllipsisPageItemElmt = new PaginationItem({isActivable: false, isEnabled: false, isVisible: this.#hasStartEllipsis, innerHTML: "..."});
@@ -378,7 +385,7 @@ export class Pagination extends HTMLUListElement {
         this.#endEllipsisPageItemElmt = new PaginationItem({isActivable: false, isEnabled: false, isVisible: this.#hasEndEllipsis, innerHTML: "..."});
         this.appendChild(this.#endEllipsisPageItemElmt);
         // Next page.
-        this.#nextPageItemElmt = new PaginationItem({isActivable: false, isEnabled: this.#nextPage != null, page: this.#nextPage, title: "Next page", innerHTML: `<i class="bi bi-chevron-right"></i>`});
+        this.#nextPageItemElmt = new PaginationItem({isActivable: false, isEnabled: !Number.isNaN(this.#nextPage), page: this.#nextPage, title: "Next page", innerHTML: `<i class="bi bi-chevron-right"></i>`});
         this.appendChild(this.#nextPageItemElmt);
         // Last page.
         this.#lastPageItemElmt = new PaginationItem({isActivable: false, isEnabled: this.#page != this.#lastPage, page: this.#lastPage, title: "Last page", innerHTML: `<i class="bi bi-chevron-double-right"></i>`});
@@ -393,12 +400,12 @@ export class Pagination extends HTMLUListElement {
 }
 
 
-if (customElements.get("app-pagination-item") == null) {
-    customElements.define("app-pagination-item", PaginationItem, { extends: "li" });
+if (window.customElements.get("app-pagination-item") == null) {
+    window.customElements.define("app-pagination-item", PaginationItem, { extends: "li" });
 }
-if (customElements.get("app-pagination") == null) {
-    customElements.define("app-pagination", Pagination, { extends: "ul" });
+if (window.customElements.get("app-pagination") == null) {
+    window.customElements.define("app-pagination", Pagination, { extends: "ul" });
 }
-if (customElements.get("app-pagesize-selector") == null) {
-    customElements.define("app-pagesize-selector", PageSizeSelector, { extends: "div" });
+if (window.customElements.get("app-pagesize-selector") == null) {
+    window.customElements.define("app-pagesize-selector", PageSizeSelector, { extends: "div" });
 }

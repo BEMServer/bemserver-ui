@@ -1,4 +1,3 @@
-{% import "macros/items_count.html" as mac_items_count %}
 {% extends "pages/base.html" %}
 
 {% set title = "Campaign scopes" %}
@@ -19,9 +18,7 @@
             <p class="text-break mb-0">{{ g.campaign_ctxt.campaign.name }}</p>
         </div>
         <div class="col-auto">
-            {% filter indent(width=12) %}
-            {{ mac_items_count.render_items_count(campaign_scopes | length) -}}
-            {% endfilter %}
+            <small class="text-nowrap text-muted"><app-items-count first-item="1" last-item="{{ campaign_scopes | length }}" total-count="{{ campaign_scopes | length }}"></app-items-count></small>
         </div>
     </div>
     <div class="row">
@@ -43,3 +40,10 @@
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}

@@ -64,12 +64,8 @@
                         {% endfor %}
                     </select>
                 </div>
-                <small class="text-muted">
-                    {% if pagination.page is defined %}
-                    Items: {{ ((pagination.page - 1) * filters.page_size) + 1 }} - {% if pagination.page == pagination.last_page %}{{ pagination.total }}{% else %}{{ ((pagination.page - 1) * filters.page_size) + filters.page_size }}{% endif %} out of {{ pagination.total }}
-                    {% else %}
-                    No item
-                    {% endif %}
+                <small>
+                    <app-items-count{% if pagination.page is defined %} first-item="{{ ((pagination.page - 1) * filters.page_size) + 1 }}" last-item="{% if pagination.page == pagination.last_page %}{{ pagination.total }}{% else %}{{ ((pagination.page - 1) * filters.page_size) + filters.page_size }}{% endif %}" total-count="{{ pagination.total }}"{% endif %}></app-items-count>
                 </small>
             </div>
             <nav aria-label="Timeseries pagination">
@@ -160,6 +156,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
+    import "{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}";
     import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}";
 
 

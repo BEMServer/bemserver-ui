@@ -1,3 +1,4 @@
+import "../../components/itemsCount.js";
 import { Pagination, PageSizeSelector } from "../../components/pagination.js";
 import { AccordionList } from "../../components/accordionList.js";
 import { DropZone } from "../../components/dropZone.js";
@@ -66,8 +67,7 @@ export class TimeseriesManageStructuralElementsView {
             event.preventDefault();
 
             if (event.detail.newValue != event.detail.oldValue) {
-                this.#tsItemsCountElmt.innerHTML = "";
-                this.#tsItemsCountElmt.appendChild(new Spinner({useSmallSize: true}));
+                this.#tsItemsCountElmt.setLoading();
                 this.#tsListElmt.setLoading();
                 this.refresh({page_size: event.detail.newValue});
             }
@@ -311,8 +311,7 @@ export class TimeseriesManageStructuralElementsView {
             this.#tsPaginationContainerElmt.innerHTML = "";
             this.#tsPaginationContainerElmt.appendChild(new Spinner());
         }
-        this.#tsItemsCountElmt.innerHTML = "";
-        this.#tsItemsCountElmt.appendChild(new Spinner({useSmallSize: true}));
+        this.#tsItemsCountElmt.setLoading();
         this.#tsListElmt.setLoading();
 
         let fetcherOptions = {"page_size": Parser.parseIntOrDefault(options.page_size, this.#tsPageSizeSelectorElmt.current), "page": Parser.parseIntOrDefault(options.page, 1)};
@@ -354,17 +353,12 @@ export class TimeseriesManageStructuralElementsView {
                     this.#tsPaginationElmt.reload(tsPaginationOpts);
                 }
 
-                if (this.#tsPaginationElmt.totalItems > 0) {
-                    this.#tsItemsCountElmt.innerText = `Items ${this.#tsPaginationElmt.startItem} - ${this.#tsPaginationElmt.endItem} out of ${this.#tsPaginationElmt.totalItems}`;
-                }
-                else {
-                    this.#tsItemsCountElmt.innerText = "No item";
-                }
+                this.#tsItemsCountElmt.update({totalCount: this.#tsPaginationElmt.totalItems, firstItem: this.#tsPaginationElmt.startItem, lastItem: this.#tsPaginationElmt.endItem});
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                 this.#messagesElmt.appendChild(flashMsgElmt);
-        },
+            },
         );
     }
 }

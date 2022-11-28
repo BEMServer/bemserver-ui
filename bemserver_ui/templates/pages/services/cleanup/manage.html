@@ -1,4 +1,3 @@
-{% import "macros/items_count.html" as mac_items_count %}
 {% extends "pages/base.html" %}
 
 {% set title = "Cleanup service" %}
@@ -38,9 +37,7 @@
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top">
                     <caption class="text-end">
-                        {% filter indent(width=24) %}
-                        {{ mac_items_count.render_items_count(cleanup_timeseries | length) -}}
-                        {% endfilter %}
+                        <small class="text-nowrap text-muted"><app-items-count first-item="1" last-item="{{ cleanup_timeseries | length }}" total-count="{{ cleanup_timeseries | length }}"></app-items-count></small>
                     </caption>
                     <thead>
                         <tr>
@@ -79,6 +76,7 @@
 {{ super() -}}
 {% if signed_user.is_admin %}
 {% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/cleanupManage.js') }}"></script>
 {% endfilter %}
 {% endif %}

@@ -1,8 +1,6 @@
 """Structural elements internal API"""
 import flask
 
-import bemserver_api_client.exceptions as bac_exc
-
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
@@ -86,32 +84,5 @@ def retrieve_property_data(type, id):
         {
             "type": type,
             "properties": properties,
-        }
-    )
-
-
-@blp.route("/<string:type>/<int:id>/timeseries")
-@auth.signin_required
-@ensure_campaign_context
-def retrieve_timeseries(type, id):
-    api_prop_resource = getattr(flask.g.api_client, f"timeseries_by_{type}s")
-    ts_by_type_resp = api_prop_resource.getall(**{f"{type}_id": id})
-
-    timeseries = []
-    for ts_by_type in ts_by_type_resp.data:
-        try:
-            ts_resp = flask.g.api_client.timeseries.getone(
-                id=ts_by_type["timeseries_id"]
-            )
-        except bac_exc.BEMServerAPINotFoundError:
-            # Just ignore this case (timeseries not found).
-            pass
-        else:
-            timeseries.append(ts_resp.data)
-
-    return flask.jsonify(
-        {
-            "type": type,
-            "timeseries": timeseries,
         }
     )

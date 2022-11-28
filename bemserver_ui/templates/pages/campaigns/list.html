@@ -1,4 +1,3 @@
-{% import "macros/items_count.html" as mac_items_count %}
 {% extends "pages/base.html" %}
 
 {% set title = "Campaigns" %}
@@ -45,9 +44,7 @@
     </div>
     <div class="row justify-content-end mb-3">
         <div class="col-auto">
-            {% filter indent(width=12) %}
-            {{ mac_items_count.render_items_count(g.campaign_ctxt.campaigns_by_state[g.campaign_ctxt.campaign_state_overall] | length, last_item=campaigns | length) -}}
-            {% endfilter %}
+            <small class="text-nowrap text-muted"><app-items-count id="itemsCount" first-item="1" last-item="{{ campaigns | length }}" total-count="{{ g.campaign_ctxt.campaigns_by_state[g.campaign_ctxt.campaign_state_overall] | length }}"></app-items-count></small>
         </div>
     </div>
     <div class="row">
@@ -102,3 +99,10 @@
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}
