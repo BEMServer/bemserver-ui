@@ -1,9 +1,14 @@
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
+import "../../components/itemsCount.js";
+import "../../components/pagination.js";
+import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 
 
 export class StructuralElementsExploreView {
+
+    #messagesElmt = null;
 
     #internalAPIRequester = null;
     #generalReqID = null;
@@ -15,7 +20,13 @@ export class StructuralElementsExploreView {
     #tabTimeseriesElmts = null;
     #generalTabContentElmt = null;
     #propertiesTabContentElmt = null;
-    #timeseriesTabContentElmt = null;
+
+    #searchElmt = null;
+    #clearSearchBtnElmt = null;
+    #tsPageSizeElmt = null;
+    #tsCountElmt = null;
+    #tsPaginationElmt = null;
+    #tsListElmt = null;
 
     #tabSitesSelected = null;
     #tabPropertiesSelected = null;
@@ -37,12 +48,20 @@ export class StructuralElementsExploreView {
     }
 
     #cacheDOM() {
+        this.#messagesElmt = document.getElementById("messages");
+
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
         this.#tabPropertiesElmts = [].slice.call(document.querySelectorAll("#tabProperties button[data-bs-toggle='tab']"));
         this.#tabTimeseriesElmts = [].slice.call(document.querySelectorAll("#tabTimeseries button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
         this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
-        this.#timeseriesTabContentElmt = document.getElementById("timeseries-tabcontent");
+
+        this.#searchElmt = document.getElementById("search");
+        this.#clearSearchBtnElmt = document.getElementById("clear");
+        this.#tsPageSizeElmt = document.getElementById("tsPageSize");
+        this.#tsCountElmt = document.getElementById("tsCount");
+        this.#tsPaginationElmt = document.getElementById("tsPagination");
+        this.#tsListElmt = document.getElementById("tsListElmt");
     }
 
     #initEventListeners() {
@@ -84,6 +103,48 @@ export class StructuralElementsExploreView {
                 this.refresh();
             });
         }
+
+        this.#searchElmt.addEventListener("input", (event) => {
+            event.preventDefault();
+
+            if (event.target.value != "") {
+                this.#clearSearchBtnElmt.classList.remove("d-none", "invisible");
+            }
+            else {
+                this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+            }
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#tsPaginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#clearSearchBtnElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            this.#searchElmt.value = "";
+            this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
+
+        this.#tsPageSizeElmt.addEventListener("pageSizeChange", (event) => {
+            event.preventDefault();
+
+            if (event.detail.newValue != event.detail.oldValue) {
+                this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+                this.#tsPaginationElmt.page = 1;
+                this.refresh();
+            }
+        });
+
+        this.#tsPaginationElmt.addEventListener("pageItemClick", (event) => {
+            event.preventDefault();
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
     }
 
     #getEditBtnHTML(type, id, tab=null) {
@@ -97,7 +158,8 @@ export class StructuralElementsExploreView {
                 return `<a class="btn btn-sm btn-outline-primary text-nowrap" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
             }
             catch (error) {
-                console.error(error);
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
             }
         }
         return ``;
@@ -156,24 +218,6 @@ export class StructuralElementsExploreView {
 </div>`;
     }
 
-    #getTimeseriesHTML(data, id) {
-        let contentHTML = ``;
-        if (data.timeseries.length > 0) {
-            contentHTML += `<p class="text-muted text-end">Items count: ${data.timeseries.length}</p>`;
-            for (let ts_data of data.timeseries) {
-                let unitSymbol = (ts_data.unit_symbol != null && ts_data.unit_symbol.length > 0) ? `<small class="text-black text-opacity-50">[${ts_data.unit_symbol}]</small>` : ``;
-                contentHTML += `<li class="d-flex gap-1"><i class="bi bi-clock-history"></i><span class="fw-bold text-break">${ts_data.name}</span>${unitSymbol}${this.#getItemHelpHTML(ts_data.description, false)}</li>`;
-            }
-        }
-        else {
-            contentHTML = `<p class="fst-italic">No data</p>`;
-        }
-
-        return `<ul class="list-unstyled mb-3">
-    ${contentHTML}
-</ul>`;
-    }
-
     #getErrorHTML(error) {
         return `<div class="alert alert-danger" role="alert">
     <i class="bi bi-x-octagon me-2"></i>
@@ -224,21 +268,90 @@ export class StructuralElementsExploreView {
         );
     }
 
+    #populateTimeseriesList(tsList) {
+        this.#tsListElmt.innerHTML = "";
+        if (tsList.length > 0) {
+            for (let tsData of tsList) {
+                let tsElmt = document.createElement("div");
+                tsElmt.classList.add("list-group-item");
+
+                let tsHeaderElmt = document.createElement("div");
+                tsHeaderElmt.classList.add("d-flex", "gap-1");
+
+                let iconElmt = document.createElement("i");
+                iconElmt.classList.add("bi", "bi-clock-history", "me-1");
+                tsHeaderElmt.appendChild(iconElmt);
+
+                let nameSpanElmt = document.createElement("span");
+                nameSpanElmt.classList.add("fw-bold", "text-break");
+                nameSpanElmt.innerText = tsData.name;
+                tsHeaderElmt.appendChild(nameSpanElmt);
+
+                if (tsData.unit_symbol) {
+                    let unitSpanElmt = document.createElement("span");
+                    unitSpanElmt.classList.add("text-muted");
+                    unitSpanElmt.innerText = `[${tsData.unit_symbol}]`;
+                    tsHeaderElmt.appendChild(unitSpanElmt);
+                }
+
+                tsElmt.appendChild(tsHeaderElmt);
+
+                let tsDescElmt = document.createElement("small");
+                tsDescElmt.classList.add("fst-italic", "text-muted");
+                tsDescElmt.innerText = tsData.description;
+                tsElmt.appendChild(tsDescElmt);
+
+                this.#tsListElmt.appendChild(tsElmt);
+            }
+        }
+        else {
+            let nodataSpanElmt = document.createElement("span");
+            nodataSpanElmt.classList.add("fst-italic", "text-muted", "text-center");
+            nodataSpanElmt.innerText = "No data";
+            this.#tsListElmt.appendChild(nodataSpanElmt);
+        }
+    }
+
     #renderTimeseries(id, type, path) {
-        this.#timeseriesTabContentElmt.innerHTML = "";
-        this.#timeseriesTabContentElmt.appendChild(new Spinner());
+        this.#tsCountElmt.setLoading();
+        this.#tsListElmt.innerHTML = "";
+        this.#tsListElmt.appendChild(new Spinner());
 
         if (this.#tsReqID != null) {
             this.#internalAPIRequester.abort(this.#tsReqID);
             this.#tsReqID = null;
         }
+
+        let tsOptions = {
+            "page_size": this.#tsPageSizeElmt.current,
+            "page": this.#tsPaginationElmt.page,
+        };
+        tsOptions[`${type}_id`] = id;
+        if (this.#searchElmt.value != "") {
+            tsOptions["search"] = this.#searchElmt.value;
+        }
+
         this.#tsReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_timeseries`, {type: type, id: id}),
+            flaskES6.urlFor(`api.timeseries.retrieve_list`, tsOptions),
             (data) => {
-                this.#timeseriesTabContentElmt.innerHTML = this.#getTimeseriesHTML(data, id);
+                let tsPaginationOpts = {
+                    pageSize: this.#tsPageSizeElmt.current,
+                    totalItems: data.pagination.total,
+                    totalPages: data.pagination.total_pages,
+                    page: data.pagination.page,
+                    firstPage: data.pagination.first_page,
+                    lastPage: data.pagination.last_page,
+                    previousPage: data.pagination.previous_page,
+                    nextPage: data.pagination.next_page,
+                }
+                this.#tsPaginationElmt.reload(tsPaginationOpts);
+                this.#tsCountElmt.update({totalCount: this.#tsPaginationElmt.totalItems, firstItem: this.#tsPaginationElmt.startItem, lastItem: this.#tsPaginationElmt.endItem});
+
+                this.#populateTimeseriesList(data.data);
             },
             (error) => {
-                this.#timeseriesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
     }
@@ -248,6 +361,7 @@ export class StructuralElementsExploreView {
         for (let tabElmt of this.#tabPropertiesElmts) {
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
         }
+        this.#tsPaginationElmt.reload();
         this.refresh();
     }
 

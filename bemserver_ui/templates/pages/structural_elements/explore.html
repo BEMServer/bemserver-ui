@@ -13,8 +13,8 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    <div class="row d-lg-flex d-grid mb-3 mb-lg-0 h-100">
-        <div class="col col-lg-6 pb-3 pb-lg-0">
+    <div class="row d-xl-flex d-grid mb-3 mb-xl-0 h-100">
+        <div class="col col-xl-6 pb-3 pb-xl-0">
             <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link{% if tab == 'sites' %} active{% endif %}" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="{% if tab == 'sites' %}true{% else %}false{% endif %}"><i class="bi bi-building"></i> Sites / Buildings...</button>
@@ -55,7 +55,25 @@
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabPropertiesContent">
                 <div class="tab-pane fade show active p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab"></div>
                 <div class="tab-pane fade p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab"></div>
-                <div class="tab-pane fade p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab"></div>
+                <div class="tab-pane fade p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab">
+                    <div class="row mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label m-0" for="search">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" autofocus>
+                            <a id="clear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+                        </div>
+                    </div>
+                    <nav class="row" aria-label="Timeseries pagination">
+                        <div class="col-auto align-self-center py-1">
+                            <div is="app-pagesize-selector" id="tsPageSize"></div>
+                        </div>
+                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="tsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="tsPagination"></ul>
+                        </div>
+                    </nav>
+                    <div id="tsListElmt" class="list-group py-2"></div>
+                </div>
             </div>
         </div>
     </div>
