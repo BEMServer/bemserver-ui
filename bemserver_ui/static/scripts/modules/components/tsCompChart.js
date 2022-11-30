@@ -97,6 +97,10 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
             },
             right: 10,
             top: "center",
+            text: ["Complete", "Empty"],
+            formatter: (value) => {
+                return `${value.toString()}%`;
+            }
         },
         series: [],
         useUTC: true,
@@ -154,7 +158,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 name: tsInfo.name,
                 type: "heatmap",
                 data: tsInfo["ratio"].map((ratio, xIndex) => {
-                    return [xIndex, yIndex, Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100];
+                    return [xIndex, yIndex, Parser.parseFloatOrDefault(Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100.0, 0.0, 0)];
                 }),
                 emphasis: {
                     itemStyle: {
