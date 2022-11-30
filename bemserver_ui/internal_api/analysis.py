@@ -4,6 +4,7 @@ import zoneinfo
 import calendar
 import flask
 
+from bemserver_api_client.enums import BucketWidthUnit
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -53,7 +54,7 @@ def retrieve_completeness():
         timeseries_ids,
         data_state_id,
         bucket_width_value,
-        bucket_width_unit,
+        BucketWidthUnit(bucket_width_unit),
         timezone=tz_name,
     )
 
@@ -81,7 +82,7 @@ def retrieve_ener_cons_brkd(structural_element_type, structural_element_id):
     year_reference = int(flask.request.args["year_reference"])
 
     bucket_width_value = 1
-    bucket_width_unit = "hour"
+    bucket_width_unit = BucketWidthUnit.hour
     tz = zoneinfo.ZoneInfo(tz_name)
     if period_type == "Month-Hourly":
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
@@ -89,17 +90,17 @@ def retrieve_ener_cons_brkd(structural_element_type, structural_element_id):
         end_month = (period_month % 12) + 1
         dt_end = dt.datetime(end_year, end_month, 1, 1, 0, 0, tzinfo=tz)
     elif period_type == "Month-Daily":
-        bucket_width_unit = "day"
+        bucket_width_unit = BucketWidthUnit.day
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
         end_year = period_year + (period_month // 12)
         end_month = (period_month % 12) + 1
         dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
     elif period_type == "Year-Monthly":
-        bucket_width_unit = "month"
+        bucket_width_unit = BucketWidthUnit.month
         dt_start = dt.datetime(period_year, 1, 1, 0, 0, 0, tzinfo=tz)
         dt_end = dt.datetime(period_year + 1, 1, 1, 0, 0, 0, tzinfo=tz)
     elif period_type == "Yearly":
-        bucket_width_unit = "year"
+        bucket_width_unit = BucketWidthUnit.year
         dt_start = dt.datetime(year_reference - period_year, 1, 1, 0, 0, 0, tzinfo=tz)
         dt_end = dt.datetime(year_reference + 1, 1, 1, 0, 0, 0, tzinfo=tz)
 
