@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+0.1.1 (2022-11-30)
+++++++++++++++++++
+
+Features:
+
+- Update sites/buildings... explore (paginated list in timeseries tab)
+
+Fixes:
+
+- Repair timeseries data explore download CSV chart toolbox feature
+- Minor other fixes
+
 0.1.0 (2022-11-22)
 ++++++++++++++++++
 
