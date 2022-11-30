@@ -1,11 +1,14 @@
 """Timeseries data views"""
 import datetime as dt
 import zoneinfo
+import io
 import flask
 
-from bemserver_api_client.enums import DataFormat, Aggregation
+from bemserver_api_client.enums import DataFormat, Aggregation, BucketWidthUnit
 from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
+from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.tools import is_filestream_empty
+from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
@@ -63,39 +66,71 @@ def completeness():
 @auth.signin_required
 @ensure_campaign_context
 def download(id):
-    data_state_id = flask.request.args["data_state"]
-    start_time = flask.request.args["start_time"]
-    end_time = flask.request.args["end_time"]
+    ts_resp = flask.g.api_client.timeseries.getone(id=id)
+    flask.request.args["timeseries"] = ts_resp.data["name"]
+    return flask.redirect(
+        flask.url_for("timeseries_data.download_multiple", flask.request.args)
+    )
 
+
+@blp.route("/download")
+@auth.signin_required
+@ensure_campaign_context
+def download_multiple():
+    data_state_id = flask.request.args["data_state"]
+    ts_names = [str(x) for x in flask.request.args["timeseries"].split(",")]
+    start_date = flask.request.args["start_date"]
+    start_time = flask.request.args.get("start_time", "00:00") or "00:00"
+    end_date = flask.request.args["end_date"]
+    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
+    tz_name = flask.request.args["timezone"]
     aggregation = flask.request.args.get("agg")
     if aggregation == "none":
         aggregation = None
-    duration = flask.request.args.get("duration")
+    bucket_width_value = flask.request.args.get("bucket_width_value")
+    bucket_width_unit = flask.request.args.get("bucket_width_unit")
 
-    ts_resp = flask.g.api_client.timeseries.getone(id=id)
+    tz = zoneinfo.ZoneInfo(tz_name)
+    try:
+        dt_start = convert_html_form_datetime(start_date, start_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid start datetime!")
+    try:
+        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
 
-    if aggregation is not None and duration is not None:
+    if (
+        aggregation is not None
+        and bucket_width_value is not None
+        and bucket_width_unit is not None
+    ):
         ts_data_csv = flask.g.api_client.timeseries_data.download_aggregate_by_names(
             flask.g.campaign_ctxt.id,
-            start_time,
-            end_time,
+            dt_start.isoformat(),
+            dt_end.isoformat(),
             data_state_id,
-            [ts_resp.data["name"]],
-            duration,
+            ts_names,
             aggregation=Aggregation(aggregation),
+            bucket_width_value=bucket_width_value,
+            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
             format=DataFormat.csv,
         )
     else:
         ts_data_csv = flask.g.api_client.timeseries_data.download_by_names(
             flask.g.campaign_ctxt.id,
-            start_time,
-            end_time,
+            dt_start.isoformat(),
+            dt_end.isoformat(),
             data_state_id,
-            [ts_resp.data["name"]],
+            ts_names,
             format=DataFormat.csv,
         )
 
-    return ts_data_csv.send_file()
+    return flask.send_file(
+        io.BytesIO(ts_data_csv.data),
+        as_attachment=True,
+        download_name="timeseries_data.csv",
+    )
 
 
 @blp.route("/delete")
