@@ -4,6 +4,7 @@ import csv
 import zoneinfo
 import flask
 
+from bemserver_api_client.enums import DataFormat, Aggregation, BucketWidthUnit
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -49,23 +50,25 @@ def retrieve_data(id):
         and bucket_width_value is not None
         and bucket_width_unit is not None
     ):
-        ts_data_csv = flask.g.api_client.timeseries_data.download_csv_aggregate(
+        ts_data_csv = flask.g.api_client.timeseries_data.download_aggregate(
             dt_start.isoformat(),
             dt_end.isoformat(),
             data_state_id,
             [id],
             timezone=tz_name,
-            aggregation=aggregation,
+            aggregation=Aggregation(aggregation),
             bucket_width_value=bucket_width_value,
-            bucket_width_unit=bucket_width_unit,
+            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
+            format=DataFormat.csv,
         )
     else:
-        ts_data_csv = flask.g.api_client.timeseries_data.download_csv(
+        ts_data_csv = flask.g.api_client.timeseries_data.download(
             dt_start.isoformat(),
             dt_end.isoformat(),
             data_state_id,
             [id],
             timezone=tz_name,
+            format=DataFormat.csv,
         )
 
     ts_headers = ["Datetime", str(id)]
@@ -125,27 +128,27 @@ def retrieve_multiple_data():
         and bucket_width_value is not None
         and bucket_width_unit is not None
     ):
-        ts_data_csv = (
-            flask.g.api_client.timeseries_data.download_csv_aggregate_by_names(
-                campaign,
-                dt_start.isoformat(),
-                dt_end.isoformat(),
-                data_state_id,
-                ts_names,
-                timezone=tz_name,
-                aggregation=aggregation,
-                bucket_width_value=bucket_width_value,
-                bucket_width_unit=bucket_width_unit,
-            )
-        )
-    else:
-        ts_data_csv = flask.g.api_client.timeseries_data.download_csv_by_names(
+        ts_data_csv = flask.g.api_client.timeseries_data.download_aggregate_by_names(
             campaign,
             dt_start.isoformat(),
             dt_end.isoformat(),
             data_state_id,
             ts_names,
             timezone=tz_name,
+            aggregation=Aggregation(aggregation),
+            bucket_width_value=bucket_width_value,
+            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
+            format=DataFormat.csv,
+        )
+    else:
+        ts_data_csv = flask.g.api_client.timeseries_data.download_by_names(
+            campaign,
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            ts_names,
+            timezone=tz_name,
+            format=DataFormat.csv,
         )
 
     ts_headers = ["Datetime"] + ts_names
