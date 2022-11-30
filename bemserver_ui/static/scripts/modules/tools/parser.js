@@ -10,7 +10,7 @@ export class Parser {
         return valueInt;
     }
 
-    static parseFloatOrDefault(value, defaultValue = 0, fractionDigits = null) {
+    static parseFloatOrDefault(value, defaultValue = 0.0, fractionDigits = null) {
         if (defaultValue == null) {
             defaultValue = Number.NaN;
         }
