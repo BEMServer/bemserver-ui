@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.1.2 (2022-11-30)
+++++++++++++++++++
+
+Features:
+
+- Update completeness chart (add units)
+
 0.1.1 (2022-11-30)
 ++++++++++++++++++
 
