@@ -1,0 +1,30 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create an event category" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('event_categories.create') }}" method="POST">
+                <fieldset>
+                    <legend class="invisible d-none">Event category information</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" maxlength="250" rows="3"></textarea>
+                    </div>
+                        <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('event_categories.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

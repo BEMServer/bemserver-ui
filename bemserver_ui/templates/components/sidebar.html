@@ -216,7 +216,7 @@
                                         <div class="d-flex justify-content-between align-items-center gap-1">
                                             <a class="nav-link w-100" href="{{ url_for('services.cleanup.list') }}" title="Manage cleanup service"><i class="bi bi-magic"></i> Cleanup</a>
                                         </div>
-                                    </li>                    
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -234,7 +234,13 @@
                                         <div class="d-flex justify-content-between align-items-center gap-1">
                                             <a class="nav-link w-100" href="{{ url_for('event_levels.list') }}" title="Manage event levels"><i class="bi bi-tags"></i> Levels</a>
                                         </div>
-                                    </li>                    
+                                    </li>
+                                    <li class="nav-item">
+                                        <div class="d-flex justify-content-between align-items-center gap-1">
+                                            <a class="nav-link w-100" href="{{ url_for('event_categories.list') }}" title="Manage event categories"><i class="bi bi-tags"></i> Categories</a>
+                                            <a class="nav-link" href="{{ url_for('event_categories.create') }}" title="Add a new event category"><i class="bi bi-plus-circle"></i></a>
+                                        </div>
+                                    </li>
                                 </ul>
                             </div>
                         </div>

@@ -1,0 +1,43 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Event categories" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('event_categories.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event category"><i class="bi bi-plus-circle"></i> New event category</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row justify-content-end mb-3">
+        <div class="col-auto">
+            <small class="text-nowrap text-muted"><app-items-count first-item="1" last-item="{{ event_categories | length }}" total-count="{{ event_categories | length }}"></app-items-count></small>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="list-group">
+                {% for x in event_categories %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-4 py-2" href="{{ url_for('event_categories.edit', id=x.id) }}" title="Edit event category">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-tag"></i>
+                        <h6 class="fw-bold text-break mb-0">{{ x.name }}</h6>
+                    </div>
+                    <span class="fst-italic text-muted">{{ x.description }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}
