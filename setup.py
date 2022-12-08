@@ -48,7 +48,7 @@ setup(
     install_requires=[
         "flask>=2.2.2",
         "python-dotenv>=0.21.0",
-        "bemserver-api-client>=0.2.0,<0.3.0",
+        "bemserver-api-client>=0.3.0,<0.4.0",
     ],
     extras_require=EXTRAS_REQUIRE,
     packages=find_packages(exclude=["tests*"]),
