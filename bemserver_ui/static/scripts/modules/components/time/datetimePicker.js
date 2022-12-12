@@ -13,6 +13,7 @@ export class DatetimePicker extends HTMLDivElement {
     #timeInputFormBindElmt = null;
 
     #isRequired = false;
+    #hasAutofocus = false;
     #dateInputFormBind = null;
     #timeInputFormBind = null;
     #title = null;
@@ -72,6 +73,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#dateInputFormBind = this.getAttribute("date-input-form-bind") || options.dateInputFormBind;
         this.#timeInputFormBind = this.getAttribute("time-input-form-bind") || options.timeInputFormBind;
         this.#isRequired = options?.required == null ? this.hasAttribute("required") : options.required;
+        this.#hasAutofocus = options?.autofocus == null ? this.hasAttribute("autofocus") : options.autofocus;
         this.#title = this.getAttribute("title") || options.title;
         this.#tzName = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
         this.#dateMin = this.getAttribute("min") || options.dateMin;
@@ -185,6 +187,9 @@ export class DatetimePicker extends HTMLDivElement {
         if (this.#isRequired) {
             this.#dateInputElmt.setAttribute("required", true);
         }
+        if (this.#hasAutofocus) {
+            this.#dateInputElmt.setAttribute("autofocus", true);
+        }
         this.appendChild(this.#dateInputElmt);
 
         this.#timeInputElmt = document.createElement("input");
@@ -210,6 +215,6 @@ export class DatetimePicker extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-datetime-picker") == null) {
-    customElements.define("app-datetime-picker", DatetimePicker, { extends: "div" });
+if (window.customElements.get("app-datetime-picker") == null) {
+    window.customElements.define("app-datetime-picker", DatetimePicker, { extends: "div" });
 }
