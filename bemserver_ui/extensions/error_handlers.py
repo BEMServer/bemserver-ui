@@ -96,9 +96,6 @@ def _handle_409(exc):
                 message,
                 exc.errors or {},
             )
-
-        print(exc.errors)
-
         flask.session["_validation_errors"] = exc.errors or {}
         flask.flash(message, "error")
         return flask.redirect(_get_back_location())
@@ -133,8 +130,6 @@ def _handle_422(exc):
         # Special case for sign in page (to clear session, especially auth_data).
         if flask.request.endpoint == "auth.signin":
             flask.session.clear()
-
-        print(exc.errors)
 
         flask.session["_validation_errors"] = exc.errors or {}
         flask.flash(message, "error")
