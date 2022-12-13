@@ -25,6 +25,7 @@ MODULES = (
     timeseries.timeseries_datastates,
     timeseries.timeseries_properties,
     timeseries.timeseries_data,
+    events.events,
     events.event_levels,
     events.event_categories,
 )

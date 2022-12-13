@@ -1,0 +1,126 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Create an event entry" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <form action="{{ url_for('events.create') }}" method="POST">
+                <fieldset>
+                    <legend class="invisible d-none">Event entry information</legend>
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                            <label class="form-label" for="timestamp">Timestamp</label>
+                            <div class="d-flex gap-2">
+                                <div is="app-datetime-picker" id="timestamp" date-input-form-bind="timestamp_date" time-input-form-bind="timestamp_time" date="{{ timestamp_date }}" time="{{ timestamp_time }}" tzname="{{ g.campaign_ctxt.tz_name }}" required autofocus>
+                                    <div is="app-spinner"></div>
+                                </div>
+                                <button class="btn btn-sm btn-link" id="btnEditTimezone" title="Edit timezone"><i class="bi bi-globe"></i></button>
+                            </div>
+                            <input type="hidden" id="timestamp_date" name="timestamp_date" value="{{ timestamp_date }}">
+                            <input type="hidden" id="timestamp_time" name="timestamp_time" value="{{ timestamp_time }}">
+                        </div>
+                        <div class="col-12 col-sm-6 d-none invisible" id="colTimezone">
+                            <label class="form-label" for="timezonePicker">Timezone</label>
+                            <div is="app-timezone-picker" id="timezonePicker" input-form-bind="timezone" tzname="{{ g.campaign_ctxt.tz_name }}">
+                                <div is="app-spinner"></div>
+                            </div>
+                            <input type="hidden" id="timezone" name="timezone" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                            <label class="form-label" for="source">Source</label>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control bg-dark bg-opacity-25" id="source" name="source" value="bemserver-ui" required readonly>
+                                <button class="btn btn-sm btn-link" id="btnEditSource" title="Edit source"><i class="bi bi-pencil"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label" for="campaign_scope">Campaign scope</label>
+                            <select class="form-select" id="campaign_scope" name="campaign_scope" aria-label="Select a campaign scope" required>
+                                {% for x in campaign_scopes %}
+                                <option value="{{ x.id }}">{{ x.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                            <label class="form-label" for="event_level">Level</label>
+                            <select class="form-select" id="event_level" name="event_level" aria-label="Select a level" required>
+                                {% for x in event_levels %}
+                                <option value="{{ x.id }}">{{ x.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="event_category">Category</label>
+                            <select class="form-select" id="event_category" name="event_category" aria-label="Select a category" required>
+                                {% for x in event_categories %}
+                                <option value="{{ x.id }}">{{ x.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                    </div>
+                        <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('events.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let tzPickerElmt = document.getElementById("timezonePicker");
+        let timestampPickerElmt = document.getElementById("timestamp");
+        let inputSourceElmt = document.getElementById("source");
+        let btnEditSourceElmt = document.getElementById("btnEditSource");
+        let colTimezoneElmt = document.getElementById("colTimezone");
+        let btnEditTimezoneElmt = document.getElementById("btnEditTimezone");
+
+        tzPickerElmt.addEventListener("tzChange", (event) => {
+            event.preventDefault();
+
+            timestampPickerElmt.tzName = event.detail.tzName;
+        });
+
+        btnEditSourceElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            inputSourceElmt.classList.remove("bg-dark", "bg-opacity-25");
+            inputSourceElmt.removeAttribute("readonly");
+            inputSourceElmt.select()
+            btnEditSourceElmt.remove();
+        });
+
+        btnEditTimezoneElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            colTimezoneElmt.classList.remove("d-none", "invisible");
+            btnEditTimezoneElmt.remove();
+        });
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

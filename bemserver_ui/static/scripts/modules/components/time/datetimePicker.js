@@ -212,6 +212,15 @@ export class DatetimePicker extends HTMLDivElement {
 
         this.#initEventListeners();
     }
+
+    reset() {
+        this.#date = null;
+        this.#time = null;
+        this.#dateMin = null;
+        this.#dateMax = null;
+        this.#updateDateBounds();
+        this.#updateDateAndTime();
+    }
 }
 
 

@@ -1,0 +1,95 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Events" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="false">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <div class="row g-2 mb-2">
+                                <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
+                                    <span>Between</span>
+                                    <div is="app-datetime-picker" id="timestamp_min" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                </div>
+                                <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
+                                    <span>and</span>
+                                    <div is="app-datetime-picker" id="timestamp_max" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                </div>
+                            </div>
+                            <div id="filtersContainer" class="d-xl-flex d-grid gap-2 mb-2">
+                                <input type="text" class="form-control" id="sourceSearch" placeholder="Source..." aria-label="Source search" aria-describedby="sourceSearch" autofocus>
+                                <a id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap my-auto" role="button" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex align-items-center gap-2">
+                <input type="hidden" name="sort" id="sort" value="-timestamp">
+                <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
+                <input type="radio" class="btn-check" name="sort" id="sort_timestamp_asc" autocomplete="off">
+                <label class="btn btn-sm btn-outline-info" for="sort_timestamp_asc" title="Older to newer"><i class="bi bi-sort-up"></i> Timestamp</label>
+                <input type="radio" class="btn-check" name="sort" id="sort_timestamp_desc" autocomplete="off" checked>
+                <label class="btn btn-sm btn-outline-info" for="sort_timestamp_desc" title="Newer to older"><i class="bi bi-sort-down"></i> Timestamp</label>
+            </div>
+        </div>
+    </div>
+    <nav class="row mb-2" aria-label="Events pagination">
+        <div class="col-auto align-self-center py-1">
+            <div is="app-pagesize-selector" id="pageSize"></div>
+        </div>
+        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+            <small class="text-nowrap text-muted"><app-items-count id="itemsCount"></app-items-count></small>
+            <ul is="app-pagination" id="pagination"></ul>
+        </div>
+    </nav>
+    <div class="row">
+        <div class="col">
+            <div id="eventsContainer" class="accordion">
+                <app-spinner></app-spinner>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { EventListView } from "{{ url_for('static', filename='scripts/modules/views/events/list.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let options = {
+            timezone: {{ g.campaign_ctxt.tz_name | tojson }},
+        };
+
+        let evtListView = new EventListView(options);
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

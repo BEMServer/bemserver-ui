@@ -1,5 +1,5 @@
 {% include "components/campaigns/selector.html" +%}
-<nav id="sidebarMenu" class="col-md-3 col-xl-2 d-md-block bg-light app-sidebar border-end border-2 collapse">
+<nav id="sidebarMenu" class="col-md-3 col-xl-2 d-md-block bg-light app-sidebar border-end border-2 collapse pb-4">
     <div class="position-sticky">
         <div class="d-flex flex-column gap-3">
             <ul class="nav nav-pills flex-column">
@@ -60,6 +60,12 @@
                             </ul>
                         </div>
                         {% endif %}
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div class="d-flex justify-content-between align-items-center gap-1">
+                        <a class="nav-link w-100" href="{{ url_for('events.list') }}" title="Manage events"><i class="bi bi-calendar2-event"></i> Events</a>
+                        <a class="nav-link" href="{{ url_for('events.create') }}" title="Add a new event entry"><i class="bi bi-plus-circle"></i></a>
                     </div>
                 </li>
             </ul>
