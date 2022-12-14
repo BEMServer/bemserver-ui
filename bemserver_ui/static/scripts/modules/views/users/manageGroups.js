@@ -34,9 +34,10 @@ export class UserManageGroupsView {
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
-        this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpTitle: `Not yet a member of any group.`, helpTexts: [`Click on <mark>${this.#userGroupAvailableBtnElmt.innerText}</mark> button to get available group list.`, `Then <span class="fw-bold">drag and drop</span> a group into this zone to make the user a member.`] });
+        this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpNoItemsText: `Not yet a member of any group.`, helpBackgroundText: `Drag and drop groups here` });
         this.#dropZoneElmt.id = `dropZone-${this.#user.id}`;
         this.#userGroupContainerElmt.appendChild(this.#dropZoneElmt);
+        this.#dropZoneElmt.hideHelp();
 
         this.#initEventListeners();
     }
@@ -68,6 +69,14 @@ export class UserManageGroupsView {
                 iconElmt.classList.add("bi", "bi-arrow-bar-right");
                 this.#userGroupAvailableBtnElmt.innerHTML = "";
                 this.#userGroupAvailableBtnElmt.appendChild(iconElmt);
+
+                this.#dropZoneElmt.showHelp();
+            }
+        });
+
+        this.#userGroupAvailableCollapsePanelElmt.addEventListener("hide.bs.collapse", (event) => {
+            if (event.target == this.#userGroupAvailableCollapsePanelElmt) {
+                this.#dropZoneElmt.hideHelp();
             }
         });
 
@@ -159,7 +168,7 @@ export class UserManageGroupsView {
         this.#userGroupAvailableCountElmt.innerText = userGroupAvailableCount.toString();
 
         if (this.#dropZoneElmt.count <= 0) {
-            this.#dropZoneElmt.setHelp();
+            this.#dropZoneElmt.showNoItems();
         }
         let noUserGroupAvailableInfoElmt = this.#userGroupAvailableContainerElmt.querySelector(":scope > span");
         if (noUserGroupAvailableInfoElmt == null) {

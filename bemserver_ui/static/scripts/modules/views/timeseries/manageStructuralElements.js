@@ -117,7 +117,9 @@ export class TimeseriesManageStructuralElementsView {
                 dropZoneElmt.id = `dropZone-${tsId}`;
                 dropZoneElmt.targetId = tsId;
                 dropZoneElmt.targetTitle = tsTitle;
-                event.target.replaceBodyContainerElement(dropZoneElmt);
+
+                let targetBodyElmt = event.target.querySelector(`div[class="accordion-body"]`);
+                targetBodyElmt.appendChild(dropZoneElmt);
 
                 dropZoneElmt.setLoading();
 
@@ -161,9 +163,9 @@ export class TimeseriesManageStructuralElementsView {
                             }
                         }
 
-                        if (totalLinks <= 0) {
-                            dropZoneElmt.setHelp();
-                        }
+                        // if (totalLinks <= 0) {
+                        //     dropZoneElmt.setHelp();
+                        // }
                         event.target.isLoaded = true;
                     },
                     (error) => {
@@ -251,7 +253,7 @@ export class TimeseriesManageStructuralElementsView {
         dropedItemElmt.style.maxWidth = "350px";
 
         let dropItemMainContainerElmt = document.createElement("div");
-        dropItemMainContainerElmt.classList.add("d-flex", "flex-wrap", "align-items-center", "gap-1", "border", "border-secondary", "rounded-start", "py-1", "px-2");
+        dropItemMainContainerElmt.classList.add("d-flex", "flex-wrap", "align-items-center", "gap-1", "border", "border-1", "border-secondary", "rounded-start", "py-1", "px-2");
         dropedItemElmt.appendChild(dropItemMainContainerElmt);
 
         let dropedItemHeaderElmt = document.createElement("div");

@@ -162,3 +162,11 @@ body,
     background-color: var(--bs-table-hover-bg) !important;
     color: var(--bs-table-hover-color) !important;
 }
+
+.app-border-dashed {
+    border-style: dashed !important;
+}
+
+.app-border-dotted {
+    border-style: dotted !important;
+}
