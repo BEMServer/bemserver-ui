@@ -5,6 +5,13 @@
     {% set tab = "general" %}
 {% endif %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/dragndrop.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
@@ -25,7 +32,7 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span id="userGroupCount" class="badge bg-secondary">{{ user_groups|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
@@ -48,28 +55,55 @@
                 </div>
                 <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
                     <div class="d-lg-flex flex-nowrap d-grid justify-content-lg-between gap-3">
-                        <div class="order-1 order-lg-0">
-                            {% if user_groups|length > 0 %}
-                            <div class="d-flex flex-wrap mt-2 gap-2">
-                                {% for user_group in user_groups %}
-                                {% filter indent(width=16) %}
-                                {% include "components/user_groups/group_for_campaign_scope.html" %}
-                                {% endfilter %}
-                                {% endfor %}
-                            </div>
-                            {% else %}
-                            <span class="fst-italic text-muted">none</span>
-                            {% endif %}
-                        </div>
+                        <div class="order-1 order-lg-0 w-100" id="userGroupContainer"></div>
                         {% if signed_user.is_admin %}
                         <div class="order-0 order-lg-1 text-end">
-                            <a href="{{ url_for('campaign_scopes.manage_groups', id=campaign_scope.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Manage user groups"><i class="bi bi-person-rolodex"></i> Manage user groups</a>
+                            <button id="userGroupAvailableBtn" class="btn btn-sm btn-outline-secondary text-nowrap" type="button" data-bs-toggle="collapse" data-bs-target="#userGroupAvailableCollapsePanel" aria-expanded="false" aria-controls="userGroupAvailableCollapsePanel"><i class="bi bi-arrow-bar-left"></i> Manage groups</button>
                         </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+        <div class="w-100 d-lg-none d-block"></div>
+        <div class="col-auto mt-lg-0 mt-3 d-none" id="userGroupAvailableColumn">
+            <div class="collapse collapse-horizontal app-panel-collapse" id="userGroupAvailableCollapsePanel">
+                <div class="app-panel-collapse-body">
+                    <h5>
+                        Available user groups
+                        <span class="badge bg-secondary" id="userGroupAvailableCount">0</span>
+                        <sup><a id="userGroupAvailableHelpLnk" class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#userGroupAvailableHelpCollapsePanel" aria-expanded="false" aria-controls="userGroupAvailableHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
+                    </h5>
+                    <div class="collapse mb-3" id="userGroupAvailableHelpCollapsePanel">
+                        <div class="alert alert-info pb-0" role="alert">
+                            <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                            <p class="ms-3"><span class="fw-bold fst-italic">Drag and drop</span> in the <span class="border border-4 rounded-3 bg-white app-border-dashed text-black text-opacity-25 p-1">appropriate area</span> the groups allowed to access this campaign scope.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 p-2" id="userGroupAvailableContainer"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { CampaignScopeManageGroupsView } from "{{ url_for('static', filename='scripts/modules/views/campaignScopes/manageGroups.js') }}";
+
+
+    const campaignScope = {{ campaign_scope | tojson }};
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let campaignScopeManageGroupsView = new CampaignScopeManageGroupsView(campaignScope);
+        campaignScopeManageGroupsView.refresh();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
