@@ -3,12 +3,17 @@ import zoneinfo
 import datetime as dt
 import flask
 
+from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint("events", __name__, url_prefix="/events")
+
+
+def _get_event_levels():
+    return [{"id": x.name, "name": x.value} for x in EventLevel]
 
 
 @blp.route("/")
@@ -27,7 +32,7 @@ def create():
             "source": flask.request.form["source"],
             "campaign_scope_id": flask.request.form["campaign_scope"],
             "category_id": flask.request.form["event_category"],
-            "level_id": flask.request.form["event_level"],
+            "level": flask.request.form["event_level"],
             "description": flask.request.form["description"],
         }
         # Datetime received from the HTML POST form is not localized and tz-aware.
@@ -50,7 +55,6 @@ def create():
         campaign_id=flask.g.campaign_ctxt.id
     )
     event_categories_resp = flask.g.api_client.event_categories.getall()
-    event_levels_resp = flask.g.api_client.event_levels.getall()
 
     tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
     timestamp = dt.datetime.now(tz=tz)
@@ -61,7 +65,7 @@ def create():
         timestamp_time=timestamp.time().strftime("%H:%M"),
         campaign_scopes=campaign_scopes_resp.data,
         event_categories=event_categories_resp.data,
-        event_levels=event_levels_resp.data,
+        event_levels=_get_event_levels(),
     )
 
 
@@ -73,7 +77,7 @@ def edit(id):
         payload = {
             "source": flask.request.form["source"],
             "category_id": flask.request.form["event_category"],
-            "level_id": flask.request.form["event_level"],
+            "level": flask.request.form["event_level"],
             "description": flask.request.form["description"],
         }
         flask.g.api_client.events.update(
@@ -86,7 +90,6 @@ def edit(id):
         campaign_id=flask.g.campaign_ctxt.id
     )
     event_categories_resp = flask.g.api_client.event_categories.getall()
-    event_levels_resp = flask.g.api_client.event_levels.getall()
 
     event_resp = flask.g.api_client.events.getone(id)
     event_data = event_resp.data
@@ -109,7 +112,7 @@ def edit(id):
         etag=event_resp.etag,
         campaign_scopes=campaign_scopes_resp.data,
         event_categories=event_categories_resp.data,
-        event_levels=event_levels_resp.data,
+        event_levels=_get_event_levels(),
     )
 
 

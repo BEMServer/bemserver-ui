@@ -2,6 +2,7 @@
 import zoneinfo
 import flask
 
+from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -28,7 +29,7 @@ def retrieve_list():
     if "campaign_scope" in flask.request.args:
         filters["campaign_scope_id"] = flask.request.args["campaign_scope"]
     if "level" in flask.request.args:
-        filters["level_id"] = flask.request.args["level"]
+        filters["level"] = flask.request.args["level"]
     if "category" in flask.request.args:
         filters["category_id"] = flask.request.args["category"]
     # Dates/times received are not datetime instances nor localized and tz-aware.
@@ -66,8 +67,8 @@ def retrieve_list():
 @blp.route("/levels")
 @auth.signin_required
 def retrieve_levels():
-    event_levels_resp = flask.g.api_client.event_levels.getall()
-    return flask.jsonify(event_levels_resp.data)
+    event_levels = [{"id": x.name, "name": x.value} for x in EventLevel]
+    return flask.jsonify(event_levels)
 
 
 @blp.route("/categories")

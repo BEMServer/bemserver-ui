@@ -44,7 +44,7 @@
                         <label class="form-label" for="event_level">Level</label>
                         <select form="editForm" class="form-select" id="event_level" name="event_level" aria-label="Select a level" required>
                             {% for x in event_levels %}
-                            <option value="{{ x.id }}"{% if x.id == event.level_id %} selected{% endif %}>{{ x.name }}</option>
+                            <option value="{{ x.id }}"{% if x.id == event.level %} selected{% endif %}>{{ x.name }}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -18,6 +18,10 @@ export class EventListView {
             icon: [],
             badge: ["badge", "text-bg-dark", "p-2"],
         },
+        "DEBUG": {
+            icon: [],
+            badge: ["badge", "text-bg-dark", "bg-opacity-50", "p-2"],
+        },
         "INFO": {
             icon: ["bi", "bi-info-square", "me-1"],
             badge: ["badge", "text-bg-success", "bg-opacity-75", "p-2"],
@@ -306,7 +310,7 @@ export class EventListView {
         eventHeaderCol2Elmt.classList.add("col", "me-auto");
         eventHeaderContainerElmt.appendChild(eventHeaderCol2Elmt);
 
-        let levelData = this.#getLevelData(eventData.level_id);
+        let levelData = this.#getLevelData(eventData.level);
         if (levelData != null) {
             let levelStyle = this.#levelStyles[levelData.name];
             if (levelStyle == null) {
