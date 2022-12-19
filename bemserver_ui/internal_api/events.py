@@ -24,8 +24,8 @@ def retrieve_list():
         filters["page_size"] = flask.request.args["page_size"]
     if "page" in flask.request.args:
         filters["page"] = flask.request.args["page"]
-    if "source" in flask.request.args:
-        filters["source"] = flask.request.args["source"]
+    if "in_source" in flask.request.args:
+        filters["in_source"] = flask.request.args["in_source"]
     if "campaign_scope" in flask.request.args:
         filters["campaign_scope_id"] = flask.request.args["campaign_scope"]
     if "level" in flask.request.args:

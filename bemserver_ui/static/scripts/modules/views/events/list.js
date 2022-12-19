@@ -185,6 +185,7 @@ export class EventListView {
         this.#sourceSearchFilterElmt.addEventListener("input", (event) => {
             event.preventDefault();
 
+            this.#updateSourceSearch();
             this.refresh();
         });
 
@@ -199,6 +200,7 @@ export class EventListView {
             }
             if (this.#sourceSearchFilterElmt.value != "") {
                 this.#sourceSearchFilterElmt.value = "";
+                this.#updateSourceSearch();
                 hasFilterChanged = true;
             }
             for (let searchFilterElmt of Object.values(this.#searchSelectFilters).map((filterOpts) => { return filterOpts["htmlElement"]; })) {
@@ -240,6 +242,15 @@ export class EventListView {
 
             this.refresh();
         });
+    }
+
+    #updateSourceSearch() {
+        if (this.#sourceSearchFilterElmt.value == "") {
+            this.#sourceSearchFilterElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+        }
+        else if (!this.#sourceSearchFilterElmt.classList.contains("border-info")) {
+            this.#sourceSearchFilterElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+        }
     }
 
     #getCampaignScopeData(campaignScopeId) {
@@ -592,7 +603,7 @@ export class EventListView {
             searchOptions["time_max"] = this.#timestampMaxSearchFilterElmt.time;
         }
         if (this.#sourceSearchFilterElmt.value != "") {
-            searchOptions["source"] = this.#sourceSearchFilterElmt.value;
+            searchOptions["in_source"] = this.#sourceSearchFilterElmt.value;
         }
         for (let [searchOptName, searchOpts] of Object.entries(this.#searchSelectFilters)) {
             if (searchOpts["htmlElement"].value != "None") {
