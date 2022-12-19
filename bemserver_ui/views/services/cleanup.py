@@ -109,12 +109,14 @@ def _get_cleanup_data_for_campaign(campaign_id):
     )
 
 
-def _manage(cleanup_campaign, cleanup_campaign_etag):
+def _manage(cleanup_campaign, cleanup_campaign_etag, sort):
+    sort = sort
+
     cleanup_campaign = _ensure_cleanup_campaign_data(cleanup_campaign)
 
     cleanup_ts_resp = flask.g.api_client.st_cleanup_by_timeseries.get_full(
         campaign_id=cleanup_campaign["campaign_id"],
-        sort="-last_timestamp,+timeseries_name",
+        sort=sort,
     )
 
     return flask.render_template(
@@ -122,30 +124,46 @@ def _manage(cleanup_campaign, cleanup_campaign_etag):
         cleanup_campaign=cleanup_campaign,
         etag=cleanup_campaign_etag,
         cleanup_timeseries=cleanup_ts_resp.data,
+        sort=sort
     )
 
 
-@blp.route("/<int:id>/state")
+@blp.route("/<int:id>/state", methods=["GET", "POST"])
 @auth.signin_required
 def cleanup_state(id):
+    sort = "+timeseries_name"
+
+    if flask.request.method == "POST":
+        sort = flask.request.form["sort"]
+
     cleanup_data, cleanup_etag = _get_cleanup_data(id)
-    return _manage(cleanup_data, cleanup_etag)
+    return _manage(cleanup_data, cleanup_etag, sort)
 
 
-@blp.route("/state")
+@blp.route("/state", methods=["GET", "POST"])
 @auth.signin_required
 @ensure_campaign_context
 def state():
+    sort = "+timeseries_name"
+
+    if flask.request.method == "POST":
+        sort = flask.request.form["sort"]
+
     campaign_id = flask.g.campaign_ctxt.id
     cleanup_data, cleanup_etag = _get_cleanup_data_for_campaign(campaign_id)
-    return _manage(cleanup_data, cleanup_etag)
+    return _manage(cleanup_data, cleanup_etag, sort)
 
 
-@blp.route("/campaign/<int:id>/state")
+@blp.route("/campaign/<int:id>/state", methods=["GET", "POST"])
 @auth.signin_required
 def campaign_state(id):
+    sort = "+timeseries_name"
+
+    if flask.request.method == "POST":
+        sort = flask.request.form["sort"]#
+
     if flask.g.campaign_ctxt.has_campaign and flask.g.campaign_ctxt.id == id:
         return flask.redirect(flask.url_for("services.cleanup.state"))
 
     cleanup_data, cleanup_etag = _get_cleanup_data_for_campaign(id)
-    return _manage(cleanup_data, cleanup_etag)
+    return _manage(cleanup_data, cleanup_etag, sort)
