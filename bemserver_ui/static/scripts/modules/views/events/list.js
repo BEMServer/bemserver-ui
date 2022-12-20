@@ -144,7 +144,7 @@ export class EventListView {
                         if (searchSelectFilterOpts["defaultValue"] == row.id.toString()) {
                             selectedOptionIndex = filterIndex + 1;
                         }
-                        return {value: row.id.toString(), text: `= ${row.name}`};
+                        return {value: row.id.toString(), text: `${searchSelectFilterKey == "level" ? "= " : ""}${row.name}`};
                     });
                     selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
                     if (searchSelectFilterKey == "level") {
@@ -159,6 +159,7 @@ export class EventListView {
                     searchSelectFilterElmt.addEventListener("change", (event) => {
                         event.preventDefault();
 
+                        this.#paginationElmt.page = 1;
                         this.refresh();
                     });
                 }
@@ -177,6 +178,7 @@ export class EventListView {
             event.preventDefault();
 
             this.#timestampMaxSearchFilterElmt.dateMin = this.#timestampMinSearchFilterElmt.date;
+            this.#paginationElmt.page = 1;
             this.refresh();
         });
 
@@ -184,6 +186,7 @@ export class EventListView {
             event.preventDefault();
 
             this.#timestampMinSearchFilterElmt.dateMax = this.#timestampMaxSearchFilterElmt.date;
+            this.#paginationElmt.page = 1;
             this.refresh();
         });
 
@@ -191,6 +194,7 @@ export class EventListView {
             event.preventDefault();
 
             this.#updateSourceSearch();
+            this.#paginationElmt.page = 1;
             this.refresh();
         });
 
