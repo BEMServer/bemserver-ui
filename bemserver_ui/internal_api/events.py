@@ -19,6 +19,7 @@ def retrieve_list():
     if "sort" in flask.request.args:
         sort = flask.request.args["sort"]
 
+    # TODO: add campaign_id filter when API is ready
     filters = {}
     if "page_size" in flask.request.args:
         filters["page_size"] = flask.request.args["page_size"]
@@ -30,6 +31,8 @@ def retrieve_list():
         filters["campaign_scope_id"] = flask.request.args["campaign_scope"]
     if "level" in flask.request.args:
         filters["level"] = flask.request.args["level"]
+    if "level_min" in flask.request.args:
+        filters["level_min"] = flask.request.args["level_min"]
     if "category" in flask.request.args:
         filters["category_id"] = flask.request.args["category"]
     # Dates/times received are not datetime instances nor localized and tz-aware.

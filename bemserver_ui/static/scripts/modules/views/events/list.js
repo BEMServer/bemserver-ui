@@ -103,12 +103,6 @@ export class EventListView {
 
     #initFilters() {
         this.#searchSelectFilters = {
-            "campaign_scope": {
-                "label": "campaign scopes",
-                "fetchUrl": flaskES6.urlFor(`api.campaign_scopes.retrieve_list`),
-                "htmlElement": new FilterSelect(),
-                "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
-            },
             "level": {
                 "label": "levels",
                 "fetchUrl": flaskES6.urlFor(`api.events.retrieve_levels`),
@@ -120,6 +114,12 @@ export class EventListView {
                 "fetchUrl": flaskES6.urlFor(`api.events.retrieve_categories`),
                 "htmlElement": new FilterSelect(),
                 "defaultValue": (this.#defaultFilters["category"] || null)?.toString(),
+            },
+            "campaign_scope": {
+                "label": "campaign scopes",
+                "fetchUrl": flaskES6.urlFor(`api.campaign_scopes.retrieve_list`),
+                "htmlElement": new FilterSelect(),
+                "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
             },
         };
 
@@ -144,9 +144,14 @@ export class EventListView {
                         if (searchSelectFilterOpts["defaultValue"] == row.id.toString()) {
                             selectedOptionIndex = filterIndex + 1;
                         }
-                        return {value: row.id.toString(), text: row.name};
+                        return {value: row.id.toString(), text: `= ${row.name}`};
                     });
                     selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
+                    if (searchSelectFilterKey == "level") {
+                        for (let row of filterData) {
+                            selectOptions.push({value: `${row.id.toString()}_min`, text: `>= ${row.name}`});
+                        }
+                    }
 
                     let searchSelectFilterElmt = searchSelectFilterOpts["htmlElement"];
                     this.#filtersContainerElmt.insertBefore(searchSelectFilterElmt, this.#btnRemoveFiltersElmt);
@@ -607,7 +612,12 @@ export class EventListView {
         }
         for (let [searchOptName, searchOpts] of Object.entries(this.#searchSelectFilters)) {
             if (searchOpts["htmlElement"].value != "None") {
-                searchOptions[searchOptName] = searchOpts["htmlElement"].value;
+                let searchOptValue = searchOpts["htmlElement"].value;
+                if (searchOptValue.endsWith("_min")) {
+                    searchOptName = `${searchOptName}_min`;
+                    searchOptValue = searchOptValue.replace("_min", "");
+                }
+                searchOptions[searchOptName] = searchOptValue;
             }
         }
 
