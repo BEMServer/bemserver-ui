@@ -110,8 +110,6 @@ def _get_cleanup_data_for_campaign(campaign_id):
 
 
 def _manage(cleanup_campaign, cleanup_campaign_etag, sort):
-    sort = sort
-
     cleanup_campaign = _ensure_cleanup_campaign_data(cleanup_campaign)
 
     cleanup_ts_resp = flask.g.api_client.st_cleanup_by_timeseries.get_full(
@@ -124,7 +122,7 @@ def _manage(cleanup_campaign, cleanup_campaign_etag, sort):
         cleanup_campaign=cleanup_campaign,
         etag=cleanup_campaign_etag,
         cleanup_timeseries=cleanup_ts_resp.data,
-        sort=sort
+        sort=sort,
     )
 
 
@@ -160,7 +158,7 @@ def campaign_state(id):
     sort = "+timeseries_name"
 
     if flask.request.method == "POST":
-        sort = flask.request.form["sort"]#
+        sort = flask.request.form["sort"]
 
     if flask.g.campaign_ctxt.has_campaign and flask.g.campaign_ctxt.id == id:
         return flask.redirect(flask.url_for("services.cleanup.state"))

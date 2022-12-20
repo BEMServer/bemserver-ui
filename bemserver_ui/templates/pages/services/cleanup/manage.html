@@ -16,10 +16,10 @@
         <div class="col">
             <h5>Service state</h5>
             {% if signed_user.is_admin %}
-            <input type="radio" class="btn-check" name="svc_state" id="svc-state-on" autocomplete="off"{% if cleanup_campaign.is_enabled %} checked{% endif %}>
-            <label class="btn btn-outline-success" for="svc-state-on">ON</label>
-            <input type="radio" class="btn-check" name="svc_state" id="svc-state-off" autocomplete="off"{% if not cleanup_campaign.is_enabled %} checked{% endif %}>
-            <label class="btn btn-outline-danger" for="svc-state-off">OFF</label>
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_on" autocomplete="off"{% if cleanup_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-success" for="svc_state_on">ON</label>
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_off" autocomplete="off"{% if not cleanup_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-danger" for="svc_state_off">OFF</label>
             <input type="hidden" name="cleanup_id" id="cleanup_id"{% if cleanup_campaign.id is not none %} value="{{ cleanup_campaign.id }}"{% endif %}>
             <input type="hidden" name="campaign_id" id="campaign_id"{% if cleanup_campaign.campaign_id is not none %} value="{{ cleanup_campaign.campaign_id }}"{% endif %}>
             <input type="hidden" name="etag" id="etag" value="{{ etag }}">
@@ -32,31 +32,31 @@
             {% endif %}
         </div>
     </div>
+    <div class="row mb-3">
+        <div class="col"> 
+            <div class="d-flex justify-content-between align-items-center">
+                <form id="formFiltersElmt" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                    <input type="hidden" name="sort" id="sort" value="{{ sort }}">
+                    <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-asc" autocomplete="off" {% if sort == "+timeseries_name" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort-timeseries_name-asc" title="Name alphabetical order"><i class="bi bi-sort-alpha-down"></i> Name</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-desc" autocomplete="off" {% if sort == "-timeseries_name" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort-timeseries_name-desc" title="Name reverse alphabetical order"><i class="bi bi-sort-alpha-up"></i> Name</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort-last_timestamp-asc" autocomplete="off"{% if sort == "+last_timestamp" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort-last_timestamp-asc" title="Timestamp date order"><i class="bi bi-sort-numeric-down"></i> Timestamp</label>
+                    <input type="radio" class="btn-check" name="sort" id="sort-last_timestamp-desc" autocomplete="off"{% if sort == "-last_timestamp" %} checked{% endif %}>
+                    <label class="btn btn-sm btn-outline-info" for="sort-last_timestamp-desc" title="Timestamp reverse date order"><i class="bi bi-sort-numeric-up"></i> Timestamp</label>
+                </form>
+                <small class="text-nowrap text-muted">
+                    <app-items-count first-item="1" last-item="{{ cleanup_timeseries | length }}" total-count="{{ cleanup_timeseries | length }}"></app-items-count>
+                </small>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top">
-                    <div class="row mb-3">
-                        <div class="col">   
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center gap-2">
-                                    <form id="formFiltersElmt" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                        <input type="hidden" name="sort" id="sort" value="{{ sort }}">
-                                        <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
-                                        <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-asc" autocomplete="off" {% if sort == "+timeseries_name" %} checked{% endif %}>
-                                        <label class="btn btn-sm btn-outline-info" for="sort-timeseries_name-asc" title="Name alphabetical order"><i class="bi bi-sort-alpha-down"></i> Name</label>
-                                        <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-desc" autocomplete="off" {% if sort == "-timeseries_name" %} checked{% endif %}>
-                                        <label class="btn btn-sm btn-outline-info" for="sort-timeseries_name-desc" title="Name reverse alphabetical order"><i class="bi bi-sort-alpha-up"></i> Name</label>
-                                        <input type="radio" class="btn-check" name="sort" id="sort-last_timestamp-asc" autocomplete="off"{% if sort == "+last_timestamp" %} checked{% endif %}>
-                                        <label class="btn btn-sm btn-outline-info" for="sort-last_timestamp-asc" title="Timestamp date order"><i class="bi bi-sort-numeric-down"></i> Timestamp</label>
-                                        <input type="radio" class="btn-check" name="sort" id="sort-last_timestamp-desc" autocomplete="off"{% if sort == "-last_timestamp" %} checked{% endif %}>
-                                        <label class="btn btn-sm btn-outline-info" for="sort-last_timestamp-desc" title="Timestamp reverse date order"><i class="bi bi-sort-numeric-up"></i> Timestamp</label>
-                                    </form>
-                                </div>
-                                <small class="text-nowrap text-muted"><app-items-count first-item="1" last-item="{{ cleanup_timeseries | length }}" total-count="{{ cleanup_timeseries | length }}"></app-items-count></small>
-                            </div>
-                        </div>
-                    </div>
                     <thead>
                         <tr>
                             <th scope="col" colspan="2">Timeseries</th>

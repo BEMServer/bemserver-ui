@@ -4,7 +4,7 @@ import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import "../../components/itemsCount.js";
 
 
-class ServiceCleanupManageView {
+class ServiceCleanuManageView {
 
     #internalAPIRequester = null;
     #tsUpdateStateReqID = null;
@@ -32,8 +32,8 @@ class ServiceCleanupManageView {
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
 
-        this.#stateOnRadioElmt = document.getElementById("svc-state-on");
-        this.#stateOffRadioElmt = document.getElementById("svc-state-off");
+        this.#stateOnRadioElmt = document.getElementById("svc_state_on");
+        this.#stateOffRadioElmt = document.getElementById("svc_state_off");
         this.#cleanupIDInputElmt = document.getElementById("cleanup_id");
         this.#campaignIDInputElmt = document.getElementById("campaign_id");
         this.#etagInputElmt = document.getElementById("etag");
@@ -64,7 +64,6 @@ class ServiceCleanupManageView {
                     this.#sortInputElmt.value = newSortValue;
                     this.#formFiltersElmt.submit();
                 }
-                console.log("Sort Value : ",newSortValue);
             })         
         };
     }
@@ -114,14 +113,11 @@ class ServiceCleanupManageView {
             );
         }
     }
-
-    refresh() {
-    }
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    let svcCleanupManageView = new ServiceCleanupManageView();
+    let svcCleanupManageView = new ServiceCleanuManageView();
 
 });
