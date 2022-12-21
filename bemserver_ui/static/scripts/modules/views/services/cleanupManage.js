@@ -1,6 +1,7 @@
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
+import "../../components/itemsCount.js";
 
 
 class ServiceCleanuManageView {
@@ -15,6 +16,10 @@ class ServiceCleanuManageView {
     #cleanupIDInputElmt = null;
     #campaignIDInputElmt = null;
     #etagInputElmt = null;
+    
+    #formFiltersElmt = null;
+    #sortInputElmt = null;
+    #sortRadioElmts = null;
 
     constructor() {
         this.#cacheDOM();
@@ -23,7 +28,7 @@ class ServiceCleanuManageView {
 
         this.#initEventListeners();
     }
-
+    
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
 
@@ -32,6 +37,10 @@ class ServiceCleanuManageView {
         this.#cleanupIDInputElmt = document.getElementById("cleanup_id");
         this.#campaignIDInputElmt = document.getElementById("campaign_id");
         this.#etagInputElmt = document.getElementById("etag");
+
+        this.#formFiltersElmt = document.getElementById("formFiltersElmt");
+        this.#sortInputElmt = document.getElementById("sort");
+        this.#sortRadioElmts = [].slice.call(document.querySelectorAll(`input[type="radio"][id^="sort-"]`));
     }
 
     #initEventListeners() {
@@ -46,6 +55,17 @@ class ServiceCleanuManageView {
                 this.#updateServiceState(this.#stateOnRadioElmt.checked);
             }
         });
+        for (let sortRadioElmt of this.#sortRadioElmts) {
+            sortRadioElmt.addEventListener("change", (event) => {
+                event.preventDefault();
+                let sortData = sortRadioElmt.id.split("-");
+                let newSortValue = `${sortData[2].toLowerCase() == "asc" ? "+" : "-"}${sortData[1].toLowerCase()}`;
+                if (this.#sortInputElmt.value != newSortValue) {
+                    this.#sortInputElmt.value = newSortValue;
+                    this.#formFiltersElmt.submit();
+                }
+            })         
+        };
     }
 
     #updateServiceState(isEnabled) {
