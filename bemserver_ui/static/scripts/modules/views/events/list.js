@@ -7,10 +7,12 @@ import "../../components/pagination.js";
 import "../../components/time/datetimePicker.js";
 import { FilterSelect } from "../../components/filterSelect.js";
 import { TimeDisplay } from "../../tools/time.js";
+import { Parser } from "../../tools/parser.js";
 
 
 export class EventListView {
 
+    #structuralElementTypes = []
     #tzName = "UTC";
     #defaultFilters = {};
     #levelStyles = {
@@ -19,7 +21,7 @@ export class EventListView {
             badge: ["badge", "text-bg-dark", "p-2"],
         },
         "DEBUG": {
-            icon: [],
+            icon: ["bi", "bi-bug", "me-1"],
             badge: ["badge", "text-bg-dark", "bg-opacity-50", "p-2"],
         },
         "INFO": {
@@ -43,7 +45,7 @@ export class EventListView {
     #internalAPIRequester = null;
     #filterReqIDs = {};
     #searchReqID = null;
-    #loadTsReqIDs = {};
+    #loadEventInfoTabReqIDs = {};
 
     #messagesElmt = null;
 
@@ -62,8 +64,27 @@ export class EventListView {
     #pageSizeElmt = null;
     #paginationElmt = null;
 
+    #eventsTableElmt = null;
+    #eventsHeaderElmt = null;
     #eventsContainerElmt = null;
-    #tsTabsLoaded = [];
+    #eventInfoModalElmt = null;
+
+    #eventEditLinkElmt = null;
+    #eventInfoContainerElmt = null;
+    #eventInfoTabElmts = {};
+    #eventInfoTabContentElmts = {};
+    #eventInfoCountElmts = {};
+    #eventInfoTabSpinnerElmt = null;
+    #eventInfoTabsElmt = null;
+    #eventInfoTabContentsElmt = null;
+
+    #currentEventElmt = null;
+    #eventInfoRowIndexElmt = null;
+    #eventInfoRowCountElmt = null;
+    #eventInfoNavFirstElmt = null;
+    #eventInfoNavPreviousElmt = null;
+    #eventInfoNavNextElmt = null;
+    #eventInfoNavLastElmt = null;
 
     constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -76,6 +97,7 @@ export class EventListView {
     }
 
     #loadOptions(options = {}) {
+        this.#structuralElementTypes = options.structuralElementTypes || [];
         this.#tzName = options.timezone || "UTC";
         for (let [optFilterName, optFilterValue] of Object.entries(options.filters || {})) {
             this.#defaultFilters[optFilterName] = optFilterValue;
@@ -98,7 +120,31 @@ export class EventListView {
         this.#pageSizeElmt = document.getElementById("pageSize");
         this.#paginationElmt = document.getElementById("pagination");
 
+        this.#eventsTableElmt = document.getElementById("eventsTable");
+        this.#eventsHeaderElmt = document.getElementById("eventsHeader");
         this.#eventsContainerElmt = document.getElementById("eventsContainer");
+        this.#eventInfoModalElmt = document.getElementById("eventInfoModal");
+
+        this.#eventEditLinkElmt = document.getElementById("eventEditLink");
+        this.#eventInfoContainerElmt = document.getElementById("eventInfoContainer");
+        this.#eventInfoTabElmts["ts"] = document.getElementById("ts-tab");
+        this.#eventInfoTabContentElmts["ts"] = document.getElementById("ts-tabcontent");
+        this.#eventInfoCountElmts["ts"] = document.getElementById("tsCount");
+        for (let structuralElment of this.#structuralElementTypes) {
+            this.#eventInfoTabElmts[structuralElment] = document.getElementById(`${structuralElment}s-tab`);
+            this.#eventInfoTabContentElmts[structuralElment] = document.getElementById(`${structuralElment}s-tabcontent`);
+            this.#eventInfoCountElmts[structuralElment] = document.getElementById(`${structuralElment}sCount`);
+        }
+        this.#eventInfoTabSpinnerElmt = document.getElementById("eventInfoTabSpinner");
+        this.#eventInfoTabsElmt = document.getElementById("eventInfoTabs");
+        this.#eventInfoTabContentsElmt = document.getElementById("eventInfoTabContents");
+
+        this.#eventInfoRowIndexElmt = document.getElementById("eventInfoRowIndex");
+        this.#eventInfoRowCountElmt = document.getElementById("eventInfoRowCount");
+        this.#eventInfoNavFirstElmt = document.getElementById("eventInfoNavFirst");
+        this.#eventInfoNavPreviousElmt = document.getElementById("eventInfoNavPrevious");
+        this.#eventInfoNavNextElmt = document.getElementById("eventInfoNavNext");
+        this.#eventInfoNavLastElmt = document.getElementById("eventInfoNavLast");
     }
 
     #initFilters() {
@@ -251,6 +297,70 @@ export class EventListView {
 
             this.refresh();
         });
+
+        this.#eventInfoModalElmt.addEventListener("show.bs.modal", (event) => {
+            // event.relatedTarget is the HTML element that triggered the modal
+            this.#currentEventElmt = event.relatedTarget;
+            this.#loadEventInfo();
+        });
+
+        this.#eventInfoModalElmt.addEventListener("hide.bs.modal", (event) => {
+            this.#currentEventElmt.classList.remove("app-table-tr-selected");
+            this.#currentEventElmt = null;
+        });
+
+        this.#eventInfoNavFirstElmt.addEventListener("click", (event) => {
+            if (this.#currentEventElmt != null) {
+                this.#currentEventElmt.classList.remove("app-table-tr-selected");
+            }
+
+            // Get event at index=0 in table.
+            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="0"]`);
+            this.#loadEventInfo();
+        });
+
+        this.#eventInfoNavPreviousElmt.addEventListener("click", (event) => {
+            let curIndex = 0;
+            if (this.#currentEventElmt != null) {
+                curIndex = Parser.parseIntOrDefault(this.#currentEventElmt.getAttribute("data-index"), 0);
+                this.#currentEventElmt.classList.remove("app-table-tr-selected");
+            }
+
+            // Get event at index=curIndex-1 in table.
+            let prevIndex = Math.max(0, curIndex - 1);
+            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${prevIndex}"]`);
+            this.#loadEventInfo();
+        });
+
+        this.#eventInfoNavNextElmt.addEventListener("click", (event) => {
+            let curIndex = 0;
+            if (this.#currentEventElmt != null) {
+                curIndex = Parser.parseIntOrDefault(this.#currentEventElmt.getAttribute("data-index"), 0);
+                this.#currentEventElmt.classList.remove("app-table-tr-selected");
+            }
+
+            // Get event at index=curIndex+1 in table.
+            let nextIndex = Math.min(Math.max(0, this.#eventsContainerElmt.rows.length - 1), curIndex + 1);
+            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${nextIndex}"]`);
+            this.#loadEventInfo();
+        });
+
+        this.#eventInfoNavLastElmt.addEventListener("click", (event) => {
+            if (this.#currentEventElmt != null) {
+                this.#currentEventElmt.classList.remove("app-table-tr-selected");
+            }
+
+            // Get event at index=PAGE_SIZE in table.
+            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${this.#eventsContainerElmt.rows.length - 1}"]`);
+            this.#loadEventInfo();
+        });
+
+        window.addEventListener("resize", (event) => {
+            let descriptionCellWidth = this.#eventsTableElmt.offsetWidth * 0.25;
+            for (let rowElmt of this.#eventsContainerElmt.rows) {
+                rowElmt.cells.item(rowElmt.cells.length - 1).style.maxWidth = `${descriptionCellWidth}px`;
+            }
+        });
     }
 
     #updateSourceSearch() {
@@ -289,261 +399,220 @@ export class EventListView {
         return null;
     }
 
-    #createEventElement(eventData) {
-        let panelCollapseId = `panelCollapseEvent-${eventData.id}`;
+    #loadEventInfo() {
+        if (this.#currentEventElmt != null) {
+            let eventId = this.#currentEventElmt.getAttribute("data-event");
+            let rowIndex = Parser.parseIntOrDefault(this.#currentEventElmt.getAttribute("data-index"), 0);
 
-        let eventItemElmt = document.createElement("div");
-        eventItemElmt.classList.add("accordion-item");
+            this.#currentEventElmt.classList.add("app-table-tr-selected");
 
-        // Event accordion item panel.
-        let eventHeaderElmt = document.createElement("h2");
-        eventHeaderElmt.classList.add("accordion-header");
-        eventHeaderElmt.id = `panelHeadingEvent-${eventData.id}`;
-        eventItemElmt.appendChild(eventHeaderElmt);
+            // Update event edit link button.
+            this.#eventEditLinkElmt.href = flaskES6.urlFor(`events.edit`, {id: eventId});
 
-        let eventHeaderBtnElmt = document.createElement("button");
-        eventHeaderBtnElmt.classList.add("accordion-button", "collapsed", "py-2");
-        eventHeaderBtnElmt.setAttribute("type", "button");
-        eventHeaderBtnElmt.setAttribute("data-bs-toggle", "collapse");
-        eventHeaderBtnElmt.setAttribute("data-bs-target", `#${panelCollapseId}`);
-        eventHeaderBtnElmt.setAttribute("aria-expanded", false);
-        eventHeaderBtnElmt.setAttribute("aria-controls", panelCollapseId);
-        eventHeaderElmt.appendChild(eventHeaderBtnElmt);
+            // Update footer navigation (on page-sized events table).
+            this.#eventInfoRowIndexElmt.innerText = (rowIndex + 1).toString();
+            this.#eventInfoRowCountElmt.innerText = this.#eventsContainerElmt.rows.length.toString();
+            if (rowIndex <= 0) {
+                this.#eventInfoNavFirstElmt.parentElement.classList.add("disabled");
+                this.#eventInfoNavPreviousElmt.parentElement.classList.add("disabled");
+                this.#eventInfoNavNextElmt.parentElement.classList.remove("disabled");
+                this.#eventInfoNavLastElmt.parentElement.classList.remove("disabled");
+            }
+            else {
+                this.#eventInfoNavFirstElmt.parentElement.classList.remove("disabled");
+                this.#eventInfoNavPreviousElmt.parentElement.classList.remove("disabled");
+                if (rowIndex >= this.#eventsContainerElmt.rows.length - 1) {
+                    this.#eventInfoNavNextElmt.parentElement.classList.add("disabled");
+                    this.#eventInfoNavLastElmt.parentElement.classList.add("disabled");
+                }
+                else {
+                    this.#eventInfoNavNextElmt.parentElement.classList.remove("disabled");
+                    this.#eventInfoNavLastElmt.parentElement.classList.remove("disabled");
+                }
+            }
 
-        let eventHeaderContainerElmt = document.createElement("div");
-        eventHeaderContainerElmt.classList.add("row", "align-items-center", "w-100", "me-3");
-        eventHeaderBtnElmt.appendChild(eventHeaderContainerElmt);
+            // Pick event general info from selected table row.
+            this.#eventInfoContainerElmt.innerHTML = "";
+            for (let [cellIndex, headerCellElmt] of Object.entries(this.#eventsHeaderElmt.cells)) {
+                let colElmt = document.createElement("div");
+                colElmt.classList.add("col-auto");
+                this.#eventInfoContainerElmt.appendChild(colElmt);
 
-        let eventHeaderInfoElmt = document.createElement("div");
-        eventHeaderInfoElmt.classList.add("col-auto", "d-flex", "flex-nowrap", "gap-2");
-        eventHeaderContainerElmt.appendChild(eventHeaderInfoElmt);
+                let headerInfoElmt = document.createElement("h6");
+                headerInfoElmt.classList.add("fw-bold");
+                headerInfoElmt.innerHTML = headerCellElmt.innerHTML;
+                colElmt.appendChild(headerInfoElmt);
+                let valueInfoElmt = document.createElement("p");
+                valueInfoElmt.innerHTML = this.#currentEventElmt.cells[cellIndex].innerHTML;
+                colElmt.appendChild(valueInfoElmt);
+            }
 
-        let eventIconElmt = document.createElement("i");
-        eventIconElmt.classList.add("bi", "bi-calendar2-event");
-        eventHeaderInfoElmt.appendChild(eventIconElmt);
+            // Load event info tabs (timeseries, sites...).
+            this.#loadEventInfoTabs(eventId);
+        }
+    }
 
-        let eventHeaderTimestampElmt = document.createElement("span");
-        eventHeaderTimestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
-        eventHeaderInfoElmt.appendChild(eventHeaderTimestampElmt);
+    #loadEventInfoTabs(eventId) {
+        // Show event info tabs spinner loader.
+        this.#eventInfoTabSpinnerElmt.classList.remove("d-none");
+        // Hide all event info tabs and contents until data on timeseries or structural elements (if any) is loaded.
+        this.#eventInfoTabsElmt.classList.add("d-none");
+        this.#eventInfoTabContentsElmt.classList.add("d-none");
+        for (let eventInfoTabElmt of Object.values(this.#eventInfoTabElmts)) {
+            eventInfoTabElmt.classList.remove("active");
+        }
+        for (let eventInfoTabContentElmt of Object.values(this.#eventInfoTabContentElmts)) {
+            eventInfoTabContentElmt.classList.remove("show", "active");
+        }
 
-        let eventHeaderCol2Elmt = document.createElement("div");
-        eventHeaderCol2Elmt.classList.add("col", "me-auto");
-        eventHeaderContainerElmt.appendChild(eventHeaderCol2Elmt);
+        // Init web request data, used to load event info tabs.
+        let eventInfoTabReqData = {
+            "ts": {
+                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_timeseries`, {id: eventId}),
+                "listRenderer": this.#createTimeseriesListElement,
+                "iconClasses": ["bi", "bi-clock-history", "me-1"],
+            },
+        };
+        for (let structuralElmentType of this.#structuralElementTypes) {
+            eventInfoTabReqData[structuralElmentType] = {
+                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_structural_elements`, {id: eventId, type: structuralElmentType}),
+                "listRenderer": this.#createStructuralElementsListElement,
+                "iconClasses": structuralElmentType != "zone" ? ["bi", "bi-building", "me-1"] : ["bi", "bi-bullseye", "me-1"],
+            };
+        }
 
+        // Abort previous event info tab web request, if any.
+        for (let [eventInfoTabFetchUrl, eventInfoTabReqID] of Object.entries(this.#loadEventInfoTabReqIDs)) {
+            this.#internalAPIRequester.abort(eventInfoTabReqID);
+            this.#loadEventInfoTabReqIDs[eventInfoTabFetchUrl] = null;
+        }
+
+        let nbTabLoaded = 0;
+
+        // Execute web request and load data on tabs.
+        this.#loadEventInfoTabReqIDs = this.#internalAPIRequester.gets(
+            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return eventInfoTabReqOpts["fetchUrl"]; }),
+            (data) => {
+                for (let [index, eventInfoTabData] of Object.entries(data)) {
+                    eventInfoTabData = eventInfoTabData.data != undefined ? eventInfoTabData.data : eventInfoTabData;
+
+                    let eventInfoTabKey = Object.keys(eventInfoTabReqData)[index];
+                    let eventInfoReqOpts = eventInfoTabReqData[eventInfoTabKey];
+
+                    this.#eventInfoTabContentElmts[eventInfoTabKey].innerHTML = "";
+                    this.#eventInfoCountElmts[eventInfoTabKey].innerText = eventInfoTabData.length.toString();
+
+                    if (eventInfoTabData.length > 0) {
+                        let eventInfoTabListItemsCountContainerElmt = document.createElement("div");
+                        eventInfoTabListItemsCountContainerElmt.classList.add("text-end", "mb-2");
+                        this.#eventInfoTabContentElmts[eventInfoTabKey].appendChild(eventInfoTabListItemsCountContainerElmt);
+
+                        let eventInfoTabListItemsCountFormatterElmt = document.createElement("small");
+                        eventInfoTabListItemsCountFormatterElmt.classList.add("text-nowrap", "text-muted");
+                        eventInfoTabListItemsCountContainerElmt.appendChild(eventInfoTabListItemsCountFormatterElmt);
+
+                        let eventInfoTabListItemsCount = new ItemsCount();
+                        eventInfoTabListItemsCountFormatterElmt.appendChild(eventInfoTabListItemsCount);
+                        eventInfoTabListItemsCount.update({firstItem: 1, lastItem: eventInfoTabData.length, totalCount: eventInfoTabData.length});
+
+                        if (eventInfoReqOpts["listRenderer"] != null) {
+                            let eventInfoTabListElmt = eventInfoReqOpts["listRenderer"](eventInfoTabData, eventInfoReqOpts["iconClasses"]);
+                            this.#eventInfoTabContentElmts[eventInfoTabKey].appendChild(eventInfoTabListElmt);
+                        }
+
+                        this.#eventInfoTabElmts[eventInfoTabKey].classList.remove("disabled", "d-none");
+                        this.#eventInfoTabContentElmts[eventInfoTabKey].classList.remove("d-none");
+                        nbTabLoaded += 1;
+
+                        // Activate and show the first event info tab that could be loaded.
+                        if (nbTabLoaded == 1) {
+                            this.#eventInfoTabElmts[eventInfoTabKey].classList.add("active");
+                            this.#eventInfoTabContentElmts[eventInfoTabKey].classList.add("show", "active");
+                        }
+                    }
+                    else {
+                        this.#eventInfoTabElmts[eventInfoTabKey].classList.add("disabled", "d-none");
+                        this.#eventInfoTabContentElmts[eventInfoTabKey].classList.add("d-none");
+                    }
+                }
+
+                // Hide event info tabs spinner loader.
+                this.#eventInfoTabSpinnerElmt.classList.add("d-none");
+            },
+            (error) => {
+                // Hide event info tabs spinner loader.
+                this.#eventInfoTabSpinnerElmt.classList.add("d-none");
+
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+            () => {
+                // Show event info tabs and contents if at least one tab has been loaded.
+                if (nbTabLoaded > 0) {
+                    this.#eventInfoTabsElmt.classList.remove("d-none");
+                    this.#eventInfoTabContentsElmt.classList.remove("d-none");
+                }
+            },
+        );
+    }
+
+    #createEventElement(eventData, rowIndex) {
+        let eventElmt = document.createElement("tr");
+        eventElmt.classList.add("align-middle");
+        eventElmt.setAttribute("role", "button");
+        eventElmt.setAttribute("data-bs-toggle", "modal");
+        eventElmt.setAttribute("data-bs-target", "#eventInfoModal");
+        eventElmt.setAttribute("data-event", eventData.id);
+        eventElmt.setAttribute("data-index", rowIndex)
+
+        let timestampElmt = document.createElement("th");
+        timestampElmt.setAttribute("scope", "row");
+        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+        eventElmt.appendChild(timestampElmt);
+
+        let sourceElmt = document.createElement("td");
+        sourceElmt.innerText = eventData.source;
+        eventElmt.appendChild(sourceElmt);
+
+        let levelCellElmt = document.createElement("td");
+        eventElmt.appendChild(levelCellElmt);
         let levelData = this.#getLevelData(eventData.level);
         if (levelData != null) {
             let levelStyle = this.#levelStyles[levelData.name];
             if (levelStyle == null) {
                 levelStyle = this.#levelStyles["default"];
             }
-            let eventLevelElmt = document.createElement("span");
-            eventLevelElmt.classList.add(...levelStyle.badge);
-            let eventLevelIconElmt = document.createElement("i");
-            eventLevelIconElmt.classList.add(...levelStyle.icon);
-            eventLevelElmt.appendChild(eventLevelIconElmt);
-            let eventLevelNameElmt = document.createElement("span");
-            eventLevelNameElmt.innerText = levelData.name;
-            eventLevelElmt.appendChild(eventLevelNameElmt);
-            eventHeaderCol2Elmt.appendChild(eventLevelElmt);
+            let levelElmt = document.createElement("span");
+            levelElmt.classList.add(...levelStyle.badge);
+            let levelIconElmt = document.createElement("i");
+            levelIconElmt.classList.add(...levelStyle.icon);
+            levelElmt.appendChild(levelIconElmt);
+            let levelNameElmt = document.createElement("span");
+            levelNameElmt.innerText = levelData.name;
+            levelElmt.appendChild(levelNameElmt);
+            levelCellElmt.appendChild(levelElmt);
         }
 
-        let eventHeaderCol3Elmt = document.createElement("div");
-        eventHeaderCol3Elmt.classList.add("col-auto", "d-flex", "flex-nowrap", "align-items-center", "justify-content-end", "gap-2");
-        eventHeaderContainerElmt.appendChild(eventHeaderCol3Elmt);
-
-        let campaignScopeData = this.#getCampaignScopeData(eventData.campaign_scope_id);
-        if (campaignScopeData != null) {
-            let inLabelElmt = document.createElement("small");
-            inLabelElmt.classList.add("text-muted");
-            inLabelElmt.innerText = "In";
-            eventHeaderCol3Elmt.appendChild(inLabelElmt);
-
-            let campaignScopeHeaderElmt = document.createElement("small");
-            campaignScopeHeaderElmt.classList.add("fw-bold", "text-muted");
-            campaignScopeHeaderElmt.innerText = campaignScopeData.name;
-            eventHeaderCol3Elmt.appendChild(campaignScopeHeaderElmt);
-        }
-
+        let categoryElmt = document.createElement("td");
         let categoryData = this.#getCategoryData(eventData.category_id);
-        if (categoryData != null) {
-            let categoryElmt = document.createElement("span");
-            categoryElmt.classList.add("badge", "rounded-pill", "bg-primary", "font-monospace");
-            categoryElmt.innerText = categoryData.name;
-            eventHeaderCol3Elmt.appendChild(categoryElmt);
-        }
+        categoryElmt.innerText = categoryData != null ? categoryData.name : "?";
+        eventElmt.appendChild(categoryElmt);
 
-        let fromLabelElmt = document.createElement("small");
-        fromLabelElmt.classList.add("text-muted");
-        fromLabelElmt.innerText = "from";
-        eventHeaderCol3Elmt.appendChild(fromLabelElmt);
+        let campaignScopeElmt = document.createElement("td");
+        let campaignScopeData = this.#getCampaignScopeData(eventData.campaign_scope_id);
+        campaignScopeElmt.innerText = campaignScopeData != null ? campaignScopeData.name : "?";
+        eventElmt.appendChild(campaignScopeElmt);
 
-        let eventSourceElmt = document.createElement("small");
-        eventSourceElmt.classList.add("fst-italic", "text-muted");
-        eventSourceElmt.innerText = eventData.source;
-        eventHeaderCol3Elmt.appendChild(eventSourceElmt);
+        let descriptionElmt = document.createElement("td");
+        descriptionElmt.classList.add("text-truncate");
+        descriptionElmt.style.maxWidth = `${this.#eventsTableElmt.offsetWidth * 0.25}px`;
+        descriptionElmt.innerText = eventData.description != null ? eventData.description : "-";
+        eventElmt.appendChild(descriptionElmt);
 
-        // Event accordion item panel.
-        let eventPanelElmt = document.createElement("div");
-        eventPanelElmt.classList.add("accordion-collapse", "collapse");
-        eventPanelElmt.id = panelCollapseId;
-        eventPanelElmt.setAttribute("aria-labelledby", eventHeaderElmt.id);
-        eventPanelElmt.setAttribute("data-event-id", eventData.id);
-        eventItemElmt.appendChild(eventPanelElmt);
-
-        let eventPanelBodyElmt = document.createElement("div");
-        eventPanelBodyElmt.classList.add("accordion-body");
-        eventPanelElmt.appendChild(eventPanelBodyElmt);
-
-        let tabsContainerElmt = document.createElement("ul");
-        tabsContainerElmt.classList.add("nav", "nav-tabs", "app-tabs", "justify-content-center");
-        tabsContainerElmt.setAttribute("role", "tablist");
-        eventPanelBodyElmt.appendChild(tabsContainerElmt);
-
-        let tabContentsContainerElmt = document.createElement("div");
-        tabContentsContainerElmt.classList.add("tab-content", "overflow-auto", "border", "border-top-0", "bg-white", "mb-3");
-        eventPanelBodyElmt.appendChild(tabContentsContainerElmt);
-
-        let generalTabId = `general-tab-${eventData.id}`;
-        let generalTabContentId = `general-tabcontent-${eventData.id}`;
-
-        let generalTabElmt = document.createElement("li");
-        generalTabElmt.classList.add("nav-item");
-        generalTabElmt.setAttribute("role", "presentation");
-        tabsContainerElmt.appendChild(generalTabElmt);
-
-        let generalTabBtnElmt = document.createElement("button");
-        generalTabBtnElmt.id = generalTabId;
-        generalTabBtnElmt.classList.add("nav-link", "active");
-        generalTabBtnElmt.setAttribute("data-bs-toggle", "tab");
-        generalTabBtnElmt.setAttribute("data-bs-target", `#${generalTabContentId}`);
-        generalTabBtnElmt.setAttribute("type", "button");
-        generalTabBtnElmt.setAttribute("role", "tab");
-        generalTabBtnElmt.setAttribute("aria-controls", generalTabContentId);
-        generalTabBtnElmt.setAttribute("aria-selected", true);
-        generalTabBtnElmt.innerText = "General";
-        generalTabElmt.appendChild(generalTabBtnElmt);
-
-        let generalTabContentElmt = document.createElement("div");
-        generalTabContentElmt.classList.add("tab-pane", "fade", "show", "active", "p-3");
-        generalTabContentElmt.id = generalTabContentId;
-        generalTabContentElmt.setAttribute("role", "tabpanel");
-        generalTabContentElmt.setAttribute("aria-labelledby", generalTabId);
-        tabContentsContainerElmt.appendChild(generalTabContentElmt);
-
-        let generalTabContentContainerElmt = document.createElement("div");
-        generalTabContentContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start");
-        generalTabContentElmt.appendChild(generalTabContentContainerElmt);
-
-        let generalTabContentInfoElmt = document.createElement("dl");
-        generalTabContentContainerElmt.appendChild(generalTabContentInfoElmt);
-
-        if (campaignScopeData != null) {
-            let campaignScopeTitleElmt = document.createElement("dt");
-            campaignScopeTitleElmt.innerText = "Campaign scope";
-            generalTabContentInfoElmt.appendChild(campaignScopeTitleElmt);
-
-            let campaignScopeElmt = document.createElement("dd");
-            campaignScopeElmt.innerText = campaignScopeData.name;
-            generalTabContentInfoElmt.appendChild(campaignScopeElmt);
-        }
-
-        let eventDescriptionTitleElmt = document.createElement("dt");
-        eventDescriptionTitleElmt.innerText = "Description";
-        generalTabContentInfoElmt.appendChild(eventDescriptionTitleElmt);
-
-        let eventDescriptionElmt = document.createElement("dd");
-        eventDescriptionElmt.innerText = eventData.description || "-";
-        generalTabContentInfoElmt.appendChild(eventDescriptionElmt);
-
-        let generalEditBtnElmt = document.createElement("a");
-        generalEditBtnElmt.classList.add("btn", "btn-sm", "btn-outline-secondary", "ms-auto", "w-auto");
-        generalEditBtnElmt.setAttribute("role", "button");
-        generalEditBtnElmt.title = "Edit event";
-        generalEditBtnElmt.href = flaskES6.urlFor("events.edit", {id: eventData.id});
-        generalTabContentContainerElmt.appendChild(generalEditBtnElmt);
-
-        let generalEditIconElmt = document.createElement("i");
-        generalEditIconElmt.classList.add("bi", "bi-pencil", "me-1");
-        generalEditBtnElmt.appendChild(generalEditIconElmt);
-
-        let generalEditTextElmt = document.createElement("span");
-        generalEditTextElmt.innerText = "Edit";
-        generalEditBtnElmt.appendChild(generalEditTextElmt);
-
-        let tsTabId = `ts-tab-${eventData.id}`;
-        let tsTabContentId = `ts-tabcontent-${eventData.id}`;
-
-        let tsTabElmt = document.createElement("li");
-        tsTabElmt.classList.add("nav-item");
-        tsTabElmt.setAttribute("role", "presentation");
-        tabsContainerElmt.appendChild(tsTabElmt);
-
-        let tsTabBtnElmt = document.createElement("button");
-        tsTabBtnElmt.id = tsTabId;
-        tsTabBtnElmt.classList.add("nav-link");
-        tsTabBtnElmt.setAttribute("data-bs-toggle", "tab");
-        tsTabBtnElmt.setAttribute("data-bs-target", `#${tsTabContentId}`);
-        tsTabBtnElmt.setAttribute("type", "button");
-        tsTabBtnElmt.setAttribute("role", "tab");
-        tsTabBtnElmt.setAttribute("aria-controls", tsTabContentId);
-        tsTabBtnElmt.setAttribute("aria-selected", false);
-        tsTabBtnElmt.innerText = "Timeseries";
-        tsTabElmt.appendChild(tsTabBtnElmt);
-
-        let tsTabContentElmt = document.createElement("div");
-        tsTabContentElmt.classList.add("tab-pane", "fade", "p-3");
-        tsTabContentElmt.id = tsTabContentId;
-        tsTabContentElmt.setAttribute("role", "tabpanel");
-        tsTabContentElmt.setAttribute("aria-labelledby", tsTabId);
-        tabContentsContainerElmt.appendChild(tsTabContentElmt);
-
-        // Timeseries tab event listener.
-        tsTabBtnElmt.addEventListener("click", (event) => {
-            if (!this.#tsTabsLoaded.includes(tsTabBtnElmt.id)) {
-                tsTabContentElmt.innerHTML = "";
-                tsTabContentElmt.appendChild(new Spinner());
-
-                if (this.#loadTsReqIDs[tsTabBtnElmt.id] != null) {
-                    this.#internalAPIRequester.abort(this.#loadTsReqIDs[tsTabBtnElmt.id]);
-                    this.#searchReqID = null;
-                }
-
-                this.#loadTsReqIDs[tsTabBtnElmt.id] = this.#internalAPIRequester.get(
-                    flaskES6.urlFor(`api.events.retrieve_timeseries`, {id: eventData.id}),
-                    (data) => {
-                        tsTabContentElmt.innerHTML = "";
-
-                        if (data.data.length > 0) {
-                            let tsListItemsCountContainerElmt = document.createElement("div");
-                            tsListItemsCountContainerElmt.classList.add("text-end", "mb-2");
-                            tsTabContentElmt.appendChild(tsListItemsCountContainerElmt);
-
-                            let tsListItemsCountFormatterElmt = document.createElement("small");
-                            tsListItemsCountFormatterElmt.classList.add("text-nowrap", "text-muted");
-                            tsListItemsCountContainerElmt.appendChild(tsListItemsCountFormatterElmt);
-
-                            let tsListItemsCount = new ItemsCount();
-                            tsListItemsCountFormatterElmt.appendChild(tsListItemsCount);
-                            tsListItemsCount.update({firstItem: 1, lastItem: data.data.length, totalCount: data.data.length});
-                        }
-
-                        let tsListElmt = this.#createTimeseriesListElement(data.data);
-                        tsTabContentElmt.appendChild(tsListElmt);
-
-                        this.#tsTabsLoaded.push(tsTabBtnElmt.id);
-                    },
-                    (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
-                    },
-                );
-            }
-        });
-
-        return eventItemElmt;
+        return eventElmt;
     }
 
-    #createTimeseriesListElement(tsList) {
+    #createTimeseriesListElement(tsList, iconClasses) {
         let tsListElmt = null;
         if (tsList.length > 0) {
             tsListElmt = document.createElement("div");
@@ -556,7 +625,7 @@ export class EventListView {
                 tsHeaderElmt.classList.add("d-flex", "gap-1");
 
                 let iconElmt = document.createElement("i");
-                iconElmt.classList.add("bi", "bi-clock-history", "me-1");
+                iconElmt.classList.add(...iconClasses);
                 tsHeaderElmt.appendChild(iconElmt);
 
                 let nameSpanElmt = document.createElement("span");
@@ -589,10 +658,55 @@ export class EventListView {
         return tsListElmt;
     }
 
+    #createStructuralElementsListElement(structuralElementList, iconClasses) {
+        let structuralElementListElmt = null;
+        if (structuralElementList.length > 0) {
+            structuralElementListElmt = document.createElement("div");
+            structuralElementListElmt.classList.add("list-group");
+            for (let structuralElementData of structuralElementList) {
+                let structuralElementElmt = document.createElement("div");
+                structuralElementElmt.classList.add("list-group-item");
+
+                let structuralElementHeaderElmt = document.createElement("div");
+                structuralElementHeaderElmt.classList.add("d-flex", "gap-1");
+
+                let iconElmt = document.createElement("i");
+                iconElmt.classList.add(...iconClasses);
+                structuralElementHeaderElmt.appendChild(iconElmt);
+
+                let nameSpanElmt = document.createElement("span");
+                nameSpanElmt.classList.add("fw-bold", "text-break");
+                nameSpanElmt.innerText = structuralElementData.name;
+                structuralElementHeaderElmt.appendChild(nameSpanElmt);
+
+                structuralElementElmt.appendChild(structuralElementHeaderElmt);
+
+                let descElmt = document.createElement("small");
+                descElmt.classList.add("fst-italic", "text-muted");
+                descElmt.innerText = structuralElementData.description;
+                structuralElementElmt.appendChild(descElmt);
+
+                structuralElementListElmt.appendChild(structuralElementElmt);
+            }
+        }
+        else {
+            structuralElementListElmt = document.createElement("span");
+            structuralElementListElmt.classList.add("fst-italic", "text-muted", "text-center");
+            structuralElementListElmt.innerText = "No data";
+        }
+        return structuralElementListElmt;
+    }
+
     refresh() {
         this.#itemsCountElmt.setLoading();
         this.#eventsContainerElmt.innerHTML = "";
-        this.#eventsContainerElmt.appendChild(new Spinner());
+        let loadingContainerElmt = document.createElement("tr");
+        let loadingElmt = document.createElement("td");
+        loadingElmt.classList.add("text-center");
+        loadingElmt.setAttribute("colspan", 6);
+        loadingElmt.appendChild(new Spinner());
+        loadingContainerElmt.appendChild(loadingElmt);
+        this.#eventsContainerElmt.appendChild(loadingContainerElmt);
 
         let searchOptions = {
             "page_size": this.#pageSizeElmt.current,
@@ -635,8 +749,8 @@ export class EventListView {
             (data) => {
                 this.#eventsContainerElmt.innerHTML = "";
                 if (data.data.length > 0) {
-                    for (let row of data.data) {
-                        let eventItemElmt = this.#createEventElement(row);
+                    for (let [rowIndex, row] of data.data.entries()) {
+                        let eventItemElmt = this.#createEventElement(row, rowIndex);
                         this.#eventsContainerElmt.appendChild(eventItemElmt);
                     }
                 }

@@ -93,3 +93,19 @@ def retrieve_timeseries(id):
         ts.append(ts_resp.data)
 
     return flask.jsonify({"data": ts})
+
+
+@blp.route("/<int:id>/structural_elements/<string:type>")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_structural_elements(id, type):
+    api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
+    struct_elmt_event_resp = api_events_resource.getall(event_id=id)
+
+    structural_elements = []
+    for struct_elmt_event in struct_elmt_event_resp.data:
+        api_resource = getattr(flask.g.api_client, f"{type}s")
+        struc_elmt_resp = api_resource.getone(id=struct_elmt_event[f"{type}_id"])
+        structural_elements.append(struc_elmt_resp.data)
+
+    return flask.jsonify({"data": structural_elements})

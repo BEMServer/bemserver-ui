@@ -157,3 +157,8 @@ body,
         width: 300px !important;
     }
 }
+
+.app-table-tr-selected > * {
+    background-color: var(--bs-table-hover-bg) !important;
+    color: var(--bs-table-hover-color) !important;
+}

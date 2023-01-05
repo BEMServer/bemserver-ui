@@ -6,6 +6,7 @@ import flask
 from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
@@ -20,7 +21,10 @@ def _get_event_levels():
 @auth.signin_required
 @ensure_campaign_context
 def list():
-    return flask.render_template("pages/events/list.html")
+    return flask.render_template(
+        "pages/events/list.html",
+        structural_element_types=FULL_STRUCTURAL_ELEMENT_TYPES,
+    )
 
 
 @blp.route("/create", methods=["GET", "POST"])
