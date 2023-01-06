@@ -43,18 +43,6 @@
             </div>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col">
-            <div class="d-flex align-items-center gap-2">
-                <input type="hidden" name="sort" id="sort" value="-timestamp">
-                <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
-                <input type="radio" class="btn-check" name="sort" id="sort_timestamp_asc" autocomplete="off">
-                <label class="btn btn-sm btn-outline-info" for="sort_timestamp_asc" title="Older to newer"><i class="bi bi-sort-up"></i> Timestamp</label>
-                <input type="radio" class="btn-check" name="sort" id="sort_timestamp_desc" autocomplete="off" checked>
-                <label class="btn btn-sm btn-outline-info" for="sort_timestamp_desc" title="Newer to older"><i class="bi bi-sort-down"></i> Timestamp</label>
-            </div>
-        </div>
-    </div>
     <nav class="row mb-2" aria-label="Events pagination">
         <div class="col-auto align-self-center py-1">
             <div is="app-pagesize-selector" id="pageSize"></div>
@@ -69,8 +57,8 @@
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top" id="eventsTable">
                     <thead>
-                        <tr id="eventsHeader">
-                            <th scope="col">Timestamp</th>
+                        <tr id="eventsHeader" class="align-top">
+                            <th scope="col"><a id="sort-timestamp" class="hstack gap-2" role="button" data-field="timestamp" data-direction="-"><span>Timestamp</span><i class="bi bi-sort-down"></i></a></th>
                             <th scope="col">Source</th>
                             <th scope="col">Level</th>
                             <th scope="col">Category</th>
@@ -80,7 +68,7 @@
                     </thead>
                     <tbody class="table-group-divider" id="eventsContainer">
                         <tr>
-                            <td colspan="6" class="text-center">
+                            <td colspan="6" class="text-center p-4">
                                 <div is="app-spinner"></div>
                             </td>
                         </tr>

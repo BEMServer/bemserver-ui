@@ -15,9 +15,7 @@ blp = flask.Blueprint("events", __name__, url_prefix="/events")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_list():
-    sort = "-timestamp"
-    if "sort" in flask.request.args:
-        sort = flask.request.args["sort"]
+    sort = flask.request.args.get("sort")
 
     # TODO: add campaign_id filter when API is ready
     filters = {}

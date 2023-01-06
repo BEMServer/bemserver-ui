@@ -57,8 +57,8 @@ export class EventListView {
     #searchSelectFilters = {};
     #dataFilters = {};
 
-    #sortInputElmt = null;
-    #sortRadioElmts = null;
+    #sort = []
+    #sortLinkTimestampElmt = null;
 
     #itemsCountElmt = null;
     #pageSizeElmt = null;
@@ -92,6 +92,7 @@ export class EventListView {
         this.#loadOptions(options);
         this.#cacheDOM();
 
+        this.#initSort();
         this.#initFilters();
         this.#initEventListeners();
     }
@@ -113,8 +114,7 @@ export class EventListView {
         this.#timestampMaxSearchFilterElmt = document.getElementById("timestamp_max");
         this.#btnRemoveFiltersElmt = document.getElementById("removeFiltersBtn");
 
-        this.#sortInputElmt = document.getElementById("sort");
-        this.#sortRadioElmts = [].slice.call(document.querySelectorAll(`input[type="radio"][id^="sort_"]`));
+        this.#sortLinkTimestampElmt = document.getElementById("sort-timestamp");
 
         this.#itemsCountElmt = document.getElementById("itemsCount");
         this.#pageSizeElmt = document.getElementById("pageSize");
@@ -145,6 +145,15 @@ export class EventListView {
         this.#eventInfoNavPreviousElmt = document.getElementById("eventInfoNavPrevious");
         this.#eventInfoNavNextElmt = document.getElementById("eventInfoNavNext");
         this.#eventInfoNavLastElmt = document.getElementById("eventInfoNavLast");
+    }
+
+    #initSort() {
+        let sortField = this.#sortLinkTimestampElmt.getAttribute("data-field") || "";
+        let sortDirection = this.#sortLinkTimestampElmt.getAttribute("data-direction") || "";
+        let sortData = `${sortDirection}${sortField}`;
+        if (sortData != "") {
+            this.#sort.push(sortData);
+        }
     }
 
     #initFilters() {
@@ -270,18 +279,40 @@ export class EventListView {
             }
         });
 
-        for (let sortRadioElmt of this.#sortRadioElmts) {
-            sortRadioElmt.addEventListener("change", (event) => {
-                event.preventDefault();
+        this.#sortLinkTimestampElmt.addEventListener("click", (event) => {
+            event.preventDefault();
 
-                let sortData = sortRadioElmt.id.split("_");
-                let newSortValue = `${sortData[2].toLowerCase() == "asc" ? "+" : "-"}${sortData[1].toLowerCase()}`;
-                if (this.#sortInputElmt.value != newSortValue) {
-                    this.#sortInputElmt.value = newSortValue;
-                    this.refresh();
-                }
-            });            
-        }
+            let sortField = this.#sortLinkTimestampElmt.getAttribute("data-field");
+            let sortDirection = this.#sortLinkTimestampElmt.getAttribute("data-direction");
+
+            let newSortDirection = sortDirection == "-" ? "+" : "-";
+            this.#sortLinkTimestampElmt.setAttribute("data-direction", newSortDirection);
+
+            let sortIconElmt = this.#sortLinkTimestampElmt.querySelector(`i[class^="bi bi-"]`);
+            if (sortIconElmt.classList.contains("bi-sort-up")) {
+                sortIconElmt.classList.remove("bi-sort-up");
+                sortIconElmt.classList.add("bi-sort-down");
+            }
+            else {
+                sortIconElmt.classList.remove("bi-sort-down");
+                sortIconElmt.classList.add("bi-sort-up");
+            }
+
+            let oldSortData = `${sortDirection}${sortField}`;
+            let newSortData = `${newSortDirection}${sortField}`;
+
+            // Remove previous sort on field.
+            let sortIndex = this.#sort.indexOf(oldSortData);
+            if (sortIndex != -1) {
+                this.#sort.splice(sortIndex, 1);
+            }
+            // Add new sort on field.
+            if (newSortData != "") {
+                this.#sort.push(newSortData);
+            }
+
+            this.refresh();
+        });
 
         this.#pageSizeElmt.addEventListener("pageSizeChange", (event) => {
             event.preventDefault();
@@ -702,7 +733,7 @@ export class EventListView {
         this.#eventsContainerElmt.innerHTML = "";
         let loadingContainerElmt = document.createElement("tr");
         let loadingElmt = document.createElement("td");
-        loadingElmt.classList.add("text-center");
+        loadingElmt.classList.add("text-center", "p-4");
         loadingElmt.setAttribute("colspan", 6);
         loadingElmt.appendChild(new Spinner());
         loadingContainerElmt.appendChild(loadingElmt);
@@ -711,7 +742,7 @@ export class EventListView {
         let searchOptions = {
             "page_size": this.#pageSizeElmt.current,
             "page": this.#paginationElmt.page,
-            "sort": this.#sortInputElmt.value,
+            "sort": this.#sort.join(),
         };
         if (this.#timestampMinSearchFilterElmt.date != null) {
             searchOptions["date_min"] = this.#timestampMinSearchFilterElmt.date;
