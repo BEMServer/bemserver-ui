@@ -8,18 +8,24 @@ export class DropZone extends HTMLDivElement {
     #dropEffect = "copy";
     #dropCount = 0;
 
-    #helpTitle = "No items yet.";
-    #helpTexts = ["Drag and drop items here."];
+    #helpNoItemsText = "No items";
+    #helpBackgroundText = "Drag and drop items here";
 
     #getDraggedElmtCallback = null;
+
+    #innerDropZoneElmt = null;
+    #helpContainerElmt = null;
 
     constructor(options) {
         super();
 
         this.#dropEffect = options.dropEffect || "copy";
-        this.#helpTitle = options.helpTitle || "No items yet.";
-        this.#helpTexts = options.helpTexts || ["Drag and drop items here."];
+        this.#helpNoItemsText = options.helpNoItemsText || "No items";
+        this.#helpBackgroundText = options.helpBackgroundText || "Drag and drop items here";
         this.#getDraggedElmtCallback = options.getDraggedElmtCallback;
+
+        this.#innerDropZoneElmt = document.createElement("div");
+        this.#innerDropZoneElmt.classList.add("d-flex", "flex-wrap", "gap-2", "m-2", "px-2", "py-3");
     }
 
     get count() {
@@ -28,7 +34,22 @@ export class DropZone extends HTMLDivElement {
 
     connectedCallback() {
         this.innerHTML = "";
-        this.classList.add("d-flex", "flex-wrap", "gap-2", "m-2");
+        this.classList.add("position-relative");
+        this.style.minHeight = "100";
+
+        this.#helpContainerElmt = document.createElement("div");
+        this.#helpContainerElmt.classList.add("position-absolute", "bottom-0", "end-0", "pb-1", "pe-3");
+        this.appendChild(this.#helpContainerElmt);
+
+        let helpTextElmt = document.createElement("span");
+        helpTextElmt.classList.add("fst-italic", "text-black", "text-opacity-25");
+        helpTextElmt.innerText = this.#helpBackgroundText;
+        this.#helpContainerElmt.appendChild(helpTextElmt);
+
+        this.appendChild(this.#innerDropZoneElmt);
+
+        this.showNoItems();
+        this.showHelp();
 
         this.#initEventListeners();
     }
@@ -42,11 +63,11 @@ export class DropZone extends HTMLDivElement {
             let isDuplicate = (!this.#allowDuplicates && sourceElmt != null);
             if (isDuplicate) {
                 sourceElmt.classList.add("dragging-duplicate");
-                this.classList.add("drop-not-allowed");
+                this.#innerDropZoneElmt.classList.add("drop-not-allowed");
                 event.dataTransfer.dropEffect = "none";
             }
             else {
-                this.classList.add("dragover");
+                this.#innerDropZoneElmt.classList.add("dragover");
                 event.dataTransfer.dropEffect = this.#dropEffect;
             }
         });
@@ -54,8 +75,8 @@ export class DropZone extends HTMLDivElement {
         this.addEventListener("dragleave", (event) => {
             event.preventDefault();
 
-            this.classList.remove("dragover");
-            this.classList.remove("drop-not-allowed");
+            this.#innerDropZoneElmt.classList.remove("dragover");
+            this.#innerDropZoneElmt.classList.remove("drop-not-allowed");
 
             let sourceElmt = this.#getDraggedElmtCallback?.();
             sourceElmt?.classList.remove("dragging-duplicate");
@@ -64,8 +85,8 @@ export class DropZone extends HTMLDivElement {
         this.addEventListener("drop", (event) => {
             event.preventDefault();
 
-            this.classList.remove("dragover");
-            this.classList.remove("drop-not-allowed");
+            this.#innerDropZoneElmt.classList.remove("dragover");
+            this.#innerDropZoneElmt.classList.remove("drop-not-allowed");
 
             let isDuplicate = false;
             if (!this.#allowDuplicates) {
@@ -94,7 +115,7 @@ export class DropZone extends HTMLDivElement {
             if (this.#dropCount <= 0) {
                 this.clear();
             }
-            this.appendChild(element);
+            this.#innerDropZoneElmt.appendChild(element);
             this.#dropCount += 1;
         }
     }
@@ -106,55 +127,43 @@ export class DropZone extends HTMLDivElement {
 
             if (this.#dropCount <= 0) {
                 this.clear();
-                this.setHelp();
+                this.showNoItems();
             }
         }
     }
 
     setLoading() {
-        this.innerHTML = "";
-        this.appendChild(new Spinner());
+        this.#innerDropZoneElmt.innerHTML = "";
+        this.#innerDropZoneElmt.appendChild(new Spinner());
     }
 
-    setHelp() {
-        this.innerHTML = "";
+    showHelp() {
+        this.#innerDropZoneElmt.classList.add("border", "border-4", "rounded-4", "bg-white", "app-border-dashed");
+        this.#helpContainerElmt.classList.remove("d-none");
+    }
 
-        let helpContainerElmt = document.createElement("div");
-        helpContainerElmt.classList.add("alert", "alert-info");
-        helpContainerElmt.setAttribute("role", "alert");
-        this.appendChild(helpContainerElmt);
+    hideHelp() {
+        this.#innerDropZoneElmt.classList.remove("border", "border-4", "rounded-4", "bg-white", "app-border-dashed");
+        this.#helpContainerElmt.classList.add("d-none");
+    }
 
-        let helpIconElmt = document.createElement("i");
-        helpIconElmt.classList.add("bi", "bi-question-diamond", "me-1");
-        helpContainerElmt.appendChild(helpIconElmt);
-
-        let helpTitleElmt = document.createElement("span");
-        helpTitleElmt.classList.add("fw-bold");
-        helpTitleElmt.innerText = this.#helpTitle;
-        helpContainerElmt.appendChild(helpTitleElmt);
-
-        let helpTextContainerElmt = document.createElement("div");
-        helpTextContainerElmt.classList.add("fst-italic");
-        if (this.#helpTexts.length > 0) {
-            helpTextContainerElmt.classList.add("mt-2");
-        }
-        helpContainerElmt.appendChild(helpTextContainerElmt);
-
-        for (let helpText of this.#helpTexts) {
-            let helpTextElmt = document.createElement("p");
-            helpTextElmt.classList.add("mb-0");
-            helpTextElmt.innerHTML = helpText;
-            helpTextContainerElmt.appendChild(helpTextElmt);
+    showNoItems() {
+        if (this.#dropCount <= 0) {
+            this.#innerDropZoneElmt.innerHTML = "";
+            let noItemsElmt = document.createElement("span");
+            noItemsElmt.classList.add("fst-italic", "text-muted");
+            noItemsElmt.innerText = this.#helpNoItemsText;
+            this.#innerDropZoneElmt.appendChild(noItemsElmt);
         }
     }
 
     clear() {
-        this.innerHTML = "";
+        this.#innerDropZoneElmt.innerHTML = "";
         this.#dropCount = 0;
     }
 }
 
 
-if (customElements.get("app-drop-zone") == null) {
-    customElements.define("app-drop-zone", DropZone, { extends: "div" });
+if (window.customElements.get("app-drop-zone") == null) {
+    window.customElements.define("app-drop-zone", DropZone, { extends: "div" });
 }

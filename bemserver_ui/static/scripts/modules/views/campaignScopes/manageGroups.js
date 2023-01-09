@@ -7,9 +7,9 @@ import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 
 
-export class UserManageGroupsView {
+export class CampaignScopeManageGroupsView {
 
-    #user = null;
+    #campaignScope = null;
 
     #internalAPIRequester = null;
     #getGroupListReqID = null;
@@ -27,15 +27,15 @@ export class UserManageGroupsView {
 
     #dropZoneElmt = null;
 
-    constructor(user) {
-        this.#user = user;
+    constructor(campaignScope) {
+        this.#campaignScope = campaignScope;
 
         this.#cacheDOM();
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
-        this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpNoItemsText: `Not yet a member of any group.`, helpBackgroundText: `Drag and drop groups here` });
-        this.#dropZoneElmt.id = `dropZone-${this.#user.id}`;
+        this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpNoItemsText: `No special groups allowed.`, helpBackgroundText: `Drag and drop groups here` });
+        this.#dropZoneElmt.id = `dropZone-${this.#campaignScope.id}`;
         this.#userGroupContainerElmt.appendChild(this.#dropZoneElmt);
         this.#dropZoneElmt.hideHelp();
 
@@ -104,10 +104,10 @@ export class UserManageGroupsView {
             let groupName = jsonData.sourceNodeData.name;
 
             this.#internalAPIRequester.post(
-                flaskES6.urlFor(`api.user_groups.add_user`, {id: groupId}),
-                {user_id: this.#user.id},
+                flaskES6.urlFor(`api.campaign_scopes.add_group`, {id: this.#campaignScope.id}),
+                {group_id: groupId},
                 (data) => {
-                    let userGroupItemElmt = new UserGroupItem(groupId, groupName, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: groupId, tab: `users`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, groupId, groupName, data.data.id, this.#user.name) : null);
+                    let userGroupItemElmt = new UserGroupItem(groupId, groupName, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: groupId, tab: `campaign_scopes`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, groupId, groupName, data.data.id, this.#campaignScope.name) : null);
                     this.#dropZoneElmt.addElement(userGroupItemElmt);
 
                     let dropedItemElmt = document.getElementById(jsonData.sourceNodeId);
@@ -115,7 +115,7 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User added to ${groupName} group!`, isDismissible: true, delay: 4});
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${groupName} added to ${this.#campaignScope.name}!`, isDismissible: true, delay: 4});
                     this.#messagesElmt.appendChild(flashMsgElmt);
                 },
                 (error) => {
@@ -126,14 +126,14 @@ export class UserManageGroupsView {
         });
     }
 
-    #userGroupRemoveUserCallback(groupId, groupName, groupUserRelId, userName) {
+    #userGroupRemoveUserCallback(groupId, groupName, groupUserRelId, campaignScopeName) {
         let userGroupItemElmt = document.getElementById(`usergroup-${groupId}`);
 
         // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
-        let modalConfirm = new ModalConfirm(`usergroup-${groupId}`, `Remove <mark>${userName}</mark> user from <mark>${groupName}</mark> group`, () => {
+        let modalConfirm = new ModalConfirm(`usergroup-${groupId}`, `Remove <mark>${groupName}</mark> from <mark>${campaignScopeName}</mark>`, () => {
             // Inside the callback to remove user from group.
             this.#internalAPIRequester.post(
-                flaskES6.urlFor("api.user_groups.remove_user", {id: groupId, rel_id: groupUserRelId}),
+                flaskES6.urlFor("api.campaign_scopes.remove_group", {id: this.#campaignScope.id, rel_id: groupUserRelId}),
                 null,
                 () => {
                     let dropedItemElmt = document.getElementById(`drag-usergroup-${groupId}`);
@@ -148,7 +148,7 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User removed from ${groupName} group!`, isDismissible: true, delay: 4});
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${groupName} removed from ${this.#campaignScope.name}!`, isDismissible: true, delay: 4});
                     this.#messagesElmt.appendChild(flashMsgElmt);
                 },
                 (error) => {
@@ -203,11 +203,11 @@ export class UserManageGroupsView {
                 this.#getGroupListReqID = null;
             }
             this.#getGroupListReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.users.list_groups`, {id: this.#user.id}),
+                flaskES6.urlFor(`api.campaign_scopes.list_groups`, {id: this.#campaignScope.id}),
                 (data) => {
                     this.#dropZoneElmt.clear();
                     for (let row of data.groups) {
-                        let userGroupItemElmt = new UserGroupItem(row.id, row.name, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: row.id, tab: `users`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, row.id, row.name, row.rel_id, this.#user.name) : null);
+                        let userGroupItemElmt = new UserGroupItem(row.id, row.name, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: row.id, tab: `campaign_scopes`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, row.id, row.name, row.rel_id, this.#campaignScope.name) : null);
                         this.#dropZoneElmt.addElement(userGroupItemElmt);
                     }
 

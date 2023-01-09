@@ -113,7 +113,7 @@
                     <div class="collapse mb-3" id="userGroupAvailableHelpCollapsePanel">
                         <div class="alert alert-info pb-0" role="alert">
                             <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
-                            <p class="ms-3">User becomes member of the groups you <span class="fw-bold fst-italic">drag and drop</span> from these available user groups to current user's groups panel.</p>
+                            <p class="ms-3"><span class="fw-bold fst-italic">Drag and drop</span> in the <span class="border border-4 rounded-3 bg-white app-border-dashed text-black text-opacity-25 p-1">appropriate area</span> the groups to which the user must belong.</p>
                         </div>
                     </div>
                     <div class="d-flex flex-wrap gap-2 p-2" id="userGroupAvailableContainer"></div>
@@ -132,12 +132,11 @@
 
 
     const editedUser = {{ user | tojson }};
-    const signedUser = {{ signed_user | tojson }};
 
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let userManageGroupsView = new UserManageGroupsView(editedUser, signedUser);
+        let userManageGroupsView = new UserManageGroupsView(editedUser);
         userManageGroupsView.refresh();
 
     });
