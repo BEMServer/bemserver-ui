@@ -68,23 +68,23 @@ export class ItemsCount extends HTMLElement {
         this.appendChild(this.#spinnerElmt);
     }
 
-    update(options = {}) {
+    update(options = {}, partial = false) {
         if (Number.isInteger(options.totalCount)) {
             this.setAttribute("total-count", options.totalCount.toString());
         }
-        else {
+        else if (!partial) {
             this.removeAttribute("total-count");
         }
         if (Number.isInteger(options.firstItem)) {
             this.setAttribute("first-item", options.firstItem.toString());
         }
-        else {
+        else if (!partial) {
             this.removeAttribute("first-item");
         }
         if (Number.isInteger(options.lastItem)) {
             this.setAttribute("last-item", options.lastItem.toString());
         }
-        else {
+        else if (!partial) {
             this.removeAttribute("last-item");
         }
     }
