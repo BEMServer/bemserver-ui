@@ -123,17 +123,18 @@ export class TimezonePicker extends HTMLDivElement {
 
     connectedCallback() {
         this.innerHTML = "";
+        this.classList.add("input-group");
 
         if (this.#title != null) {
-            this.classList.add("input-group");
-
             let selectorTitleElmt = document.createElement("span");
             selectorTitleElmt.classList.add("input-group-text");
             selectorTitleElmt.innerText = this.#title;
             this.appendChild(selectorTitleElmt);
         }
         else {
-            this.classList.add("d-sm-flex", "d-grid");
+            let iconElmt = document.createElement("i");
+            iconElmt.classList.add("bi", "bi-globe", "input-group-text");
+            this.appendChild(iconElmt);
         }
 
         this.#tzRegionSelectElmt = document.createElement("select");
@@ -141,14 +142,9 @@ export class TimezonePicker extends HTMLDivElement {
         this.#tzRegionSelectElmt.setAttribute("aria-label", "Select a timezone");
         this.appendChild(this.#tzRegionSelectElmt);
 
-        if (this.#title != null) {
-            let breakerElmt = document.createElement("div");
-            breakerElmt.classList.add("d-sm-none", "d-block", "w-100", "mb-1");
-            this.appendChild(breakerElmt);
-        }
-        else {
-            this.#tzRegionSelectElmt.classList.add("me-0", "me-sm-2", "mb-1", "mb-sm-0");
-        }
+        let breakerElmt = document.createElement("div");
+        breakerElmt.classList.add("d-sm-none", "d-block", "w-100", "mb-1");
+        this.appendChild(breakerElmt);
 
         this.#tzNameSelectElmt = document.createElement("select");
         this.#tzNameSelectElmt.classList.add("form-select");
@@ -164,6 +160,6 @@ export class TimezonePicker extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-timezone-picker") == null) {
-    customElements.define("app-timezone-picker", TimezonePicker, { extends: "div" });
+if (window.customElements.get("app-timezone-picker") == null) {
+    window.customElements.define("app-timezone-picker", TimezonePicker, { extends: "div" });
 }

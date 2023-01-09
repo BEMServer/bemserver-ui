@@ -123,13 +123,13 @@ body,
     background-color: var(--app-blue-200) !important;
 }
 
-.app-tabs .nav-item:hover {
+.app-tabs .nav-item:hover .nav-link:not(.disabled) {
     background-color: var(--app-blue) !important;
     border-top-left-radius: var(--bs-nav-tabs-border-radius);
     border-top-right-radius: var(--bs-nav-tabs-border-radius);
 }
 
-.app-tabs .nav-item:hover .nav-link:not(.active) {
+.app-tabs .nav-item:hover .nav-link:not(.active) .nav-link:not(.disabled) {
     color: var(--app-white);
 }
 
@@ -156,4 +156,9 @@ body,
     .app-panel-collapse .app-panel-collapse-body:first-child {
         width: 300px !important;
     }
+}
+
+.app-table-tr-selected > * {
+    background-color: var(--bs-table-hover-bg) !important;
+    color: var(--bs-table-hover-color) !important;
 }

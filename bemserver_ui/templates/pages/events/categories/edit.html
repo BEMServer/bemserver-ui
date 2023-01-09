@@ -1,0 +1,42 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Event category" %}
+{% set subtitle = "Edit" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<form id="delForm" action="{{ url_for('event_categories.delete', id=event_category.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ event_category.name }}&lt;/mark&gt; event category">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend class="invisible d-none">Event category information</legend>
+                <div class="mb-3">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" form="editForm" value="{{ event_category.name }}" minlength="1" maxlength="80" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="250" rows="3">{{ event_category.description }}</textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('event_categories.list') }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
+                    <form id="editForm" action="{{ url_for('event_categories.edit', id=event_category.id) }}" method="POST">
+                        <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                        <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

@@ -1,0 +1,98 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Event entry" %}
+{% set subtitle = "Edit" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<form id="delForm" action="{{ url_for('events.delete', id=event.id) }}" method="POST" data-modal-confirm-message="Delete event &lt;mark&gt;{{ event.category_name }}&lt;/mark&gt; from &lt;mark&gt;{{ event.source }}&lt;/mark&gt; at &lt;mark&gt;{{ event.timestamp | iso_datetime_format(tz_name=g.campaign_ctxt.tz_name) }}&lt;/mark&gt;">
+    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+</form>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <fieldset>
+                <legend class="invisible d-none">Event entry information</legend>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                        <label class="form-label" for="timestamp">Timestamp</label>
+                        <div class="form-control bg-dark bg-opacity-25">{{ event.timestamp | iso_datetime_format(tz_name=g.campaign_ctxt.tz_name) }}</div>
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="campaign_scope">Campaign scope</label>
+                        <div class="form-control bg-dark bg-opacity-25">{{ event.campaign_scope_name }}</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="source">Source</label>
+                        <div class="d-flex gap-2">
+                            <input form="editForm" type="text" class="form-control bg-dark bg-opacity-25" id="source" name="source" value="{{ event.source }}" required readonly>
+                            <button class="btn btn-sm btn-link" id="btnEditSource"><i class="bi bi-pencil"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                        <label class="form-label" for="event_level">Level</label>
+                        <select form="editForm" class="form-select" id="event_level" name="event_level" aria-label="Select a level" required>
+                            {% for x in event_levels %}
+                            <option value="{{ x.id }}"{% if x.id == event.level %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="event_category">Category</label>
+                        <select form="editForm" class="form-select" id="event_category" name="event_category" aria-label="Select a category" required>
+                            {% for x in event_categories %}
+                            <option value="{{ x.id }}"{% if x.id == event.category_id %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description</label>
+                    <textarea form="editForm" class="form-control" id="description" name="description" rows="4">{{ event.description }}</textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('events.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <form id="editForm" action="{{ url_for('events.edit', id=event.id) }}" method="POST">
+                        <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let inputSourceElmt = document.getElementById("source");
+        let btnEditSourceElmt = document.getElementById("btnEditSource");
+
+        btnEditSourceElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            inputSourceElmt.classList.remove("bg-dark", "bg-opacity-25");
+            inputSourceElmt.removeAttribute("readonly");
+            inputSourceElmt.select()
+            btnEditSourceElmt.remove();
+        });
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

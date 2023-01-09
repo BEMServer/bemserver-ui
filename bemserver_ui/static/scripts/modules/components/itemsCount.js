@@ -10,6 +10,10 @@ export class ItemsCount extends HTMLElement {
 
     #spinnerElmt = null;
 
+    get isLoading() {
+        return this.contains(this.#spinnerElmt);
+    }
+
     static get observedAttributes() {
         return ["total-count", "first-item", "last-item"];
     }
@@ -50,6 +54,10 @@ export class ItemsCount extends HTMLElement {
                     break;
             }
 
+            this.#update();
+        }
+        else if (this.isLoading)
+        {
             this.#update();
         }
     }

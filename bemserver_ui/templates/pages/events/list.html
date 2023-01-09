@@ -1,0 +1,147 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Events" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="false">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <div class="row g-2 mb-2">
+                                <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
+                                    <span>Between</span>
+                                    <div is="app-datetime-picker" id="timestamp_min" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                </div>
+                                <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
+                                    <span>and</span>
+                                    <div is="app-datetime-picker" id="timestamp_max" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                </div>
+                            </div>
+                            <div id="filtersContainer" class="d-xl-flex d-grid align-items-center gap-2 mb-2">
+                                <input type="text" class="form-control" id="sourceSearch" placeholder="Source..." aria-label="Source search" aria-describedby="sourceSearch" autofocus>
+                                <a id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap my-auto" role="button" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <nav class="row mb-2" aria-label="Events pagination">
+        <div class="col-auto align-self-center py-1">
+            <div is="app-pagesize-selector" id="pageSize"></div>
+        </div>
+        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+            <small class="text-nowrap text-muted"><app-items-count id="itemsCount"></app-items-count></small>
+            <ul is="app-pagination" id="pagination"></ul>
+        </div>
+    </nav>
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive-xl">
+                <table class="table table-sm table-hover table-bordered caption-top" id="eventsTable">
+                    <thead>
+                        <tr id="eventsHeader" class="align-top">
+                            <th scope="col"><a id="sort-timestamp" class="hstack gap-2" role="button" data-field="timestamp" data-direction="-"><span>Timestamp</span><i class="bi bi-sort-down"></i></a></th>
+                            <th scope="col">Source</th>
+                            <th scope="col">Level</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Campaign scope</th>
+                            <th scope="col">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" id="eventsContainer">
+                        <tr>
+                            <td colspan="6" class="text-center p-4">
+                                <div is="app-spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="eventInfoModal" data-bs-keyboard="true" tabindex="-1" aria-labelledby="eventInfoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="height: 80%;">
+        <div class="modal-content" style="height: 80%;">
+            <div class="modal-header">
+                <h5 class="modal-title font-monospace">Event information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="height: calc(100% - 135px);">
+                <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="row mb-3" id="eventInfoContainer"></div>
+                    <a id="eventEditLink" class="btn btn-sm btn-outline-secondary ms-auto w-auto text-nowrap" title="Edit event entry"><i class="bi bi-pencil"></i> Edit</a>
+                </div>
+                <div is="app-spinner" id="eventInfoTabSpinner" class="d-none"></div>
+                <ul id="eventInfoTabs" class="nav nav-tabs app-tabs justify-content-center d-none" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ts-tab" data-bs-toggle="tab" data-bs-target="#ts-tabcontent" type="button" role="tab" aria-controls="ts-tabcontent" aria-selected="false">Timeseries <span class="badge bg-secondary" id="tsCount">0</span></button>
+                    </li>
+                    {% for struct_elmt_type in structural_element_types %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="{{ struct_elmt_type }}s-tab" data-bs-toggle="tab" data-bs-target="#{{ struct_elmt_type }}s-tabcontent" type="button" role="tab" aria-controls="{{ struct_elmt_type }}s-tabcontent" aria-selected="false">{{ struct_elmt_type | capitalize }}s <span class="badge bg-secondary" id="{{ struct_elmt_type }}sCount">0</span></button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div id="eventInfoTabContents" class="tab-content overflow-auto border border-top-0 bg-white d-none">
+                    <div class="tab-pane show active p-3" id="ts-tabcontent" role="tabpanel" aria-labelledby="ts-tab"></div>
+                    {% for struct_elmt_type in structural_element_types %}
+                    <div class="tab-pane p-3" id="{{ struct_elmt_type }}s-tabcontent" role="tabpanel" aria-labelledby="{{ struct_elmt_type }}s-tab"></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between gap-2">
+                <nav class="hstack gap-2" aria-label="Events navigation">
+                    <ul class="pagination justify-content-end mb-0">
+                        <li class="page-item disabled"><a id="eventInfoNavFirst" class="page-link" title="First event" role="button"><i class="bi bi-chevron-double-left"></i></a></li>
+                        <li class="page-item disabled"><a id="eventInfoNavPrevious" class="page-link" title="Previous event" role="button"><i class="bi bi-chevron-left"></i></a></li>
+                        <li class="page-item disabled"><a id="eventInfoNavNext" class="page-link" title="Next event" role="button"><i class="bi bi-chevron-right"></i></a></li>
+                        <li class="page-item disabled"><a id="eventInfoNavLast" class="page-link" title="Last event" role="button"><i class="bi bi-chevron-double-right"></i></a></li>
+                    </ul>
+                    <small class="text-muted"><span id="eventInfoRowIndex">?</span> / <span id="eventInfoRowCount">?</span></small>
+                </nav>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { EventListView } from "{{ url_for('static', filename='scripts/modules/views/events/list.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let options = {
+            timezone: {{ g.campaign_ctxt.tz_name | tojson }},
+            structuralElementTypes: {{ structural_element_types | tojson }},
+        };
+
+        let evtListView = new EventListView(options);
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}
