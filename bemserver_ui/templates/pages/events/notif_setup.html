@@ -1,0 +1,116 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Events" %}
+{% set subtitle = "Notifications setup" %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('events.list') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Back to events"><i class="bi bi-arrow-return-left"></i> Back to events</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="alert alert-info mb-0" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                <span class="fw-bold">Default notification level</span> for not defined event categories is <span class="fw-bold fst-italic">{{ default_notification_level }}</span>.
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered caption-top" id="configTable">
+                    <caption class="text-end">
+                        <small><app-items-count id="itemsCount"></app-items-count></small>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center align-middle">Event category</th>
+                            <th scope="col" class="text-center">Notification level</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    </tbody>
+                    <tfoot>
+                        <tr class="align-middle">
+                            <td class="text-center text-nowrap">
+                                <div class="dropdown my-2">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="addEventCategoryBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-plus-circle"></i> Setup an event category
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="addEventCategoryBtn"></ul>
+                                    <sup class="ms-2"><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#addEventCategoryHelpCollapsePanel" aria-expanded="false" aria-controls="addEventCategoryHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
+                                </div>
+                            </td>
+                            <td class="p-2">
+                                <div class="collapse" id="addEventCategoryHelpCollapsePanel">
+                                    <div class="alert alert-info mb-0 pb-0" role="alert" style="max-width: 700px;">
+                                        <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                                        <p>You can <span class="fw-bold">add an event category</span> to select the <span class="fw-bold">notification level</span> wanted.</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editConfigModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editConfigModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editConfigModalLabel">Notification setup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-auto">Event category</dt>
+                    <dd id="editedEventCategoryLabel" class="col">?</dd>
+                </dl>
+                <div>
+                    <label for="editedNotificationLevel" class="form-label">Notification level</label>
+                    <select class="form-select form-select-sm" id="editedNotificationLevel" aria-label="Select a value" data-default="{{ default_notification_level }}">
+                        {% for x in event_levels %}
+                        <option value="{{ x.id }}"{% if x.id == default_notification_level %} selected{% endif %}>{{ x.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <input type="hidden" id="editedEventCategory">
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="saveConfigBtn" type="button" class="btn btn-sm btn-primary"><i class="bi bi-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import "{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}";
+    import { EventNotificationSetupView } from "{{ url_for('static', filename='scripts/modules/views/events/notifSetup.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let view = new EventNotificationSetupView(
+            {{ notif_config | tojson }},
+            {{ all_event_categories | tojson }},
+            {{ available_event_categories | tojson }},
+        );
+        view.refresh();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

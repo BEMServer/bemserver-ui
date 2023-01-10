@@ -5,7 +5,13 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
+<div class="d-flex gap-2">
+    <div class="hstack gap-3">
+        <a href="{{ url_for('events.notif_setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Setup notifications"><i class="bi bi-tools"></i> Notifications setup</a>
+        <div class="vr me-2"></div>
+    </div>
+    <a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
+</div>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -34,7 +40,7 @@
                                 </div>
                             </div>
                             <div id="filtersContainer" class="d-xl-flex d-grid align-items-center gap-2 mb-2">
-                                <input type="text" class="form-control" id="sourceSearch" placeholder="Source..." aria-label="Source search" aria-describedby="sourceSearch" autofocus>
+                                <input type="text" class="form-control form-control-sm" id="sourceSearch" placeholder="Source..." aria-label="Source search" aria-describedby="sourceSearch" autofocus>
                                 <a id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap my-auto" role="button" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
                             </div>
                         </div>
