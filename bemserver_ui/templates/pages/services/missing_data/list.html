@@ -1,0 +1,65 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Check missing data service" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="false">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <div class="d-sm-flex d-grid align-items-center gap-2">
+                                <input type="text" class="form-control form-control-sm" id="campaignNameSearch" placeholder="Campaign..." aria-label="Campaign name search" aria-describedby="campaignNameSearch" autofocus>
+                                <select class="form-select form-select-sm" id="campaign_state" name="campaign_state" aria-label="Select a filter value" data-default="{{ g.campaign_ctxt.campaign_state_overall }}">
+                                    <option value="{{ g.campaign_ctxt.campaign_state_overall }}" selected>All campaign states</option>
+                                    {% for x in g.campaign_ctxt.campaign_states %}
+                                    <option value="{{ x }}">{{ x | capitalize }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select class="form-select form-select-sm" id="service_state" name="service_state" aria-label="Select a filter value" data-default="all">
+                                    <option value="all" selected>All service states</option>
+                                    <option value="on">ON</option>
+                                    <option value="off">OFF</option>
+                                </select>
+                                <a id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap my-auto" role="button" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-between">
+        <div class="col">
+            <h5>Campaigns</h5>
+        </div>
+        <div class="col-auto text-end">
+            <small class="text-nowrap text-muted"><app-items-count id="itemsCount" total-count="{{ g.campaign_ctxt.campaigns_by_state[g.campaign_ctxt.campaign_state_overall] | length }}"></app-items-count></small>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="list-group" id="serviceStatesContainer">
+                <div class="text-center p-4 w-100">
+                    <div is="app-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/missingData/list.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}

@@ -1,0 +1,45 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Check missing data service" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row g-5">
+        <div class="col">
+            <div class="d-flex align-items-start gap-3">
+                <h5>Campaign</h5>
+                <span class="fw-bold text-{% if missing_data_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ missing_data_campaign.campaign_state | upper }}]</span>
+            </div>
+            <p class="text-break">{{ missing_data_campaign.campaign_name }}</p>
+        </div>
+        <div class="col">
+            <h5>Service state</h5>
+            {% if signed_user.is_admin %}
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_on" autocomplete="off"{% if missing_data_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-success" for="svc_state_on">ON</label>
+            <input type="radio" class="btn-check" name="svc_state" id="svc_state_off" autocomplete="off"{% if not missing_data_campaign.is_enabled %} checked{% endif %}>
+            <label class="btn btn-outline-danger" for="svc_state_off">OFF</label>
+            <input type="hidden" name="campaign_service_id" id="campaign_service_id"{% if missing_data_campaign.id is not none %} value="{{ missing_data_campaign.id }}"{% endif %}>
+            <input type="hidden" name="campaign_id" id="campaign_id"{% if missing_data_campaign.campaign_id is not none %} value="{{ missing_data_campaign.campaign_id }}"{% endif %}>
+            <input type="hidden" name="etag" id="etag" value="{{ etag }}">
+            {% else %}
+            {% if missing_data_campaign.is_enabled %}
+            <span class="fw-bold text-success text-opacity-75">ON</span>
+            {% else %}
+            <span class="fw-bold text-danger text-opacity-75">OFF</span>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% if signed_user.is_admin %}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/missingData/manage.js') }}"></script>
+{% endfilter %}
+{% endif %}
+{% endblock body_scripts %}
