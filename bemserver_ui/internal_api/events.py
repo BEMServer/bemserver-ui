@@ -107,3 +107,62 @@ def retrieve_structural_elements(id, type):
         structural_elements.append(struc_elmt_resp.data)
 
     return flask.jsonify({"data": structural_elements})
+
+
+def _extend_notif_setup_data(jsonData):
+    # Get event category name.
+    event_category_resp = flask.g.api_client.event_categories.getone(
+        jsonData["data"]["category_id"]
+    )
+    jsonData["data"]["category_name"] = event_category_resp.data["name"]
+    return jsonData
+
+
+@blp.route("/notifications/setup", methods=["POST"])
+@auth.signin_required
+@ensure_campaign_context
+def notif_setup_create():
+    payload = {
+        "notification_level": flask.request.json["notification_level"],
+        "user_id": flask.session["user"]["data"]["id"],
+        "category_id": flask.request.json["category_id"],
+    }
+    notif_setup_resp = flask.g.api_client.event_categories_by_users.create(payload)
+
+    jsonData = _extend_notif_setup_data(notif_setup_resp.toJSON())
+    return flask.jsonify(jsonData)
+
+
+@blp.route("/notifications/setup/<int:id>", methods=["PUT"])
+@auth.signin_required
+@ensure_campaign_context
+def notif_setup_update(id):
+    etag = flask.request.headers["ETag"]
+    payload = {
+        "notification_level": flask.request.json["notification_level"],
+        "category_id": flask.request.json["category_id"],
+    }
+    notif_setup_resp = flask.g.api_client.event_categories_by_users.update(
+        id, payload, etag=etag
+    )
+
+    jsonData = _extend_notif_setup_data(notif_setup_resp.toJSON())
+    return flask.jsonify(jsonData)
+
+
+@blp.route("/notifications/setup/<int:id>", methods=["DELETE"])
+@auth.signin_required
+@ensure_campaign_context
+def notif_setup_delete(id):
+    etag = flask.request.headers["ETag"]
+    flask.g.api_client.event_categories_by_users.delete(id, etag=etag)
+    return flask.jsonify({"success": True})
+
+
+@blp.route("/notifications/setup/<int:id>")
+@auth.signin_required
+@ensure_campaign_context
+def notif_setup_retrieve(id):
+    notif_setup_resp = flask.g.api_client.event_categories_by_users.getone(id)
+    jsonData = _extend_notif_setup_data(notif_setup_resp.toJSON())
+    return flask.jsonify(jsonData)
