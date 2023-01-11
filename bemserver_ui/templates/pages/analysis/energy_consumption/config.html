@@ -75,7 +75,7 @@
             </div>
             <div class="modal-body">
                 {% filter indent(width=16, first=False) %}
-                {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorConfig", filters={structural_element.type: structural_element.id}) -}}
+                {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorConfig", selection_limit=1, filters={structural_element.type: structural_element.id}) -}}
                 {% endfilter %}
                 <div class="mt-3">
                     <label for="editedWhFactor" class="form-label">Wh conversion factor</label>
