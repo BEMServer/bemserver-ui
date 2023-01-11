@@ -56,6 +56,8 @@ export class EventListView {
     #currentEventElmt = null;
     #eventInfoRowIndexElmt = null;
     #eventInfoRowCountElmt = null;
+    #eventInfoPageIndexElmt = null;
+    #eventInfoPageCountElmt = null;
     #eventInfoNavFirstElmt = null;
     #eventInfoNavPreviousElmt = null;
     #eventInfoNavNextElmt = null;
@@ -116,6 +118,8 @@ export class EventListView {
 
         this.#eventInfoRowIndexElmt = document.getElementById("eventInfoRowIndex");
         this.#eventInfoRowCountElmt = document.getElementById("eventInfoRowCount");
+        this.#eventInfoPageIndexElmt = document.getElementById("eventInfoPageIndex");
+        this.#eventInfoPageCountElmt = document.getElementById("eventInfoPageCount");
         this.#eventInfoNavFirstElmt = document.getElementById("eventInfoNavFirst");
         this.#eventInfoNavPreviousElmt = document.getElementById("eventInfoNavPrevious");
         this.#eventInfoNavNextElmt = document.getElementById("eventInfoNavNext");
@@ -320,9 +324,20 @@ export class EventListView {
                 this.#currentEventElmt.classList.remove("app-table-tr-selected");
             }
 
-            // Get event at index=0 in table.
-            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="0"]`);
-            this.#loadEventInfo();
+            let updateAndLoadEventInfo = () => {
+                // Get event at index=0 in table.
+                this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="0"]`);
+                this.#loadEventInfo();
+            };
+
+            // Need to load first page before loading event info?
+            if (this.#paginationElmt.page != this.#paginationElmt.firstPage) {
+                this.#paginationElmt.page = this.#paginationElmt.firstPage;
+                this.refresh(updateAndLoadEventInfo);
+            }
+            else {
+                updateAndLoadEventInfo();
+            }
         });
 
         this.#eventInfoNavPreviousElmt.addEventListener("click", (event) => {
@@ -332,10 +347,21 @@ export class EventListView {
                 this.#currentEventElmt.classList.remove("app-table-tr-selected");
             }
 
-            // Get event at index=curIndex-1 in table.
-            let prevIndex = Math.max(0, curIndex - 1);
-            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${prevIndex}"]`);
-            this.#loadEventInfo();
+            // Need to load previous page before loading event info?
+            if (curIndex <= 0 && this.#paginationElmt.previousPage < this.#paginationElmt.page) {
+                this.#paginationElmt.page = this.#paginationElmt.previousPage;
+                this.refresh(() => {
+                    // Get event at index=PAGE_SIZE in table.
+                    this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${this.#eventsContainerElmt.rows.length - 1}"]`);
+                    this.#loadEventInfo();
+                });
+            }
+            else {
+                // Get event at index=curIndex-1 in table.
+                let prevIndex = Math.max(0, curIndex - 1);
+                this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${prevIndex}"]`);
+                this.#loadEventInfo();
+            }
         });
 
         this.#eventInfoNavNextElmt.addEventListener("click", (event) => {
@@ -345,10 +371,21 @@ export class EventListView {
                 this.#currentEventElmt.classList.remove("app-table-tr-selected");
             }
 
-            // Get event at index=curIndex+1 in table.
-            let nextIndex = Math.min(Math.max(0, this.#eventsContainerElmt.rows.length - 1), curIndex + 1);
-            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${nextIndex}"]`);
-            this.#loadEventInfo();
+            // Need to load next page before loading event info?
+            if (curIndex >= this.#eventsContainerElmt.rows.length - 1 && this.#paginationElmt.nextPage > this.#paginationElmt.page) {
+                this.#paginationElmt.page = this.#paginationElmt.nextPage;
+                this.refresh(() => {
+                    // Get event at index=0 in table.
+                    this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="0"]`);
+                    this.#loadEventInfo();
+                });
+            }
+            else {
+                // Get event at index=curIndex+1 in table.
+                let nextIndex = Math.min(Math.max(0, this.#eventsContainerElmt.rows.length - 1), curIndex + 1);
+                this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${nextIndex}"]`);
+                this.#loadEventInfo();
+            }
         });
 
         this.#eventInfoNavLastElmt.addEventListener("click", (event) => {
@@ -356,9 +393,20 @@ export class EventListView {
                 this.#currentEventElmt.classList.remove("app-table-tr-selected");
             }
 
-            // Get event at index=PAGE_SIZE in table.
-            this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${this.#eventsContainerElmt.rows.length - 1}"]`);
-            this.#loadEventInfo();
+            let updateAndLoadEventInfo = () => {
+                // Get event at index=PAGE_SIZE in table.
+                this.#currentEventElmt = this.#eventsContainerElmt.querySelector(`tr[data-index="${this.#eventsContainerElmt.rows.length - 1}"]`);
+                this.#loadEventInfo();
+            };
+
+            // Need to load last page before loading event info?
+            if (this.#paginationElmt.lastPage > this.#paginationElmt.page) {
+                this.#paginationElmt.page = this.#paginationElmt.lastPage;
+                this.refresh(updateAndLoadEventInfo);
+            }
+            else {
+                updateAndLoadEventInfo();
+            }
         });
 
         window.addEventListener("resize", (event) => {
@@ -416,9 +464,12 @@ export class EventListView {
             this.#eventEditLinkElmt.href = flaskES6.urlFor(`events.edit`, {id: eventId});
 
             // Update footer navigation (on page-sized events table).
-            this.#eventInfoRowIndexElmt.innerText = (rowIndex + 1).toString();
-            this.#eventInfoRowCountElmt.innerText = this.#eventsContainerElmt.rows.length.toString();
-            if (rowIndex <= 0) {
+            let itemIndex = ((this.#paginationElmt.page - 1) * this.#pageSizeElmt.current) + rowIndex + 1;
+            this.#eventInfoRowIndexElmt.innerText = itemIndex.toString();
+            this.#eventInfoRowCountElmt.innerText = this.#paginationElmt.totalItems.toString();
+            this.#eventInfoPageIndexElmt.innerText = this.#paginationElmt.page.toString();
+            this.#eventInfoPageCountElmt.innerText = this.#paginationElmt.lastPage.toString();
+            if (itemIndex <= 1) {
                 this.#eventInfoNavFirstElmt.parentElement.classList.add("disabled");
                 this.#eventInfoNavPreviousElmt.parentElement.classList.add("disabled");
                 this.#eventInfoNavNextElmt.parentElement.classList.remove("disabled");
@@ -427,7 +478,7 @@ export class EventListView {
             else {
                 this.#eventInfoNavFirstElmt.parentElement.classList.remove("disabled");
                 this.#eventInfoNavPreviousElmt.parentElement.classList.remove("disabled");
-                if (rowIndex >= this.#eventsContainerElmt.rows.length - 1) {
+                if (itemIndex >= this.#paginationElmt.totalItems) {
                     this.#eventInfoNavNextElmt.parentElement.classList.add("disabled");
                     this.#eventInfoNavLastElmt.parentElement.classList.add("disabled");
                 }
@@ -700,7 +751,7 @@ export class EventListView {
         return structuralElementListElmt;
     }
 
-    refresh() {
+    refresh(afterResfreshCallback = null) {
         this.#itemsCountElmt.setLoading();
         this.#eventsContainerElmt.innerHTML = "";
         let loadingContainerElmt = document.createElement("tr");
@@ -776,6 +827,8 @@ export class EventListView {
                 }
                 this.#paginationElmt.reload(paginationOpts);
                 this.#itemsCountElmt.update({totalCount: this.#paginationElmt.totalItems, firstItem: this.#paginationElmt.startItem, lastItem: this.#paginationElmt.endItem});
+
+                afterResfreshCallback?.();
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
