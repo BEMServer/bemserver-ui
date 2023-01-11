@@ -444,9 +444,16 @@ export class EventListView {
                 colElmt.classList.add("col-auto");
                 this.#eventInfoContainerElmt.appendChild(colElmt);
 
+                // Header cell can be sorted and therefore have a link which we do not want to display here.
+                let headerText = headerCellElmt.innerHTML;
+                let headerSortElmt = headerCellElmt.querySelector("a");
+                if (headerSortElmt != null) {
+                    headerText = headerSortElmt.querySelector("span").innerHTML;
+                }
+
                 let headerInfoElmt = document.createElement("h6");
                 headerInfoElmt.classList.add("fw-bold");
-                headerInfoElmt.innerHTML = headerCellElmt.innerHTML;
+                headerInfoElmt.innerHTML = headerText;
                 colElmt.appendChild(headerInfoElmt);
                 let valueInfoElmt = document.createElement("p");
                 valueInfoElmt.innerHTML = this.#currentEventElmt.cells[cellIndex].innerHTML;
