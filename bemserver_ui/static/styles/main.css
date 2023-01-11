@@ -2,6 +2,8 @@
     --app-blue: #0088bd;
     --app-blue-rgb: 0, 136, 189;
     --app-blue-200: rgba(0, 136, 189, 0.2);
+    --app-blue-100: rgba(0, 136, 189, 0.1);
+    --app-blue-50: rgba(0, 136, 189, 0.05);
     --app-green: #95c11a;
     --app-green-rgb: 149, 193, 26;
     --app-white: #ffffff;
