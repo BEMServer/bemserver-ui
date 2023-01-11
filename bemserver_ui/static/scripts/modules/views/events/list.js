@@ -8,6 +8,7 @@ import "../../components/time/datetimePicker.js";
 import { FilterSelect } from "../../components/filterSelect.js";
 import { TimeDisplay } from "../../tools/time.js";
 import { Parser } from "../../tools/parser.js";
+import { EventLevelBadge } from "../../components/eventLevel.js";
 
 
 export class EventListView {
@@ -15,32 +16,6 @@ export class EventListView {
     #structuralElementTypes = []
     #tzName = "UTC";
     #defaultFilters = {};
-    #levelStyles = {
-        "default": {
-            icon: [],
-            badge: ["badge", "text-bg-dark", "p-2"],
-        },
-        "DEBUG": {
-            icon: ["bi", "bi-bug", "me-1"],
-            badge: ["badge", "text-bg-dark", "bg-opacity-50", "p-2"],
-        },
-        "INFO": {
-            icon: ["bi", "bi-info-square", "me-1"],
-            badge: ["badge", "text-bg-success", "bg-opacity-75", "p-2"],
-        },
-        "WARNING": {
-            icon: ["bi", "bi-exclamation-triangle", "me-1"],
-            badge: ["badge", "text-bg-warning", "bg-opacity-50", "p-2"],
-        },
-        "ERROR": {
-            icon: ["bi", "bi-x-octagon", "me-1"],
-            badge: ["badge", "text-bg-danger", "bg-opacity-50", "text-black", "p-2"],
-        },
-        "CRITICAL": {
-            icon: ["bi", "bi-radioactive", "me-1"],
-            badge: ["badge", "text-bg-danger", "p-2"],
-        },
-    }
 
     #internalAPIRequester = null;
     #filterReqIDs = {};
@@ -609,19 +584,9 @@ export class EventListView {
         eventElmt.appendChild(levelCellElmt);
         let levelData = this.#getLevelData(eventData.level);
         if (levelData != null) {
-            let levelStyle = this.#levelStyles[levelData.name];
-            if (levelStyle == null) {
-                levelStyle = this.#levelStyles["default"];
-            }
-            let levelElmt = document.createElement("span");
-            levelElmt.classList.add(...levelStyle.badge);
-            let levelIconElmt = document.createElement("i");
-            levelIconElmt.classList.add(...levelStyle.icon);
-            levelElmt.appendChild(levelIconElmt);
-            let levelNameElmt = document.createElement("span");
-            levelNameElmt.innerText = levelData.name;
-            levelElmt.appendChild(levelNameElmt);
-            levelCellElmt.appendChild(levelElmt);
+            let levelBadgeElmt = new EventLevelBadge();
+            levelBadgeElmt.setAttribute("level", levelData.name.toUpperCase());
+            levelCellElmt.appendChild(levelBadgeElmt);
         }
 
         let categoryElmt = document.createElement("td");
