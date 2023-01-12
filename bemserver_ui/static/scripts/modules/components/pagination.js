@@ -267,7 +267,21 @@ export class Pagination extends HTMLUListElement {
     }
     set page(value) {
         let cleanValue = Parser.parseIntOrDefault(value, 1);
-        this.reload({ pageSize: this.#pageSize, totalItems: this.#totalItems, totalPages: this.#totalPages, firstPage: this.#firstPage, lastPage: this.#lastPage, page: cleanValue, previousPage: this.#previousPage, nextPage: this.#nextPage });
+        if (cleanValue != this.#page) {
+            this.reload({ pageSize: this.#pageSize, totalItems: this.#totalItems, totalPages: this.#totalPages, firstPage: this.#firstPage, lastPage: this.#lastPage, page: cleanValue, previousPage: this.#previousPage, nextPage: this.#nextPage });
+        }
+    }
+    get firstPage() {
+        return this.#firstPage;
+    }
+    get lastPage() {
+        return this.#lastPage;
+    }
+    get previousPage() {
+        return this.#previousPage;
+    }
+    get nextPage() {
+        return this.#nextPage;
     }
 
     #loadOptions(options = {}) {
@@ -313,14 +327,7 @@ export class Pagination extends HTMLUListElement {
 
             if (this.#page != event.detail.page) {
                 this.#page = event.detail.page;
-                this.#currentActivePageItemElmt.isActive = false;
-                for (let pageItemElmt of this.children) {
-                    if (pageItemElmt.isActivable && pageItemElmt.page == this.#page) {
-                        this.#currentActivePageItemElmt = pageItemElmt;
-                        this.#currentActivePageItemElmt.isActive = true;
-                        break;
-                    }
-                }
+                this.#updatePageItemActive();
             }
             else {
                 event.stopPropagation();
@@ -350,8 +357,24 @@ export class Pagination extends HTMLUListElement {
             this.appendChild(this.#nextPageItemElmt);
             this.appendChild(this.#lastPageItemElmt);
         }
+        else {
+            this.#updatePageItemActive();
+        }
 
         this.#hasPaginationDataChanged = false;
+    }
+
+    #updatePageItemActive() {
+        if (this.#currentActivePageItemElmt != null) {
+            this.#currentActivePageItemElmt.isActive = false;
+            for (let pageItemElmt of this.children) {
+                if (pageItemElmt.isActivable && pageItemElmt.page == this.#page) {
+                    this.#currentActivePageItemElmt = pageItemElmt;
+                    this.#currentActivePageItemElmt.isActive = true;
+                    break;
+                }
+            }
+        }
     }
 
     #renderPageItemElements() {

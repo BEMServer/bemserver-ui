@@ -123,14 +123,20 @@ body,
     background-color: var(--app-blue-200) !important;
 }
 
-.app-tabs .nav-item:hover .nav-link:not(.disabled) {
-    background-color: var(--app-blue) !important;
-    border-top-left-radius: var(--bs-nav-tabs-border-radius);
-    border-top-right-radius: var(--bs-nav-tabs-border-radius);
+.app-tabs .nav-item .nav-link:not(.active):not(.disabled) {
+    border-left-color: var(--app-blue-100);
+    border-top-color: var(--app-blue-100);
+    border-right-color: var(--app-blue-100);
+    background-color: var(--app-blue-50) !important;
 }
 
-.app-tabs .nav-item:hover .nav-link:not(.active) .nav-link:not(.disabled) {
-    color: var(--app-white);
+.app-tabs .nav-item:hover .nav-link:not(.active):not(.disabled) {
+    background-color: var(--app-blue) !important;
+    border-bottom-color: var(--app-blue);
+}
+
+.app-tabs .nav-item:hover .nav-link:not(.active):not(.disabled) {
+    color: var(--app-white) !important;
 }
 
 .app-spinner {

@@ -12,15 +12,16 @@
         </button>
         <div id="dropdownSearchPanel" class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownSearchBtn">
             <div class="d-flex align-items-center gap-2 mb-2">
-                <input type="text" class="form-control" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
+                <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
                 <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
             </div>
             <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2 mb-2">
                 <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
             </div>
+            <hr class="mb-2">
             <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity"></i></small>
-                <div class="d-lg-flex d-grid text-end gap-lg-3">
+                <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity ms-1"></i></small>
+                <div class="d-lg-flex d-grid align-items-center text-end gap-lg-3">
                     <a id="selectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">select all in page</small></a>
                     <a id="unselectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">unselect all in page</small></a>
                     <div class="vr d-none d-lg-block"></div>

@@ -2,6 +2,7 @@ import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6 } from "../../../app.js";
 import { ModalConfirm } from "../../components/modalConfirm.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
+import { EventLevelBadge } from "../../components/eventLevel.js";
 
 
 export class EventNotificationSetupView {
@@ -10,7 +11,6 @@ export class EventNotificationSetupView {
     #postReqID = null;
     #putReqID = null;
     #deleteReqID = null;
-    #getReqID = null;
 
     #messagesElmt = null;
 
@@ -156,13 +156,13 @@ export class EventNotificationSetupView {
 
     #refreshConf(eventCategoryId) {
         let idSuffix = `${eventCategoryId}`;
-        let spanElmt = document.getElementById(`spanLevel-${idSuffix}`);
+        let levelBadgeElmt = document.getElementById(`levelBadge-${idSuffix}`);
         let notSavedElmt = document.getElementById(`notSaved-${idSuffix}`);
         let btnDeleteConfigElmt = document.getElementById(`btnDelConfig-${idSuffix}`);
 
         let confData = this.#config[eventCategoryId];
 
-        spanElmt.innerText = confData.notification_level;
+        levelBadgeElmt.setAttribute("level", confData.notification_level.toString().toUpperCase());
 
         if (confData.id != null) {
             btnDeleteConfigElmt.classList.remove("d-none");
@@ -197,11 +197,10 @@ export class EventNotificationSetupView {
         tdInfoContainerElmt.classList.add("d-flex", "flex-wrap", "align-items-center", "gap-2");
         tdContainerElmt.appendChild(tdInfoContainerElmt);
 
-        let tdSpanElmt = document.createElement("span");
-        tdSpanElmt.classList.add("text-nowrap");
-        tdSpanElmt.id = `spanLevel-${idSuffix}`;
-        tdSpanElmt.innerText = eventCategoryConfigData.notification_level;
-        tdInfoContainerElmt.appendChild(tdSpanElmt);
+        let levelBadgeElmt = new EventLevelBadge();
+        levelBadgeElmt.id = `levelBadge-${idSuffix}`;
+        levelBadgeElmt.setAttribute("level", eventCategoryConfigData.notification_level.toString().toUpperCase());
+        tdInfoContainerElmt.appendChild(levelBadgeElmt);
 
         if (eventCategoryConfigData.id == null) {
             let notSavedElmt = document.createElement("small");
