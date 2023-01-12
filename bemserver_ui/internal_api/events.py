@@ -17,7 +17,6 @@ blp = flask.Blueprint("events", __name__, url_prefix="/events")
 def retrieve_list():
     sort = flask.request.args.get("sort")
 
-    # TODO: add campaign_id filter when API is ready
     filters = {}
     if "page_size" in flask.request.args:
         filters["page_size"] = flask.request.args["page_size"]
@@ -58,7 +57,9 @@ def retrieve_list():
         else:
             filters["timestamp_max"] = timestamp_max.isoformat()
 
-    events_resp = flask.g.api_client.events.getall(sort=sort, **filters)
+    events_resp = flask.g.api_client.events.getall(
+        campaign_id=flask.g.campaign_ctxt.id, sort=sort, **filters
+    )
 
     return flask.jsonify(
         {"data": events_resp.data, "pagination": events_resp.pagination}
