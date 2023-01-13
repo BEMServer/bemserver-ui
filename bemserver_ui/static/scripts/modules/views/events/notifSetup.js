@@ -251,6 +251,7 @@ export class EventNotificationSetupView {
                 () => {
                     delete this.#config[eventCategoryConfigData.category_id];
                     rowElmt.remove();
+                    this.#addEventCatMenuItemElmt(eventCategoryConfigData.category_id);
                 },
                 (error) => {
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
@@ -277,6 +278,35 @@ export class EventNotificationSetupView {
         this.#itemsCountElmt.update({firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount, totalCount: totalCount});
     }
 
+    #addEventCatMenuItemElmt(eventCategoryId) {
+        let menuItemLinkElmt = document.createElement("a");
+        menuItemLinkElmt.classList.add("dropdown-item");
+        menuItemLinkElmt.setAttribute("role", "button");
+        menuItemLinkElmt.innerText = this.#eventCategories[eventCategoryId];
+
+        let menuItemElmt = document.createElement("li");
+        menuItemElmt.appendChild(menuItemLinkElmt);
+
+        this.#addEventCategoryMenuElmt.appendChild(menuItemElmt);
+
+        menuItemLinkElmt.addEventListener("click", (event) => {
+            menuItemElmt.remove();
+            this.#availableEventCategoryIds = this.#availableEventCategoryIds.filter((availableEventCategoryId) => availableEventCategoryId != eventCategoryId);
+
+            this.#config[eventCategoryId] = {
+                category_id: eventCategoryId,
+                category_name: this.#eventCategories[eventCategoryId],
+                notification_level: this.#editedNotificationLevelInputElmt.getAttribute("data-default"),
+            };
+
+            this.#addEventCategoryFromConfig(this.#config[eventCategoryId]);
+
+            if (this.#availableEventCategoryIds.length <= 0) {
+                this.#configTableFooterElmt.classList.add("d-none");
+            }
+        });
+    }
+
     refresh() {
         this.#configTableBodyElmt.innerHTML = "";
 
@@ -285,32 +315,7 @@ export class EventNotificationSetupView {
         }
 
         for (let eventCategoryId of this.#availableEventCategoryIds) {
-            let menuItemLinkElmt = document.createElement("a");
-            menuItemLinkElmt.classList.add("dropdown-item");
-            menuItemLinkElmt.setAttribute("role", "button");
-            menuItemLinkElmt.innerText = this.#eventCategories[eventCategoryId];
-
-            let menuItemElmt = document.createElement("li");
-            menuItemElmt.appendChild(menuItemLinkElmt);
-
-            this.#addEventCategoryMenuElmt.appendChild(menuItemElmt);
-
-            menuItemLinkElmt.addEventListener("click", (event) => {
-                menuItemElmt.remove();
-                this.#availableEventCategoryIds = this.#availableEventCategoryIds.filter((availableEventCategoryId) => availableEventCategoryId != eventCategoryId);
-
-                this.#config[eventCategoryId] = {
-                    category_id: eventCategoryId,
-                    category_name: this.#eventCategories[eventCategoryId],
-                    notification_level: this.#editedNotificationLevelInputElmt.getAttribute("data-default"),
-                };
-
-                this.#addEventCategoryFromConfig(this.#config[eventCategoryId]);
-
-                if (this.#availableEventCategoryIds.length <= 0) {
-                    this.#configTableFooterElmt.classList.add("d-none");
-                }
-            });
+            this.#addEventCatMenuItemElmt(eventCategoryId);
         };
 
         if (this.#availableEventCategoryIds.length <= 0) {
