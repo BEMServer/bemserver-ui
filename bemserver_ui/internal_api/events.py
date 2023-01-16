@@ -5,6 +5,7 @@ import flask
 from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.const import STRUCTURAL_ELEMENT_TYPES
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
@@ -84,30 +85,52 @@ def retrieve_categories():
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_timeseries(id):
-    ts_event_resp = flask.g.api_client.timeseries_by_events.getall(event_id=id)
+    filters = {}
+    if "page_size" in flask.request.args:
+        filters["page_size"] = flask.request.args["page_size"]
+    if "page" in flask.request.args:
+        filters["page"] = flask.request.args["page"]
 
-    ts = []
-    for ts_event in ts_event_resp.data:
-        ts_resp = flask.g.api_client.timeseries.getone(id=ts_event["timeseries_id"])
-        ts.append(ts_resp.data)
-
-    return flask.jsonify({"data": ts})
+    ts_resp = flask.g.api_client.timeseries.getall(
+        campaign_id=flask.g.campaign_ctxt.id, event_id=id, **filters
+    )
+    return flask.jsonify({"data": ts_resp.data, "pagination": ts_resp.pagination})
 
 
 @blp.route("/<int:id>/structural_elements/<string:type>")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_structural_elements(id, type):
+    filters = {}
+    if "page_size" in flask.request.args:
+        filters["page_size"] = flask.request.args["page_size"]
+    if "page" in flask.request.args:
+        filters["page"] = flask.request.args["page"]
+
     api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
-    struct_elmt_event_resp = api_events_resource.getall(event_id=id)
+    struct_elmt_event_resp = api_events_resource.getall(event_id=id, **filters)
+
+    def _build_structural_element_path(struct_elmt_data):
+        path = None
+        if type in STRUCTURAL_ELEMENT_TYPES:
+            path = " / ".join(
+                [
+                    struct_elmt_data[x]["name"]
+                    for x in STRUCTURAL_ELEMENT_TYPES
+                    if x != type and x in struct_elmt_data
+                ]
+            )
+        return path
 
     structural_elements = []
     for struct_elmt_event in struct_elmt_event_resp.data:
-        api_resource = getattr(flask.g.api_client, f"{type}s")
-        struc_elmt_resp = api_resource.getone(id=struct_elmt_event[f"{type}_id"])
-        structural_elements.append(struc_elmt_resp.data)
+        struct_elmt_event["path"] = _build_structural_element_path(struct_elmt_event)
+        struct_elmt_event = {**struct_elmt_event, **struct_elmt_event[type]}
+        structural_elements.append(struct_elmt_event)
 
-    return flask.jsonify({"data": structural_elements})
+    return flask.jsonify(
+        {"data": structural_elements, "pagination": struct_elmt_event_resp.pagination}
+    )
 
 
 def _extend_notif_setup_data(jsonData):
