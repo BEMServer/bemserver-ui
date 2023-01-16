@@ -29,6 +29,13 @@ def retrieve_list():
     for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
         if f"{struct_elmt}_id" in flask.request.args:
             filters[f"{struct_elmt}_id"] = flask.request.args[f"{struct_elmt}_id"]
+        if (
+            struct_elmt not in ["space", "zone"]
+            and f"recurse_{struct_elmt}_id" in flask.request.args
+        ):
+            filters[f"recurse_{struct_elmt}_id"] = flask.request.args[
+                f"recurse_{struct_elmt}_id"
+            ]
 
     # Get timeseries list.
     timeseries_resp = flask.g.api_client.timeseries.getall(sort="+name", **filters)

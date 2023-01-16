@@ -23,6 +23,8 @@ export class StructuralElementsExploreView {
 
     #searchElmt = null;
     #clearSearchBtnElmt = null;
+    #tsRecurseSwitchElmt = null;
+    #tsStructuralElementNameElmt = null;
     #tsPageSizeElmt = null;
     #tsCountElmt = null;
     #tsPaginationElmt = null;
@@ -58,6 +60,8 @@ export class StructuralElementsExploreView {
 
         this.#searchElmt = document.getElementById("search");
         this.#clearSearchBtnElmt = document.getElementById("clear");
+        this.#tsRecurseSwitchElmt = document.getElementById("tsRecurseSwitch");
+        this.#tsStructuralElementNameElmt = document.getElementById("tsStructuralElementNameElmt");
         this.#tsPageSizeElmt = document.getElementById("tsPageSize");
         this.#tsCountElmt = document.getElementById("tsCount");
         this.#tsPaginationElmt = document.getElementById("tsPagination");
@@ -124,6 +128,13 @@ export class StructuralElementsExploreView {
 
             this.#searchElmt.value = "";
             this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
+
+        this.#tsRecurseSwitchElmt.addEventListener("change", (event) => {
+            event.preventDefault();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.refresh();
@@ -322,11 +333,19 @@ export class StructuralElementsExploreView {
             this.#tsReqID = null;
         }
 
+        if (["space", "zone"].includes(type)) {
+            this.#tsRecurseSwitchElmt.checked = false;
+            this.#tsRecurseSwitchElmt.setAttribute("disabled", true);
+        }
+        else {
+            this.#tsRecurseSwitchElmt.removeAttribute("disabled");
+        }
+
         let tsOptions = {
             "page_size": this.#tsPageSizeElmt.current,
             "page": this.#tsPaginationElmt.page,
         };
-        tsOptions[`${type}_id`] = id;
+        tsOptions[`${this.#tsRecurseSwitchElmt.checked ? "recurse_" : ""}${type}_id`] = id;
         if (this.#searchElmt.value != "") {
             tsOptions["search"] = this.#searchElmt.value;
         }
