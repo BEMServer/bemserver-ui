@@ -8,16 +8,16 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <div class="row mb-3">
+            <div class="row mb-2">
                 <div class="col">
                     {% filter indent(width=20, first=False) %}
                     {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorCompleteness") -}}
                     {% endfilter %}
                 </div>
             </div>
-            <div class="row d-lg-flex d-grid mb-3">
+            <div class="row d-lg-flex d-grid mb-2">
                 <div class="col pb-3 pb-lg-0">
-                    <div class="input-group">
+                    <div class="input-group input-group-sm">
                         <span class="input-group-text">Period</span>
                         <select id="period" class="form-select" aria-label="Select a period" required>
                             <option value="Year-Monthly" selected>Year-Monthly</option>
@@ -30,13 +30,13 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="input-group">
+                    <div class="input-group input-group-sm">
                         <span class="input-group-text">Timeseries data state</span>
                         <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
                     </div>
                 </div>
             </div>
-            <div class="row d-lg-flex d-grid mb-3">
+            <div class="row d-lg-flex d-grid mb-2">
                 <div class="col pb-3 pb-lg-0">
                     <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ dt_end.date().isoformat() }}" time="{{ dt_end.time().isoformat()[:5] }}" tzname="{{ g.campaign_ctxt.tz_name }}" required>
                         <div is="app-spinner"></div>

@@ -172,7 +172,7 @@ export class DatetimePicker extends HTMLDivElement {
 
     connectedCallback() {
         this.innerHTML = "";
-        this.classList.add("input-group");
+        this.classList.add("input-group", "input-group-sm");
 
         if (this.#title != null) {
             this.#titleSpanElmt = document.createElement("span");

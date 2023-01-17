@@ -123,7 +123,7 @@ export class TimezonePicker extends HTMLDivElement {
 
     connectedCallback() {
         this.innerHTML = "";
-        this.classList.add("input-group");
+        this.classList.add("input-group", "input-group-sm");
 
         if (this.#title != null) {
             let selectorTitleElmt = document.createElement("span");
