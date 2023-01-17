@@ -2,7 +2,7 @@ import { flaskES6 } from "../../../app.js";
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { Spinner } from "../../components/spinner.js";
-import { ItemsCount } from "../../components/itemsCount.js";
+import "../../components/itemsCount.js";
 import "../../components/pagination.js";
 import "../../components/time/datetimePicker.js";
 import { FilterSelect } from "../../components/filterSelect.js";
@@ -16,11 +16,13 @@ export class EventListView {
     #structuralElementTypes = []
     #tzName = "UTC";
     #defaultFilters = {};
+    #defaultEventInfoTabListPageSize = 10;
 
     #internalAPIRequester = null;
     #filterReqIDs = {};
     #searchReqID = null;
     #loadEventInfoTabReqIDs = {};
+    #loadEventInfoTabReqPageIDs = {};
 
     #messagesElmt = null;
 
@@ -48,7 +50,10 @@ export class EventListView {
     #eventInfoContainerElmt = null;
     #eventInfoTabElmts = {};
     #eventInfoTabContentElmts = {};
-    #eventInfoCountElmts = {};
+    #eventInfoTotalCountElmts = {};
+    #eventInfoTabItemsCountElmts = {};
+    #eventInfoTabPaginationElmts = {};
+    #eventInfoTabListContainerElmts = {};
     #eventInfoTabSpinnerElmt = null;
     #eventInfoTabsElmt = null;
     #eventInfoTabContentsElmt = null;
@@ -106,11 +111,17 @@ export class EventListView {
         this.#eventInfoContainerElmt = document.getElementById("eventInfoContainer");
         this.#eventInfoTabElmts["ts"] = document.getElementById("ts-tab");
         this.#eventInfoTabContentElmts["ts"] = document.getElementById("ts-tabcontent");
-        this.#eventInfoCountElmts["ts"] = document.getElementById("tsCount");
+        this.#eventInfoTotalCountElmts["ts"] = document.getElementById("tsTotalCount");
+        this.#eventInfoTabItemsCountElmts["ts"] = document.getElementById("tsItemsCount");
+        this.#eventInfoTabPaginationElmts["ts"] = document.getElementById("tsPagination");
+        this.#eventInfoTabListContainerElmts["ts"] = document.getElementById("tsListContainer");
         for (let structuralElment of this.#structuralElementTypes) {
             this.#eventInfoTabElmts[structuralElment] = document.getElementById(`${structuralElment}s-tab`);
             this.#eventInfoTabContentElmts[structuralElment] = document.getElementById(`${structuralElment}s-tabcontent`);
-            this.#eventInfoCountElmts[structuralElment] = document.getElementById(`${structuralElment}sCount`);
+            this.#eventInfoTotalCountElmts[structuralElment] = document.getElementById(`${structuralElment}sTotalCount`);
+            this.#eventInfoTabItemsCountElmts[structuralElment] = document.getElementById(`${structuralElment}sItemsCount`);
+            this.#eventInfoTabPaginationElmts[structuralElment] = document.getElementById(`${structuralElment}sPagination`);
+            this.#eventInfoTabListContainerElmts[structuralElment] = document.getElementById(`${structuralElment}sListContainer`);
         }
         this.#eventInfoTabSpinnerElmt = document.getElementById("eventInfoTabSpinner");
         this.#eventInfoTabsElmt = document.getElementById("eventInfoTabs");
@@ -532,15 +543,17 @@ export class EventListView {
         // Init web request data, used to load event info tabs.
         let eventInfoTabReqData = {
             "ts": {
-                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_timeseries`, {id: eventId}),
-                "listRenderer": this.#createTimeseriesListElement,
+                "fetchUrl": `api.events.retrieve_timeseries`,
+                "fetchUrlParams": {id: eventId, page_size: this.#defaultEventInfoTabListPageSize},
+                "listItemRenderer": this.#createTimeseriesElement,
                 "iconClasses": ["bi", "bi-clock-history", "me-1"],
             },
         };
         for (let structuralElmentType of this.#structuralElementTypes) {
             eventInfoTabReqData[structuralElmentType] = {
-                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_structural_elements`, {id: eventId, type: structuralElmentType}),
-                "listRenderer": this.#createStructuralElementsListElement,
+                "fetchUrl": `api.events.retrieve_structural_elements`,
+                "fetchUrlParams": {id: eventId, type: structuralElmentType, page_size: this.#defaultEventInfoTabListPageSize},
+                "listItemRenderer": this.#createStructuralElementsElement,
                 "iconClasses": structuralElmentType != "zone" ? ["bi", "bi-building", "me-1"] : ["bi", "bi-bullseye", "me-1"],
             };
         }
@@ -555,34 +568,47 @@ export class EventListView {
 
         // Execute web request and load data on tabs.
         this.#loadEventInfoTabReqIDs = this.#internalAPIRequester.gets(
-            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return eventInfoTabReqOpts["fetchUrl"]; }),
+            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return flaskES6.urlFor(eventInfoTabReqOpts["fetchUrl"], eventInfoTabReqOpts["fetchUrlParams"]); }),
             (data) => {
                 for (let [index, eventInfoTabData] of Object.entries(data)) {
+                    let eventInfoTabDataPagination = eventInfoTabData.pagination;
                     eventInfoTabData = eventInfoTabData.data != undefined ? eventInfoTabData.data : eventInfoTabData;
 
                     let eventInfoTabKey = Object.keys(eventInfoTabReqData)[index];
                     let eventInfoReqOpts = eventInfoTabReqData[eventInfoTabKey];
 
-                    this.#eventInfoTabContentElmts[eventInfoTabKey].innerHTML = "";
-                    this.#eventInfoCountElmts[eventInfoTabKey].innerText = eventInfoTabData.length.toString();
+                    this.#eventInfoTotalCountElmts[eventInfoTabKey].innerText = eventInfoTabDataPagination.total.toString();
+                    this.#eventInfoTabListContainerElmts[eventInfoTabKey].innerHTML = "";
 
                     if (eventInfoTabData.length > 0) {
-                        let eventInfoTabListItemsCountContainerElmt = document.createElement("div");
-                        eventInfoTabListItemsCountContainerElmt.classList.add("text-end", "mb-2");
-                        this.#eventInfoTabContentElmts[eventInfoTabKey].appendChild(eventInfoTabListItemsCountContainerElmt);
+                        this.#updateEventInfoTab(eventInfoTabData, eventInfoTabDataPagination, eventInfoTabKey, eventInfoReqOpts);
 
-                        let eventInfoTabListItemsCountFormatterElmt = document.createElement("small");
-                        eventInfoTabListItemsCountFormatterElmt.classList.add("text-nowrap", "text-muted");
-                        eventInfoTabListItemsCountContainerElmt.appendChild(eventInfoTabListItemsCountFormatterElmt);
+                        this.#eventInfoTabContentElmts[eventInfoTabKey].addEventListener("pageItemClick", (event) => {
+                            if (this.#loadEventInfoTabReqPageIDs[eventInfoTabKey] != null) {
+                                this.#internalAPIRequester.abort(this.#loadEventInfoTabReqPageIDs[eventInfoTabKey]);
+                                this.#loadEventInfoTabReqPageIDs[eventInfoTabKey] = null;
+                            }
 
-                        let eventInfoTabListItemsCount = new ItemsCount();
-                        eventInfoTabListItemsCountFormatterElmt.appendChild(eventInfoTabListItemsCount);
-                        eventInfoTabListItemsCount.update({firstItem: 1, lastItem: eventInfoTabData.length, totalCount: eventInfoTabData.length});
+                            this.#eventInfoTabListContainerElmts[eventInfoTabKey].innerHTML = "";
+                            this.#eventInfoTabListContainerElmts[eventInfoTabKey].appendChild(new Spinner());
 
-                        if (eventInfoReqOpts["listRenderer"] != null) {
-                            let eventInfoTabListElmt = eventInfoReqOpts["listRenderer"](eventInfoTabData, eventInfoReqOpts["iconClasses"]);
-                            this.#eventInfoTabContentElmts[eventInfoTabKey].appendChild(eventInfoTabListElmt);
-                        }
+                            let eventInfoReqParams = eventInfoReqOpts["fetchUrlParams"];
+                            eventInfoReqParams["page"] = event.detail.page;
+
+                            this.#loadEventInfoTabReqPageIDs[eventInfoTabKey] = this.#internalAPIRequester.get(
+                                flaskES6.urlFor(eventInfoReqOpts["fetchUrl"], eventInfoReqParams),
+                                (dataTab) => {
+                                    let dataTabPagination = dataTab.pagination;
+                                    dataTab = dataTab.data != undefined ? dataTab.data : dataTab;
+
+                                    this.#updateEventInfoTab(dataTab, dataTabPagination, eventInfoTabKey, eventInfoReqOpts);
+                                },
+                                (error) => {
+                                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                                    this.#messagesElmt.appendChild(flashMsgElmt);
+                                },
+                            );
+                        });
 
                         this.#eventInfoTabElmts[eventInfoTabKey].classList.remove("disabled", "d-none");
                         this.#eventInfoTabContentElmts[eventInfoTabKey].classList.remove("d-none");
@@ -618,6 +644,42 @@ export class EventListView {
                 }
             },
         );
+    }
+
+    #updateEventInfoTab(data, pagination, eventInfoTabKey, eventInfoTabOpts) {
+        this.#eventInfoTabListContainerElmts[eventInfoTabKey].innerHTML = "";
+
+        if (data.length > 0) {
+            if (eventInfoTabOpts["listItemRenderer"] != null) {
+                for (let dataRow of data) {
+                    let listItemElmt = eventInfoTabOpts["listItemRenderer"](dataRow, eventInfoTabOpts["iconClasses"]);
+                    this.#eventInfoTabListContainerElmts[eventInfoTabKey].appendChild(listItemElmt);
+                }
+            }
+        }
+        else {
+            let noDataElmt = document.createElement("span");
+            noDataElmt.classList.add("fst-italic", "text-muted", "text-center");
+            noDataElmt.innerText = "No data";
+            this.#eventInfoTabListContainerElmts[eventInfoTabKey].appendChild(noDataElmt);
+        }
+
+        this.#eventInfoTabPaginationElmts[eventInfoTabKey].reload({
+            pageSize: this.#defaultEventInfoTabListPageSize,
+            totalItems: pagination.total,
+            totalPages: pagination.total_pages,
+            page: pagination.page,
+            firstPage: pagination.first_page,
+            lastPage: pagination.last_page,
+            previousPage: pagination.previous_page,
+            nextPage: pagination.next_page,
+        });
+
+        this.#eventInfoTabItemsCountElmts[eventInfoTabKey].update({
+            firstItem: this.#eventInfoTabPaginationElmts[eventInfoTabKey].startItem,
+            lastItem: this.#eventInfoTabPaginationElmts[eventInfoTabKey].endItem,
+            totalCount: this.#eventInfoTabPaginationElmts[eventInfoTabKey].totalItems,
+        });
     }
 
     #createEventElement(eventData, rowIndex) {
@@ -666,89 +728,69 @@ export class EventListView {
         return eventElmt;
     }
 
-    #createTimeseriesListElement(tsList, iconClasses) {
-        let tsListElmt = null;
-        if (tsList.length > 0) {
-            tsListElmt = document.createElement("div");
-            tsListElmt.classList.add("list-group");
-            for (let tsData of tsList) {
-                let tsElmt = document.createElement("div");
-                tsElmt.classList.add("list-group-item");
+    #createTimeseriesElement(tsData, iconClasses) {
+        let tsElmt = document.createElement("div");
+        tsElmt.classList.add("list-group-item");
 
-                let tsHeaderElmt = document.createElement("div");
-                tsHeaderElmt.classList.add("d-flex", "gap-1");
+        let tsHeaderElmt = document.createElement("div");
+        tsHeaderElmt.classList.add("d-flex", "gap-1");
 
-                let iconElmt = document.createElement("i");
-                iconElmt.classList.add(...iconClasses);
-                tsHeaderElmt.appendChild(iconElmt);
+        let iconElmt = document.createElement("i");
+        iconElmt.classList.add(...iconClasses);
+        tsHeaderElmt.appendChild(iconElmt);
 
-                let nameSpanElmt = document.createElement("span");
-                nameSpanElmt.classList.add("fw-bold", "text-break");
-                nameSpanElmt.innerText = tsData.name;
-                tsHeaderElmt.appendChild(nameSpanElmt);
+        let nameSpanElmt = document.createElement("span");
+        nameSpanElmt.classList.add("fw-bold", "text-break");
+        nameSpanElmt.innerText = tsData.name;
+        tsHeaderElmt.appendChild(nameSpanElmt);
 
-                if (tsData.unit_symbol) {
-                    let unitSpanElmt = document.createElement("span");
-                    unitSpanElmt.classList.add("text-muted");
-                    unitSpanElmt.innerText = `[${tsData.unit_symbol}]`;
-                    tsHeaderElmt.appendChild(unitSpanElmt);
-                }
-
-                tsElmt.appendChild(tsHeaderElmt);
-
-                let tsDescElmt = document.createElement("small");
-                tsDescElmt.classList.add("fst-italic", "text-muted");
-                tsDescElmt.innerText = tsData.description;
-                tsElmt.appendChild(tsDescElmt);
-
-                tsListElmt.appendChild(tsElmt);
-            }
+        if (tsData.unit_symbol) {
+            let unitSpanElmt = document.createElement("span");
+            unitSpanElmt.classList.add("text-muted");
+            unitSpanElmt.innerText = `[${tsData.unit_symbol}]`;
+            tsHeaderElmt.appendChild(unitSpanElmt);
         }
-        else {
-            tsListElmt = document.createElement("span");
-            tsListElmt.classList.add("fst-italic", "text-muted", "text-center");
-            tsListElmt.innerText = "No data";
-        }
-        return tsListElmt;
+
+        tsElmt.appendChild(tsHeaderElmt);
+
+        let tsDescElmt = document.createElement("small");
+        tsDescElmt.classList.add("fst-italic", "text-muted");
+        tsDescElmt.innerText = tsData.description;
+        tsElmt.appendChild(tsDescElmt);
+
+        return tsElmt;
     }
 
-    #createStructuralElementsListElement(structuralElementList, iconClasses) {
-        let structuralElementListElmt = null;
-        if (structuralElementList.length > 0) {
-            structuralElementListElmt = document.createElement("div");
-            structuralElementListElmt.classList.add("list-group");
-            for (let structuralElementData of structuralElementList) {
-                let structuralElementElmt = document.createElement("div");
-                structuralElementElmt.classList.add("list-group-item");
+    #createStructuralElementsElement(structuralElementData, iconClasses) {
+        let structuralElementElmt = document.createElement("div");
+        structuralElementElmt.classList.add("list-group-item");
 
-                let structuralElementHeaderElmt = document.createElement("div");
-                structuralElementHeaderElmt.classList.add("d-flex", "gap-1");
+        let structuralElementHeaderElmt = document.createElement("div");
+        structuralElementHeaderElmt.classList.add("d-flex", "align-items-center", "gap-1");
+        structuralElementElmt.appendChild(structuralElementHeaderElmt);
 
-                let iconElmt = document.createElement("i");
-                iconElmt.classList.add(...iconClasses);
-                structuralElementHeaderElmt.appendChild(iconElmt);
+        let iconElmt = document.createElement("i");
+        iconElmt.classList.add(...iconClasses);
+        structuralElementHeaderElmt.appendChild(iconElmt);
 
-                let nameSpanElmt = document.createElement("span");
-                nameSpanElmt.classList.add("fw-bold", "text-break");
-                nameSpanElmt.innerText = structuralElementData.name;
-                structuralElementHeaderElmt.appendChild(nameSpanElmt);
+        let nameSpanElmt = document.createElement("span");
+        nameSpanElmt.classList.add("fw-bold", "text-break");
+        nameSpanElmt.innerText = structuralElementData.name;
+        structuralElementHeaderElmt.appendChild(nameSpanElmt);
 
-                structuralElementElmt.appendChild(structuralElementHeaderElmt);
-
-                let descElmt = document.createElement("small");
-                descElmt.classList.add("fst-italic", "text-muted");
-                descElmt.innerText = structuralElementData.description;
-                structuralElementElmt.appendChild(descElmt);
-
-                structuralElementListElmt.appendChild(structuralElementElmt);
-            }
+        if (structuralElementData.path != null) {
+            let pathElmt = document.createElement("small");
+            pathElmt.classList.add("text-muted", "ms-3");
+            pathElmt.innerText = structuralElementData.path;
+            structuralElementHeaderElmt.appendChild(pathElmt);
         }
-        else {
-            structuralElementListElmt = document.createElement("span");
-            structuralElementListElmt.classList.add("fst-italic", "text-muted", "text-center");
-            structuralElementListElmt.innerText = "No data";
-        }
-        return structuralElementListElmt;
+
+        let descElmt = document.createElement("small");
+        descElmt.classList.add("fst-italic", "text-muted");
+        descElmt.innerText = structuralElementData.description;
+        structuralElementElmt.appendChild(descElmt);
+
+        return structuralElementElmt;
     }
 
     refresh(afterResfreshCallback = null) {

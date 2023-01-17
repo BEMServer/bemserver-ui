@@ -99,18 +99,30 @@
                 <div is="app-spinner" id="eventInfoTabSpinner" class="d-none"></div>
                 <ul id="eventInfoTabs" class="nav nav-tabs app-tabs justify-content-center d-none" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="ts-tab" data-bs-toggle="tab" data-bs-target="#ts-tabcontent" type="button" role="tab" aria-controls="ts-tabcontent" aria-selected="false">Timeseries <span class="badge bg-secondary" id="tsCount">0</span></button>
+                        <button class="nav-link active" id="ts-tab" data-bs-toggle="tab" data-bs-target="#ts-tabcontent" type="button" role="tab" aria-controls="ts-tabcontent" aria-selected="false">Timeseries <span class="badge bg-secondary" id="tsTotalCount">0</span></button>
                     </li>
                     {% for struct_elmt_type in structural_element_types %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="{{ struct_elmt_type }}s-tab" data-bs-toggle="tab" data-bs-target="#{{ struct_elmt_type }}s-tabcontent" type="button" role="tab" aria-controls="{{ struct_elmt_type }}s-tabcontent" aria-selected="false">{{ struct_elmt_type | capitalize }}s <span class="badge bg-secondary" id="{{ struct_elmt_type }}sCount">0</span></button>
+                        <button class="nav-link" id="{{ struct_elmt_type }}s-tab" data-bs-toggle="tab" data-bs-target="#{{ struct_elmt_type }}s-tabcontent" type="button" role="tab" aria-controls="{{ struct_elmt_type }}s-tabcontent" aria-selected="false">{{ struct_elmt_type | capitalize }}s <span class="badge bg-secondary" id="{{ struct_elmt_type }}sTotalCount">0</span></button>
                     </li>
                     {% endfor %}
                 </ul>
                 <div id="eventInfoTabContents" class="tab-content overflow-auto border border-top-0 bg-white d-none">
-                    <div class="tab-pane show active p-3" id="ts-tabcontent" role="tabpanel" aria-labelledby="ts-tab"></div>
+                    <div class="tab-pane show active p-3" id="ts-tabcontent" role="tabpanel" aria-labelledby="ts-tab">
+                        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="tsItemsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="tsPagination"></ul>
+                        </div>
+                        <div id="tsListContainer" class="list-group"></div>
+                    </div>
                     {% for struct_elmt_type in structural_element_types %}
-                    <div class="tab-pane p-3" id="{{ struct_elmt_type }}s-tabcontent" role="tabpanel" aria-labelledby="{{ struct_elmt_type }}s-tab"></div>
+                    <div class="tab-pane p-3" id="{{ struct_elmt_type }}s-tabcontent" role="tabpanel" aria-labelledby="{{ struct_elmt_type }}s-tab">
+                        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="{{ struct_elmt_type }}sItemsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="{{ struct_elmt_type }}sPagination"></ul>
+                        </div>
+                        <div id="{{ struct_elmt_type }}sListContainer" class="list-group"></div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
