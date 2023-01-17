@@ -46,7 +46,7 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
         this.innerHTML = "";
 
         if (this.#title != null) {
-            this.classList.add("input-group");
+            this.classList.add("input-group", "input-group-sm");
 
             let titleSpanElmt = document.createElement("span");
             titleSpanElmt.classList.add("input-group-text");

@@ -8,30 +8,22 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
-            <div class="row mb-3">
+            <div class="row mb-2">
                 <div class="col">
                     {% filter indent(width=20, first=False) %}
                     {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExplore") -}}
                     {% endfilter %}
                 </div>
             </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <div class="input-group">
-                        <span class="input-group-text">Timeseries data state</span>
-                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
-                    </div>
-                </div>
-            </div>
-            <div class="row mb-3">
+            <div class="row mb-2">
                 <div class="col">
                     <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ g.campaign_ctxt.tz_name }}" required>
                         <div is="app-spinner"></div>
                     </div>
                 </div>
             </div>
-            <div class="row d-xl-flex d-grid mb-3">
-                <div class="col pb-3 pb-xl-0">
+            <div class="row d-xl-flex d-grid mb-2">
+                <div class="col pb-2 pb-xl-0">
                     <div is="app-datetime-picker" id="start_datetime" title="From" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
                         <div is="app-spinner"></div>
                     </div>
@@ -42,9 +34,15 @@
                     </div>
                 </div>
             </div>
-            <div class="row d-xl-flex d-grid mb-3">
-                <div class="col pb-3 pb-xl-0">
-                    <div class="input-group">
+            <div class="row d-xl-flex d-grid mb-2">
+                <div class="col pb-2 pb-xl-0">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Timeseries data state</span>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+                    </div>
+                </div>
+                <div class="col pb-2 pb-xl-0">
+                    <div class="input-group input-group-sm">
                         <span class="input-group-text">Aggregation mode</span>
                         <select class="form-select" id="agg" name="agg" aria-label="Select an aggregation mode">
                             <option value="none" selected>No aggregation</option>
