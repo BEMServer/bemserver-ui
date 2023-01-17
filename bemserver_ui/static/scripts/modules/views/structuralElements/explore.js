@@ -4,49 +4,67 @@ import { Spinner } from "../../components/spinner.js";
 import "../../components/itemsCount.js";
 import "../../components/pagination.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
+import { TimeDisplay } from "../../tools/time.js";
+import { EventLevelBadge } from "../../components/eventLevel.js";
 
 
 export class StructuralElementsExploreView {
 
+    #tzName = "UTC";
     #messagesElmt = null;
 
     #internalAPIRequester = null;
     #generalReqID = null;
     #propertiesReqID = null;
     #tsReqID = null;
+    #eventsReqID = null;
 
     #tabSitesElmts = null;
     #tabPropertiesElmts = null;
-    #tabTimeseriesElmts = null;
     #generalTabContentElmt = null;
     #propertiesTabContentElmt = null;
 
-    #searchElmt = null;
-    #clearSearchBtnElmt = null;
+    #tsSearchElmt = null;
+    #tsClearSearchBtnElmt = null;
     #tsRecurseSwitchElmt = null;
-    #tsStructuralElementNameElmt = null;
     #tsPageSizeElmt = null;
     #tsCountElmt = null;
     #tsPaginationElmt = null;
     #tsListElmt = null;
 
+    #eventsSearchElmt = null;
+    #eventsClearSearchBtnElmt = null;
+    #eventsRecurseSwitchElmt = null;
+    #eventsPageSizeElmt = null;
+    #eventsCountElmt = null;
+    #eventsPaginationElmt = null;
+    #eventsListElmt = null;
+
     #tabSitesSelected = null;
     #tabPropertiesSelected = null;
-    #tabTimeseriesSelected = null;
 
     #selectedItemsPerTab = {};
     #renderPerTab = {
         "general-tab": this.#renderGeneral.bind(this),
         "properties-tab": this.#renderProperties.bind(this),
         "timeseries-tab": this.#renderTimeseries.bind(this),
+        "events-tab": this.#renderEvents.bind(this),
     }
     #alreadyLoadedPerTab = {};
 
-    constructor() {
+    constructor(options = {}) {
+        this.#internalAPIRequester = new InternalAPIRequest();
+
+        this.#loadOptions(options);
         this.#cacheDOM();
         this.#initEventListeners();
 
-        this.#internalAPIRequester = new InternalAPIRequest();
+        this.#updateTsSearchState();
+        this.#updateEventsSearchState();
+    }
+
+    #loadOptions(options = {}) {
+        this.#tzName = options.timezone || "UTC";
     }
 
     #cacheDOM() {
@@ -54,18 +72,24 @@ export class StructuralElementsExploreView {
 
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
         this.#tabPropertiesElmts = [].slice.call(document.querySelectorAll("#tabProperties button[data-bs-toggle='tab']"));
-        this.#tabTimeseriesElmts = [].slice.call(document.querySelectorAll("#tabTimeseries button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
         this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
 
-        this.#searchElmt = document.getElementById("search");
-        this.#clearSearchBtnElmt = document.getElementById("clear");
+        this.#tsSearchElmt = document.getElementById("tsSearch");
+        this.#tsClearSearchBtnElmt = document.getElementById("tsClear");
         this.#tsRecurseSwitchElmt = document.getElementById("tsRecurseSwitch");
-        this.#tsStructuralElementNameElmt = document.getElementById("tsStructuralElementNameElmt");
         this.#tsPageSizeElmt = document.getElementById("tsPageSize");
         this.#tsCountElmt = document.getElementById("tsCount");
         this.#tsPaginationElmt = document.getElementById("tsPagination");
-        this.#tsListElmt = document.getElementById("tsListElmt");
+        this.#tsListElmt = document.getElementById("tsList");
+
+        this.#eventsSearchElmt = document.getElementById("eventsSearch");
+        this.#eventsClearSearchBtnElmt = document.getElementById("eventsClear");
+        this.#eventsRecurseSwitchElmt = document.getElementById("eventsRecurseSwitch");
+        this.#eventsPageSizeElmt = document.getElementById("eventsPageSize");
+        this.#eventsCountElmt = document.getElementById("eventsCount");
+        this.#eventsPaginationElmt = document.getElementById("eventsPagination");
+        this.#eventsListElmt = document.getElementById("eventsList");
     }
 
     #initEventListeners() {
@@ -96,38 +120,21 @@ export class StructuralElementsExploreView {
             });
         }
 
-        for (let tabElmt of this.#tabTimeseriesElmts) {
-            if (tabElmt.classList.contains("active")) {
-                this.#tabTimeseriesSelected = tabElmt;
-            }
-            this.#alreadyLoadedPerTab[tabElmt.id] = false;
-            tabElmt.addEventListener("shown.bs.tab", (event) => {
-                // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
-                this.#tabTimeseriesSelected = event.target;
-                this.refresh();
-            });
-        }
-
-        this.#searchElmt.addEventListener("input", (event) => {
+        this.#tsSearchElmt.addEventListener("input", (event) => {
             event.preventDefault();
 
-            if (event.target.value != "") {
-                this.#clearSearchBtnElmt.classList.remove("d-none", "invisible");
-            }
-            else {
-                this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
-            }
+            this.#updateTsSearchState();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.#tsPaginationElmt.page = 1;
             this.refresh();
         });
 
-        this.#clearSearchBtnElmt.addEventListener("click", (event) => {
+        this.#tsClearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            this.#searchElmt.value = "";
-            this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+            this.#tsSearchElmt.value = "";
+            this.#updateTsSearchState();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.refresh();
@@ -156,6 +163,72 @@ export class StructuralElementsExploreView {
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.refresh();
         });
+
+        this.#eventsSearchElmt.addEventListener("input", (event) => {
+            event.preventDefault();
+
+            this.#updateEventsSearchState();
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#eventsPaginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#eventsClearSearchBtnElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            this.#eventsSearchElmt.value = "";
+            this.#updateEventsSearchState();
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
+
+        this.#eventsRecurseSwitchElmt.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
+
+        this.#eventsPageSizeElmt.addEventListener("pageSizeChange", (event) => {
+            event.preventDefault();
+
+            if (event.detail.newValue != event.detail.oldValue) {
+                this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+                this.#eventsPaginationElmt.page = 1;
+                this.refresh();
+            }
+        });
+
+        this.#eventsPaginationElmt.addEventListener("pageItemClick", (event) => {
+            event.preventDefault();
+
+            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.refresh();
+        });
+    }
+
+    #updateTsSearchState() {
+        if (this.#tsSearchElmt.value != "") {
+            this.#tsSearchElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            this.#tsClearSearchBtnElmt.classList.remove("d-none", "invisible");
+        }
+        else {
+            this.#tsSearchElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            this.#tsClearSearchBtnElmt.classList.add("d-none", "invisible");
+        }
+    }
+
+    #updateEventsSearchState() {
+        if (this.#eventsSearchElmt.value != "") {
+            this.#eventsSearchElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            this.#eventsClearSearchBtnElmt.classList.remove("d-none", "invisible");
+        }
+        else {
+            this.#eventsSearchElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            this.#eventsClearSearchBtnElmt.classList.add("d-none", "invisible");
+        }
     }
 
     #getEditBtnHTML(type, id, tab=null) {
@@ -239,6 +312,8 @@ export class StructuralElementsExploreView {
     #renderNoData() {
         this.#generalTabContentElmt.innerHTML = "";
         this.#propertiesTabContentElmt.innerHTML = "";
+        this.#tsListElmt.innerHTML = "";
+        this.#eventsListElmt.innerHTML = "";
     }
 
     #renderGeneral(id, type, path) {
@@ -323,6 +398,59 @@ export class StructuralElementsExploreView {
         }
     }
 
+    #populateEventList(eventsList) {
+        this.#eventsListElmt.innerHTML = "";
+        if (eventsList.length > 0) {
+            for (let eventData of eventsList) {
+                let eventElmt = document.createElement("div");
+                eventElmt.classList.add("list-group-item");
+
+                let eventHeaderElmt = document.createElement("div");
+                eventHeaderElmt.classList.add("d-flex", "align-items-center", "gap-1", "w-100");
+                eventElmt.appendChild(eventHeaderElmt);
+
+                let iconElmt = document.createElement("i");
+                iconElmt.classList.add("bi", "bi-journal-x", "me-1");
+                eventHeaderElmt.appendChild(iconElmt);
+
+                let headerContentElmt = document.createElement("div");
+                headerContentElmt.classList.add("d-flex", "justify-content-between", "align-items-center", "gap-2", "w-100");
+                eventHeaderElmt.appendChild(headerContentElmt);
+
+                let timestampElmt = document.createElement("h6");
+                timestampElmt.classList.add("text-nowrap", "mb-0");
+                timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+                headerContentElmt.appendChild(timestampElmt);
+
+                let levelBadgeElmt = new EventLevelBadge();
+                levelBadgeElmt.setAttribute("level", eventData.level.toUpperCase());
+                headerContentElmt.appendChild(levelBadgeElmt);
+
+                let bodyContentElmt = document.createElement("div");
+                bodyContentElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-2");
+                eventElmt.appendChild(bodyContentElmt);
+
+                let eventDescElmt = document.createElement("small");
+                eventDescElmt.classList.add("fst-italic", "text-muted");
+                eventDescElmt.innerText = eventData.description;
+                bodyContentElmt.appendChild(eventDescElmt);
+
+                let sourceElmt = document.createElement("span");
+                sourceElmt.classList.add("text-nowrap");
+                sourceElmt.innerText = eventData.source;
+                bodyContentElmt.appendChild(sourceElmt);
+
+                this.#eventsListElmt.appendChild(eventElmt);
+            }
+        }
+        else {
+            let nodataSpanElmt = document.createElement("span");
+            nodataSpanElmt.classList.add("fst-italic", "text-muted", "text-center");
+            nodataSpanElmt.innerText = "No data";
+            this.#eventsListElmt.appendChild(nodataSpanElmt);
+        }
+    }
+
     #renderTimeseries(id, type, path) {
         this.#tsCountElmt.setLoading();
         this.#tsListElmt.innerHTML = "";
@@ -346,8 +474,8 @@ export class StructuralElementsExploreView {
             "page": this.#tsPaginationElmt.page,
         };
         tsOptions[`${this.#tsRecurseSwitchElmt.checked ? "recurse_" : ""}${type}_id`] = id;
-        if (this.#searchElmt.value != "") {
-            tsOptions["search"] = this.#searchElmt.value;
+        if (this.#tsSearchElmt.value != "") {
+            tsOptions["search"] = this.#tsSearchElmt.value;
         }
 
         this.#tsReqID = this.#internalAPIRequester.get(
@@ -367,6 +495,58 @@ export class StructuralElementsExploreView {
                 this.#tsCountElmt.update({totalCount: this.#tsPaginationElmt.totalItems, firstItem: this.#tsPaginationElmt.startItem, lastItem: this.#tsPaginationElmt.endItem});
 
                 this.#populateTimeseriesList(data.data);
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #renderEvents(id, type, path) {
+        this.#eventsCountElmt.setLoading();
+        this.#eventsListElmt.innerHTML = "";
+        this.#eventsListElmt.appendChild(new Spinner());
+
+        if (this.#eventsReqID != null) {
+            this.#internalAPIRequester.abort(this.#eventsReqID);
+            this.#eventsReqID = null;
+        }
+
+        if (["space", "zone"].includes(type)) {
+            this.#eventsRecurseSwitchElmt.checked = false;
+            this.#eventsRecurseSwitchElmt.setAttribute("disabled", true);
+        }
+        else {
+            this.#eventsRecurseSwitchElmt.removeAttribute("disabled");
+        }
+
+        let eventsOptions = {
+            "page_size": this.#eventsPageSizeElmt.current,
+            "page": this.#eventsPaginationElmt.page,
+        };
+        eventsOptions[`${this.#eventsRecurseSwitchElmt.checked ? "recurse_" : ""}${type}_id`] = id;
+        if (this.#eventsSearchElmt.value != "") {
+            eventsOptions["in_source"] = this.#eventsSearchElmt.value;
+        }
+
+        this.#eventsReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
+            (data) => {
+                let eventsPaginationOpts = {
+                    pageSize: this.#eventsPageSizeElmt.current,
+                    totalItems: data.pagination.total,
+                    totalPages: data.pagination.total_pages,
+                    page: data.pagination.page,
+                    firstPage: data.pagination.first_page,
+                    lastPage: data.pagination.last_page,
+                    previousPage: data.pagination.previous_page,
+                    nextPage: data.pagination.next_page,
+                }
+                this.#eventsPaginationElmt.reload(eventsPaginationOpts);
+                this.#eventsCountElmt.update({totalCount: this.#eventsPaginationElmt.totalItems, firstItem: this.#eventsPaginationElmt.startItem, lastItem: this.#eventsPaginationElmt.endItem});
+
+                this.#populateEventList(data.data);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});

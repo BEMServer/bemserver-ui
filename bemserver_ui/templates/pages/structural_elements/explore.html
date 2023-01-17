@@ -51,6 +51,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="timeseries-tab" data-bs-toggle="tab" data-bs-target="#timeseries-tabcontent" type="button" role="tab" aria-controls="timeseries-tabcontent" aria-selected="false">Timeseries</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-tabcontent" type="button" role="tab" aria-controls="events-tabcontent" aria-selected="false">Events</button>
+                </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabPropertiesContent">
                 <div class="tab-pane fade show active p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab"></div>
@@ -67,8 +70,8 @@
                     <div class="row mb-3">
                         <div class="d-flex align-items-center gap-2">
                             <label class="form-label m-0" for="search">Search</label>
-                            <input type="text" class="form-control form-control-sm" id="search" name="search" autofocus>
-                            <a id="clear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+                            <input type="text" class="form-control form-control-sm" id="tsSearch" name="tsSearch" placeholder="Name..." autofocus>
+                            <a id="tsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
                         </div>
                     </div>
                     <nav class="row" aria-label="Timeseries pagination">
@@ -80,7 +83,34 @@
                             <ul is="app-pagination" id="tsPagination"></ul>
                         </div>
                     </nav>
-                    <div id="tsListElmt" class="list-group py-2"></div>
+                    <div id="tsList" class="list-group py-2"></div>
+                </div>
+                <div class="tab-pane fade p-3" id="events-tabcontent" role="tabpanel" aria-labelledby="events-tab">
+                    <div class="row mb-1">
+                        <div class="col">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="eventsRecurseSwitch">
+                                <label class="form-check-label" for="eventsRecurseSwitch">include events located in child elements</label>
+                            </div>
+                        </div>               
+                    </div>
+                    <div class="row mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label m-0" for="search">Search</label>
+                            <input type="text" class="form-control form-control-sm" id="eventsSearch" name="eventsSearch" placeholder="Source..." autofocus>
+                            <a id="eventsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+                        </div>
+                    </div>
+                    <nav class="row" aria-label="Events pagination">
+                        <div class="col-auto align-self-center py-1">
+                            <div is="app-pagesize-selector" id="eventsPageSize"></div>
+                        </div>
+                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="eventsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="eventsPagination"></ul>
+                        </div>
+                    </nav>
+                    <div id="eventsList" class="list-group py-2"></div>
                 </div>
             </div>
         </div>
@@ -98,7 +128,11 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let structuralElmts = new StructuralElementsExploreView();
+        let options = {
+            timezone: {{ g.campaign_ctxt.tz_name | tojson }},
+        };
+
+        let structuralElmts = new StructuralElementsExploreView(options);
         let treeSites = new Tree("treeSites", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
         let treeZones = new Tree("treeZones", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
 

@@ -5,7 +5,10 @@ import flask
 from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
-from bemserver_ui.common.const import STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+    STRUCTURAL_ELEMENT_TYPES,
+)
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
@@ -57,6 +60,16 @@ def retrieve_list():
             flask.abort(422, description="Invalid timestamp min!")
         else:
             filters["timestamp_max"] = timestamp_max.isoformat()
+    for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
+        if f"{struct_elmt}_id" in flask.request.args:
+            filters[f"{struct_elmt}_id"] = flask.request.args[f"{struct_elmt}_id"]
+        if (
+            struct_elmt not in ["space", "zone"]
+            and f"recurse_{struct_elmt}_id" in flask.request.args
+        ):
+            filters[f"recurse_{struct_elmt}_id"] = flask.request.args[
+                f"recurse_{struct_elmt}_id"
+            ]
 
     events_resp = flask.g.api_client.events.getall(
         campaign_id=flask.g.campaign_ctxt.id, sort=sort, **filters
@@ -112,7 +125,7 @@ def retrieve_structural_elements(id, type):
 
     def _build_structural_element_path(struct_elmt_data):
         path = None
-        if type in STRUCTURAL_ELEMENT_TYPES:
+        if type in FULL_STRUCTURAL_ELEMENT_TYPES:
             path = " / ".join(
                 [
                     struct_elmt_data[x]["name"]
