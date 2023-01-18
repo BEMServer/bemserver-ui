@@ -69,12 +69,6 @@ export class ItemsCount extends HTMLElement {
     }
 
     update(options = {}, partial = false) {
-        if (Number.isInteger(options.totalCount)) {
-            this.setAttribute("total-count", options.totalCount.toString());
-        }
-        else if (!partial) {
-            this.removeAttribute("total-count");
-        }
         if (Number.isInteger(options.firstItem)) {
             this.setAttribute("first-item", options.firstItem.toString());
         }
@@ -86,6 +80,12 @@ export class ItemsCount extends HTMLElement {
         }
         else if (!partial) {
             this.removeAttribute("last-item");
+        }
+        if (Number.isInteger(options.totalCount)) {
+            this.setAttribute("total-count", options.totalCount.toString());
+        }
+        else if (!partial) {
+            this.removeAttribute("total-count");
         }
     }
 }
