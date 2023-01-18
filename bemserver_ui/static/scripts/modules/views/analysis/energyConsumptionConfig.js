@@ -20,6 +20,7 @@ export class EnergyConsumptionConfigView {
     #addEnergySourceBtnElmt = null;
     #addEnergySourceMenuElmt = null;
     #saveSelectedTimeseriesBtnElmt = null;
+    #itemsCountElmt = null;
 
     #structuralElement = {};
     #config = null;
@@ -61,6 +62,7 @@ export class EnergyConsumptionConfigView {
         this.#configTableElmt = document.getElementById("configTable");
         this.#configTableBodyElmt = this.#configTableElmt.querySelector("tbody");
         this.#configTableFooterElmt = this.#configTableElmt.querySelector("tfoot");
+        this.#itemsCountElmt = document.getElementById("itemsCount");
 
         if (this.#isEditable) {
             this.#addEnergySourceBtnElmt = document.getElementById("addEnergySourceBtn");
@@ -353,6 +355,9 @@ export class EnergyConsumptionConfigView {
         }
 
         this.#configTableBodyElmt.appendChild(rowElmt);
+
+        let totalCount = Object.keys(this.#config).length;
+        this.#itemsCountElmt.update({firstItem: 1, lastItem: totalCount, totalCount: totalCount});
     }
 
     refresh() {

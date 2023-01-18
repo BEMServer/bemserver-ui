@@ -22,7 +22,7 @@
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top" id="configTable">
                     <caption class="text-end">
-                        <small><app-items-count total-count="{{ ener_cons_config | length }}"></app-items-count></small>
+                        <small><app-items-count id="itemsCount" first-item="1" last-item="{{ ener_cons_config | length }}" total-count="{{ ener_cons_config | length }}"></app-items-count></small>
                     </caption>
                     <thead>
                         <tr>
