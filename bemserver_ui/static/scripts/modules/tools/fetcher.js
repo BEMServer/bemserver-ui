@@ -46,6 +46,10 @@ export class InternalAPIRequest {
         if (response.ok) {
             return response.json();
         }
+        else if (response.status == 304) {
+            // Data not modified.
+            return null;
+        }
         return Promise.reject(response);
     }
 
@@ -109,7 +113,9 @@ export class InternalAPIRequest {
             this.#processRawResponse
         ).then(
             (data) => {
-                resolveCallback?.(data);
+                if (data != null) {
+                    resolveCallback?.(data);
+                }
             }
         ).catch(
             (error) => {
@@ -141,7 +147,9 @@ export class InternalAPIRequest {
         return this.#fetchPromises[requestID];
     }
 
+    // TODO: pass etag as optional arg
     get(url, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        // TODO: optional etag arg should be passed in headers
         return this.#executeRequest(url, null, resolveCallback, rejectCallback, finallyCallback);
     }
 
