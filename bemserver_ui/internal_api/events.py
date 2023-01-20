@@ -36,6 +36,8 @@ def retrieve_list():
         filters["level_min"] = flask.request.args["level_min"]
     if "category" in flask.request.args:
         filters["category_id"] = flask.request.args["category"]
+    if "timeseries_id" in flask.request.args:
+        filters["timeseries_id"] = flask.request.args["timeseries_id"]
     # Dates/times received are not datetime instances nor localized and tz-aware.
     tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
     if "date_min" in flask.request.args and flask.request.args["date_min"] != "":

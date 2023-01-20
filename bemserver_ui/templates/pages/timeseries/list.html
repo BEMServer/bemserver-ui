@@ -122,6 +122,9 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="locations-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#locations-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="locations-tabcontent-{{ x.id }}">Locations</button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="events-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#events-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="events-tabcontent-{{ x.id }}">Events</button>
+                                </li>
                             </ul>
                             <div class="tab-content overflow-auto border border-top-0 bg-white mb-3">
                                 <div class="tab-pane fade show active p-3" id="general-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="general-tab-{{ x.id }}">
@@ -137,6 +140,18 @@
                                 </div>
                                 <div class="tab-pane fade p-3" id="locations-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="locations-tab-{{ x.id }}">
                                     <div id="timeseriesStructuralElements-{{ x.id }}" data-ts-loaded="false"></div>
+                                </div>
+                                <div class="tab-pane fade p-3" id="events-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="events-tab-{{ x.id }}">
+                                    <nav class="row mb-2" aria-label="Events pagination">
+                                        <div class="col-auto align-self-center py-1">
+                                            <div is="app-pagesize-selector" id="tsEventsPageSize-{{ x.id }}" current="5"></div>
+                                        </div>
+                                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                            <small class="text-nowrap text-muted"><app-items-count id="tsEventsItemsCount-{{ x.id }}"></app-items-count></small>
+                                            <ul is="app-pagination" id="tsEventsPagination-{{ x.id }}"></ul>
+                                        </div>
+                                    </nav>
+                                    <div id="tsEvents-{{ x.id }}" class="list-group" data-ts-loaded="false"></div>
                                 </div>
                             </div>
                         </div>
@@ -156,13 +171,17 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import "{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}";
     import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let tsListView = new TimeseriesListView({{ filters | tojson }});
+        let options = {
+            filters: {{ filters | tojson }},
+            timezone: {{ g.campaign_ctxt.tz_name | tojson }},
+        };
+
+        let tsListView = new TimeseriesListView(options);
 
     });
 </script>

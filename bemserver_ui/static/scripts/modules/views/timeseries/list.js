@@ -2,6 +2,10 @@ import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 import { Parser } from "../../tools/parser.js";
+import { TimeDisplay } from "../../tools/time.js";
+import { EventLevelBadge } from "../../components/eventLevel.js";
+import "../../components/itemsCount.js";
+import "../../components/pagination.js";
 
 
 export class TimeseriesListView {
@@ -9,6 +13,9 @@ export class TimeseriesListView {
     #internalAPIRequester = null;
     #getStructElmtsReqID = null;
     #getPropDataReqID = null;
+    #getEventsReqID = null;
+
+    #tzName = "UTC";
 
     #formFiltersElmt = null;
     #campaignScopeElmt = null;
@@ -17,13 +24,17 @@ export class TimeseriesListView {
     #pageLinkElmts = null;
     #accordionTimeseriesBtnElmts = null;
 
-    constructor(filters) {
-        this.filters = filters;
-
+    constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
 
+        this.#loadOptions(options);
         this.#cacheDOM();
         this.#initEventListeners();
+    }
+
+    #loadOptions(options = {}) {
+        this.filters = options.filters || {};
+        this.#tzName = options.timezone || "UTC";
     }
 
     #cacheDOM() {
@@ -70,6 +81,7 @@ export class TimeseriesListView {
                 let tsId = event.target.getAttribute("data-ts-id");
                 this.#renderProperties(tsId);
                 this.#renderStructuralElements(tsId);
+                this.#renderEvents(tsId);
             });
         }
     }
@@ -179,6 +191,59 @@ export class TimeseriesListView {
 </div>`;
     }
 
+    #populateEventList(eventsList, eventsContainerElmt) {
+        eventsContainerElmt.innerHTML = "";
+        if (eventsList.length > 0) {
+            for (let eventData of eventsList) {
+                let eventElmt = document.createElement("div");
+                eventElmt.classList.add("list-group-item");
+
+                let eventHeaderElmt = document.createElement("div");
+                eventHeaderElmt.classList.add("d-flex", "align-items-center", "gap-1", "w-100");
+                eventElmt.appendChild(eventHeaderElmt);
+
+                let iconElmt = document.createElement("i");
+                iconElmt.classList.add("bi", "bi-journal-x", "me-1");
+                eventHeaderElmt.appendChild(iconElmt);
+
+                let headerContentElmt = document.createElement("div");
+                headerContentElmt.classList.add("d-flex", "justify-content-between", "align-items-center", "gap-2", "w-100");
+                eventHeaderElmt.appendChild(headerContentElmt);
+
+                let timestampElmt = document.createElement("h6");
+                timestampElmt.classList.add("text-nowrap", "mb-0");
+                timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+                headerContentElmt.appendChild(timestampElmt);
+
+                let levelBadgeElmt = new EventLevelBadge();
+                levelBadgeElmt.setAttribute("level", eventData.level.toUpperCase());
+                headerContentElmt.appendChild(levelBadgeElmt);
+
+                let bodyContentElmt = document.createElement("div");
+                bodyContentElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-2");
+                eventElmt.appendChild(bodyContentElmt);
+
+                let eventDescElmt = document.createElement("small");
+                eventDescElmt.classList.add("fst-italic", "text-muted");
+                eventDescElmt.innerText = eventData.description != null ? eventData.description : "-";
+                bodyContentElmt.appendChild(eventDescElmt);
+
+                let sourceElmt = document.createElement("span");
+                sourceElmt.classList.add("text-nowrap");
+                sourceElmt.innerText = eventData.source;
+                bodyContentElmt.appendChild(sourceElmt);
+
+                eventsContainerElmt.appendChild(eventElmt);
+            }
+        }
+        else {
+            let nodataSpanElmt = document.createElement("span");
+            nodataSpanElmt.classList.add("fst-italic", "text-muted", "text-center");
+            nodataSpanElmt.innerText = "No data";
+            eventsContainerElmt.appendChild(nodataSpanElmt);
+        }
+    }
+
     #getErrorHTML(error) {
         return `<div class="alert alert-danger" role="alert">
     <i class="bi bi-x-octagon me-2"></i>
@@ -229,6 +294,68 @@ export class TimeseriesListView {
                 },
                 (error) => {
                     timeseriesStructuralElementsElmt.innerHTML = this.#getErrorHTML(error.message);
+                },
+            );
+        }
+    }
+
+    #renderEvents(tsId) {
+        let tsEventsPageSizeElmt = document.getElementById(`tsEventsPageSize-${tsId}`);
+        let tsEventsItemsCountElmt = document.getElementById(`tsEventsItemsCount-${tsId}`);
+        let tsEventsPaginationElmt = document.getElementById(`tsEventsPagination-${tsId}`);
+        let tsEventsContainerElmt = document.getElementById(`tsEvents-${tsId}`);
+        let alreadyLoaded = JSON.parse(tsEventsContainerElmt.getAttribute("data-ts-loaded"));
+
+        if (!alreadyLoaded) {
+            tsEventsContainerElmt.innerHTML = "";
+            tsEventsContainerElmt.appendChild(new Spinner());
+
+            if (this.#getEventsReqID != null) {
+                this.#internalAPIRequester.abort(this.#getEventsReqID);
+                this.#getEventsReqID = null;
+            }
+
+            tsEventsPageSizeElmt.addEventListener("pageSizeChange", (event) => {
+                event.preventDefault();
+
+                if (event.detail.newValue != event.detail.oldValue) {
+                    tsEventsPaginationElmt.page = 1;
+                    tsEventsContainerElmt.setAttribute("data-ts-loaded", false);
+                    this.#renderEvents(tsId);
+                }
+            });
+            tsEventsPaginationElmt.addEventListener("pageItemClick", (event) => {
+                event.preventDefault();
+
+                this.#renderEvents(tsId);
+            });
+
+            let eventsOptions = {
+                "page_size": tsEventsPageSizeElmt.current,
+                "page": tsEventsPaginationElmt.page,
+                "timeseries_id": tsId,
+            };
+            this.#getEventsReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
+                (data) => {
+                    let eventsPaginationOpts = {
+                        pageSize: tsEventsPageSizeElmt.current,
+                        totalItems: data.pagination.total,
+                        totalPages: data.pagination.total_pages,
+                        page: data.pagination.page,
+                        firstPage: data.pagination.first_page,
+                        lastPage: data.pagination.last_page,
+                        previousPage: data.pagination.previous_page,
+                        nextPage: data.pagination.next_page,
+                    }
+                    tsEventsPaginationElmt.reload(eventsPaginationOpts);
+                    tsEventsItemsCountElmt.update({totalCount: tsEventsPaginationElmt.totalItems, firstItem: tsEventsPaginationElmt.startItem, lastItem: tsEventsPaginationElmt.endItem});
+    
+                    this.#populateEventList(data.data, tsEventsContainerElmt);
+                    tsEventsContainerElmt.setAttribute("data-ts-loaded", true);
+                },
+                (error) => {
+                    tsEventsContainerElmt.innerHTML = this.#getErrorHTML(error.message);
                 },
             );
         }
