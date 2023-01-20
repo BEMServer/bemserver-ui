@@ -57,7 +57,7 @@ def retrieve_list():
                 tz=tz,
             )
         except BEMServerUICommonInvalidDatetimeError:
-            flask.abort(422, description="Invalid timestamp min!")
+            flask.abort(422, description="Invalid timestamp max!")
         else:
             filters["timestamp_max"] = timestamp_max.isoformat()
     for struct_elmt in FULL_STRUCTURAL_ELEMENT_TYPES:
