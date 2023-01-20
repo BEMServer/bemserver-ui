@@ -57,7 +57,7 @@ def signin_required(func=None, roles=None):
                 flask.session["user"] = user_resp.toJSON()
 
             # Verify if user's role is sufficient for the requested action.
-            if Roles.admin in roles and not user_resp.data["is_admin"]:
+            if Roles.admin in roles and not flask.session["user"]["data"]["is_admin"]:
                 raise wexc.Forbidden
 
             return func(*args, **kwargs)
