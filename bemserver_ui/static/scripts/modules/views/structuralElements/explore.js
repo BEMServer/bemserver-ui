@@ -384,7 +384,7 @@ export class StructuralElementsExploreView {
 
                 let tsDescElmt = document.createElement("small");
                 tsDescElmt.classList.add("fst-italic", "text-muted");
-                tsDescElmt.innerText = tsData.description;
+                tsDescElmt.innerText = tsData.description != null ? tsData.description : "-";
                 tsElmt.appendChild(tsDescElmt);
 
                 this.#tsListElmt.appendChild(tsElmt);
