@@ -5,6 +5,9 @@ import { FlashMessageTypes, FlashMessage } from "./components/flash.js";
 
 export class NotificationUpdater {
 
+    #intervalDelay = 60000;
+    #intervalID = null;
+
     #internalAPIRequester = null;
     #refreshReqID = null;
 
@@ -18,11 +21,20 @@ export class NotificationUpdater {
     #notifsPagination = {};
     #notifsETag = null;
 
-    constructor() {
+    get isDisabled() {
+        return this.#notifBellElmt.classList.contains("d-none");
+    }
+
+    constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
 
+        this.#loadOptions(options);
         this.#cacheDOM();
         this.#initEventListeners();
+    }
+
+    #loadOptions(options = {}) {
+        this.#intervalDelay = options.delay || 60000;
     }
 
     #cacheDOM() {
@@ -43,6 +55,21 @@ export class NotificationUpdater {
                 new FlashMessage({type: FlashMessageTypes.WARNING, text: `Notifications UI panel not fully implemented yet!`, isDismissible: true, isTimed: false})
             );
         });
+
+        this.#setInterval();
+    }
+
+    #setInterval() {
+        // Ensure no other refresh interval is on.
+        this.#cancelInterval();
+        this.#intervalID = window.setInterval(() => { this.refresh(); }, this.#intervalDelay);
+    }
+
+    #cancelInterval() {
+        if (this.#intervalID != null) {
+            window.clearInterval(this.#intervalID);
+            this.#intervalID = null;
+        }
     }
 
     #updateNewBulletState() {
@@ -74,26 +101,38 @@ export class NotificationUpdater {
             this.#refreshReqID = null;
         }
 
-        let refreshOptions = {read: false, sort: "-timestamp"};
-        if (this.#notifsETag != null) {
-            refreshOptions.etag = this.#notifsETag;
+        if (!this.isDisabled) {
+            let refreshOptions = {read: false, sort: "-timestamp"};
+            if (this.#notifsETag != null) {
+                refreshOptions.etag = this.#notifsETag;
+            }
+
+            this.#refreshReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.notifications.retrieve_list`, refreshOptions),
+                (data) => {
+                    this.#notifsData = data.data;
+                    this.#notifsPagination = data.pagination;
+                    this.#notifsETag = data.etag;
+
+                    this.#updateNewBulletState();
+
+                    // TODO: display notifs data in UI (notification panel)
+                },
+                (error) => {
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
+                },
+            );
         }
+    }
 
-        this.#refreshReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.notifications.retrieve_list`, refreshOptions),
-            (data) => {
-                this.#notifsData = data.data;
-                this.#notifsPagination = data.pagination;
-                this.#notifsETag = data.etag;
+    disable() {
+        this.#notifBellElmt.classList.add("d-none", "invisible");
+        this.#cancelInterval();
+    }
 
-                this.#updateNewBulletState();
-
-                // TODO: display notifs data in UI (notification panel)
-            },
-            (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
-            },
-        );
+    enable() {
+        this.#notifBellElmt.classList.remove("d-none", "invisible");
+        this.#setInterval();
     }
 }
