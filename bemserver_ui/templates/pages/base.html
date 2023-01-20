@@ -48,6 +48,22 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/app.js') }}"></script>
+<script type="module">
+    import { App } from "{{ url_for('static', filename='scripts/app.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let options = {
+            campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
+            notificationUpdaterDelay: {{ config.BEMSERVER_NOTIFICATION_UPDATER_DELAY }},
+        };
+
+        let app = new App(options);
+        app.mount();
+
+    });
+
+</script>
 {% endfilter %}
 {% endblock body_scripts %}

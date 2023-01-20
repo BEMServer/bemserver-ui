@@ -120,6 +120,16 @@ class CampaignContext:
                 return campaign
         return None
 
+    def toJSON(self):
+        # Allows to set this response instance in a serializable object.
+        return {
+            "has_campaign": self.has_campaign,
+            "tz_name": self.tz_name,
+            "id": self.id,
+            "name": self.name,
+            "campaign": self.campaign,
+        }
+
 
 # Inspired from https://stackoverflow.com/a/57491317
 def url_for_campaign(endpoint, **kwargs):

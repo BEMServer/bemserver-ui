@@ -8,27 +8,56 @@ import { FlashTimer } from "./modules/flashTimer.js";
 import { NotificationUpdater } from "./modules/notifications.js";
 
 
+// TODO: how can app instance be accessible from any module?
+// TODO: when app instance is accessible by any other module, put flaskES6 instance inside
+// TODO: manage flash messages in through this app class?
+
+
 const flaskES6 = new FlaskES6(flaskEndpoints);
-const notifUpdaterDelay = 60000;
 
 
-document.addEventListener("DOMContentLoaded", () => {
+export class App {
 
-    let campaignSelector = new CampaignSelectorView();
-    let sidebar = new Sidebar();
-    let formCtrl = new FormController();
-    let flashTimer = new FlashTimer();
-    let notifUpdater = new NotificationUpdater();
+    #notifUpdatedDelay = 60000;
+    #campaignContext = {};
 
-    sidebar.refresh();
-    campaignSelector.hide();
-    formCtrl.bind();
-    flashTimer.bind();
+    #campaignSelector = new CampaignSelectorView();
+    #sidebar = new Sidebar();
+    #formCtrl = new FormController();
+    #flashTimer = new FlashTimer();
+    #notifUpdater = null;
 
-    notifUpdater.refresh();
-    window.setInterval(() => { notifUpdater.refresh(); }, notifUpdaterDelay);
+    constructor(options = {}) {
+        this.#loadOptions(options);
 
-});
+        this.#sidebar = new Sidebar();
+        this.#campaignSelector = new CampaignSelectorView();
+        this.#formCtrl = new FormController();
+        this.#flashTimer = new FlashTimer();
+        this.#notifUpdater = new NotificationUpdater({delay: this.#notifUpdatedDelay});
+    }
+
+    #loadOptions(options = {}) {
+        this.#notifUpdatedDelay = options.notificationUpdaterDelay || 60000;
+        this.#campaignContext = options.campaignContext || {};
+    }
+
+    mount() {
+
+        this.#sidebar.refresh();
+        this.#campaignSelector.hide();
+        this.#formCtrl.bind();
+        this.#flashTimer.bind();
+
+        if (this.#campaignContext.has_campaign) {
+            this.#notifUpdater.refresh();
+        }
+        else {
+            this.#notifUpdater.disable();
+        }
+
+    }
+}
 
 
 export { flaskES6, signedUser } ;
