@@ -11,6 +11,8 @@ import json
 import flask
 import werkzeug.exceptions as wexc
 
+import bemserver_api_client.exceptions as bac
+
 
 class Roles(enum.Enum):
     admin = "Administrator"
@@ -38,7 +40,8 @@ def signin_required(func=None, roles=None):
             try:
                 # Verfify user existence and credentials at the same time.
                 user_resp = flask.g.api_client.users.getone(
-                    flask.session["user"]["data"]["id"]
+                    flask.session["user"]["data"]["id"],
+                    etag=flask.session["user"]["etag"],
                 )
             except wexc.NotFound as exc:
                 flask.session.clear()
@@ -46,8 +49,11 @@ def signin_required(func=None, roles=None):
             except wexc.Forbidden as exc:
                 # Case of deactivated user while already using app.
                 raise wexc.Unauthorized from exc
+            except bac.BEMServerAPINotModified:
+                # User still exist and not been updated since last check.
+                pass
             else:
-                # User still exist and credentials are valid.
+                # User exists and credentials are valid.
                 flask.session["user"] = user_resp.toJSON()
 
             # Verify if user's role is sufficient for the requested action.
