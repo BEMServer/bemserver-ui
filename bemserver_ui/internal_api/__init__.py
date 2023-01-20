@@ -17,6 +17,7 @@ from . import analysis
 from . import services
 from . import energy_consumption
 from . import events
+from . import notifications
 
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
@@ -34,6 +35,7 @@ MODULES = (
     analysis,
     energy_consumption,
     events,
+    notifications,
 )
 
 
