@@ -19,7 +19,7 @@ repos:
   hooks:
     - id: pip-compile
       name: pip-compile setup.py
-      args: [setup.py, --output-file=requirements/install.txt]
+      args: [setup.py, --resolver=backtracking, --output-file=requirements/install.txt]
       files: ^(setup\.py|requirements\/install\.txt)$
     - id: pip-compile
       name: pip-compile requirements/dev.in
