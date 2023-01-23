@@ -37,7 +37,7 @@ Flask custom var config available:
     **BEMSERVER_TIMEZONE_NAME = "UTC"**
         Default application timezone name, when not overrided campaign timezone
     **BEMSERVER_NOTIFICATION_UPDATER_DELAY = 60000**
-        Delay in seconds between checks of new notifications
+        Delay, in seconds, between each check of new notifications
     *(optional)* **BEMSERVER_PARTNERS_FILE = None**
         Absolute path of json file that describes the project's partners
 
