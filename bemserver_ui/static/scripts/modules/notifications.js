@@ -85,12 +85,12 @@ export class NotificationUpdater {
             }
 
             this.#notifBellIconElmt.classList.replace("bi-bell", "bi-bell-fill");
-            this.#notifBellIconElmt.classList.add("text-warning");
+            this.#notifBellIconElmt.classList.add("app-notif-animate");
             this.#notifBellElmt.appendChild(this.#notifBellNewBulletElmt);
         }
         else if (this.#notifBellNewBulletElmt != null) {
             this.#notifBellIconElmt.classList.replace("bi-bell-fill", "bi-bell");
-            this.#notifBellIconElmt.classList.remove("text-warning");
+            this.#notifBellIconElmt.classList.remove("app-notif-animate");
             this.#notifBellNewBulletElmt.remove();
         }
     }
