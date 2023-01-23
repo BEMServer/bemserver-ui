@@ -52,7 +52,7 @@
             <div class="table-responsive-xl">
                 <table class="table table-sm table-hover table-bordered caption-top">
                     <caption class="text-end">
-                        <small class="text-nowrap text-muted"><app-items-count id="itemCount" first-item="1" last-item="{{ properties | length }}" total-count="{{ total_count }}"></app-items-count></small>
+                        <small class="text-nowrap text-muted"><app-items-count id="itemCount" first-item="{% if properties | length > 0 %}1{% else %}0{% endif %}" last-item="{{ properties | length }}" total-count="{{ total_count }}"></app-items-count></small>
                     </caption>
                     <thead>
                         <tr>
