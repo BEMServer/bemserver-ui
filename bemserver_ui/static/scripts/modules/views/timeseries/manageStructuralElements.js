@@ -8,12 +8,15 @@ import { ModalConfirm } from "../../components/modalConfirm.js";
 import { InternalAPIRequest } from "../../tools/fetcher.js";
 import { Parser } from "../../tools/parser.js";
 import { flaskES6 } from "../../../app.js";
+import "../../components/tree.js";
 
 
 export class TimeseriesManageStructuralElementsView {
 
     #internalAPIRequester = null;
     #getTSListReqID = null;
+    #sitesTreeReqID = null;
+    #zonesTreeReqID = null;
 
     #messagesElmt = null;
     #searchElmt = null;
@@ -27,18 +30,15 @@ export class TimeseriesManageStructuralElementsView {
     #tsListContainerElmt = null;
     #tsListElmt = null;
 
-    #treeStructuralElements = null;
-    #treeZones = null;
+    #sitesTreeElmt = null;
+    #zonesTreeElmt = null;
 
     #draggedElmt = null;
 
-    constructor(options = {}) {
-        this.#treeStructuralElements = options.treeStructuralElements;
-        this.#treeZones = options.treeZones;
+    constructor() {
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
-
-        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#tsPageSizeSelectorElmt = new PageSizeSelector();
         this.#tsPageSizeSelectorContainerElmt.innerHTML = "";
@@ -60,6 +60,9 @@ export class TimeseriesManageStructuralElementsView {
         this.#tsItemsCountElmt = document.getElementById("tsItemsCount");
         this.#tsPaginationContainerElmt = document.getElementById("tsPaginationContainer");
         this.#tsListContainerElmt = document.getElementById("tsListContainer");
+
+        this.#sitesTreeElmt = document.getElementById("sitesTree");
+        this.#zonesTreeElmt = document.getElementById("zonesTree");
     }
 
     #initEventListeners() {
@@ -69,14 +72,14 @@ export class TimeseriesManageStructuralElementsView {
             if (event.detail.newValue != event.detail.oldValue) {
                 this.#tsItemsCountElmt.setLoading();
                 this.#tsListElmt.setLoading();
-                this.refresh({page_size: event.detail.newValue});
+                this.#update({page_size: event.detail.newValue});
             }
         });
 
         this.#tsPaginationContainerElmt.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
-            this.refresh({"page": event.detail.page});
+            this.#update({"page": event.detail.page});
         });
 
         this.#searchElmt.addEventListener("input", (event) => {
@@ -89,7 +92,7 @@ export class TimeseriesManageStructuralElementsView {
                 this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
             }
 
-            this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value, "search": event.target.value});
+            this.#update({"page_size": this.#tsPageSizeSelectorElmt.value, "search": event.target.value});
         });
 
         this.#clearSearchBtnElmt.addEventListener("click", (event) => {
@@ -98,7 +101,7 @@ export class TimeseriesManageStructuralElementsView {
             this.#searchElmt.value = "";
             this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
 
-            this.refresh({"page_size": this.#tsPageSizeSelectorElmt.value});
+            this.#update({"page_size": this.#tsPageSizeSelectorElmt.value});
         });
 
         this.#tsListElmt.addEventListener("accordionItemOpen", (event) => {
@@ -110,8 +113,8 @@ export class TimeseriesManageStructuralElementsView {
 
             if (!event.target.isLoaded) {
                 let dropZoneElmt = new DropZone({ getDraggedElmtCallback: () => {
-                    let draggedElmtId = this.#draggedElmt.getAttribute("data-tree-item-id");
-                    let draggedElmtType = this.#draggedElmt.getAttribute("data-tree-item-type");
+                    let draggedElmtId = this.#draggedElmt.getAttribute("data-tree-node-id");
+                    let draggedElmtType = this.#draggedElmt.getAttribute("data-tree-node-type");
                     return dropZoneElmt.querySelector(`#${draggedElmtType}-${draggedElmtId}`);
                 } });
                 dropZoneElmt.id = `dropZone-${tsId}`;
@@ -127,7 +130,6 @@ export class TimeseriesManageStructuralElementsView {
                     flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
                     (data) => {
                         dropZoneElmt.clear();
-                        let totalLinks = 0;
                         for (let [structuralElementType, tsStructElmtLinks] of Object.entries(data.data)) {
                             for (let tsStructElmtLink of tsStructElmtLinks) {
                                 let tsId = tsStructElmtLink.timeseries_id;
@@ -137,8 +139,8 @@ export class TimeseriesManageStructuralElementsView {
                                 let tsStructElmtLinkEtag = tsStructElmtLink.etag;
 
                                 // Search item in tree.
-                                let searchTree = structuralElementType == "zone" ? this.#treeZones : this.#treeStructuralElements;
-                                let itemData = searchTree.getItemData(structuralElementType, structuralElementId);
+                                let searchTree = structuralElementType == "zone" ? this.#zonesTreeElmt : this.#sitesTreeElmt;
+                                let itemData = searchTree.getTreeNodeData(structuralElementType, structuralElementId);
                                 let dropedItemId = itemData.sourceNodeId;
                                 let dropedItemIcon = `${itemData.sourceNodeData.type == "zone" ? "bullseye" : "building"}`;
                                 let dropedItemTitle = itemData.sourceNodeData.name;
@@ -159,13 +161,9 @@ export class TimeseriesManageStructuralElementsView {
                                 });
 
                                 dropZoneElmt.addElement(dropedItemElmt);
-                                totalLinks += 1;
                             }
                         }
 
-                        // if (totalLinks <= 0) {
-                        //     dropZoneElmt.setHelp();
-                        // }
                         event.target.isLoaded = true;
                     },
                     (error) => {
@@ -176,23 +174,23 @@ export class TimeseriesManageStructuralElementsView {
             }
         });
 
-        this.#treeStructuralElements.treeElmt.addEventListener("itemDragStart", (event) => {
+        this.#sitesTreeElmt.addEventListener("itemDragStart", (event) => {
             event.preventDefault();
 
             this.#draggedElmt = event.detail.target;
         });
-        this.#treeStructuralElements.treeElmt.addEventListener("itemDragEnd", (event) => {
+        this.#sitesTreeElmt.addEventListener("itemDragEnd", (event) => {
             event.preventDefault();
 
             this.#draggedElmt = null;
         });
 
-        this.#treeZones.treeElmt.addEventListener("itemDragStart", (event) => {
+        this.#zonesTreeElmt.addEventListener("itemDragStart", (event) => {
             event.preventDefault();
 
             this.#draggedElmt = event.detail.target;
         });
-        this.#treeZones.treeElmt.addEventListener("itemDragEnd", (event) => {
+        this.#zonesTreeElmt.addEventListener("itemDragEnd", (event) => {
             event.preventDefault();
 
             this.#draggedElmt = null;
@@ -303,7 +301,49 @@ export class TimeseriesManageStructuralElementsView {
         return dropedItemElmt;
     }
 
-    refresh(options = {}) {
+    #loadSitesTreeData() {
+        this.#sitesTreeElmt.showLoading();
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, {draggable: true}),
+            (data) => {
+                this.#sitesTreeElmt.load(data.data);
+                this.#sitesTreeElmt.collapseAll();
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #loadZonesTreeData() {
+        this.#zonesTreeElmt.showLoading();
+
+        if (this.#zonesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#zonesTreeReqID);
+            this.#zonesTreeReqID = null;
+        }
+
+        this.#zonesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`, {draggable: true}),
+            (data) => {
+                this.#zonesTreeElmt.load(data.data);
+                this.#zonesTreeElmt.collapseAll();
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #update(options = {}) {
         if (this.#getTSListReqID != null) {
             this.#internalAPIRequester.abort(this.#getTSListReqID);
             this.#getTSListReqID = null;
@@ -362,5 +402,11 @@ export class TimeseriesManageStructuralElementsView {
                 this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
+    }
+
+    refresh(options = {}) {
+        this.#loadSitesTreeData();
+        this.#loadZonesTreeData();
+        this.#update(options);
     }
 }

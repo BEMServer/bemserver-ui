@@ -5,11 +5,6 @@ import flask
 from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
-from ..structural_elements.structural_elements import (
-    _build_tree_sites,
-    _build_tree_zones,
-)
-
 
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
 
@@ -275,18 +270,7 @@ def delete_property(id, property_id):
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def manage_structural_elements():
-    campaign_id = flask.g.campaign_ctxt.id
-
-    # Structural elements tree data.
-    sites_tree_data = _build_tree_sites(campaign_id, is_draggable=True)
-    # Zones "tree" data.
-    zones_tree_data = _build_tree_zones(campaign_id, is_draggable=True)
-
-    return flask.render_template(
-        "pages/timeseries/manage_structural_elements.html",
-        sites_tree_data=sites_tree_data,
-        zones_tree_data=zones_tree_data,
-    )
+    return flask.render_template("pages/timeseries/manage_structural_elements.html")
 
 
 @blp.route("/upload", methods=["GET", "POST"])

@@ -6,6 +6,7 @@ import "../../components/pagination.js";
 import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { TimeDisplay } from "../../tools/time.js";
 import { EventLevelBadge } from "../../components/eventLevel.js";
+import "../../components/tree.js";
 
 
 export class StructuralElementsExploreView {
@@ -18,6 +19,8 @@ export class StructuralElementsExploreView {
     #propertiesReqID = null;
     #tsReqID = null;
     #eventsReqID = null;
+    #sitesTreeReqID = null;
+    #zonesTreeReqID = null;
 
     #tabSitesElmts = null;
     #tabPropertiesElmts = null;
@@ -51,6 +54,9 @@ export class StructuralElementsExploreView {
         "events-tab": this.#renderEvents.bind(this),
     }
     #alreadyLoadedPerTab = {};
+
+    #sitesTreeElmt = null;
+    #zonesTreeElmt = null;
 
     constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -90,6 +96,9 @@ export class StructuralElementsExploreView {
         this.#eventsCountElmt = document.getElementById("eventsCount");
         this.#eventsPaginationElmt = document.getElementById("eventsPagination");
         this.#eventsListElmt = document.getElementById("eventsList");
+
+        this.#sitesTreeElmt = document.getElementById("sitesTree");
+        this.#zonesTreeElmt = document.getElementById("zonesTree");
     }
 
     #initEventListeners() {
@@ -104,7 +113,7 @@ export class StructuralElementsExploreView {
                 for (let tabPropertyElmt of this.#tabPropertiesElmts) {
                     this.#alreadyLoadedPerTab[tabPropertyElmt.id] = false;
                 }
-                this.refresh();
+                this.#refreshTabs();
             });
         }
 
@@ -116,7 +125,7 @@ export class StructuralElementsExploreView {
             tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabPropertiesSelected = event.target;
-                this.refresh();
+                this.#refreshTabs();
             });
         }
 
@@ -127,7 +136,7 @@ export class StructuralElementsExploreView {
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.#tsPaginationElmt.page = 1;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#tsClearSearchBtnElmt.addEventListener("click", (event) => {
@@ -137,14 +146,14 @@ export class StructuralElementsExploreView {
             this.#updateTsSearchState();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#tsRecurseSwitchElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#tsPageSizeElmt.addEventListener("pageSizeChange", (event) => {
@@ -153,7 +162,7 @@ export class StructuralElementsExploreView {
             if (event.detail.newValue != event.detail.oldValue) {
                 this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
                 this.#tsPaginationElmt.page = 1;
-                this.refresh();
+                this.#refreshTabs();
             }
         });
 
@@ -161,7 +170,7 @@ export class StructuralElementsExploreView {
             event.preventDefault();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#eventsSearchElmt.addEventListener("input", (event) => {
@@ -171,7 +180,7 @@ export class StructuralElementsExploreView {
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
             this.#eventsPaginationElmt.page = 1;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#eventsClearSearchBtnElmt.addEventListener("click", (event) => {
@@ -181,14 +190,14 @@ export class StructuralElementsExploreView {
             this.#updateEventsSearchState();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#eventsRecurseSwitchElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
         });
 
         this.#eventsPageSizeElmt.addEventListener("pageSizeChange", (event) => {
@@ -197,7 +206,7 @@ export class StructuralElementsExploreView {
             if (event.detail.newValue != event.detail.oldValue) {
                 this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
                 this.#eventsPaginationElmt.page = 1;
-                this.refresh();
+                this.#refreshTabs();
             }
         });
 
@@ -205,7 +214,15 @@ export class StructuralElementsExploreView {
             event.preventDefault();
 
             this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
-            this.refresh();
+            this.#refreshTabs();
+        });
+
+        this.#sitesTreeElmt.addEventListener("treeNodeSelect", (event) => {
+            this.render(event.detail.id, event.detail.type, event.detail.path);
+        });
+
+        this.#zonesTreeElmt.addEventListener("treeNodeSelect", (event) => {
+            this.render(event.detail.id, event.detail.type, event.detail.path);
         });
     }
 
@@ -555,16 +572,49 @@ export class StructuralElementsExploreView {
         );
     }
 
-    render(id, type, path) {
-        this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type, path: path};
-        for (let tabElmt of this.#tabPropertiesElmts) {
-            this.#alreadyLoadedPerTab[tabElmt.id] = false;
+    #loadSitesTreeData() {
+        this.#sitesTreeElmt.showLoading();
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
         }
-        this.#tsPaginationElmt.reload();
-        this.refresh();
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            (data) => {
+                this.#sitesTreeElmt.load(data.data);
+                this.#sitesTreeElmt.collapseAll();
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
     }
 
-    refresh() {
+    #loadZonesTreeData() {
+        this.#zonesTreeElmt.showLoading();
+
+        if (this.#zonesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#zonesTreeReqID);
+            this.#zonesTreeReqID = null;
+        }
+
+        this.#zonesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            (data) => {
+                this.#zonesTreeElmt.load(data.data);
+                this.#zonesTreeElmt.collapseAll();
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #refreshTabs() {
         let selectedItemData = this.#selectedItemsPerTab[this.#tabSitesSelected.id];
         if (selectedItemData != null) {
             if (!this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id]) {
@@ -575,5 +625,20 @@ export class StructuralElementsExploreView {
         else {
             this.#renderNoData();
         }
+    }
+
+    render(id, type, path) {
+        this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type, path: path};
+        for (let tabElmt of this.#tabPropertiesElmts) {
+            this.#alreadyLoadedPerTab[tabElmt.id] = false;
+        }
+        this.#tsPaginationElmt.reload();
+        this.#refreshTabs();
+    }
+
+    refresh() {
+        this.#loadSitesTreeData();
+        this.#loadZonesTreeData();
+        this.#refreshTabs();
     }
 }

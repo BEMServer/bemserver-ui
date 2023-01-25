@@ -1,4 +1,3 @@
-{% import "macros/tree.html" as mac_tree %}
 {% extends "pages/base.html" %}
 
 {% set title = "Explore sites" %}
@@ -25,18 +24,10 @@
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
                 <div class="tab-pane fade{% if tab == 'sites' %} show active{% endif %} p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
-                    <div id="treeSitesToolbar" class="d-flex justify-content-end gap-3">
-                        <a id="treeSitesCollapseAll" class="link-primary text-decoration-none" role="button"><i class="bi bi-arrows-collapse"></i> <small>collapse all</small></a>
-                        <a id="treeSitesExpandAll" class="link-primary text-decoration-none" role="button"><i class="bi bi-arrows-expand"></i> <small>expand all</small></a>
-                    </div>
-                    {% filter indent(width=20) %}
-                    {{ mac_tree.render_tree("treeSites", sites_tree_data) }}
-                    {% endfilter %}
+                    <app-tree id="sitesTree"></app-tree>
                 </div>
                 <div class="tab-pane fade{% if tab == 'zones' %} show active{% endif %} p-3" id="zones-tabcontent" role="tabpanel" aria-labelledby="zones-tab">
-                    {% filter indent(width=20) %}
-                    {{ mac_tree.render_tree("treeZones", zones_tree_data) }}
-                    {% endfilter %}        
+                    <app-tree id="zonesTree" toolbar="false"></app-tree>
                 </div>
             </div>
         </div>
@@ -122,7 +113,6 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { Tree } from "{{ url_for('static', filename='scripts/modules/tree.js') }}";
     import { StructuralElementsExploreView } from "{{ url_for('static', filename='scripts/modules/views/structuralElements/explore.js') }}";
 
 
@@ -133,11 +123,6 @@
         };
 
         let structuralElmts = new StructuralElementsExploreView(options);
-        let treeSites = new Tree("treeSites", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
-        let treeZones = new Tree("treeZones", { selected: (id, type, path, name) => { structuralElmts.render(id, type, path); } });
-
-        treeSites.collapseAll();
-        treeZones.collapseAll();
         structuralElmts.refresh();
 
     });
