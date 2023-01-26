@@ -36,9 +36,6 @@ export class TimeseriesListView {
     #zoneIdInputElmt = null;
 
     constructor(options = {}) {
-        this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
-        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
-
         this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#loadOptions(options);
@@ -63,6 +60,9 @@ export class TimeseriesListView {
         this.#structuralElementIdInputElmt = document.getElementById("structural_element_filter");
         this.#structuralElementRecursiveSwitchElmt = document.getElementById("structural_element_recursive");
         this.#zoneIdInputElmt = document.getElementById("zone_filter");
+
+        this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
+        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
     }
 
     #initEventListeners() {

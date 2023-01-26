@@ -38,18 +38,18 @@
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
                             <div class="row mb-3">
-                                <div class="col">
-                                    <label for="siteSelector" class="form-label">Sites/buildings... selection</label>
+                                <div class="col-12 col-xl-6">
+                                    <label for="siteSelector" class="form-label">Site/building... selection</label>
                                     {% filter indent(width=12, first=False) %}
                                     {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelector", title=none) -}}
-                                    {% endfilter %}                    
+                                    {% endfilter %}
                                     <input type="hidden" form="formFilters" id="structural_element_filter" name="{{ filters['structural_element_filter_type'] }}" value="{{ filters['structural_element_filter_id'] }}">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" form="formFilters" role="switch" id="structural_element_recursive" name="structural_element_recursive"{% if filters["structural_element_recursive"] %} checked {% endif %}>
                                         <label class="form-check-label" for="structural_element_recursive">extend search in child elements</label>
                                     </div>                                      
                                 </div>
-                                <div class="col">
+                                <div class="col-12 col-xl-6">
                                     <label for="zoneSelector" class="form-label">Zone selection</label>
                                     {% filter indent(width=12, first=False) %}
                                     {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelector", title=none) -}}
