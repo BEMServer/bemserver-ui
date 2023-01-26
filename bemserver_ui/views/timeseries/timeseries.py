@@ -3,7 +3,10 @@ from copy import deepcopy
 import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
-from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+    STRUCTURAL_ELEMENT_TYPES,
+)
 
 
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
@@ -57,39 +60,52 @@ def list():
         "campaign_id": campaign_id,
         "campaign_scope_id": None,
         "page_size": 10,
-        **{f"{x}_id": None for x in FULL_STRUCTURAL_ELEMENT_TYPES},
     }
+    ui_filters = {}
+    recurse_prefix = ""
     # Get requested filters.
     if flask.request.method == "POST":
         if flask.request.form["campaign_scope"] != "None":
             filters["campaign_scope_id"] = flask.request.form["campaign_scope"]
-        for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
-            filter_value = flask.request.form.get(struct_elmt_type, "None") or "None"
-            if filter_value != "None":
-                filters[f"{struct_elmt_type}_id"] = filter_value
+        if (
+            "structural_element_recursive" in flask.request.form
+            and flask.request.form["structural_element_recursive"] != ""
+        ):
+            recurse_prefix = "recurse_"
+            ui_filters["structural_element_recursive"] = True
+        else:
+            ui_filters["structural_element_recursive"] = False
+        for struct_elmt_type in STRUCTURAL_ELEMENT_TYPES:
+            struct_elmt_filter_key = f"{recurse_prefix}{struct_elmt_type}_id"
+            struct_elmt_filter_value = flask.request.form.get(struct_elmt_filter_key)
+            if (
+                struct_elmt_filter_key in flask.request.form
+                and struct_elmt_filter_value != ""
+            ):
+                filters[struct_elmt_filter_key] = struct_elmt_filter_value
+                ui_filters["structural_element_filter_type"] = struct_elmt_type
+                ui_filters["structural_element_filter_id"] = struct_elmt_filter_value
+        if "zone_id" in flask.request.form and flask.request.form["zone_id"] != "":
+            filters["zone_id"] = flask.request.form["zone_id"]
         if "page_size" in flask.request.form:
             filters["page_size"] = int(flask.request.form["page_size"])
         if "page" in flask.request.form and flask.request.form["page"] != "":
             filters["page"] = int(flask.request.form["page"])
+
     is_filtered = filters["campaign_scope_id"] is not None or any(
-        [filters[f"{x}_id"] is not None for x in FULL_STRUCTURAL_ELEMENT_TYPES]
+        [
+            f"{recurse_prefix}{x}_id" in filters
+            and filters[f"{recurse_prefix}{x}_id"] is not None
+            for x in FULL_STRUCTURAL_ELEMENT_TYPES
+        ]
     )
 
     campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
         campaign_id=campaign_id, sort="+name"
     )
-
     campaign_scopes_by_id = {}
     for campaign_scope in campaign_scopes_resp.data:
         campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
-
-    structural_elements = {}
-    for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
-        structural_elements[struct_elmt_type] = (
-            getattr(flask.g.api_client, f"{struct_elmt_type}s")
-            .getall(campaign_id=campaign_id)
-            .data
-        )
 
     # Get timeseries list applying filters.
     timeseries_resp = flask.g.api_client.timeseries.getall(**filters, sort="+name")
@@ -104,10 +120,9 @@ def list():
         "pages/timeseries/list.html",
         timeseries=timeseries_data,
         campaign_scopes=campaign_scopes_resp.data,
-        filters=filters,
+        filters={**filters, **ui_filters},
         is_filtered=is_filtered,
         pagination=prepare_pagination(timeseries_resp.pagination),
-        structural_elements=structural_elements,
     )
 
 
