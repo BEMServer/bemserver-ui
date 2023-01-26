@@ -131,6 +131,10 @@ export class StructuralElementSelector extends HTMLElement {
         this.#treeSelectorElmt.select(nodeId);
     }
 
+    unselect() {
+        this.#treeSelectorElmt.unselect();
+    }
+
     static getInstance(elementId = null) {
         let queryId = "";
         if (elementId != null) {
