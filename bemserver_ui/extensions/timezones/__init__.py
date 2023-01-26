@@ -21,8 +21,8 @@ def init_app(app):
             export class TimezoneTool {{
 
                 constructor() {{
-                    this.defaultTzName = "{default_tz_name!r}";
-                    this.defaultTzRegion = "{default_tz_region!r}";
+                    this.defaultTzName = {default_tz_name!r};
+                    this.defaultTzRegion = {default_tz_region!r};
 
                     this.timezones = {json.dumps(tz_tool.timezones)};
                     this.regions = {json.dumps(tz_tool.regions)};
