@@ -1,0 +1,35 @@
+{% macro _render_structural_element_selector(html_element_id=none, title=none, structural_element_types=none, treeToolbar=True) %}
+<app-structural-element-selector{% if html_element_id %} id="{{ html_element_id }}"{% endif %}>
+    {% if title %}
+    <div class="d-flex justify-content-between align-items-start gap-2">
+        <h5>{{ title }}</h5>
+    </div>
+    {% endif %}
+    <div class="btn-group bg-white w-100">
+        <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-1 px-3"></div>
+        <button id="clearSelectionBtn" type="button" class="btn btn-outline-danger g-1 d-none invisible">
+            <i class="bi bi-x-lg"></i>
+            <span class="visually-hidden">Clear selection</span>
+        </button>
+        <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-reference="parent" aria-expanded="false">
+            <i class="bi bi-search"></i>
+            <span class="visually-hidden">Toggle select panel</span>
+        </button>
+        <div id="dropdownSearchPanel" class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownSearchBtn">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
+                <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+            </div>
+            <app-tree id="treeSelector" ignore-unselect="false" toolbar="{{ treeToolbar | tojson }}" {% if structural_element_types %} types={{ structural_element_types }}{% endif %}></app-tree>
+        </div>
+    </div>
+</app-structural-element-selector>
+{% endmacro %}
+
+{% macro render_site_selector(html_element_id=none, title="Sites/buildings/... selection") %}
+    {{- _render_structural_element_selector(html_element_id=html_element_id, title=title) }}
+{% endmacro %}
+
+{% macro render_zone_selector(html_element_id=none, title="Zones selection") %}
+    {{- _render_structural_element_selector(html_element_id=html_element_id, title=title, structural_element_types="zone", treeToolbar=False) }}
+{% endmacro %}

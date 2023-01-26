@@ -79,10 +79,16 @@ export class Tree extends HTMLElement {
         this.#expandAllBtnElmt?.addEventListener("click", () => { this.expandAll(); });
     }
 
-    #getCollapsableFromItem(itemElmt, switchable=false) {
-        let collapsableElmnt = itemElmt.querySelector("ul.collapse");
-        if (collapsableElmnt != null) {
-            return new bootstrap.Collapse(collapsableElmnt, {toggle: switchable});
+    #getCollapsableFromItem(itemElmt, switchable=false, ancestor=false) {
+        let collapsableElmt = null;
+        if (ancestor) {
+            collapsableElmt = itemElmt?.closest("ul.collapse");
+        }
+        else {
+            collapsableElmt = itemElmt?.querySelector("ul.collapse");
+        }
+        if (collapsableElmt != null) {
+            return new bootstrap.Collapse(collapsableElmt, {toggle: switchable});
         }
         return null;
     }
@@ -168,7 +174,6 @@ export class Tree extends HTMLElement {
             liElmt.appendChild(linkElmt);
 
             linkElmt.addEventListener("click", (event) => {
-
                 if (this.#treeNodeSelected != event.target) {
                     this.#treeNodeSelected?.classList.remove("active");
                     this.#treeNodeSelected = event.target;
@@ -273,8 +278,30 @@ export class Tree extends HTMLElement {
         }
         else {
             let noDataElmt = document.createElement("p");
+            noDataElmt.classList.add("fst-italic", "text-muted", "mb-0");
             noDataElmt.innerText = "No data";
             this.#treeContainerElmt.appendChild(noDataElmt);
+        }
+    }
+
+    select(nodeId) {
+        this.unselect();
+        let [nodeType, _nodeId] = nodeId.split("-");
+        let nodeData = this.getTreeNodeData(nodeType, _nodeId);
+        let treeNodeElmt = this.#treeContainerElmt.querySelector(nodeData.sourceNodeQuerySelector)
+        treeNodeElmt?.click();
+
+        // Expand all parent nodes until root node.
+        let collapsableParent = this.#getCollapsableFromItem(treeNodeElmt, false, true);
+        while (collapsableParent != null) {
+            collapsableParent.show();
+            collapsableParent = this.#getCollapsableFromItem(collapsableParent._element.parentElement, false, true);
+        }
+    }
+
+    unselect() {
+        if (this.#treeNodeSelected != null) {
+            this.#treeNodeSelected.click();
         }
     }
 }
