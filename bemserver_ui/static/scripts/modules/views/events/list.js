@@ -9,6 +9,7 @@ import { FilterSelect } from "../../components/filterSelect.js";
 import { TimeDisplay } from "../../tools/time.js";
 import { Parser } from "../../tools/parser.js";
 import { EventLevelBadge } from "../../components/eventLevel.js";
+import { StructuralElementSelector } from "../../components/structuralElements/selector.js";
 
 
 export class EventListView {
@@ -23,6 +24,8 @@ export class EventListView {
     #searchReqID = null;
     #loadEventInfoTabReqIDs = {};
     #loadEventInfoTabReqPageIDs = {};
+    #sitesTreeReqID = null;
+    #zonesTreeReqID = null;
 
     #messagesElmt = null;
 
@@ -33,6 +36,9 @@ export class EventListView {
     #btnRemoveFiltersElmt = null;
     #searchSelectFilters = {};
     #dataFilters = {};
+    #siteSelector = null;
+    #zoneSelector = null;
+    #siteSelectorRecursiveSwitchElmt = null;
 
     #sort = []
     #sortLinkTimestampElmt = null;
@@ -89,6 +95,10 @@ export class EventListView {
 
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
+
+        this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
+        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
+        this.#siteSelectorRecursiveSwitchElmt = document.getElementById("siteSelectorRecursiveSwitch");
 
         this.#filtersContainerElmt = document.getElementById("filtersContainer");
         this.#sourceSearchFilterElmt = document.getElementById("sourceSearch");
@@ -263,6 +273,14 @@ export class EventListView {
                     hasFilterChanged = true;
                 }
             }
+            if (this.#siteSelector.selectedData != null) {
+                this.#siteSelector.unselect();
+                hasFilterChanged = true;
+            }
+            if (this.#zoneSelector.selectedData != null) {
+                this.#zoneSelector.unselect();
+                hasFilterChanged = true;
+            }
             if (hasFilterChanged) {
                 this.#paginationElmt.page = 1;
                 this.refresh();
@@ -424,6 +442,34 @@ export class EventListView {
             let descriptionCellWidth = this.#eventsTableElmt.offsetWidth * 0.25;
             for (let rowElmt of this.#eventsContainerElmt.rows) {
                 rowElmt.cells.item(rowElmt.cells.length - 1).style.maxWidth = `${descriptionCellWidth}px`;
+            }
+        });
+
+        this.#siteSelector.addEventListener("treeNodeSelect", (event) => {
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#siteSelector.addEventListener("treeNodeUnselect", () => {
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#zoneSelector.addEventListener("treeNodeSelect", (event) => {
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#zoneSelector.addEventListener("treeNodeUnselect", () => {
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        });
+
+        this.#siteSelectorRecursiveSwitchElmt.addEventListener("change", (event) => {
+            if (this.#siteSelector.selectedData != null)
+            {
+                this.#paginationElmt.page = 1;
+                this.refresh();
             }
         });
     }
@@ -793,7 +839,52 @@ export class EventListView {
         return structuralElementElmt;
     }
 
+    #loadSitesTreeData() {
+        this.#siteSelector.showLoadingTree();
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            (data) => {
+                this.#siteSelector.loadTree(data.data);
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #loadZonesTreeData() {
+        this.#zoneSelector.showLoadingTree();
+
+        if (this.#zonesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#zonesTreeReqID);
+            this.#zonesTreeReqID = null;
+        }
+
+        this.#zonesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            (data) => {
+                this.#zoneSelector.loadTree(data.data);
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
     refresh(afterResfreshCallback = null) {
+        if (this.#searchReqID != null) {
+            this.#internalAPIRequester.abort(this.#searchReqID);
+            this.#searchReqID = null;
+        }
+
         this.#itemsCountElmt.setLoading();
         this.#eventsContainerElmt.innerHTML = "";
         let loadingContainerElmt = document.createElement("tr");
@@ -834,10 +925,11 @@ export class EventListView {
                 searchOptions[searchOptName] = searchOptValue;
             }
         }
-
-        if (this.#searchReqID != null) {
-            this.#internalAPIRequester.abort(this.#searchReqID);
-            this.#searchReqID = null;
+        if (this.#siteSelector.selectedData != null) {
+            searchOptions[`${this.#siteSelectorRecursiveSwitchElmt.checked ? "recurse_" : ""}${this.#siteSelector.selectedData.type}_id`] = this.#siteSelector.selectedData.id;
+        }
+        if (this.#zoneSelector.selectedData != null) {
+            searchOptions["zone_id"] = this.#zoneSelector.selectedData.id;
         }
 
         this.#searchReqID = this.#internalAPIRequester.get(
@@ -877,5 +969,10 @@ export class EventListView {
                 this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
+    }
+
+    mount() {
+        this.#loadSitesTreeData();
+        this.#loadZonesTreeData();
     }
 }
