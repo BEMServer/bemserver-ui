@@ -23,7 +23,7 @@ def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
         if len(parent_data["full_path"]) > 0:
             full_path = " / ".join([parent_data["full_path"], full_path])
     return {
-        "node_id": f"{data_type}_{data['id']}",
+        "node_id": f"{data_type}-{data['id']}",
         "node_level": node_level,
         "id": data["id"],
         "name": data["name"],
@@ -114,24 +114,8 @@ def _search_tree_node(tree, node_type, node_id):
 @auth.signin_required
 @ensure_campaign_context
 def explore():
-    # This page retrieves all the structural elements of selected campaign.
-    # Those structural elements are rendered in a tree view.
-    # To do this, just build the entire tree (sites/buildings/storeys/spaces).
-
-    campaign_id = flask.g.campaign_ctxt.id
     tab = flask.request.args.get("tab", "sites")
-
-    # Structural elements tree data.
-    sites_tree_data = _build_tree_sites(campaign_id)
-    # Zones "tree" data.
-    zones_tree_data = _build_tree_zones(campaign_id)
-
-    return flask.render_template(
-        "pages/structural_elements/explore.html",
-        sites_tree_data=sites_tree_data,
-        zones_tree_data=zones_tree_data,
-        tab=tab,
-    )
+    return flask.render_template("pages/structural_elements/explore.html", tab=tab)
 
 
 @blp.route("/<string:type>/create", methods=["GET", "POST"])

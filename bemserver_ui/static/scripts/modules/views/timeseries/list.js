@@ -6,6 +6,8 @@ import { TimeDisplay } from "../../tools/time.js";
 import { EventLevelBadge } from "../../components/eventLevel.js";
 import "../../components/itemsCount.js";
 import "../../components/pagination.js";
+import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
+import { StructuralElementSelector } from "../../components/structuralElements/selector.js";
 
 
 export class TimeseriesListView {
@@ -14,15 +16,24 @@ export class TimeseriesListView {
     #getStructElmtsReqID = null;
     #getPropDataReqID = null;
     #getEventsReqID = null;
+    #sitesTreeReqID = null;
+    #zonesTreeReqID = null;
 
     #tzName = "UTC";
 
+    #messagesElmt = null;
     #formFiltersElmt = null;
     #campaignScopeElmt = null;
     #pageInputElmt = null;
     #pageSizeElmt = null;
     #pageLinkElmts = null;
     #accordionTimeseriesBtnElmts = null;
+
+    #siteSelector = null;
+    #zoneSelector = null;
+    #structuralElementIdInputElmt = null;
+    #structuralElementRecursiveSwitchElmt = null;
+    #zoneIdInputElmt = null;
 
     constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -38,12 +49,20 @@ export class TimeseriesListView {
     }
 
     #cacheDOM() {
+        this.#messagesElmt = document.getElementById("messages");
         this.#formFiltersElmt = document.getElementById("formFilters");
         this.#campaignScopeElmt = document.getElementById("campaign_scope");
         this.#pageInputElmt = document.getElementById("page");
         this.#pageSizeElmt = document.getElementById("page_size");
         this.#pageLinkElmts = [].slice.call(document.querySelectorAll(".page-item:not(.disabled) .page-link"));
         this.#accordionTimeseriesBtnElmts = [].slice.call(document.querySelectorAll("#accordionTimeseries .accordion-collapse.collapse"));
+
+        this.#structuralElementIdInputElmt = document.getElementById("structural_element_filter");
+        this.#structuralElementRecursiveSwitchElmt = document.getElementById("structural_element_recursive");
+        this.#zoneIdInputElmt = document.getElementById("zone_filter");
+
+        this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
+        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
     }
 
     #initEventListeners() {
@@ -84,6 +103,36 @@ export class TimeseriesListView {
                 this.#renderEvents(tsId);
             });
         }
+
+        this.#siteSelector.addEventListener("treeNodeSelect", (event) => {
+            this.#structuralElementIdInputElmt.name = `${this.#structuralElementRecursiveSwitchElmt.checked ? "recurse_" : ""}${event.detail.type}_id`;
+            this.#structuralElementIdInputElmt.value = event.detail.id;
+        });
+
+        this.#siteSelector.addEventListener("treeNodeUnselect", () => {
+            this.#structuralElementIdInputElmt.name = this.#structuralElementIdInputElmt.id;
+            this.#structuralElementIdInputElmt.value = "";
+        });
+
+        this.#zoneSelector.addEventListener("treeNodeSelect", (event) => {
+            this.#zoneIdInputElmt.value = event.detail.id;
+        });
+
+        this.#zoneSelector.addEventListener("treeNodeUnselect", () => {
+            this.#zoneIdInputElmt.value = "";
+        });
+
+        this.#structuralElementRecursiveSwitchElmt.addEventListener("change", (event) => {
+            if (this.#structuralElementIdInputElmt.value != "")
+            {
+                if (event.target.checked) {
+                    this.#structuralElementIdInputElmt.name = `recurse_${this.#structuralElementIdInputElmt.name}`;
+                }
+                else {
+                    this.#structuralElementIdInputElmt.name = this.#structuralElementIdInputElmt.name.replace("recurse_", "");
+                }
+            }
+        });
     }
 
     #getEditBtnHTML(id, tab=null) {
@@ -359,5 +408,59 @@ export class TimeseriesListView {
                 },
             );
         }
+    }
+
+    #loadSitesTreeData() {
+        this.#siteSelector.showLoadingTree();
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            (data) => {
+                this.#siteSelector.loadTree(data.data);
+
+                if (this.#structuralElementIdInputElmt.value != "") {
+                    let structuralElementType = this.#structuralElementIdInputElmt.name.replace("_id", "");
+                    this.#siteSelector.select(`${structuralElementType}-${this.#structuralElementIdInputElmt.value}`);
+                }
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #loadZonesTreeData() {
+        this.#zoneSelector.showLoadingTree();
+
+        if (this.#zonesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#zonesTreeReqID);
+            this.#zonesTreeReqID = null;
+        }
+
+        this.#zonesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            (data) => {
+                this.#zoneSelector.loadTree(data.data);
+
+                if (this.#zoneIdInputElmt.value != "") {
+                    this.#zoneSelector.select(`zone-${this.#zoneIdInputElmt.value}`);
+                }
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    mount() {
+        this.#loadSitesTreeData();
+        this.#loadZonesTreeData();
     }
 }

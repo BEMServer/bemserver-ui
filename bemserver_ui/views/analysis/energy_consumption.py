@@ -3,8 +3,6 @@ import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
 
-from ..structural_elements.structural_elements import _build_tree_sites
-
 
 blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consumption")
 
@@ -13,17 +11,7 @@ blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consum
 @auth.signin_required
 @ensure_campaign_context
 def explore():
-    campaign_id = flask.g.campaign_ctxt.id
-
-    # Sites and buildings tree data.
-    sites_tree_data = _build_tree_sites(
-        campaign_id, structural_element_types=["site", "building"]
-    )
-
-    return flask.render_template(
-        "pages/analysis/energy_consumption/explore.html",
-        sites_tree_data=sites_tree_data,
-    )
+    return flask.render_template("pages/analysis/energy_consumption/explore.html")
 
 
 @blp.route("/config/<string:structural_element_type>/<int:structural_element_id>")

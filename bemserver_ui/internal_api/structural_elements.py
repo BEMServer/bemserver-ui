@@ -3,6 +3,10 @@ import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.views.structural_elements.structural_elements import (
+    _build_tree_sites,
+    _build_tree_zones,
+)
 
 
 blp = flask.Blueprint(
@@ -86,3 +90,29 @@ def retrieve_property_data(type, id):
             "properties": properties,
         }
     )
+
+
+@blp.route("/tree/sites")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_tree_sites():
+    kwargs = {}
+    if "draggable" in flask.request.args:
+        kwargs["is_draggable"] = flask.request.args["draggable"]
+    if "types" in flask.request.args:
+        kwargs["structural_element_types"] = flask.request.args["types"].split(",")
+    # Structural elements full tree data.
+    sites_tree_data = _build_tree_sites(flask.g.campaign_ctxt.id, **kwargs)
+    return flask.jsonify({"data": sites_tree_data})
+
+
+@blp.route("/tree/zones")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_tree_zones():
+    kwargs = {}
+    if "draggable" in flask.request.args:
+        kwargs["is_draggable"] = flask.request.args["draggable"]
+    # Zones tree data.
+    zones_tree_data = _build_tree_zones(flask.g.campaign_ctxt.id, **kwargs)
+    return flask.jsonify({"data": zones_tree_data})

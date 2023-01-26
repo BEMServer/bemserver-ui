@@ -3,12 +3,14 @@ import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { flaskES6, signedUser } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 import { TimeseriesEnergyConsumptionChart } from "../../components/tsEnerConsChart.js";
+import "../../components/tree.js";
 
 
 export class EnergyConsumptionExploreView {
 
     #internalAPIRequester = null;
     #retrieveDataReqID = null;
+    #sitesTreeReqID = null;
 
     #messagesElmt = null;
     #setupBtnElmt = null;
@@ -16,6 +18,7 @@ export class EnergyConsumptionExploreView {
     #periodTypeSelectElmt = null;
     #periodMonthSelectElmt = null;
     #periodYearSelectElmt = null;
+    #sitesTreeElmt = null;
 
     #tzName = "UTC";
     #yearRef = null;
@@ -56,12 +59,21 @@ export class EnergyConsumptionExploreView {
         this.#setupBtnElmt = document.getElementById("setupBtn");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
+        this.#sitesTreeElmt = document.getElementById("sitesTree");
         this.#periodTypeSelectElmt = document.getElementById("periodType");
         this.#periodMonthSelectElmt = document.getElementById("periodMonth");
         this.#periodYearSelectElmt = document.getElementById("periodYear");
     }
 
     #initEventListeners() {
+        this.#sitesTreeElmt.addEventListener("treeNodeSelect", (event) => {
+            this.#structuralElementType = event.detail.type;
+            this.#structuralElementId = event.detail.id;
+    
+            this.#updateConfigBtn();
+            this.#generateCharts();
+        });
+
         this.#periodTypeSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
@@ -236,11 +248,28 @@ export class EnergyConsumptionExploreView {
         }
     }
 
-    onTreeSelectItem(strucutalElementId, strucutalElementType) {
-        this.#structuralElementType = strucutalElementType;
-        this.#structuralElementId = strucutalElementId;
+    #loadSitesTreeData() {
+        this.#sitesTreeElmt.showLoading();
 
-        this.#updateConfigBtn();
-        this.#generateCharts();
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
+            (data) => {
+                this.#sitesTreeElmt.load(data.data);
+                this.#sitesTreeElmt.collapseAll();
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    mount() {
+        this.#loadSitesTreeData();
     }
 }
