@@ -105,11 +105,21 @@ export class TimeseriesListView {
         }
 
         this.#siteSelector.addEventListener("treeNodeSelect", (event) => {
+            if (event.detail.type == "space") {
+                this.#structuralElementRecursiveSwitchElmt.checked = false;
+                this.#structuralElementRecursiveSwitchElmt.setAttribute("disabled", true);
+            }
+            else {
+                this.#structuralElementRecursiveSwitchElmt.removeAttribute("disabled");
+            }
+
             this.#structuralElementIdInputElmt.name = `${this.#structuralElementRecursiveSwitchElmt.checked ? "recurse_" : ""}${event.detail.type}_id`;
             this.#structuralElementIdInputElmt.value = event.detail.id;
         });
 
         this.#siteSelector.addEventListener("treeNodeUnselect", () => {
+            this.#structuralElementRecursiveSwitchElmt.removeAttribute("disabled");
+
             this.#structuralElementIdInputElmt.name = this.#structuralElementIdInputElmt.id;
             this.#structuralElementIdInputElmt.value = "";
         });
@@ -123,7 +133,7 @@ export class TimeseriesListView {
         });
 
         this.#structuralElementRecursiveSwitchElmt.addEventListener("change", (event) => {
-            if (this.#structuralElementIdInputElmt.value != "")
+            if (this.#structuralElementIdInputElmt.value != "" && this.#structuralElementIdInputElmt.value != "space_id")
             {
                 if (event.target.checked) {
                     this.#structuralElementIdInputElmt.name = `recurse_${this.#structuralElementIdInputElmt.name}`;

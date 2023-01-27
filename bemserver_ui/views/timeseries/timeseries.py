@@ -76,7 +76,10 @@ def list():
         else:
             ui_filters["structural_element_recursive"] = False
         for struct_elmt_type in STRUCTURAL_ELEMENT_TYPES:
-            struct_elmt_filter_key = f"{recurse_prefix}{struct_elmt_type}_id"
+            if struct_elmt_type != "space":
+                struct_elmt_filter_key = f"{recurse_prefix}{struct_elmt_type}_id"
+            else:
+                struct_elmt_filter_key = f"{struct_elmt_type}_id"
             struct_elmt_filter_value = flask.request.form.get(struct_elmt_filter_key)
             if (
                 struct_elmt_filter_key in flask.request.form
@@ -94,8 +97,11 @@ def list():
 
     is_filtered = filters["campaign_scope_id"] is not None or any(
         [
-            f"{recurse_prefix}{x}_id" in filters
-            and filters[f"{recurse_prefix}{x}_id"] is not None
+            f"{recurse_prefix}{x}_id"
+            if x != "space"
+            else f"{x}_id" in filters
+            and filters[f"{recurse_prefix}{x}_id" if x != "space" else f"{x}_id"]
+            is not None
             for x in FULL_STRUCTURAL_ELEMENT_TYPES
         ]
     )

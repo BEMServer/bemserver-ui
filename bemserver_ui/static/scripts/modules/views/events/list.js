@@ -446,16 +446,26 @@ export class EventListView {
         });
 
         this.#siteSelector.addEventListener("treeNodeSelect", (event) => {
+            if (event.detail.type == "space") {
+                this.#siteSelectorRecursiveSwitchElmt.checked = false;
+                this.#siteSelectorRecursiveSwitchElmt.setAttribute("disabled", true);
+            }
+            else {
+                this.#siteSelectorRecursiveSwitchElmt.removeAttribute("disabled");
+            }
+
             this.#paginationElmt.page = 1;
             this.refresh();
         });
 
         this.#siteSelector.addEventListener("treeNodeUnselect", () => {
+            this.#siteSelectorRecursiveSwitchElmt.removeAttribute("disabled");
+
             this.#paginationElmt.page = 1;
             this.refresh();
         });
 
-        this.#zoneSelector.addEventListener("treeNodeSelect", (event) => {
+        this.#zoneSelector.addEventListener("treeNodeSelect", () => {
             this.#paginationElmt.page = 1;
             this.refresh();
         });
@@ -465,9 +475,11 @@ export class EventListView {
             this.refresh();
         });
 
-        this.#siteSelectorRecursiveSwitchElmt.addEventListener("change", (event) => {
+        this.#siteSelectorRecursiveSwitchElmt.addEventListener("change", () => {
             if (this.#siteSelector.selectedData != null)
             {
+                console.log("test");
+
                 this.#paginationElmt.page = 1;
                 this.refresh();
             }
