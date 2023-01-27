@@ -118,9 +118,11 @@ export class TimeseriesDataExploreView {
     #updateAggregationBucketState() {
         if (this.#aggInputElmt.value == "none") {
             this.#bucketElmt.setAttribute("disabled", true);
+            this.#bucketElmt.parentElement.classList.add("d-none", "invisible");
         }
         else {
             this.#bucketElmt.removeAttribute("disabled");
+            this.#bucketElmt.parentElement.classList.remove("d-none", "invisible");
         }
     }
 
