@@ -1,6 +1,29 @@
 Changelog
 ---------
 
+0.2.1 (2023-01-30)
+++++++++++++++++++
+
+Features:
+
+- Add check outlier data service management pages
+- Rework sites/buildings... filtering on timeseries and events pages (selection via a tree view)
+- Improve timeseries data explore page:
+
+  - Add *count* aggregation mode
+  - Hide *duration* selection when *no aggregation* mode is selected
+
+Fixes:
+
+- Repair campaign create/edit page (bug with timezones and datetimes picker)
+- Improve notifications setup page
+
+Other changes:
+
+- Require bemserver-api-client >=0.10.0 and <0.11.0
+- Require bemserver-api >=0.10.0 and <0.11.0
+- Require bemserver-core >=0.8.0 and <0.9.0
+
 0.2.0 (2023-01-23)
 ++++++++++++++++++
 
