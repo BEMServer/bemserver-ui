@@ -21,6 +21,25 @@
             </div>
         </div>
     </div>
+    <div class="row mb-2" id="addEventCategorySection">
+        <div class="col-12 col-lg-auto">
+            <div class="dropdown my-2">
+                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="addEventCategoryBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-plus-circle"></i> Setup an event category
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="addEventCategoryBtn"></ul>
+                <sup class="ms-2"><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#addEventCategoryHelpCollapsePanel" aria-expanded="false" aria-controls="addEventCategoryHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
+            </div>
+        </div>
+        <div class="col">
+            <div class="collapse" id="addEventCategoryHelpCollapsePanel">
+                <div class="alert alert-info mb-0 pb-0" role="alert" style="max-width: 700px;">
+                    <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                    <p>You can <span class="fw-bold">add an event category</span> to select the <span class="fw-bold">notification level</span> wanted.</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <div class="table-responsive">
@@ -36,27 +55,6 @@
                     </thead>
                     <tbody class="table-group-divider">
                     </tbody>
-                    <tfoot>
-                        <tr class="align-middle">
-                            <td class="text-center text-nowrap">
-                                <div class="dropdown my-2">
-                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="addEventCategoryBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-plus-circle"></i> Setup an event category
-                                    </button>
-                                    <ul class="dropdown-menu" aria-labelledby="addEventCategoryBtn"></ul>
-                                    <sup class="ms-2"><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#addEventCategoryHelpCollapsePanel" aria-expanded="false" aria-controls="addEventCategoryHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
-                                </div>
-                            </td>
-                            <td class="p-2">
-                                <div class="collapse" id="addEventCategoryHelpCollapsePanel">
-                                    <div class="alert alert-info mb-0 pb-0" role="alert" style="max-width: 700px;">
-                                        <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
-                                        <p>You can <span class="fw-bold">add an event category</span> to select the <span class="fw-bold">notification level</span> wanted.</p>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>

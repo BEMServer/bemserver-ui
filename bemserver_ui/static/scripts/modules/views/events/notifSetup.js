@@ -16,7 +16,7 @@ export class EventNotificationSetupView {
 
     #configTableElmt = null;
     #configTableBodyElmt = null;
-    #configTableFooterElmt = null;
+    #addEventCategorySectionElmt = null;
     #addEventCategoryBtnElmt = null;
     #addEventCategoryMenuElmt = null;
     #saveConfigBtnElmt = null;
@@ -48,8 +48,8 @@ export class EventNotificationSetupView {
 
         this.#configTableElmt = document.getElementById("configTable");
         this.#configTableBodyElmt = this.#configTableElmt.querySelector("tbody");
-        this.#configTableFooterElmt = this.#configTableElmt.querySelector("tfoot");
 
+        this.#addEventCategorySectionElmt = document.getElementById("addEventCategorySection");
         this.#addEventCategoryBtnElmt = document.getElementById("addEventCategoryBtn");
         this.#addEventCategoryMenuElmt = this.#addEventCategoryBtnElmt.parentElement.querySelector("ul.dropdown-menu");
         this.#saveConfigBtnElmt = document.getElementById("saveConfigBtn");
@@ -227,15 +227,20 @@ export class EventNotificationSetupView {
 
         let btnDeleteElmt = document.createElement("button");
         btnDeleteElmt.classList.add("btn", "btn-sm", "btn-outline-danger");
-        if (eventCategoryConfigData.id == null) {
-            btnDeleteElmt.classList.add("d-none");
-        }
         btnDeleteElmt.id = `btnDelConfig-${idSuffix}`;
         editContainerElmt.appendChild(btnDeleteElmt);
 
         let delIconElmt = document.createElement("i");
         delIconElmt.classList.add("bi", "bi-trash");
         btnDeleteElmt.appendChild(delIconElmt);
+
+        let restoreEventCatMenuItemCallback = () => {
+            rowElmt.remove();
+            delete this.#config[eventCategoryConfigData.category_id];
+            this.#availableEventCategoryIds.push(eventCategoryConfigData.category_id);
+            this.#addEventCatMenuItemElmt(eventCategoryConfigData.category_id);
+            this.#updateAddEventCategorySectionState();
+        };
 
         // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
         let modalConfirm = new ModalConfirm(eventCategoryConfigData.category_id, `Remove <mark>${eventCategoryConfigData.category_name}</mark> notification setup`, () => {
@@ -248,11 +253,7 @@ export class EventNotificationSetupView {
             this.#deleteReqID = this.#internalAPIRequester.delete(
                 flaskES6.urlFor(`api.events.notif_setup_delete`, {id: eventCategoryConfigData.id}),
                 eventCategoryConfigData.etag,
-                () => {
-                    delete this.#config[eventCategoryConfigData.category_id];
-                    rowElmt.remove();
-                    this.#addEventCatMenuItemElmt(eventCategoryConfigData.category_id);
-                },
+                restoreEventCatMenuItemCallback,
                 (error) => {
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                     this.#messagesElmt.appendChild(flashMsgElmt);
@@ -268,8 +269,13 @@ export class EventNotificationSetupView {
         // Add an event listener to display a confirm message on delete button click.
         btnDeleteElmt.addEventListener("click", (event) => {
             event.preventDefault();
-            // Display modal.
-            modalConfirm.show();
+            if (eventCategoryConfigData.id != null) {
+                // Display modal.
+                modalConfirm.show();
+            }
+            else {
+                restoreEventCatMenuItemCallback();
+            }
         });
 
         this.#configTableBodyElmt.appendChild(rowElmt);
@@ -300,11 +306,17 @@ export class EventNotificationSetupView {
             };
 
             this.#addEventCategoryFromConfig(this.#config[eventCategoryId]);
-
-            if (this.#availableEventCategoryIds.length <= 0) {
-                this.#configTableFooterElmt.classList.add("d-none");
-            }
+            this.#updateAddEventCategorySectionState();
         });
+    }
+
+    #updateAddEventCategorySectionState() {
+        if (this.#availableEventCategoryIds.length <= 0) {
+            this.#addEventCategorySectionElmt.classList.add("d-none");
+        }
+        else {
+            this.#addEventCategorySectionElmt.classList.remove("d-none");
+        }
     }
 
     refresh() {
@@ -318,8 +330,6 @@ export class EventNotificationSetupView {
             this.#addEventCatMenuItemElmt(eventCategoryId);
         };
 
-        if (this.#availableEventCategoryIds.length <= 0) {
-            this.#configTableFooterElmt.classList.add("d-none");
-        }
+        this.#updateAddEventCategorySectionState();
     }
 }
