@@ -65,11 +65,77 @@ export class TimeseriesDataExploreView {
         this.#endDatetimePickerElmt.dateMin = this.#startDatetimePickerElmt.date;
     }
 
+    #addTsParamInputs(tsData) {
+        let tsParam = document.createElement("div");
+        tsParam.id = "tsParam-" + tsData.itemId;
+        
+        tsParam.innerHTML =
+        "<div class=\"row d-xl-flex d-grid m-2 mb-3\">"
+        + "<h6>"
+        + tsData.itemName
+        + "</h6>"
+        + "<div class=\"col pb-2 pb-xl-0\">"
+        + "<div class=\"input-group input-group-sm\">"
+        + "<span class=\"input-group-text\">Position</span>"
+        + "<select class=\"form-select\" id=\"position-"
+        + tsData.itemId
+        + "\" name=\"position\" aria-label=\"Select a position\">"
+        + "<option value=\"left\" selected>Left</option>"
+        + "<option value=\"right\">Right</option>"
+        + "</select>"
+        + "</div>"
+        + "</div>"
+        + "<div class=\"col pb-2 pb-xl-0\">"
+        + "<div class=\"input-group input-group-sm\">"
+        + "<span class=\"input-group-text\">Type</span>"
+        + "<select class=\"form-select\" id=\"type-"
+        + tsData.itemId
+        + "\" name=\"type\" aria-label=\"Select a type of graph\">"
+        + "<option value=\"line\" selected>Line chart</option>"
+        + "<option value=\"bar\">Bar chart</option>"
+        + "</select>"
+        + "</div>"
+        + "</div>"
+        + "<div class=\"col pb-2 pb-xl-0\">"
+        + "<div class=\"input-group input-group-sm\">"
+        + "<span class=\"input-group-text\">Style</span>"
+        + "<select class=\"form-select\" id=\"style-"
+        + tsData.itemId
+        + "\" name=\"style\" aria-label=\"Select a style\">"
+        + "<option value=\"solid\" selected>Solid</option>"
+        + "<option value=\"dashed\">Dashed</option>"
+        + "<option value=\"dotted\">Dotted</option>"
+        + "</select>"
+        + "</div>"
+        + "</div>"
+        + "<div class=\"col pb-2 pb-xl-0\">"
+        + "<div class=\"input-group input-group-sm\">"
+        + "<span class=\"input-group-text\">Color</span>"
+        + "<input type=\"color\" class=\"form-control form-control-color\" id=\"color-"
+        + tsData.itemId
+        + "\" name=\"color\" value=\""
+        + this.#chart.colors[(this.#tsSelector.selectedItemNames.length - 1) % (this.#chart.colors.length)]
+        + "\">"
+        + "</div>"
+        + "</div>";
+
+        document.getElementById("tsParam").appendChild(tsParam);
+    }
+
     #initEventListeners() {
         this.#tsSelector.addEventListener("toggleItem", (event) => {
             event.preventDefault();
 
             this.#updateLoadBtnState();
+
+            if (event.detail.itemIsActive) {
+                this.#addTsParamInputs(event.detail);
+            }
+            else {
+                delete this.#tsSelector[event.detail.itemName];
+
+                document.getElementById("tsParam-" + event.detail.itemId)?.remove();      
+            }
         });
 
         this.#timezonePickerElmt.addEventListener("tzChange", (event) => {
@@ -157,7 +223,25 @@ export class TimeseriesDataExploreView {
             flaskES6.urlFor(`api.timeseries_data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download_multiple`, urlParams));
-                this.#chart.load(data, this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text, this.#timezonePickerElmt.tzName);
+
+                let options = {
+                    subtitle: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
+                    timezone: this.#timezonePickerElmt.tzName,
+                    series: {},
+                };
+
+                for (let [index, tsId] of Object.entries(this.#tsSelector.selectedItemIds)) {
+                    let tsName = this.#tsSelector.selectedItemNames[index];
+
+                    options.series[tsName] = {
+                        position: document.getElementById("position-" + this.#tsSelector.selectedItemIds[index]).value,
+                        type: document.getElementById("type-" + this.#tsSelector.selectedItemIds[index]).value,
+                        style: document.getElementById("style-" + this.#tsSelector.selectedItemIds[index]).value,
+                        color: document.getElementById("color-" + this.#tsSelector.selectedItemIds[index]).value,
+                        symbol: this.#tsSelector.selectedItemSymbols[index],
+                    };
+                }
+                this.#chart.load(data, options);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});

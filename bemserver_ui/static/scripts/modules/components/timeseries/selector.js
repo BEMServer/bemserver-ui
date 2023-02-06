@@ -32,6 +32,10 @@ export class SelectedItem extends HTMLSpanElement {
         return this.#itemName;
     }
 
+    get itemSymbol() {
+        return this.#itemSymbol;
+    }
+
     #initEventListeners() {
         this.#removeBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
@@ -210,6 +214,10 @@ export class TimeseriesSelector extends HTMLDivElement {
 
     get selectedItemNames() {
         return this.#selectedItems.map((item) => { return item.itemName; });
+    }
+
+    get selectedItemSymbols() {
+        return this.#selectedItems.map((item) => { return item.itemSymbol; });
     }
 
     #loadOptions(options = {}) {
