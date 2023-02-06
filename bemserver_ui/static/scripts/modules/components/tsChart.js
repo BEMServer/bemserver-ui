@@ -33,6 +33,7 @@ export class TimeseriesChart extends HTMLDivElement {
             feature: {
                 magicType: {
                     type: ["line", "bar"],
+                    show: false,
                 },
                 dataZoom: {
                     yAxisIndex: "none",
@@ -80,11 +81,33 @@ export class TimeseriesChart extends HTMLDivElement {
             {
                 type: "value",
                 nameLocation: "middle",
+                position: "left",
+            },
+            {
+                type: "value",
+                nameLocation: "middle",
+                position: "right",
             },
         ],
         series: [],
         useUTC: false,
     };
+
+    #colors = [
+        '#5470c6',
+        '#91cc75',
+        '#fac858',
+        '#ee6666',
+        '#73c0de',
+        '#3ba272',
+        '#fc8452',
+        '#9a60b4',
+        '#ea7ccc'
+    ];
+
+    get colors() {
+        return this.#colors;
+    }
 
     // `theme` parameter can be "dark"
     constructor(options = null, theme = null) {
@@ -209,7 +232,7 @@ export class TimeseriesChart extends HTMLDivElement {
 
             if (unit != null) {
                 let serieValueUnitElmt = document.createElement("small");
-                serieValueUnitElmt.innerText = unit;
+                serieValueUnitElmt.innerText = unit[index];
                 serieValueContainerElmt.appendChild(serieValueUnitElmt);
             }
 
@@ -245,35 +268,43 @@ export class TimeseriesChart extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data, dataState, tzName) {
+    load(data, parameters = {tzName: "UTC"}) {
         this.hideLoading();
-
+        let listUnit = [];
+        let yAxisIndex = 0;
         let options = this.#chart.getOption();
 
-        options.title[0].subtext = `${dataState}`;
+        options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, null, null, tzName); };
-
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, null, null, tzName); };
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {
             return header != "Datetime";
         }).map((header) => {
+            listUnit.push(parameters.series[header]?.symbol);
+            parameters.series[header]?.position == "right" ? yAxisIndex = 1 : yAxisIndex = 0;
             return {
                 id: header,
                 name: header,
-                type: "line",
+                type: parameters.series[header]?.type || "line",
+                color: parameters.series[header]?.color || "#000000",
+                lineStyle: {
+                    width: 2,
+                    type: parameters.series[header]?.style || "solid",
+                },
+                yAxisIndex: yAxisIndex,
                 smooth: true,
                 data: data.ts_data.map((row) => {
                     return [row["Datetime"], Parser.parseFloatOrDefault(row[header], Number.NaN, 2)];
                 }),
             };
         });
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.tzName);};
 
-        options.yAxis[0].data = options.series.map((serie) => {
-            return serie.name;
-        });
+        options.legend[0].formatter = (name) => {
+            return name + " [" + parameters.series[name]?.symbol + "] ";
+        };
 
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();

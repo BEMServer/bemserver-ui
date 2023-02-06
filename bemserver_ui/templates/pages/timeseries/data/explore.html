@@ -58,7 +58,21 @@
                     <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="day" value="1"></div>
                 </div>
             </div>
-            <div class="d-flex justify-content-end gap-2">
+            <div class="accordion app-sidebar-accordion rounded bg-primary bg-opacity-25" id="accordionTSExplore">
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header" id="panelHeadingTSData">
+                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTest" aria-expanded="false" aria-controls="panelCollapseTSData">
+                            <span class="app-sidebar-heading">Timeseries customization</span>
+                        </button>
+                    </h2>
+                    <div id="panelCollapseTest" class="accordion-collapse collapse" aria-labelledby="panelHeadingTSData">
+                        <div class="accordion-body px-0 py-2" id="tsParam">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
                 <button id="loadBtn" class="btn btn-sm btn-outline-primary" title="Load chart"><i class="bi bi-arrow-clockwise"></i> Load chart</button>
             </div>
         </div>
