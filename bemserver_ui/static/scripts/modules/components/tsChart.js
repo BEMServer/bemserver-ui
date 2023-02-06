@@ -62,10 +62,22 @@ export class TimeseriesChart extends HTMLDivElement {
                 type: "cross",
             },
         },
-        legend: {
-            type: "scroll",
-            bottom: 10,
-        },
+        legend: [
+            {
+                data: [],
+                width: "45%",
+                bottom: 0,
+                left: "0%",
+                type: "scroll",
+            },
+            {
+                data: [],
+                width: "45%",
+                bottom: 0,
+                right: "0%",
+                type: "scroll",
+            }
+        ],
         dataZoom: [
             {
                 type: "slider",
@@ -268,15 +280,17 @@ export class TimeseriesChart extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data, parameters = {tzName: "UTC"}) {
+    load(data, parameters) {
         this.hideLoading();
         let listUnit = [];
         let yAxisIndex = 0;
         let options = this.#chart.getOption();
+        options.legend[0].data = [];
+        options.legend[1].data = [];
 
         options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, null, null, tzName); };
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, null, null, parameters.timezone); };
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {
@@ -284,6 +298,7 @@ export class TimeseriesChart extends HTMLDivElement {
         }).map((header) => {
             listUnit.push(parameters.series[header]?.symbol);
             parameters.series[header]?.position == "right" ? yAxisIndex = 1 : yAxisIndex = 0;
+            yAxisIndex == 0 ? options.legend[0].data.push(header) : options.legend[1].data.push(header);
             return {
                 id: header,
                 name: header,
@@ -300,9 +315,12 @@ export class TimeseriesChart extends HTMLDivElement {
                 }),
             };
         });
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.tzName);};
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone);};
 
         options.legend[0].formatter = (name) => {
+            return name + " [" + parameters.series[name]?.symbol + "] ";
+        };
+        options.legend[1].formatter = (name) => {
             return name + " [" + parameters.series[name]?.symbol + "] ";
         };
 
