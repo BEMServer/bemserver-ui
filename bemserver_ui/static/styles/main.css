@@ -104,3 +104,12 @@ h2 {
     opacity: 0;
     animation: fadeIn .5s ease-in 1 forwards;
 }
+
+.dropdown .dropdown-item.active,
+.dropdown .dropdown-item:hover,
+.dropdown .dropdown-item:focus,
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    background-color: var(--app-blue);
+    color: var(--app-white);
+}

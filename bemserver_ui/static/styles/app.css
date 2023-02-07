@@ -1,5 +1,6 @@
 :root {
     --app-sidebar-bg: #f3f8e9;
+    --app-header-height: 60px;
 }
 
 body,
@@ -114,7 +115,7 @@ body,
 }
 
 .app-campaign-selector {
-    top: 60px !important;
+    top: var(--app-header-height) !important;
     min-height: 200px;
     max-height: 340px;
 }

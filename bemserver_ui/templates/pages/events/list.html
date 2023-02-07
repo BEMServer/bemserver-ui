@@ -52,11 +52,11 @@
                             <div class="row g-2 mb-2">
                                 <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
                                     <span>Between</span>
-                                    <div is="app-datetime-picker" id="timestamp_min" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                    <div is="app-datetime-picker" id="timestamp_min" tzname="{{ g.campaign_ctxt.tz_name }}" as-filter="true"></div>
                                 </div>
                                 <div class="col-12 col-lg-6 d-flex align-items-center gap-2">
                                     <span>and</span>
-                                    <div is="app-datetime-picker" id="timestamp_max" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                                    <div is="app-datetime-picker" id="timestamp_max" tzname="{{ g.campaign_ctxt.tz_name }}" as-filter="true"></div>
                                 </div>
                             </div>
                             <div id="filtersContainer" class="d-xl-flex d-grid align-items-center gap-2 mb-2">

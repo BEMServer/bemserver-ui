@@ -1,3 +1,4 @@
+import { Parser } from "../../tools/parser.js";
 import { TimezoneTool } from "../../tools/timezones.js";
 
 
@@ -20,6 +21,7 @@ export class DatetimePicker extends HTMLDivElement {
     #tzName = null;
     #dateMin = null;
     #dateMax = null;
+    #usedAsFilter = false;
 
     #date = null;
     #time = null;
@@ -80,6 +82,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#dateMax = this.getAttribute("max") || options.dateMax;
         this.#date = this.getAttribute("date") || options.date;
         this.#time = this.getAttribute("time") || options.time;
+        this.#usedAsFilter = this.getAttribute("as-filter") || Parser.parseBoolOrDefault(options.usedAsFilter, false);
     }
 
     #cacheDOM() {
@@ -97,6 +100,7 @@ export class DatetimePicker extends HTMLDivElement {
 
             this.#date = this.#dateInputElmt.value;
             this.#updateDateInputFormBind();
+            this.#updateStyle();
 
             let dateChangeEvent = new CustomEvent("dateChange", {detail: {date: this.#dateInputElmt.value}, bubbles: true});
             this.dispatchEvent(dateChangeEvent);
@@ -110,6 +114,7 @@ export class DatetimePicker extends HTMLDivElement {
 
             this.#time = this.#timeInputElmt.value;
             this.#updateTimeInputFormBind();
+            this.#updateStyle();
 
             let timeChangeEvent = new CustomEvent("timeChange", {detail: {time: this.#timeInputElmt.value}, bubbles: true});
             this.dispatchEvent(timeChangeEvent);
@@ -117,6 +122,24 @@ export class DatetimePicker extends HTMLDivElement {
             let datetimeChangeEvent = new CustomEvent("datetimeChange", {detail: {date: this.#dateInputElmt.value, time: this.#timeInputElmt.value}, bubbles: true});
             this.dispatchEvent(datetimeChangeEvent);
         });
+    }
+
+    #updateStyle() {
+        if (this.#usedAsFilter) {
+            if (this.#date == null || this.#date == "") {
+                this.#dateInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            }
+            else {
+                this.#dateInputElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            }
+
+            if (this.#time == null || this.#time == "") {
+                this.#timeInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            }
+            else {
+                this.#timeInputElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            }
+        }
     }
 
     #updateDateBounds() {
@@ -209,6 +232,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#updateDateBounds();
         this.#updateDateAndTime();
         this.#updateTzInfo();
+        this.#updateStyle();
 
         this.#initEventListeners();
     }
@@ -220,6 +244,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#dateMax = null;
         this.#updateDateBounds();
         this.#updateDateAndTime();
+        this.#updateStyle();
     }
 }
 
