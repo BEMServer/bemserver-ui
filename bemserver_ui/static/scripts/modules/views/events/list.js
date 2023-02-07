@@ -478,8 +478,6 @@ export class EventListView {
         this.#siteSelectorRecursiveSwitchElmt.addEventListener("change", () => {
             if (this.#siteSelector.selectedData != null)
             {
-                console.log("test");
-
                 this.#paginationElmt.page = 1;
                 this.refresh();
             }
@@ -547,14 +545,14 @@ export class EventListView {
             else {
                 this.#eventInfoNavFirstElmt.parentElement.classList.remove("disabled");
                 this.#eventInfoNavPreviousElmt.parentElement.classList.remove("disabled");
-                if (itemIndex >= this.#paginationElmt.totalItems) {
-                    this.#eventInfoNavNextElmt.parentElement.classList.add("disabled");
-                    this.#eventInfoNavLastElmt.parentElement.classList.add("disabled");
-                }
-                else {
-                    this.#eventInfoNavNextElmt.parentElement.classList.remove("disabled");
-                    this.#eventInfoNavLastElmt.parentElement.classList.remove("disabled");
-                }
+            }
+            if (itemIndex >= this.#paginationElmt.totalItems) {
+                this.#eventInfoNavNextElmt.parentElement.classList.add("disabled");
+                this.#eventInfoNavLastElmt.parentElement.classList.add("disabled");
+            }
+            else {
+                this.#eventInfoNavNextElmt.parentElement.classList.remove("disabled");
+                this.#eventInfoNavLastElmt.parentElement.classList.remove("disabled");
             }
 
             // Pick event general info from selected table row.
