@@ -5,7 +5,7 @@ import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 import { EventLevelBadge } from "../../components/eventLevel.js";
 
 
-export class EventNotificationSetupView {
+export class NotificationSetupView {
 
     #internalAPIRequester = null;
     #postReqID = null;

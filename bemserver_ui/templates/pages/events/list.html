@@ -13,13 +13,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-flex gap-2">
-    <div class="hstack gap-3">
-        <a href="{{ url_for('events.notif_setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Setup notifications"><i class="bi bi-tools"></i> Notifications setup</a>
-        <div class="vr me-2"></div>
-    </div>
-    <a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
-</div>
+<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 

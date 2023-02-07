@@ -2,6 +2,13 @@
 
 {% set title = "Notifications" %}
 
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('notifications.setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Setup notifications"><i class="bi bi-tools"></i> Setup</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
