@@ -1,6 +1,43 @@
 Changelog
 ---------
 
+0.3.0 (2023-02-17)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Remove messages container max height limit (all message stack is entirely visible, without scrollbar)
+  - Rework timeseries selector (use location selector as filter)
+
+- Notifications:
+
+  - Animate notifications header icon when unread notifications are received
+  - Add notifications page: view all notifications (read/unread) for each campaign
+  - Move access to notifications setup page from events to notifications module
+
+- Timeseries data explore:
+
+  - Introduce a second Y-axis (on the right of the chart)
+  - Add customization options for timeseries (left/right Y-axis, line/bar, color of data series)
+  - Display timeseries data unit symbol
+
+- Events:
+
+  - Added editing of events' related timeseries and structural elements (sites, buildings...)
+
+Fixes:
+
+- Improve datetime picker component (filter mode style)
+- Fix navigation buttons state inside modal of events page
+
+Other changes:
+
+- Require bemserver-api-client >=0.11.1 and <0.12.0
+- Require bemserver-api 0.11.1
+- Require bemserver-core 0.9.1
+
 0.2.1 (2023-01-30)
 ++++++++++++++++++
 
