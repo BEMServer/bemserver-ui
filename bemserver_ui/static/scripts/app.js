@@ -43,19 +43,11 @@ export class App {
     }
 
     mount() {
-
         this.#sidebar.refresh();
         this.#campaignSelector.hide();
         this.#formCtrl.bind();
         this.#flashTimer.bind();
-
-        if (this.#campaignContext.has_campaign) {
-            this.#notifUpdater.refresh();
-        }
-        else {
-            this.#notifUpdater.disable();
-        }
-
+        this.#notifUpdater.refresh();
     }
 }
 

@@ -1,12 +1,14 @@
 import { InternalAPIRequest } from "./tools/fetcher.js";
 import { flaskES6 } from "../app.js";
 import { FlashMessageTypes, FlashMessage } from "./components/flash.js";
+import { Parser } from "./tools/parser.js";
 
 
 export class NotificationUpdater {
 
     #intervalDelay = 60000;
     #intervalID = null;
+    #disableAutoRefresh = false;
 
     #internalAPIRequester = null;
     #refreshReqID = null;
@@ -15,10 +17,12 @@ export class NotificationUpdater {
 
     #notifBellElmt = null;
     #notifBellIconElmt = null;
-    #notifBellNewBulletElmt = null;
+    #notifBellBulletElmt = null;
+    #notifBellBulletCountElmt = null;
 
-    #notifsData = [];
-    #notifsPagination = {};
+    #notifsCount = {
+        total: 0,
+    };
     #notifsETag = null;
 
     get isDisabled() {
@@ -34,7 +38,8 @@ export class NotificationUpdater {
     }
 
     #loadOptions(options = {}) {
-        this.#intervalDelay = options.delay || 60000;
+        this.#intervalDelay = Parser.parseIntOrDefault(options.delay, 60000);
+        this.#disableAutoRefresh = Parser.parseBoolOrDefault(options.disableAutoRefresh, false);
     }
 
     #cacheDOM() {
@@ -45,24 +50,15 @@ export class NotificationUpdater {
     }
 
     #initEventListeners() {
-        this.#notifBellElmt.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            this.#messagesElmt.appendChild(
-                new FlashMessage({type: FlashMessageTypes.INFO, text: this.#notifsPagination.total > 0 ? `${this.#notifsPagination.total} not read notifications...` : "No notifications...", isDismissible: true, isTimed: false})
-            );
-            this.#messagesElmt.appendChild(
-                new FlashMessage({type: FlashMessageTypes.WARNING, text: `Notifications UI panel not fully implemented yet!`, isDismissible: true, isTimed: false})
-            );
-        });
-
         this.#setInterval();
     }
 
     #setInterval() {
         // Ensure no other refresh interval is on.
         this.#cancelInterval();
-        this.#intervalID = window.setInterval(() => { this.refresh(); }, this.#intervalDelay);
+        if (!this.#disableAutoRefresh) {
+            this.#intervalID = window.setInterval(() => { this.refresh(); }, this.#intervalDelay);
+        }
     }
 
     #cancelInterval() {
@@ -72,26 +68,41 @@ export class NotificationUpdater {
         }
     }
 
-    #updateNewBulletState() {
-        if (this.#notifsData.length > 0) {
-            if (this.#notifBellNewBulletElmt == null) {
-                this.#notifBellNewBulletElmt = document.createElement("span");
-                this.#notifBellNewBulletElmt.classList.add("position-absolute", "top-0", "start-100", "translate-middle-x", "p-1", "bg-danger", "rounded-circle");
+    #updateBulletState() {
+        if (this.#notifsCount.total > 0) {
+            this.#notifBellElmt.title = "You have unread notifications";
+
+            if (this.#notifBellBulletElmt == null) {
+                this.#notifBellBulletElmt = document.createElement("span");
+                this.#notifBellBulletElmt.classList.add("position-absolute", "top-0", "start-100", "translate-middle", "badge", "bg-danger", "rounded-pill");
+
+                this.#notifBellBulletCountElmt = document.createElement("span");
+                this.#notifBellBulletCountElmt.innerText = this.#notifsCount.total.toString();
+                this.#notifBellBulletElmt.appendChild(this.#notifBellBulletCountElmt);
 
                 let textElmt = document.createElement("span");
                 textElmt.classList.add("visually-hidden");
-                textElmt.innerText = "New notifications";
-                this.#notifBellNewBulletElmt.appendChild(textElmt);
+                textElmt.innerText = "unread notifications";
+                this.#notifBellBulletElmt.appendChild(textElmt);
+            }
+            else {
+                this.#notifBellBulletCountElmt.innerText = this.#notifsCount.total.toString();
+                this.#notifBellIconElmt.classList.remove(`me-${Math.min(5, this.#notifBellBulletCountElmt.innerText.length).toString()}`);                
             }
 
             this.#notifBellIconElmt.classList.replace("bi-bell", "bi-bell-fill");
-            this.#notifBellIconElmt.classList.add("text-warning");
-            this.#notifBellElmt.appendChild(this.#notifBellNewBulletElmt);
+            this.#notifBellIconElmt.classList.add("app-notif-animate", `me-${Math.min(5, this.#notifBellBulletCountElmt.innerText.length).toString()}`);
+            this.#notifBellElmt.appendChild(this.#notifBellBulletElmt);
         }
-        else if (this.#notifBellNewBulletElmt != null) {
+        else if (this.#notifBellBulletElmt != null) {
+            this.#notifBellElmt.title = "You have no unread notifications";
+
             this.#notifBellIconElmt.classList.replace("bi-bell-fill", "bi-bell");
-            this.#notifBellIconElmt.classList.remove("text-warning");
-            this.#notifBellNewBulletElmt.remove();
+            this.#notifBellIconElmt.classList.remove("app-notif-animate");
+            if (this.#notifBellBulletCountElmt != null) {
+                this.#notifBellIconElmt.classList.remove(`me-${Math.min(5, this.#notifBellBulletCountElmt.innerText.length).toString()}`);
+            }
+            this.#notifBellBulletElmt.remove();
         }
     }
 
@@ -102,21 +113,19 @@ export class NotificationUpdater {
         }
 
         if (!this.isDisabled) {
-            let refreshOptions = {read: false, sort: "-timestamp"};
+            let refreshOptions = { read: false };
             if (this.#notifsETag != null) {
                 refreshOptions.etag = this.#notifsETag;
             }
 
             this.#refreshReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.notifications.retrieve_list`, refreshOptions),
+                flaskES6.urlFor(`api.notifications.retrieve_count`, refreshOptions),
                 (data) => {
-                    this.#notifsData = data.data;
-                    this.#notifsPagination = data.pagination;
-                    this.#notifsETag = data.etag;
-
-                    this.#updateNewBulletState();
-
-                    // TODO: display notifs data in UI (notification panel)
+                    if (data.data != null) {
+                        this.#notifsETag = data.etag;
+                        this.#notifsCount = data.data;
+                        this.#updateBulletState();
+                    }
                 },
                 (error) => {
                     let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});

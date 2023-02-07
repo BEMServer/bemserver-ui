@@ -98,7 +98,6 @@ def retrieve_categories():
 
 @blp.route("/<int:id>/timeseries")
 @auth.signin_required
-@ensure_campaign_context
 def retrieve_timeseries(id):
     filters = {}
     if "page_size" in flask.request.args:
@@ -114,7 +113,6 @@ def retrieve_timeseries(id):
 
 @blp.route("/<int:id>/structural_elements/<string:type>")
 @auth.signin_required
-@ensure_campaign_context
 def retrieve_structural_elements(id, type):
     filters = {}
     if "page_size" in flask.request.args:
@@ -159,7 +157,6 @@ def _extend_notif_setup_data(jsonData):
 
 @blp.route("/notifications/setup", methods=["POST"])
 @auth.signin_required
-@ensure_campaign_context
 def notif_setup_create():
     payload = {
         "notification_level": flask.request.json["notification_level"],
@@ -174,7 +171,6 @@ def notif_setup_create():
 
 @blp.route("/notifications/setup/<int:id>", methods=["PUT"])
 @auth.signin_required
-@ensure_campaign_context
 def notif_setup_update(id):
     etag = flask.request.headers["ETag"]
     payload = {
@@ -191,7 +187,6 @@ def notif_setup_update(id):
 
 @blp.route("/notifications/setup/<int:id>", methods=["DELETE"])
 @auth.signin_required
-@ensure_campaign_context
 def notif_setup_delete(id):
     etag = flask.request.headers["ETag"]
     flask.g.api_client.event_categories_by_users.delete(id, etag=etag)
@@ -200,7 +195,6 @@ def notif_setup_delete(id):
 
 @blp.route("/notifications/setup/<int:id>")
 @auth.signin_required
-@ensure_campaign_context
 def notif_setup_retrieve(id):
     notif_setup_resp = flask.g.api_client.event_categories_by_users.getone(id)
     jsonData = _extend_notif_setup_data(notif_setup_resp.toJSON())

@@ -13,8 +13,12 @@ from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 blp = flask.Blueprint("events", __name__, url_prefix="/events")
 
 
-def _get_event_levels():
+def get_event_levels():
     return [{"id": x.name, "name": x.value} for x in EventLevel]
+
+
+def get_default_event_level():
+    return EventLevel.WARNING
 
 
 @blp.route("/")
@@ -69,7 +73,7 @@ def create():
         timestamp_time=timestamp.time().strftime("%H:%M"),
         campaign_scopes=campaign_scopes_resp.data,
         event_categories=event_categories_resp.data,
-        event_levels=_get_event_levels(),
+        event_levels=get_event_levels(),
     )
 
 
@@ -116,7 +120,7 @@ def edit(id):
         etag=event_resp.etag,
         campaign_scopes=campaign_scopes_resp.data,
         event_categories=event_categories_resp.data,
-        event_levels=_get_event_levels(),
+        event_levels=get_event_levels(),
     )
 
 
@@ -127,40 +131,3 @@ def delete(id):
     flask.g.api_client.events.delete(id, etag=flask.request.form["delEtag"])
     flask.flash("Event deleted!", "success")
     return flask.redirect(flask.url_for("events.list"))
-
-
-@blp.route("/notifications/setup")
-@auth.signin_required
-@ensure_campaign_context
-def notif_setup():
-    event_categories_resp = flask.g.api_client.event_categories.getall()
-
-    event_cat_sub_resp = flask.g.api_client.event_categories_by_users.getall(
-        user_id=flask.session["user"]["data"]["id"],
-    )
-
-    evt_cat_name_by_id = {x["id"]: x["name"] for x in event_categories_resp.data}
-
-    notif_config = {}
-    defined_event_categories = []
-    for x in event_cat_sub_resp.data:
-        x["category_name"] = evt_cat_name_by_id[x["category_id"]]
-        x["etag"] = flask.g.api_client.event_categories_by_users.getone(x["id"]).etag
-        notif_config[x["category_id"]] = x
-        if x["category_id"] not in defined_event_categories:
-            defined_event_categories.append(x["category_id"])
-
-    available_event_categories = []
-    for x in event_categories_resp.data:
-        if x["id"] not in defined_event_categories:
-            available_event_categories.append(x["id"])
-
-    return flask.render_template(
-        "pages/events/notif_setup.html",
-        notif_config=notif_config,
-        event_levels=_get_event_levels(),
-        default_notification_level=EventLevel.WARNING.name,
-        all_event_categories=evt_cat_name_by_id,
-        defined_event_categories=defined_event_categories,
-        available_event_categories=available_event_categories,
-    )

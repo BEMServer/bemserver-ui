@@ -206,10 +206,12 @@ export class InternalAPIRequest {
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "ETag": etag,
             },
             body: JSON.stringify(payload),
         };
+        if (etag != null) {
+            params.headers["ETag"] = etag;
+        }
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
