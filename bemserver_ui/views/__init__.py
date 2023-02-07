@@ -10,6 +10,7 @@ from . import timeseries
 from . import services
 from . import analysis
 from . import events
+from . import notifications
 
 
 MODULES = (
@@ -27,6 +28,7 @@ MODULES = (
     timeseries.timeseries_data,
     events.events,
     events.event_categories,
+    notifications,
 )
 
 

@@ -2,7 +2,7 @@
 import zoneinfo
 import flask
 
-from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.extensions import auth
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
@@ -14,7 +14,6 @@ blp = flask.Blueprint("notifications", __name__, url_prefix="/notifications")
 
 @blp.route("/")
 @auth.signin_required
-@ensure_campaign_context
 def retrieve_list():
     # TODO: here etag should be passed in headers
     etag = flask.request.args.get("etag")
@@ -27,6 +26,8 @@ def retrieve_list():
         filters["page_size"] = flask.request.args["page_size"]
     if "page" in flask.request.args:
         filters["page"] = flask.request.args["page"]
+    if "campaign_id" in flask.request.args:
+        filters["campaign_id"] = flask.request.args["campaign_id"]
     if "event_id" in flask.request.args:
         filters["event_id"] = flask.request.args["event_id"]
     if "read" in flask.request.args:
@@ -63,4 +64,49 @@ def retrieve_list():
     except bac.BEMServerAPINotModified as exc:
         return flask.jsonify(None), exc.status_code
 
-    return flask.jsonify(notifs_resp.toJSON()), notifs_resp.status_code
+    notifs_data = notifs_resp.toJSON()
+    for notif_data in notifs_data["data"]:
+        notif_data["event"]["id"] = notif_data["event_id"]
+
+    return flask.jsonify(notifs_data), notifs_resp.status_code
+
+
+@blp.route("/count")
+@auth.signin_required
+def retrieve_count():
+    # TODO: here etag should be passed in headers
+    etag = flask.request.args.get("etag")
+
+    filters = {
+        "user_id": flask.session["user"]["data"]["id"],
+    }
+    if "read" in flask.request.args:
+        filters["read"] = flask.request.args["read"]
+
+    try:
+        notifs_count_resp = flask.g.api_client.notifications.count_by_campaign(
+            etag=etag, **filters
+        )
+    except bac.BEMServerAPINotModified as exc:
+        return flask.jsonify(None), exc.status_code
+
+    return flask.jsonify(notifs_count_resp.toJSON()), notifs_count_resp.status_code
+
+
+@blp.route("/<int:id>", methods=["PUT"])
+@auth.signin_required
+def update(id):
+    notif_resp = flask.g.api_client.notifications.update(id, flask.request.json)
+    notif_json = notif_resp.toJSON()
+    notif_json["data"]["event"]["id"] = notif_json["data"]["event_id"]
+    return flask.jsonify(notif_json)
+
+
+@blp.route("/mark_all_as_read", methods=["PUT"])
+@auth.signin_required
+def mark_all_as_read():
+    flask.g.api_client.notifications.mark_all_as_read(
+        user_id=flask.session["user"]["data"]["id"],
+        campaign_id=flask.request.args["campaign_id"],
+    )
+    return flask.jsonify({"success": True})
