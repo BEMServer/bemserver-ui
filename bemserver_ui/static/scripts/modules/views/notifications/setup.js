@@ -86,7 +86,7 @@ export class NotificationSetupView {
             if (eventCategoryConfigData.id == null) {
                 // Create (post).
                 this.#postReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.events.notif_setup_create`),
+                    flaskES6.urlFor(`api.notifications.setup_create`),
                     payload,
                     (data) => {
                         eventCategoryConfigData.id = data.data.id;
@@ -114,7 +114,7 @@ export class NotificationSetupView {
             else {
                 // Update (put).
                 this.#putReqID = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.events.notif_setup_update`, {id: eventCategoryConfigData.id}),
+                    flaskES6.urlFor(`api.notifications.setup_update`, {id: eventCategoryConfigData.id}),
                     payload,
                     eventCategoryConfigData.etag,
                     (data) => {
@@ -251,7 +251,7 @@ export class NotificationSetupView {
 
             // let energyConsTs = this.#getEnergyConsTs(energySourceConfigData.energy_source_id, configData.energy_use_id);
             this.#deleteReqID = this.#internalAPIRequester.delete(
-                flaskES6.urlFor(`api.events.notif_setup_delete`, {id: eventCategoryConfigData.id}),
+                flaskES6.urlFor(`api.notifications.setup_delete`, {id: eventCategoryConfigData.id}),
                 eventCategoryConfigData.etag,
                 restoreEventCatMenuItemCallback,
                 (error) => {
