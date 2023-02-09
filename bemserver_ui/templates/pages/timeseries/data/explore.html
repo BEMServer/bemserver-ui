@@ -58,16 +58,19 @@
                     <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="day" value="1"></div>
                 </div>
             </div>
-            <div class="accordion app-sidebar-accordion rounded bg-primary bg-opacity-25" id="accordionTSExplore">
-                <div class="accordion-item border-0">
-                    <h2 class="accordion-header" id="panelHeadingTSData">
-                        <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseTest" aria-expanded="false" aria-controls="panelCollapseTSData">
-                            <span class="app-sidebar-heading">Timeseries customization</span>
-                        </button>
-                    </h2>
-                    <div id="panelCollapseTest" class="accordion-collapse collapse" aria-labelledby="panelHeadingTSData">
-                        <div class="accordion-body px-0 py-2" id="tsParam">
-                            
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="accordion" id="accordionFilters">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFilters">
+                                <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                                    <span class="fw-bold text-secondary">Timeseries customization</span>
+                                </button>
+                            </h2>
+                            <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                                <div class="accordion-body px-0 py-2" id="tsParam">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

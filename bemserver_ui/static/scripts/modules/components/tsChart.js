@@ -67,14 +67,14 @@ export class TimeseriesChart extends HTMLDivElement {
                 data: [],
                 width: "45%",
                 bottom: 0,
-                left: "0%",
+                left: 0,
                 type: "scroll",
             },
             {
                 data: [],
                 width: "45%",
                 bottom: 0,
-                right: "0%",
+                right: 0,
                 type: "scroll",
             }
         ],
@@ -146,7 +146,7 @@ export class TimeseriesChart extends HTMLDivElement {
         this.#initEventListeners();
     }
 
-    #optionToContent(opt, unit, timeFormat, tzName) {
+    #optionToContent(opt, units, timeFormat, tzName) {
         let timestamps = opt.series[0].data.map((serieData) => {
             if (timeFormat != null) {
                 return echarts.time.format(serieData[0], timeFormat);
@@ -179,10 +179,12 @@ export class TimeseriesChart extends HTMLDivElement {
         tableHeadTimestampElmt.setAttribute("scope", "col");
         tableHeadTimestampElmt.innerText = "Timestamp";
         tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-        for (let serie of opt.series) {
+        for (let [index, serie] of opt.series.entries()) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = `${serie.name}${unit ? ` (${unit})`: ""}`;
+            if (units != null) {
+                tableHeadThElmt.innerText = `${serie.name}${units[index] ? ` (${units[index]})`: ""}`;
+            }
             tableHeadTrElmt.appendChild(tableHeadThElmt);
         }
         tableHeadElmt.appendChild(tableHeadTrElmt);
@@ -208,7 +210,7 @@ export class TimeseriesChart extends HTMLDivElement {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat, tzName) {
+    #tooltipFormatter(params, units, timeFormat, tzName) {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -242,9 +244,9 @@ export class TimeseriesChart extends HTMLDivElement {
             serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], Number.NaN, 2).toString();
             serieValueContainerElmt.appendChild(serieValueElmt);
 
-            if (unit != null) {
+            if (units != null) {
                 let serieValueUnitElmt = document.createElement("small");
-                serieValueUnitElmt.innerText = unit[index];
+                serieValueUnitElmt.innerText = units[index];
                 serieValueContainerElmt.appendChild(serieValueUnitElmt);
             }
 
@@ -290,7 +292,6 @@ export class TimeseriesChart extends HTMLDivElement {
 
         options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, null, null, parameters.timezone); };
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {
@@ -315,6 +316,7 @@ export class TimeseriesChart extends HTMLDivElement {
                 }),
             };
         });
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, listUnit, null, parameters.timezone); };
         options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone);};
 
         options.legend[0].formatter = (name) => {
