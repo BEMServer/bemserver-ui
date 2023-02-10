@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/install.txt --resolver=backtracking setup.py
 #
-bemserver-api-client==0.10.2
+bemserver-api-client==0.11.0
     # via bemserver-ui (setup.py)
 certifi==2021.10.8
     # via requests
@@ -26,13 +26,11 @@ markupsafe==2.1.1
     # via
     #   jinja2
     #   werkzeug
-packaging==21.3
+packaging==23.0
     # via bemserver-api-client
-pyparsing==3.0.9
-    # via packaging
 python-dotenv==0.21.0
     # via bemserver-ui (setup.py)
-requests==2.27.1
+requests==2.28.2
     # via bemserver-api-client
 urllib3==1.26.9
     # via requests
