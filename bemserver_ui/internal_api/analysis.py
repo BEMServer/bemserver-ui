@@ -4,7 +4,7 @@ import zoneinfo
 import calendar
 import flask
 
-from bemserver_api_client.enums import BucketWidthUnit
+from bemserver_api_client.enums import BucketWidthUnit, StructuralElement
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
@@ -105,7 +105,7 @@ def retrieve_ener_cons_brkd(structural_element_type, structural_element_id):
         dt_end = dt.datetime(year_reference + 1, 1, 1, 0, 0, 0, tzinfo=tz)
 
     analysis_resp = flask.g.api_client.analysis.get_energy_consumption_breakdown(
-        structural_element_type,
+        StructuralElement(structural_element_type),
         structural_element_id,
         dt_start.isoformat(),
         dt_end.isoformat(),
