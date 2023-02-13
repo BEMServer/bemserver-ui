@@ -58,7 +58,24 @@
                     <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="day" value="1"></div>
                 </div>
             </div>
-            <div class="d-flex justify-content-end gap-2">
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="accordion" id="accordionFilters">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFilters">
+                                <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                                    <span class="fw-bold text-secondary">Timeseries customization</span>
+                                </button>
+                            </h2>
+                            <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                                <div class="accordion-body px-0 py-2" id="tsParam">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
                 <button id="loadBtn" class="btn btn-sm btn-outline-primary" title="Load chart"><i class="bi bi-arrow-clockwise"></i> Load chart</button>
             </div>
         </div>

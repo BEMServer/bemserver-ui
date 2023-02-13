@@ -27,6 +27,10 @@ export class TimeseriesDataExploreView {
     #chart = null;
     #tsSelector = null;
 
+    #tsParamsContainerElmt = null;
+
+    #tsChartParams = {};
+
     constructor(options = { height: 400 }) {
         this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorExplore");
 
@@ -55,6 +59,8 @@ export class TimeseriesDataExploreView {
 
         this.#aggInputElmt = document.getElementById("agg");
         this.#bucketElmt = document.getElementById("bucket");
+
+        this.#tsParamsContainerElmt = document.getElementById("tsParam");
     }
 
     #initElements() {
@@ -65,11 +71,160 @@ export class TimeseriesDataExploreView {
         this.#endDatetimePickerElmt.dateMin = this.#startDatetimePickerElmt.date;
     }
 
+    #addTsParamInputs(tsData) {
+        this.#tsChartParams[tsData.itemName] = {
+            position : "left",
+            type: "line",
+            style: "solid",
+            color: this.#chart.colors[(this.#tsSelector.selectedItemNames.length - 1) % this.#chart.colors.length],
+        };
+
+        let tsParam = document.createElement("div");
+        tsParam.id = "tsParam-" + tsData.itemId;
+
+        let row = document.createElement("div");
+        row.className = "row d-xl-flex d-grid m-2 mb-3";
+        
+        let h6 = document.createElement("h6");
+        h6.textContent = tsData.itemName + " [" + tsData.itemSymbol + "]";
+        console.log(tsData); 
+        
+        row.appendChild(h6);
+
+        let col1 = document.createElement("div");
+        col1.className = "col pb-2 pb-xl-0";
+
+        let positionSelect = document.createElement("select");
+        positionSelect.className = "form-select form-select-sm border border-info";
+        positionSelect.name = "position";
+        positionSelect.setAttribute("aria-label", "Select a position");
+
+        let positionLeftOption = document.createElement("option");
+        positionLeftOption.value = "left";
+        positionLeftOption.textContent = "Left";
+        positionLeftOption.selected = this.#tsChartParams[tsData.itemName].position == "left";
+
+        let positionRightOption = document.createElement("option");
+        positionRightOption.value = "right";
+        positionRightOption.textContent = "Right";
+        positionRightOption.selected = this.#tsChartParams[tsData.itemName].position == "right";
+
+        positionSelect.appendChild(positionLeftOption);
+        positionSelect.appendChild(positionRightOption);
+
+        col1.appendChild(positionSelect);
+
+        let col2 = document.createElement("div");
+        col2.className = "col pb-2 pb-xl-0";
+
+        let typeSelect = document.createElement("select");
+        typeSelect.className = "form-select form-select-sm border border-info";
+        typeSelect.name = "type";
+        typeSelect.setAttribute("aria-label", "Select a type of graph");
+
+        let typeLineOption = document.createElement("option");
+        typeLineOption.value = "line";
+        typeLineOption.textContent = "Line";
+        typeLineOption.selected = this.#tsChartParams[tsData.itemName].position == "line";
+
+        let typeBarOption = document.createElement("option");
+        typeBarOption.value = "bar";
+        typeBarOption.textContent = "Bar";
+        typeBarOption.selected = this.#tsChartParams[tsData.itemName].position == "bar";
+
+        typeSelect.appendChild(typeLineOption);
+        typeSelect.appendChild(typeBarOption);
+
+        col2.appendChild(typeSelect);
+
+        let col3 = document.createElement("div");
+        col3.className = "col pb-2 pb-xl-0";
+
+        let styleSelect = document.createElement("select");
+        styleSelect.className = "form-select form-select-sm border border-info";
+        styleSelect.name = "style";
+        styleSelect.setAttribute("aria-label", "Select a style of line");
+
+        let styleSolidOption = document.createElement("option");
+        styleSolidOption.value = "solid";
+        styleSolidOption.textContent = "Solid";
+        styleSolidOption.selected = this.#tsChartParams[tsData.itemName].position == "solid";
+
+        let styleDashedOption = document.createElement("option");
+        styleDashedOption.value = "dashed";
+        styleDashedOption.textContent = "Dashed";
+        styleDashedOption.selected = this.#tsChartParams[tsData.itemName].position == "dashed";
+
+        let styleDottedOption = document.createElement("option");
+        styleDottedOption.value = "dotted";
+        styleDottedOption.textContent = "Dotted";
+        styleDottedOption.selected = this.#tsChartParams[tsData.itemName].position == "dotted";
+
+        styleSelect.appendChild(styleSolidOption);
+        styleSelect.appendChild(styleDashedOption);
+        styleSelect.appendChild(styleDottedOption);
+
+        col3.appendChild(styleSelect);
+
+        let col4 = document.createElement("div");
+        col4.className = "col pb-2 pb-xl-0";
+
+        let colorInput = document.createElement("input");
+        colorInput.type = "color";
+        colorInput.className = "form-control form-control-sm border border-info";
+        colorInput.name = "color";
+        colorInput.value = this.#chart.colors[(this.#tsSelector.selectedItemNames.length - 1) % this.#chart.colors.length];
+        colorInput.setAttribute("aria-label", "Select a color");
+
+        col4.appendChild(colorInput);
+
+        row.appendChild(col1);
+        row.appendChild(col2);
+        row.appendChild(col3);
+        row.appendChild(col4);
+
+        tsParam.appendChild(row);
+        this.#tsParamsContainerElmt.appendChild(tsParam);
+
+        positionSelect.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#tsChartParams[tsData.itemName].position = positionSelect.value;
+        });
+
+        typeSelect.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#tsChartParams[tsData.itemName].type = typeSelect.value;
+        });
+
+        styleSelect.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#tsChartParams[tsData.itemName].style = styleSelect.value;
+        });
+        
+        colorInput.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#tsChartParams[tsData.itemName].color = colorInput.value;
+        });
+    }
+
     #initEventListeners() {
         this.#tsSelector.addEventListener("toggleItem", (event) => {
             event.preventDefault();
 
             this.#updateLoadBtnState();
+
+            if (event.detail.itemIsActive) {
+                this.#addTsParamInputs(event.detail);
+            }
+            else {
+                delete this.#tsChartParams[event.detail.itemName];
+                
+                document.getElementById("tsParam-" + event.detail.itemId)?.remove();      
+            }
         });
 
         this.#timezonePickerElmt.addEventListener("tzChange", (event) => {
@@ -157,7 +312,18 @@ export class TimeseriesDataExploreView {
             flaskES6.urlFor(`api.timeseries_data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download_multiple`, urlParams));
-                this.#chart.load(data, this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text, this.#timezonePickerElmt.tzName);
+
+                let options = {
+                    subtitle: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
+                    timezone: this.#timezonePickerElmt.tzName,
+                    series: this.#tsChartParams,
+                };
+                
+                for(let [tsName, tsParams] of Object.entries(options.series)) {
+                    tsParams.symbol = this.#tsSelector.selectedItemSymbols[this.#tsSelector.selectedItemNames.indexOf(tsName)];
+                }
+
+                this.#chart.load(data, options);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});

@@ -24,7 +24,7 @@ export class TimeseriesChart extends HTMLDivElement {
             },
         },
         grid: {
-            left: "3%",
+            left: "5%",
             right: "5%",
             bottom: 100,
             containLabel: true,
@@ -33,6 +33,7 @@ export class TimeseriesChart extends HTMLDivElement {
             feature: {
                 magicType: {
                     type: ["line", "bar"],
+                    show: false,
                 },
                 dataZoom: {
                     yAxisIndex: "none",
@@ -61,10 +62,22 @@ export class TimeseriesChart extends HTMLDivElement {
                 type: "cross",
             },
         },
-        legend: {
-            type: "scroll",
-            bottom: 10,
-        },
+        legend: [
+            {
+                data: [],
+                width: "45%",
+                bottom: 0,
+                left: 0,
+                type: "scroll",
+            },
+            {
+                data: [],
+                width: "45%",
+                bottom: 0,
+                right: 0,
+                type: "scroll",
+            }
+        ],
         dataZoom: [
             {
                 type: "slider",
@@ -80,11 +93,33 @@ export class TimeseriesChart extends HTMLDivElement {
             {
                 type: "value",
                 nameLocation: "middle",
+                position: "left",
+            },
+            {
+                type: "value",
+                nameLocation: "middle",
+                position: "right",
             },
         ],
         series: [],
         useUTC: false,
     };
+
+    #colors = [
+        '#5470c6',
+        '#91cc75',
+        '#fac858',
+        '#ee6666',
+        '#73c0de',
+        '#3ba272',
+        '#fc8452',
+        '#9a60b4',
+        '#ea7ccc'
+    ];
+
+    get colors() {
+        return this.#colors;
+    }
 
     // `theme` parameter can be "dark"
     constructor(options = null, theme = null) {
@@ -111,7 +146,7 @@ export class TimeseriesChart extends HTMLDivElement {
         this.#initEventListeners();
     }
 
-    #optionToContent(opt, unit, timeFormat, tzName) {
+    #optionToContent(opt, units, timeFormat, tzName) {
         let timestamps = opt.series[0].data.map((serieData) => {
             if (timeFormat != null) {
                 return echarts.time.format(serieData[0], timeFormat);
@@ -144,10 +179,12 @@ export class TimeseriesChart extends HTMLDivElement {
         tableHeadTimestampElmt.setAttribute("scope", "col");
         tableHeadTimestampElmt.innerText = "Timestamp";
         tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-        for (let serie of opt.series) {
+        for (let [index, serie] of opt.series.entries()) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = `${serie.name}${unit ? ` (${unit})`: ""}`;
+            if (units != null) {
+                tableHeadThElmt.innerText = `${serie.name}${units[index] ? ` (${units[index]})`: ""}`;
+            }
             tableHeadTrElmt.appendChild(tableHeadThElmt);
         }
         tableHeadElmt.appendChild(tableHeadTrElmt);
@@ -173,7 +210,7 @@ export class TimeseriesChart extends HTMLDivElement {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat, tzName) {
+    #tooltipFormatter(params, units, timeFormat, tzName) {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -207,9 +244,9 @@ export class TimeseriesChart extends HTMLDivElement {
             serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], Number.NaN, 2).toString();
             serieValueContainerElmt.appendChild(serieValueElmt);
 
-            if (unit != null) {
+            if (units != null) {
                 let serieValueUnitElmt = document.createElement("small");
-                serieValueUnitElmt.innerText = unit;
+                serieValueUnitElmt.innerText = units[index];
                 serieValueContainerElmt.appendChild(serieValueUnitElmt);
             }
 
@@ -245,25 +282,41 @@ export class TimeseriesChart extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data, dataState, tzName) {
+    load(data, parameters) {
         this.hideLoading();
-
+        let listUnit = [];
+        let listDistinctUnitByAxis = { 0: [], 1: [], };
+        let yAxisIndex = 0;
         let options = this.#chart.getOption();
+        options.legend[0].data = [];
+        options.legend[1].data = [];
 
-        options.title[0].subtext = `${dataState}`;
+        options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, null, null, tzName); };
-
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, null, null, tzName); };
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {
             return header != "Datetime";
         }).map((header) => {
+            parameters.series[header]?.position == "right" ? yAxisIndex = 1 : yAxisIndex = 0;
+            yAxisIndex == 0 ? options.legend[0].data.push(header) : options.legend[1].data.push(header);
+
+            let unitSymbol = parameters.series[header]?.symbol;
+            listUnit.push(unitSymbol);
+            if (unitSymbol != null && unitSymbol != "" && !listDistinctUnitByAxis[yAxisIndex].includes(unitSymbol)) {
+                listDistinctUnitByAxis[yAxisIndex].push(unitSymbol);
+            }
+
             return {
                 id: header,
                 name: header,
-                type: "line",
+                type: parameters.series[header]?.type || "line",
+                color: parameters.series[header]?.color || "#000000",
+                lineStyle: {
+                    width: 2,
+                    type: parameters.series[header]?.style || "solid",
+                },
+                yAxisIndex: yAxisIndex,
                 smooth: true,
                 data: data.ts_data.map((row) => {
                     return [row["Datetime"], Parser.parseFloatOrDefault(row[header], Number.NaN, 2)];
@@ -271,9 +324,23 @@ export class TimeseriesChart extends HTMLDivElement {
             };
         });
 
-        options.yAxis[0].data = options.series.map((serie) => {
-            return serie.name;
-        });
+        // Set distinct unit symbols as (left and right) Y-axis name.
+        options.yAxis[0].name = listDistinctUnitByAxis[0].join(", ");
+        options.yAxis[0].nameLocation = "middle";
+        options.yAxis[0].nameGap = 50;
+        options.yAxis[1].name = listDistinctUnitByAxis[1].join(", ");
+        options.yAxis[1].nameLocation = "middle";
+        options.yAxis[1].nameGap = 50;
+
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, listUnit, null, parameters.timezone); };
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone);};
+
+        options.legend[0].formatter = (name) => {
+            return name + " [" + parameters.series[name]?.symbol + "] ";
+        };
+        options.legend[1].formatter = (name) => {
+            return name + " [" + parameters.series[name]?.symbol + "] ";
+        };
 
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
@@ -299,6 +366,6 @@ export class TimeseriesChart extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-ts-chart") == null) {
-    customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
+if (window.customElements.get("app-ts-chart") == null) {
+    window.customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
 }
