@@ -300,6 +300,7 @@ export class TimeseriesChart extends HTMLDivElement {
             listUnit.push(parameters.series[header]?.symbol);
             parameters.series[header]?.position == "right" ? yAxisIndex = 1 : yAxisIndex = 0;
             yAxisIndex == 0 ? options.legend[0].data.push(header) : options.legend[1].data.push(header);
+            
             return {
                 id: header,
                 name: header,
@@ -316,6 +317,32 @@ export class TimeseriesChart extends HTMLDivElement {
                 }),
             };
         });
+
+        let listUnitLeft = [];
+        let listUnitRight = [];
+
+        for (let i = 1; i < data.ts_headers.length; i++) {
+            if (parameters.series[data.ts_headers[i]].position == "left") {
+                if (listUnitLeft.indexOf(listUnit[i - 1]) == -1) {
+                    listUnitLeft.push(listUnit[i - 1]);
+                }
+            }
+            else {
+                if (listUnitRight.indexOf(listUnit[i - 1]) == -1) {
+                    listUnitRight.push(listUnit[i - 1]);
+                }
+            }
+        }
+
+        options.yAxis[0].name = listUnitLeft.join(" / ");
+        options.yAxis[0].nameLocation = "middle";
+        options.yAxis[0].nameGap = 50;
+
+        options.yAxis[1].name = listUnitRight.join(" / ");
+        options.yAxis[1].nameLocation = "middle";
+        options.yAxis[1].nameGap = 50;
+
+
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, listUnit, null, parameters.timezone); };
         options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone);};
 

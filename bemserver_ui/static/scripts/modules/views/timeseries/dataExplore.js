@@ -86,7 +86,8 @@ export class TimeseriesDataExploreView {
         row.className = "row d-xl-flex d-grid m-2 mb-3";
         
         let h6 = document.createElement("h6");
-        h6.textContent = tsData.itemName;
+        h6.textContent = tsData.itemName + " [" + tsData.itemSymbol + "]";
+        console.log(tsData); 
         
         row.appendChild(h6);
 
