@@ -135,6 +135,23 @@ export class StructuralElementSelector extends HTMLElement {
         this.#treeSelectorElmt.unselect();
     }
 
+    setSelectableTypes(types = ["site", "building", "storey", "space", "zone"]) {
+        this.showLoadingTree();
+
+        let recursiveSetNodeSelectable = (node, types) => {
+            node.is_selectable = types.includes(node.type);
+            for (let childNode of node.nodes) {
+                recursiveSetNodeSelectable(childNode, types);
+            }
+        };
+
+        for (let node of this.#treeSelectorData) {
+            recursiveSetNodeSelectable(node, types);
+        }
+
+        this.#loadTree();
+    }
+
     static getInstance(elementId = null) {
         let queryId = "";
         if (elementId != null) {
