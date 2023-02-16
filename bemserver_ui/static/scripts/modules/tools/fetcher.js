@@ -76,7 +76,7 @@ export class InternalAPIRequest {
                     }
                     else if (error.status == 422) {
                         for (let [fieldName, fieldErrors] of Object.entries(errorJSON._validation_errors)) {
-                            errorMsg += ` (${fieldName} : ${fieldErrors})`;
+                            errorMsg += ` (${fieldName}: ${fieldErrors})`;
                         }
                     }
 
@@ -106,10 +106,10 @@ export class InternalAPIRequest {
         }
     }
 
-    #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+    async #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
         let reqID = this.#fetch(url, params);
 
-        this.#fetchPromises[reqID].then(
+        await this.#fetchPromises[reqID].then(
             this.#processRawResponse
         ).then(
             (data) => {
@@ -155,13 +155,13 @@ export class InternalAPIRequest {
 
     // Inspired by https://gomakethings.com/waiting-for-multiple-all-api-responses-to-complete-with-the-vanilla-js-promise.all-method/#calling-multiple-apis-at-once
     gets(urls, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let reqIDs = {};
+        let reqIDByUrl = {};
         for (let url of urls) {
-            reqIDs[url] = this.#fetch(url);
+            reqIDByUrl[url] = this.#fetch(url);
         }
 
         Promise.all(
-            Object.values(reqIDs).map((reqID) => { return this.getPromise(reqID); })
+            Object.values(reqIDByUrl).map((reqID) => { return this.getPromise(reqID); })
         ).then(
             (responses) => {
                 return Promise.all(
@@ -179,25 +179,27 @@ export class InternalAPIRequest {
         ).finally(
             () => {
                 finallyCallback?.();
-                for (let reqID of Object.values(reqIDs)) {
+                for (let reqID of Object.values(reqIDByUrl)) {
                     this.#purge(reqID);
                 }
             }
         );
 
-        return reqIDs;
+        return reqIDByUrl;
     }
 
-    post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    async post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
         let params = {
             method: "POST",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(payload),
         };
-        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+        if (payload != null) {
+            params.body = JSON.stringify(payload);
+        }
+        return await this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     put(url, payload, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
@@ -207,23 +209,27 @@ export class InternalAPIRequest {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(payload),
         };
         if (etag != null) {
             params.headers["ETag"] = etag;
         }
+        if (payload != null) {
+            params.body = JSON.stringify(payload);
+        }
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
-    delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    async delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
         let params = {
             method: "DELETE",
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "ETag": etag,
             },
         };
-        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+        if (etag != null) {
+            params.headers["ETag"] = etag;
+        }
+        return await this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 }
