@@ -10,7 +10,6 @@ body,
 
 .app-messages {
     z-index: 1031;
-    max-height: 150px;
 }
 .app-messages > .alert {
     min-width: 40vw !important;
