@@ -6,6 +6,17 @@ export class ModalConfirm extends HTMLElement {
     #cancelCallback = null;
     #keyboard = false;
 
+    #message = "";
+
+    get message() {
+        return this.#message;
+    }
+
+    set message(value) {
+        this.#message = value;
+        this.#updateMessage();
+    }
+
     constructor(targetId, message, okCallback=null, cancelCallback=null, keyboard=false) {
         super();
 
@@ -16,7 +27,12 @@ export class ModalConfirm extends HTMLElement {
         this.#keyboard = keyboard;
 
         this.modalId = `modalConfirm-${this.#targetId}`;
-        this.message = message;
+        this.#message = message;
+    }
+
+    #updateMessage() {
+        let messageElmt = this.querySelector(`p[id="${this.modalId}-message"]`);
+        messageElmt.innerHTML = this.#message;
     }
 
     connectedCallback() {
@@ -45,7 +61,7 @@ export class ModalConfirm extends HTMLElement {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>${this.message}</p>
+                <p id="${this.modalId}-message">${this.#message}</p>
                 <p class="fw-bold">Do you confirm this action?</p>
             </div>
             <div class="modal-footer">
@@ -67,6 +83,6 @@ export class ModalConfirm extends HTMLElement {
 }
 
 
-if (customElements.get("modal-confirm") == null) {
-    customElements.define("modal-confirm", ModalConfirm);
+if (window.customElements.get("modal-confirm") == null) {
+    window.customElements.define("modal-confirm", ModalConfirm);
 }

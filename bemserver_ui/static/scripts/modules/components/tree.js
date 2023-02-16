@@ -171,25 +171,36 @@ export class Tree extends HTMLElement {
             linkElmt.setAttribute("data-tree-node-type", node.type);
             linkElmt.setAttribute("data-tree-node-path", node.path);
             linkElmt.setAttribute("draggable", node.is_draggable);
+            if (!Parser.parseBoolOrDefault(node.is_selectable)) {
+                linkElmt.classList.add("disabled");
+                linkElmt.setAttribute("aria-disabled", true);
+            }
             liElmt.appendChild(linkElmt);
 
             linkElmt.addEventListener("click", (event) => {
-                if (this.#treeNodeSelected != event.target) {
-                    this.#treeNodeSelected?.classList.remove("active");
-                    this.#treeNodeSelected = event.target;
-                    this.#treeNodeSelected.classList.add("active");
-                    this.#getCollapsableFromItem(this.#treeNodeSelected.parentElement)?.show();
+                if (Parser.parseBoolOrDefault(node.is_selectable)) {
+                    if (this.#treeNodeSelected != event.target) {
+                        this.#treeNodeSelected?.classList.remove("active");
+                        this.#treeNodeSelected = event.target;
+                        this.#treeNodeSelected.classList.add("active");
+                        this.#getCollapsableFromItem(this.#treeNodeSelected.parentElement)?.show();
 
-                    let treeNodeSelectEvent = new CustomEvent("treeNodeSelect", {detail: node, bubbles: true});
-                    this.dispatchEvent(treeNodeSelectEvent);
+                        let treeNodeSelectEvent = new CustomEvent("treeNodeSelect", {detail: node, bubbles: true});
+                        this.dispatchEvent(treeNodeSelectEvent);
 
+                    }
+                    else if (!this.#ignoreUnselectEvent) {
+                        this.#treeNodeSelected?.classList.remove("active");
+                        this.#treeNodeSelected = null;
+
+                        let treeNodeUnselectEvent = new CustomEvent("treeNodeUnselect", {detail: node, bubbles: true});
+                        this.dispatchEvent(treeNodeUnselectEvent);
+                    }
                 }
-                else if (!this.#ignoreUnselectEvent) {
-                    this.#treeNodeSelected?.classList.remove("active");
-                    this.#treeNodeSelected = null;
+                else {
+                    event.stopPropagation();
 
-                    let treeNodeUnselectEvent = new CustomEvent("treeNodeUnselect", {bubbles: true});
-                    this.dispatchEvent(treeNodeUnselectEvent);
+                    this.#getCollapsableFromItem(event.target.parentElement)?.show();
                 }
             });
 

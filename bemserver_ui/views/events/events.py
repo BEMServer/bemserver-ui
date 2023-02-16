@@ -94,20 +94,18 @@ def edit(id):
         flask.flash("Event updated!", "success")
         return flask.redirect(flask.url_for("events.list"))
 
-    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
-        campaign_id=flask.g.campaign_ctxt.id
-    )
-    event_categories_resp = flask.g.api_client.event_categories.getall()
-
+    # Get event data.
     event_resp = flask.g.api_client.events.getone(id)
     event_data = event_resp.data
 
-    event_data["campaign_scope_name"] = "?"
-    for campaign_scope in campaign_scopes_resp.data:
-        if campaign_scope["id"] == event_data["campaign_scope_id"]:
-            event_data["campaign_scope_name"] = campaign_scope["name"]
-            break
+    # Get event campaign scope name.
+    campaign_scope_resp = flask.g.api_client.campaign_scopes.getone(
+        id=flask.g.campaign_ctxt.id
+    )
+    event_data["campaign_scope_name"] = campaign_scope_resp.data["name"]
 
+    # Get event categories and current event category name.
+    event_categories_resp = flask.g.api_client.event_categories.getall()
     event_data["category_name"] = "?"
     for evt_cat in event_categories_resp.data:
         if evt_cat["id"] == event_data["category_id"]:
@@ -118,9 +116,9 @@ def edit(id):
         "pages/events/edit.html",
         event=event_data,
         etag=event_resp.etag,
-        campaign_scopes=campaign_scopes_resp.data,
         event_categories=event_categories_resp.data,
         event_levels=get_event_levels(),
+        structural_element_types=FULL_STRUCTURAL_ELEMENT_TYPES,
     )
 
 

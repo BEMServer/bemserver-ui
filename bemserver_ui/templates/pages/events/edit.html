@@ -1,7 +1,19 @@
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
+{% import "macros/components/structural_element_selector.html" as mac_struct_elmt_selector %}
 {% extends "pages/base.html" %}
 
 {% set title = "Event entry" %}
 {% set subtitle = "Edit" %}
+{% if tab is undefined %}
+    {% set tab = "general" %}
+{% endif %}
+
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
 
 {% block main_toolbar %}
 {{ super() -}}
@@ -18,57 +30,163 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <fieldset>
-                <legend class="invisible d-none">Event entry information</legend>
-                <div class="row mb-3">
-                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
-                        <label class="form-label" for="timestamp">Timestamp</label>
-                        <div class="form-control bg-dark bg-opacity-25">{{ event.timestamp | iso_datetime_format(tz_name=g.campaign_ctxt.tz_name) }}</div>
-                    </div>
-                    <div class="col-12 col-sm-6">
-                        <label class="form-label" for="campaign_scope">Campaign scope</label>
-                        <div class="form-control bg-dark bg-opacity-25">{{ event.campaign_scope_name }}</div>
-                    </div>
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'timeseries' %} active{% endif %}" id="timeseries-tab" data-bs-toggle="tab" data-bs-target="#timeseries-tabcontent" type="button" role="tab" aria-controls="timeseries-tabcontent" aria-selected="{% if tab == 'timeseries' %}true{% else %}false{% endif %}">Timeseries <span class="badge bg-secondary" id="ts-badgeCount">0</span></button>
+                </li>
+                {% for struct_elmt_type in structural_element_types %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == struct_elmt_type + 's' %} active{% endif %}" id="{{ struct_elmt_type }}s-tab" data-bs-toggle="tab" data-bs-target="#{{ struct_elmt_type }}s-tabcontent" type="button" role="tab" aria-controls="{{ struct_elmt_type }}s-tabcontent" aria-selected="{% if tab == struct_elmt_type + 's' %}true{% else %}false{% endif %}">{{ struct_elmt_type | capitalize }}s <span class="badge bg-secondary" id="{{ struct_elmt_type }}s-badgeCount">-</span></button>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
+                    <fieldset>
+                        <legend class="invisible d-none">Event entry information</legend>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                <label class="form-label" for="timestamp">Timestamp</label>
+                                <div class="form-control bg-dark bg-opacity-25">{{ event.timestamp | iso_datetime_format(tz_name=g.campaign_ctxt.tz_name) }}</div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label" for="campaign_scope">Campaign scope</label>
+                                <div class="form-control bg-dark bg-opacity-25">{{ event.campaign_scope_name }}</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label" for="source">Source</label>
+                                <div class="d-flex gap-2">
+                                    <input form="editForm" type="text" class="form-control bg-dark bg-opacity-25" id="source" name="source" value="{{ event.source }}" required readonly>
+                                    <button class="btn btn-sm btn-link" id="btnEditSource" title="Edit source"><i class="bi bi-pencil"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                                <label class="form-label" for="event_level">Level</label>
+                                <select form="editForm" class="form-select" id="event_level" name="event_level" aria-label="Select a level" required>
+                                    {% for x in event_levels %}
+                                    <option value="{{ x.id }}"{% if x.id == event.level %} selected{% endif %}>{{ x.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label class="form-label" for="event_category">Category</label>
+                                <select form="editForm" class="form-select" id="event_category" name="event_category" aria-label="Select a category" required>
+                                    {% for x in event_categories %}
+                                    <option value="{{ x.id }}"{% if x.id == event.category_id %} selected{% endif %}>{{ x.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="description">Description</label>
+                            <textarea form="editForm" class="form-control" id="description" name="description" rows="4">{{ event.description }}</textarea>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <form id="editForm" action="{{ url_for('events.edit', id=event.id) }}" method="POST">
+                                <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
+                                <button type="submit" class="btn btn-sm btn-primary text-nowrap" title="Save"><i class="bi bi-save"></i> Save</button>
+                            </form>
+                        </div>
+                    </fieldset>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-12 col-sm-6">
-                        <label class="form-label" for="source">Source</label>
-                        <div class="d-flex gap-2">
-                            <input form="editForm" type="text" class="form-control bg-dark bg-opacity-25" id="source" name="source" value="{{ event.source }}" required readonly>
-                            <button class="btn btn-sm btn-link" id="btnEditSource"><i class="bi bi-pencil"></i></button>
+                <div class="tab-pane fade{% if tab == 'timeseries' %} show active{% endif %} p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab">
+                    <nav class="row mb-2" aria-label="Timeseries pagination">
+                        <div class="col-auto align-self-center py-1">
+                            <div is="app-pagesize-selector" id="ts-pageSize" current="5"></div>
+                        </div>
+                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="ts-itemsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="ts-pagination"></ul>
+                        </div>
+                    </nav>
+                    <div class="list-group mb-3" id="ts-container"></div>
+                    <div class="d-flex justify-content-between gap-2 me-2 mb-3">
+                        <div class="d-flex justify-content-center w-100">
+                            <a id="ts-linkBtn" class="btn btn-sm btn-outline-primary my-auto" title="Link timeseries" data-bs-toggle="modal" data-bs-target="#ts-selectModal"><i class="bi bi-link-45deg"></i> Link timeseries</a>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Unlink timeseries">
+                            <button id="ts-unlinkSelectedBtn" type="button" class="btn btn-outline-danger text-nowrap hstack gap-1" disabled title="Unlink selected timeseries"><i class="bi bi-trash"></i><span class="d-none d-md-block">Unlink</span><span>(<span id="ts-unlinkSelectedCount">0</span>)</span></button>
+                            <button id="ts-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;" title="Select all timeseries in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
+                            <button id="ts-unselectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Unselect all timeseries in page"><i class="bi bi-toggle-off"></i><span class="d-none d-md-block">Unselect all</span></button>
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-12 col-sm-6 mb-3 mb-sm-0">
-                        <label class="form-label" for="event_level">Level</label>
-                        <select form="editForm" class="form-select" id="event_level" name="event_level" aria-label="Select a level" required>
-                            {% for x in event_levels %}
-                            <option value="{{ x.id }}"{% if x.id == event.level %} selected{% endif %}>{{ x.name }}</option>
-                            {% endfor %}
-                        </select>
+                {% for struct_elmt_type in structural_element_types %}
+                <div class="tab-pane fade{% if tab == struct_elmt_type + 's' %} show active{% endif %} p-3" id="{{ struct_elmt_type }}s-tabcontent" role="tabpanel" aria-labelledby="{{ struct_elmt_type }}s-tab">
+                    <nav class="row mb-2" aria-label="{{ struct_elmt_type | capitalize }}s pagination">
+                        <div class="col-auto align-self-center py-1">
+                            <div is="app-pagesize-selector" id="{{ struct_elmt_type }}s-pageSize" current="5"></div>
+                        </div>
+                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                            <small class="text-nowrap text-muted"><app-items-count id="{{ struct_elmt_type }}s-itemsCount"></app-items-count></small>
+                            <ul is="app-pagination" id="{{ struct_elmt_type }}s-pagination"></ul>
+                        </div>
+                    </nav>
+                    <div class="list-group mb-3" id="{{ struct_elmt_type }}s-container"></div>
+                    <div class="d-flex justify-content-between gap-2 me-2 mb-3">
+                        <div class="d-flex justify-content-center w-100">
+                            <a id="{{ struct_elmt_type }}-linkBtn" class="btn btn-sm btn-outline-primary my-auto" title="Link {{ struct_elmt_type }}s" data-bs-toggle="modal" data-bs-target="#locations-selectModal" data-type="{{ struct_elmt_type }}"><i class="bi bi-link-45deg"></i> Link {{ struct_elmt_type }}s</a>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Unlink {{ struct_elmt_type }}s">
+                            <button id="{{ struct_elmt_type }}s-unlinkSelectedBtn" type="button" class="btn btn-outline-danger text-nowrap hstack gap-1" disabled title="Unlink selected {{ struct_elmt_type }}s"><i class="bi bi-trash"></i><span class="d-none d-md-block">Unlink</span><span>(<span id="{{ struct_elmt_type }}s-unlinkSelectedCount">0</span>)</span></button>
+                            <button id="{{ struct_elmt_type }}s-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;" title="Select all {{ struct_elmt_type }}s in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
+                            <button id="{{ struct_elmt_type }}s-unselectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Unselect all {{ struct_elmt_type }}s in page"><i class="bi bi-toggle-off"></i><span class="d-none d-md-block">Unselect all</span></button>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="event_category">Category</label>
-                        <select form="editForm" class="form-select" id="event_category" name="event_category" aria-label="Select a category" required>
-                            {% for x in event_categories %}
-                            <option value="{{ x.id }}"{% if x.id == event.category_id %} selected{% endif %}>{{ x.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea form="editForm" class="form-control" id="description" name="description" rows="4">{{ event.description }}</textarea>
-                </div>
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ url_for('events.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
-                    <form id="editForm" action="{{ url_for('events.edit', id=event.id) }}" method="POST">
-                        <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
-                        <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
-                    </form>
-                </div>
-            </fieldset>
+                {% endfor %}
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ url_for('events.list') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Cancel">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ts-selectModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="ts-selectModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ts-selectModalTitle">Link timeseries to the event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% filter indent(width=16, first=False) %}
+                {{ mac_ts_selector.render_ts_selector(element_id="ts-selector", filters={'campaign-scope': event.campaign_scope_id}) -}}
+                {% endfilter %}
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="ts-selectedSaveBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="locations-selectModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="locations-selectModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="locations-selectModalTitle">Link a <span id="locations-selectModalTitleType">location</span> to the event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% filter indent(width=16, first=False) %}
+                {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelector", title=none) -}}
+                {% endfilter %}
+                {% filter indent(width=16, first=False) %}
+                {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelector", title=none) -}}
+                {% endfilter %}
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="locations-selectedSaveBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-save"></i> Save</button>
+            </div>
         </div>
     </div>
 </div>
@@ -78,19 +196,18 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
+    import { EventEditView } from "{{ url_for('static', filename='scripts/modules/views/events/edit.js') }}";
+
+
     document.addEventListener("DOMContentLoaded", () => {
 
-        let inputSourceElmt = document.getElementById("source");
-        let btnEditSourceElmt = document.getElementById("btnEditSource");
+        let options = {
+            event: {{ event | tojson }},
+            structuralElementTypes: {{ structural_element_types | tojson }},
+        };
 
-        btnEditSourceElmt.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            inputSourceElmt.classList.remove("bg-dark", "bg-opacity-25");
-            inputSourceElmt.removeAttribute("readonly");
-            inputSourceElmt.select()
-            btnEditSourceElmt.remove();
-        });
+        let editView = new EventEditView(options);
+        editView.mount();
 
     });
 </script>

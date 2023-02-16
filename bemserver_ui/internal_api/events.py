@@ -111,6 +111,56 @@ def retrieve_timeseries(id):
     return flask.jsonify({"data": ts_resp.data, "pagination": ts_resp.pagination})
 
 
+@blp.route("/<int:id>/timeseries/links")
+@auth.signin_required
+def retrieve_timeseries_links(id):
+    filters = {
+        "event_id": id,
+    }
+    if "page_size" in flask.request.args:
+        filters["page_size"] = flask.request.args["page_size"]
+    if "page" in flask.request.args:
+        filters["page"] = flask.request.args["page"]
+    if "timeseries_id" in flask.request.args:
+        filters["timeseries_id"] = flask.request.args["timeseries_id"]
+
+    ts_links_resp = flask.g.api_client.timeseries_by_events.getall(**filters)
+    return flask.jsonify(
+        {"data": ts_links_resp.data, "pagination": ts_links_resp.pagination}
+    )
+
+
+@blp.route("/<int:id>/timeseries/<int:ts_id>/links", methods=["POST"])
+@auth.signin_required
+def create_timeseries_link(id, ts_id):
+    payload = {
+        "event_id": id,
+        "timeseries_id": ts_id,
+    }
+    event_ts_resp = flask.g.api_client.timeseries_by_events.create(payload)
+    return flask.jsonify(event_ts_resp.data)
+
+
+@blp.route("/timeseries/links/<int:link_id>", methods=["DELETE"])
+@auth.signin_required
+def delete_timeseries_link(link_id):
+    flask.g.api_client.timeseries_by_events.delete(link_id)
+    return flask.jsonify({"success": True})
+
+
+def _build_structural_element_path(struct_elmt_type, struct_elmt_data):
+    path = None
+    if struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
+        path = " / ".join(
+            [
+                struct_elmt_data[x]["name"]
+                for x in STRUCTURAL_ELEMENT_TYPES
+                if x != struct_elmt_type and x in struct_elmt_data
+            ]
+        )
+    return path
+
+
 @blp.route("/<int:id>/structural_elements/<string:type>")
 @auth.signin_required
 def retrieve_structural_elements(id, type):
@@ -123,24 +173,71 @@ def retrieve_structural_elements(id, type):
     api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
     struct_elmt_event_resp = api_events_resource.getall(event_id=id, **filters)
 
-    def _build_structural_element_path(struct_elmt_data):
-        path = None
-        if type in FULL_STRUCTURAL_ELEMENT_TYPES:
-            path = " / ".join(
-                [
-                    struct_elmt_data[x]["name"]
-                    for x in STRUCTURAL_ELEMENT_TYPES
-                    if x != type and x in struct_elmt_data
-                ]
-            )
-        return path
-
     structural_elements = []
     for struct_elmt_event in struct_elmt_event_resp.data:
-        struct_elmt_event["path"] = _build_structural_element_path(struct_elmt_event)
+        struct_elmt_event["path"] = _build_structural_element_path(
+            type, struct_elmt_event
+        )
         struct_elmt_event = {**struct_elmt_event, **struct_elmt_event[type]}
         structural_elements.append(struct_elmt_event)
 
     return flask.jsonify(
         {"data": structural_elements, "pagination": struct_elmt_event_resp.pagination}
     )
+
+
+@blp.route("/<int:id>/structural_elements/<string:type>/links")
+@auth.signin_required
+def retrieve_structural_elements_links(id, type):
+    filters = {
+        "event_id": id,
+    }
+    if "page_size" in flask.request.args:
+        filters["page_size"] = flask.request.args["page_size"]
+    if "page" in flask.request.args:
+        filters["page"] = flask.request.args["page"]
+    if "structural_element_id" in flask.request.args:
+        filters[f"{type}_id"] = flask.request.args["structural_element_id"]
+
+    api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
+    struct_elmt_event_resp = api_events_resource.getall(**filters)
+
+    structural_elements = []
+    for struct_elmt_event in struct_elmt_event_resp.data:
+        struct_elmt_event["path"] = _build_structural_element_path(
+            type, struct_elmt_event
+        )
+        struct_elmt_event = {**struct_elmt_event, **struct_elmt_event[type]}
+        structural_elements.append(struct_elmt_event)
+
+    return flask.jsonify(
+        {"data": structural_elements, "pagination": struct_elmt_event_resp.pagination}
+    )
+
+
+@blp.route(
+    "/<int:id>/structural_elements/<string:type>/<int:structural_element_id>/links",
+    methods=["POST"],
+)
+@auth.signin_required
+def create_structural_elements_link(id, type, structural_element_id):
+    payload = {
+        "event_id": id,
+        f"{type}_id": structural_element_id,
+    }
+    api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
+    struct_elmt_event_resp = api_events_resource.create(payload)
+    struct_elmt_event_data = struct_elmt_event_resp.data
+    struct_elmt_event_data["path"] = _build_structural_element_path(
+        type, struct_elmt_event_data
+    )
+    struct_elmt_event_data = {**struct_elmt_event_data, **struct_elmt_event_data[type]}
+    return flask.jsonify(struct_elmt_event_data)
+
+
+@blp.route("/structural_elements/<string:type>/links/<int:link_id>", methods=["DELETE"])
+@auth.signin_required
+def delete_structural_elements_link(type, link_id):
+    api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
+    api_events_resource.delete(link_id)
+    return flask.jsonify({"success": True})

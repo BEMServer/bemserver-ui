@@ -29,6 +29,7 @@ def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
         "name": data["name"],
         "type": data_type,
         "is_draggable": is_draggable,
+        "is_selectable": True,
         "path": "" if parent_data is None else parent_data["full_path"],
         "full_path": full_path,
         "parent_node_id": None if parent_data is None else parent_data["node_id"],

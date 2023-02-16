@@ -135,16 +135,16 @@ export class FlashMessage extends HTMLDivElement {
         }
 
         let messageContainerElmt = document.createElement("div");
-        messageContainerElmt.classList.add("p-3", "me-4");
+        messageContainerElmt.classList.add("hstack", "align-items-start", "p-3", "me-4");
         this.appendChild(messageContainerElmt);
 
         let iconElmt = document.createElement("i");
         iconElmt.classList.add("bi", `bi-${this.#messageIcon}`, "me-2");
         messageContainerElmt.appendChild(iconElmt);
 
-        let textElmt = document.createElement("span");
+        let textElmt = document.createElement("div");
         textElmt.classList.add("text-break");
-        textElmt.innerText = this.#messageText;
+        textElmt.innerHTML = this.#messageText;
         messageContainerElmt.appendChild(textElmt);
 
         if (this.#isDismissible) {
@@ -162,6 +162,6 @@ export class FlashMessage extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-flash-message") == null) {
-    customElements.define("app-flash-message", FlashMessage, { extends: "div" });
+if (window.customElements.get("app-flash-message") == null) {
+    window.customElements.define("app-flash-message", FlashMessage, { extends: "div" });
 }
