@@ -3,14 +3,6 @@
 {% set title = "Timeseries" %}
 {% set subtitle = "Manage locations" %}
 
-{% block head_styles %}
-{{ super() -}}
-{% filter indent(width=8, first=True) %}
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/dragndrop.css') }}">
-{% endfilter %}
-{% endblock head_styles %}
-
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
