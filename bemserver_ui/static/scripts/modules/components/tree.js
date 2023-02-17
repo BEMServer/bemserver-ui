@@ -57,6 +57,7 @@ export class Tree extends HTMLElement {
         this.#collapseAllBtnElmt.appendChild(collapseIconElmt);
 
         let collapseTextElmt = document.createElement("small");
+        collapseTextElmt.classList.add("text-nowrap");
         collapseTextElmt.innerText = "collapse all";
         this.#collapseAllBtnElmt.appendChild(collapseTextElmt);
 
@@ -70,6 +71,7 @@ export class Tree extends HTMLElement {
         this.#expandAllBtnElmt.appendChild(expandIconElmt);
 
         let expandTextElmt = document.createElement("small");
+        expandTextElmt.classList.add("text-nowrap");
         expandTextElmt.innerText = "expand all";
         this.#expandAllBtnElmt.appendChild(expandTextElmt);
     }
@@ -318,6 +320,6 @@ export class Tree extends HTMLElement {
 }
 
 
-if (customElements.get("app-tree") == null) {
-    customElements.define("app-tree", Tree);
+if (window.customElements.get("app-tree") == null) {
+    window.customElements.define("app-tree", Tree);
 }
