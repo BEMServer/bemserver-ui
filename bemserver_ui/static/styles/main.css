@@ -41,11 +41,11 @@ h2 {
 }
 
 .badge.bg-primary {
-    background-color: var(--app-blue) !important;
+    background-color: rgba(var(--app-blue-rgb), var(--bs-bg-opacity)) !important;
 }
 
 .badge.bg-secondary {
-    background-color: var(--app-green) !important;
+    background-color: rgba(var(--app-green-rgb), var(--bs-bg-opacity)) !important;
 }
 
 .text-primary {
