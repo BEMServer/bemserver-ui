@@ -90,7 +90,7 @@ export class TimeseriesDeleteView {
                 else {
                     let deleteModalConfirm = new ModalConfirm(
                         event.target.id,
-                        `Remove data for <mark>${this.#tsSelector.selectedItemIds.length.toString()}</mark> timeseries between ${this.#startDatetimePickerElmt.date} and ${this.#endDatetimePickerElmt.date}`,
+                        `Remove data for <mark>${this.#tsSelector.selectedItems.length.toString()}</mark> timeseries between ${this.#startDatetimePickerElmt.date} and ${this.#endDatetimePickerElmt.date}`,
                         () => {
                             let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.INFO, text: `Deleting timeseries data.`, isDismissible: true, isTimed: false});
                             this.#messagesElmt.appendChild(flashMsgElmt);
@@ -102,7 +102,7 @@ export class TimeseriesDeleteView {
                                 end_date: this.#endDatetimePickerElmt.date,
                                 end_time: this.#endDatetimePickerElmt.time,
                                 data_state: this.#dataStatesElmt.value,
-                                timeseries_ids: this.#tsSelector.selectedItemIds,
+                                timeseries_ids: this.#tsSelector.selectedItems.map(ts => ts.id),
                             };
 
                             this.#internalAPIRequester.post(
@@ -142,7 +142,7 @@ export class TimeseriesDeleteView {
 
     #updateDeleteBtnState() {
         let disabled = true;
-        if (this.#tsSelector.selectedItemIds.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
+        if (this.#tsSelector.selectedItems.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
             disabled = false;
         }
 

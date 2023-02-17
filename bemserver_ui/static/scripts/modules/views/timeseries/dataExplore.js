@@ -72,45 +72,39 @@ export class TimeseriesDataExploreView {
     }
 
     #addTsParamInputs(tsData) {
-        this.#tsChartParams[tsData.itemName] = {
+        this.#tsChartParams[tsData.name] = {
             position : "left",
             type: "line",
             style: "solid",
-            color: this.#chart.colors[(this.#tsSelector.selectedItemNames.length - 1) % this.#chart.colors.length],
+            color: this.#chart.colors[(this.#tsSelector.selectedItems.length - 1) % this.#chart.colors.length],
+            symbol: tsData.unit_symbol,
         };
 
         let tsParam = document.createElement("div");
-        tsParam.id = "tsParam-" + tsData.itemId;
+        tsParam.id = "tsParam-" + tsData.id;
 
         let row = document.createElement("div");
         row.className = "row d-xl-flex d-grid m-2 mb-3";
-        
+
         let h6 = document.createElement("h6");
-        h6.textContent = tsData.itemName + " [" + tsData.itemSymbol + "]";
-        console.log(tsData); 
-        
+        h6.textContent = tsData.label;
         row.appendChild(h6);
 
         let col1 = document.createElement("div");
         col1.className = "col pb-2 pb-xl-0";
 
         let positionSelect = document.createElement("select");
-        positionSelect.className = "form-select form-select-sm border border-info";
+        positionSelect.className = "form-select form-select-sm";
         positionSelect.name = "position";
         positionSelect.setAttribute("aria-label", "Select a position");
 
-        let positionLeftOption = document.createElement("option");
-        positionLeftOption.value = "left";
-        positionLeftOption.textContent = "Left";
-        positionLeftOption.selected = this.#tsChartParams[tsData.itemName].position == "left";
-
-        let positionRightOption = document.createElement("option");
-        positionRightOption.value = "right";
-        positionRightOption.textContent = "Right";
-        positionRightOption.selected = this.#tsChartParams[tsData.itemName].position == "right";
-
-        positionSelect.appendChild(positionLeftOption);
-        positionSelect.appendChild(positionRightOption);
+        for (let [optValue, optText] of Object.entries({"left": "Left", "right": "Right"})) {
+            let optElmt = document.createElement("option");
+            optElmt.value = optValue;
+            optElmt.textContent = optText;
+            optElmt.selected = this.#tsChartParams[tsData.name].position == optValue;
+            positionSelect.appendChild(optElmt);
+        }
 
         col1.appendChild(positionSelect);
 
@@ -118,22 +112,17 @@ export class TimeseriesDataExploreView {
         col2.className = "col pb-2 pb-xl-0";
 
         let typeSelect = document.createElement("select");
-        typeSelect.className = "form-select form-select-sm border border-info";
+        typeSelect.className = "form-select form-select-sm";
         typeSelect.name = "type";
         typeSelect.setAttribute("aria-label", "Select a type of graph");
 
-        let typeLineOption = document.createElement("option");
-        typeLineOption.value = "line";
-        typeLineOption.textContent = "Line";
-        typeLineOption.selected = this.#tsChartParams[tsData.itemName].position == "line";
-
-        let typeBarOption = document.createElement("option");
-        typeBarOption.value = "bar";
-        typeBarOption.textContent = "Bar";
-        typeBarOption.selected = this.#tsChartParams[tsData.itemName].position == "bar";
-
-        typeSelect.appendChild(typeLineOption);
-        typeSelect.appendChild(typeBarOption);
+        for (let [optValue, optText] of Object.entries({"line": "Line", "bar": "Bar"})) {
+            let optElmt = document.createElement("option");
+            optElmt.value = optValue;
+            optElmt.textContent = optText;
+            optElmt.selected = this.#tsChartParams[tsData.name].type == optValue;
+            typeSelect.appendChild(optElmt);
+        }
 
         col2.appendChild(typeSelect);
 
@@ -141,28 +130,17 @@ export class TimeseriesDataExploreView {
         col3.className = "col pb-2 pb-xl-0";
 
         let styleSelect = document.createElement("select");
-        styleSelect.className = "form-select form-select-sm border border-info";
+        styleSelect.className = "form-select form-select-sm";
         styleSelect.name = "style";
         styleSelect.setAttribute("aria-label", "Select a style of line");
 
-        let styleSolidOption = document.createElement("option");
-        styleSolidOption.value = "solid";
-        styleSolidOption.textContent = "Solid";
-        styleSolidOption.selected = this.#tsChartParams[tsData.itemName].position == "solid";
-
-        let styleDashedOption = document.createElement("option");
-        styleDashedOption.value = "dashed";
-        styleDashedOption.textContent = "Dashed";
-        styleDashedOption.selected = this.#tsChartParams[tsData.itemName].position == "dashed";
-
-        let styleDottedOption = document.createElement("option");
-        styleDottedOption.value = "dotted";
-        styleDottedOption.textContent = "Dotted";
-        styleDottedOption.selected = this.#tsChartParams[tsData.itemName].position == "dotted";
-
-        styleSelect.appendChild(styleSolidOption);
-        styleSelect.appendChild(styleDashedOption);
-        styleSelect.appendChild(styleDottedOption);
+        for (let [optValue, optText] of Object.entries({"solid": "Solid", "dashed": "Dashed", "dotted": "Dotted"})) {
+            let styleOptElmt = document.createElement("option");
+            styleOptElmt.value = optValue;
+            styleOptElmt.textContent = optText;
+            styleOptElmt.selected = this.#tsChartParams[tsData.name].style == optValue;
+            styleSelect.appendChild(styleOptElmt);
+        }
 
         col3.appendChild(styleSelect);
 
@@ -171,9 +149,9 @@ export class TimeseriesDataExploreView {
 
         let colorInput = document.createElement("input");
         colorInput.type = "color";
-        colorInput.className = "form-control form-control-sm border border-info";
+        colorInput.className = "form-control form-control-sm";
         colorInput.name = "color";
-        colorInput.value = this.#chart.colors[(this.#tsSelector.selectedItemNames.length - 1) % this.#chart.colors.length];
+        colorInput.value = this.#tsChartParams[tsData.name].color;
         colorInput.setAttribute("aria-label", "Select a color");
 
         col4.appendChild(colorInput);
@@ -189,25 +167,25 @@ export class TimeseriesDataExploreView {
         positionSelect.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#tsChartParams[tsData.itemName].position = positionSelect.value;
+            this.#tsChartParams[tsData.name].position = positionSelect.value;
         });
 
         typeSelect.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#tsChartParams[tsData.itemName].type = typeSelect.value;
+            this.#tsChartParams[tsData.name].type = typeSelect.value;
         });
 
         styleSelect.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#tsChartParams[tsData.itemName].style = styleSelect.value;
+            this.#tsChartParams[tsData.name].style = styleSelect.value;
         });
         
         colorInput.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#tsChartParams[tsData.itemName].color = colorInput.value;
+            this.#tsChartParams[tsData.name].color = colorInput.value;
         });
     }
 
@@ -217,13 +195,13 @@ export class TimeseriesDataExploreView {
 
             this.#updateLoadBtnState();
 
-            if (event.detail.itemIsActive) {
-                this.#addTsParamInputs(event.detail);
+            if (event.detail.isActive) {
+                this.#addTsParamInputs(event.detail.timeseries);
             }
             else {
-                delete this.#tsChartParams[event.detail.itemName];
-                
-                document.getElementById("tsParam-" + event.detail.itemId)?.remove();      
+                delete this.#tsChartParams[event.detail.timeseries.name];
+
+                document.getElementById(`tsParam-${event.detail.timeseries.id.toString()}`)?.remove();
             }
         });
 
@@ -262,7 +240,7 @@ export class TimeseriesDataExploreView {
     }
 
     #updateLoadBtnState() {
-        if (this.#tsSelector.selectedItemNames.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
+        if (this.#tsSelector.selectedItems.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
             this.#loadBtnElmt.removeAttribute("disabled");
         }
         else {
@@ -290,7 +268,7 @@ export class TimeseriesDataExploreView {
         this.#loadBtnElmt.setAttribute("disabled", true);
 
         let urlParams = {
-            timeseries: this.#tsSelector.selectedItemNames,
+            timeseries: this.#tsSelector.selectedItems.map(ts => ts.name),
             data_state: this.#tsDataStatesSelectElmt.value,
             start_date: this.#startDatetimePickerElmt.date,
             start_time: this.#startDatetimePickerElmt.time,
@@ -318,11 +296,6 @@ export class TimeseriesDataExploreView {
                     timezone: this.#timezonePickerElmt.tzName,
                     series: this.#tsChartParams,
                 };
-                
-                for(let [tsName, tsParams] of Object.entries(options.series)) {
-                    tsParams.symbol = this.#tsSelector.selectedItemSymbols[this.#tsSelector.selectedItemNames.indexOf(tsName)];
-                }
-
                 this.#chart.load(data, options);
             },
             (error) => {

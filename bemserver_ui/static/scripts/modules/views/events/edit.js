@@ -257,8 +257,8 @@ export class EventEditView {
             this.#locUnlinkSelectedBtnElmts[structElmtType].addEventListener("click", (event) => {
                 event.preventDefault();
 
-                let selectedItemNames = Object.values(this.#selectedLocations[structElmtType]).map((itemData) => { return `${itemData.name}${itemData.path != null && itemData.path != "" ? ` (${itemData.path})` : ""}`; });
-                this.#locUnlinkSelectedModalConfirms[structElmtType].message = `Unlink <mark>${selectedItemNames.length.toString()}</mark> ${structElmtType}${selectedItemNames.length > 1 ? "s": ""}: ${selectedItemNames.join(", ")}`;
+                let selectedLocNames = Object.values(this.#selectedLocations[structElmtType]).map(locData => `${locData.name}${locData.path ? ` (${locData.path})` : ""}`);
+                this.#locUnlinkSelectedModalConfirms[structElmtType].message = `Unlink <mark>${selectedLocNames.length.toString()}</mark> ${structElmtType}${selectedLocNames.length > 1 ? "s": ""}: ${selectedLocNames.join(", ")}`;
                 this.#locUnlinkSelectedModalConfirms[structElmtType].show();
             });
         }
@@ -315,7 +315,7 @@ export class EventEditView {
     }
 
     #updateTimeseriesSaveSelectedBtn() {
-        if (this.#tsSelector.selectedItemIds.length > 0) {
+        if (this.#tsSelector.selectedItems.length > 0) {
             this.#tsSelectedSaveBtnElmt.removeAttribute("disabled");
         }
         else {
@@ -543,21 +543,21 @@ export class EventEditView {
         let linkedTsNames = [];
         let errors = [];
 
-        for (let [index, tsId] of this.#tsSelector.selectedItemIds.entries()) {
+        for (let ts of this.#tsSelector.selectedItems) {
             await this.#internalAPIRequester.post(
-                flaskES6.urlFor(`api.events.create_timeseries_link`, {id: this.#eventData.id, ts_id: tsId}),
+                flaskES6.urlFor(`api.events.create_timeseries_link`, {id: this.#eventData.id, ts_id: ts.id}),
                 null,
                 (data) => {
                     linkedTsNames.push(data.timeseries.name);
                 },
                 (error) => {
-                    errors.push(`<span class="fw-bold fst-italic">${this.#tsSelector.selectedItemNames[index]}</span>: ${error}`);
+                    errors.push(`<span class="fw-bold fst-italic">${ts.name}</span>: ${error}`);
                 },
             );
         }
 
         if (linkedTsNames.length > 0) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${linkedTsNames.length}/${this.#tsSelector.selectedItemIds.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, isDismissible: true});
+            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, isDismissible: true});
             this.#messagesElmt.appendChild(flashMsgElmt);
         }
 
@@ -580,25 +580,24 @@ export class EventEditView {
     }
 
     async #unlinkTimeseriesSelected(doneCallback = null) {
-        let tsNames = Object.values(this.#selectedTimeseriesLinks).map((tsLinkData) => { return tsLinkData.timeseries.name; });
         let unlinkedTsNames = [];
         let errors = [];
 
-        for (let [index, tsLinkId] of Object.keys(this.#selectedTimeseriesLinks).entries()) {
+        for (let [tsLinkId, tsLinkData] of Object.entries(this.#selectedTimeseriesLinks)) {
             await this.#internalAPIRequester.delete(
                 flaskES6.urlFor(`api.events.delete_timeseries_link`, {link_id: tsLinkId}),
                 null,
                 () => {
-                    unlinkedTsNames.push(tsNames[index]);
+                    unlinkedTsNames.push(tsLinkData.name);
                 },
                 (error) => {
-                    errors.push(`<span class="fw-bold fst-italic">${tsNames[index]}</span>: ${error}`);
+                    errors.push(`<span class="fw-bold fst-italic">${tsLinkData.name}</span>: ${error}`);
                 },
             );
         }
 
         if (unlinkedTsNames.length > 0) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedTsNames.length}/${tsNames.length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, isDismissible: true});
+            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, isDismissible: true});
             this.#messagesElmt.appendChild(flashMsgElmt);
         }
 
