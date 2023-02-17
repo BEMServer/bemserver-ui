@@ -6,6 +6,13 @@
 
 {% set is_editable = signed_user.is_admin %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
@@ -75,7 +82,7 @@
             </div>
             <div class="modal-body">
                 {% filter indent(width=16, first=False) %}
-                {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorConfig", selection_limit=1, filters={structural_element.type: structural_element.id}) -}}
+                {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorConfig", selection_limit=1, filters={structural_element.type: structural_element.id, "extend": True}) -}}
                 {% endfilter %}
                 <div class="mt-3">
                     <label for="editedWhFactor" class="form-label">Wh conversion factor</label>

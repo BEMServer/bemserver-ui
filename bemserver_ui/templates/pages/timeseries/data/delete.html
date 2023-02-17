@@ -3,6 +3,13 @@
 
 {% set title = "Delete timeseries data" %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">

@@ -1,5 +1,7 @@
+{% import "macros/components/structural_element_selector.html" as mac_struct_elmt_selector %}
+
 {% macro render_ts_selector(element_id=none, selection_limit=-1, filters={}) %}
-<div is="app-ts-selector"{% if element_id %} id="{{ element_id }}"{% endif %} selection-limit="{{ selection_limit }}"{% for filter_name, filter_value in filters.items() %} {{ filter_name }}={{ filter_value }}{% endfor %}>
+<app-ts-selector{% if element_id %} id="{{ element_id }}"{% endif %} selection-limit="{{ selection_limit }}"{% for filter_name, filter_value in filters.items() %} {{ filter_name }}={{ filter_value }}{% endfor %}>
     <div class="d-flex justify-content-between align-items-start gap-2">
         <h5>Timeseries selection</h5>
         <small id="countResultsSelected" class="text-muted"></small>
@@ -15,6 +17,24 @@
                 <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
                 <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
             </div>
+            <div class="row mb-2">
+                <div class="col-12 col-xl-6">
+                    <label for="siteSelector" class="form-label">Site/building... selection</label>
+                    {% filter indent(width=20, first=False) %}
+                    {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelector", title=none) -}}
+                    {% endfilter %}
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="siteSelectorRecursiveSwitch">
+                        <label class="form-check-label" for="siteSelectorRecursiveSwitch">extend search to sub-locations</label>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-6">
+                    <label for="zoneSelector" class="form-label">Zone selection</label>
+                    {% filter indent(width=20, first=False) %}
+                    {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelector", title=none) -}}
+                    {% endfilter %}
+                </div>
+            </div>
             <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2 mb-2">
                 <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
             </div>
@@ -22,10 +42,10 @@
             <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                 <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity ms-1"></i></small>
                 <div class="d-lg-flex d-grid align-items-center text-end gap-lg-3">
-                    <a id="selectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">select all in page</small></a>
-                    <a id="unselectAllResultsLnk" class="link-secondary" role="button"><small class="text-nowrap">unselect all in page</small></a>
+                    <button id="selectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">select all in page</button>
+                    <button id="unselectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">unselect all in page</button>
                     <div class="vr d-none d-lg-block"></div>
-                    <a id="clearAllSelectionLnk" class="link-secondary" role="button"><small class="text-nowrap">clear all selection</small></a>
+                    <button id="clearAllSelectionBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">clear all selection</button>
                 </div>
             </div>
             <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 mb-3">
@@ -34,11 +54,11 @@
             <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
                 <div class="d-flex justify-content-between align-items-center gap-4 w-100">
                     <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
-                    <small id="searchResultsCount" class="text-nowrap text-muted"></small>
+                    <small class="text-nowrap text-muted"><app-items-count id="searchResultsCount"></app-items-count></small>
                 </div>
                 <ul is="app-pagination" id="searchResultsPagination"></ul>
             </nav>
         </div>
     </div>
-</div>
+</app-ts-selector>
 {% endmacro %}

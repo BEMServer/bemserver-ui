@@ -93,7 +93,7 @@ export class TimeSeriesDataCompletenessView {
     }
 
     #updateLoadBtnState() {
-        if (this.#tsSelector.selectedItemIds.length > 0 && this.#endDatetimePickerElmt.hasDatetime) {
+        if (this.#tsSelector.selectedItems.length > 0 && this.#endDatetimePickerElmt.hasDatetime) {
             this.#loadBtnElmt.removeAttribute("disabled");
         }
         else {
@@ -126,7 +126,7 @@ export class TimeSeriesDataCompletenessView {
         this.#loadBtnElmt.setAttribute("disabled", "true");
 
         let urlParams = {
-            timeseries: this.#tsSelector.selectedItemIds,
+            timeseries: this.#tsSelector.selectedItems.map(ts => ts.id),
             data_state: this.#tsDataStatesSelectElmt.value,
             bucket_width_value: this.#bucketWidthValue,
             bucket_width_unit: this.#bucketWidthUnit,

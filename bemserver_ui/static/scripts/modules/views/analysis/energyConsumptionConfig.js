@@ -106,7 +106,7 @@ export class EnergyConsumptionConfigView {
                 structural_element_id: this.#structuralElement.id,
                 energy_source_id: this.#editedEnergySourceInputElmt.value,
                 energy_use_id: this.#editedEnergyUseInputElmt.value,
-                timeseries_id: this.#tsSelector.selectedItemIds[0],
+                timeseries_id: this.#tsSelector.selectedItems[0].id,
                 wh_factor: this.#editedWhFactorInputElmt.value,
             };
 
@@ -196,7 +196,7 @@ export class EnergyConsumptionConfigView {
     }
 
     #updateSaveBtnState() {
-        if (this.#tsSelector.selectedItemNames.length > 0) {
+        if (this.#tsSelector.selectedItems.length > 0) {
             this.#saveSelectedTimeseriesBtnElmt.removeAttribute("disabled");
         }
         else {

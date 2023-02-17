@@ -3,6 +3,13 @@
 
 {% set title = "Explore timeseries" %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/tree.css') }}">
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -60,14 +67,14 @@
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <div class="accordion" id="accordionFilters">
+                    <div class="accordion" id="accordionTsParams">
                         <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingFilters">
-                                <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                            <h2 class="accordion-header" id="headingTsParams">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTsParams" aria-controls="collapseTsParams" aria-expanded="false">
                                     <span class="fw-bold text-secondary">Timeseries customization</span>
                                 </button>
                             </h2>
-                            <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                            <div id="collapseTsParams" class="accordion-collapse collapse" aria-labelledby="headingTsParams" data-bs-parent="#accordionTsParams">
                                 <div class="accordion-body px-0 py-2" id="tsParam">
                                 </div>
                             </div>
