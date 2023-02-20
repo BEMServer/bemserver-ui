@@ -20,8 +20,6 @@ MODULES = (
     user_groups,
     campaigns,
     campaign_scopes,
-    events.events,
-    events.event_categories,
     notifications,
 )
 
@@ -35,3 +33,4 @@ def init_app(app):
     timeseries.init_app(app)
     services.init_app(app)
     analysis.init_app(app)
+    events.init_app(app)
