@@ -3,7 +3,7 @@
 {% set title = type|capitalize %}
 {% set subtitle = "Edit" %}
 
-{% set url_create_property = url_for('structural_element_properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='properties')|urlencode) %}
+{% set url_create_property = url_for('structural_elements.properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='properties')|urlencode) %}
 
 {% block main_toolbar %}
 {{ super() -}}

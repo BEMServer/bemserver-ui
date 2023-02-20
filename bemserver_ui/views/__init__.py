@@ -20,8 +20,6 @@ MODULES = (
     user_groups,
     campaigns,
     campaign_scopes,
-    structural_elements.structural_elements,
-    structural_elements.structural_element_properties,
     events.events,
     events.event_categories,
     notifications,
@@ -33,6 +31,7 @@ def init_app(app):
     for module in MODULES:
         app.register_blueprint(module.blp)
 
+    structural_elements.init_app(app)
     timeseries.init_app(app)
     services.init_app(app)
     analysis.init_app(app)
