@@ -17,6 +17,10 @@ from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
 
 
+def init_app(app):
+    app.register_blueprint(blp)
+
+
 @blp.route("/", methods=["GET", "POST"])
 @auth.signin_required
 def list():

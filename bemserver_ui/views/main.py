@@ -15,6 +15,10 @@ from bemserver_ui.common.const import (
 blp = flask.Blueprint("main", __name__)
 
 
+def init_app(app):
+    app.register_blueprint(blp)
+
+
 @blp.route("/")
 @blp.route("/index")
 @auth.signin_required

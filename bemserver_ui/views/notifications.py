@@ -9,6 +9,10 @@ from bemserver_ui.views.events.events import get_event_levels, get_default_event
 blp = flask.Blueprint("notifications", __name__, url_prefix="/notifications")
 
 
+def init_app(app):
+    app.register_blueprint(blp)
+
+
 @blp.route("/")
 @auth.signin_required
 def explore():

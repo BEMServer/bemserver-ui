@@ -20,17 +20,16 @@ MODULES = (
     user_groups,
     campaigns,
     campaign_scopes,
+    structural_elements,
+    timeseries,
+    events,
     notifications,
+    services,
+    analysis,
 )
 
 
 def init_app(app):
     """Init application views"""
     for module in MODULES:
-        app.register_blueprint(module.blp)
-
-    structural_elements.init_app(app)
-    timeseries.init_app(app)
-    services.init_app(app)
-    analysis.init_app(app)
-    events.init_app(app)
+        module.init_app(app)

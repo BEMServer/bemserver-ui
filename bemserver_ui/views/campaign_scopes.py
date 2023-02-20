@@ -9,6 +9,10 @@ from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
 blp = flask.Blueprint("campaign_scopes", __name__, url_prefix="/campaign_scopes")
 
 
+def init_app(app):
+    app.register_blueprint(blp)
+
+
 @blp.route("/")
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
