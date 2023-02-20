@@ -9,6 +9,10 @@ from bemserver_ui.extensions import auth
 blp = flask.Blueprint("users", __name__, url_prefix="/users")
 
 
+def register_blueprint(api_blp):
+    api_blp.register_blueprint(blp)
+
+
 @blp.route("/<int:id>/groups")
 @auth.signin_required
 def list_groups(id):

@@ -4,9 +4,7 @@ import flask
 from bemserver_ui.extensions import auth, Roles
 
 
-blp = flask.Blueprint(
-    "timeseries_datastates", __name__, url_prefix="/timeseries_datastates"
-)
+blp = flask.Blueprint("datastates", __name__, url_prefix="/datastates")
 
 
 @blp.route("/", methods=["GET", "POST"])
@@ -29,7 +27,7 @@ def create():
         ts_datastates_resp = flask.g.api_client.timeseries_datastates.create(payload)
         ts_ds_name = ts_datastates_resp.data["name"]
         flask.flash(f"New timeseries data state created: {ts_ds_name}", "success")
-        return flask.redirect(flask.url_for("timeseries_datastates.list"))
+        return flask.redirect(flask.url_for("timeseries.datastates.list"))
 
     return flask.render_template("pages/timeseries/datastates/create.html")
 
@@ -46,7 +44,7 @@ def edit(id):
         )
         ts_ds_name = ts_datastates_resp.data["name"]
         flask.flash(f"{ts_ds_name} timeseries data state updated!", "success")
-        return flask.redirect(flask.url_for("timeseries_datastates.list"))
+        return flask.redirect(flask.url_for("timeseries.datastates.list"))
 
     ts_datastates_resp = flask.g.api_client.timeseries_datastates.getone(id)
 
@@ -64,4 +62,4 @@ def delete(id):
         id, etag=flask.request.form["delEtag"]
     )
     flask.flash("Timeseries data state deleted!", "success")
-    return flask.redirect(flask.url_for("timeseries_datastates.list"))
+    return flask.redirect(flask.url_for("timeseries.datastates.list"))

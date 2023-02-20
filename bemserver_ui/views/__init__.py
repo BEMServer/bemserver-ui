@@ -20,22 +20,16 @@ MODULES = (
     user_groups,
     campaigns,
     campaign_scopes,
-    structural_elements.structural_elements,
-    structural_elements.structural_element_properties,
-    timeseries.timeseries,
-    timeseries.timeseries_datastates,
-    timeseries.timeseries_properties,
-    timeseries.timeseries_data,
-    events.events,
-    events.event_categories,
+    structural_elements,
+    timeseries,
+    events,
     notifications,
+    services,
+    analysis,
 )
 
 
 def init_app(app):
     """Init application views"""
     for module in MODULES:
-        app.register_blueprint(module.blp)
-
-    services.init_app(app)
-    analysis.init_app(app)
+        module.init_app(app)

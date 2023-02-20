@@ -106,7 +106,7 @@ export class TimeseriesDeleteView {
                             };
 
                             this.#internalAPIRequester.post(
-                                flaskES6.urlFor(`api.timeseries_data.delete_data`),
+                                flaskES6.urlFor(`api.timeseries.data.delete_data`),
                                 jsonData,
                                 (data) => {
                                     let flashMsgElmt = null;
@@ -165,7 +165,7 @@ export class TimeseriesDeleteView {
             this.#getDataStatesReqID = null;
         }
         this.#getDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`),
+            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#dataStatesElmt.innerHTML = "";
                 for (let option of data.data) {

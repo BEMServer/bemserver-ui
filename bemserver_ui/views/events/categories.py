@@ -4,7 +4,7 @@ import flask
 from bemserver_ui.extensions import auth, Roles
 
 
-blp = flask.Blueprint("event_categories", __name__, url_prefix="/event_categories")
+blp = flask.Blueprint("categories", __name__, url_prefix="/categories")
 
 
 @blp.route("/")
@@ -30,7 +30,7 @@ def create():
             f"New event category created: {event_category_resp.data['name']}",
             "success",
         )
-        return flask.redirect(flask.url_for("event_categories.list"))
+        return flask.redirect(flask.url_for("events.categories.list"))
 
     return flask.render_template("pages/events/categories/create.html")
 
@@ -49,7 +49,7 @@ def edit(id):
         flask.flash(
             f"{event_category_resp.data['name']} event category updated!", "success"
         )
-        return flask.redirect(flask.url_for("event_categories.list"))
+        return flask.redirect(flask.url_for("events.categories.list"))
 
     event_category_resp = flask.g.api_client.event_categories.getone(id=id)
     return flask.render_template(
@@ -64,4 +64,4 @@ def edit(id):
 def delete(id):
     flask.g.api_client.event_categories.delete(id, etag=flask.request.form["delEtag"])
     flask.flash("Event category deleted!", "success")
-    return flask.redirect(flask.url_for("event_categories.list"))
+    return flask.redirect(flask.url_for("events.categories.list"))

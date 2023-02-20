@@ -9,11 +9,7 @@ from bemserver_ui.extensions import auth, Roles
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
 
-blp = flask.Blueprint(
-    "structural_element_properties",
-    __name__,
-    url_prefix="/structural_element_properties",
-)
+blp = flask.Blueprint("properties", __name__, url_prefix="/properties")
 
 
 def extend_props_data(props_data):
@@ -104,14 +100,14 @@ def create():
 
         url_next = urllib.parse.unquote(
             flask.request.args.get("next")
-            or flask.url_for("structural_element_properties.list")
+            or flask.url_for("structural_elements.properties.list")
         )
 
         return flask.redirect(url_next)
 
     url_cancel = urllib.parse.unquote(
         flask.request.args.get("back")
-        or flask.url_for("structural_element_properties.list")
+        or flask.url_for("structural_elements.properties.list")
     )
 
     return flask.render_template(
@@ -170,7 +166,7 @@ def edit(id):
                 else:
                     flask.flash(f"{prop_name} property removed from {x}s", "success")
 
-        return flask.redirect(flask.url_for("structural_element_properties.list"))
+        return flask.redirect(flask.url_for("structural_elements.properties.list"))
 
     prop_resp = flask.g.api_client.structural_element_properties.getone(id)
     prop_data = prop_resp.data
@@ -191,4 +187,4 @@ def delete(id):
         id, etag=flask.request.form["delEtag"]
     )
     flask.flash("Property deleted!", "success")
-    return flask.redirect(flask.url_for("structural_element_properties.list"))
+    return flask.redirect(flask.url_for("structural_elements.properties.list"))

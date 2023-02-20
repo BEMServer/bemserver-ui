@@ -1,10 +1,10 @@
-"""Energy consumption internal API"""
+"""Analysis energy consumption setup internal API"""
 import flask
 
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
 
 
-blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consumption")
+blp = flask.Blueprint("setup", __name__, url_prefix="/setup")
 
 
 def _extend_energy_cons_ts_data(jsonData):

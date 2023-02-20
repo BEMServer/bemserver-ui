@@ -11,7 +11,7 @@ from bemserver_ui.common.tools import is_filestream_empty
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
-blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
+blp = flask.Blueprint("data", __name__, url_prefix="/data")
 
 
 @blp.route("/upload", methods=["GET", "POST"])

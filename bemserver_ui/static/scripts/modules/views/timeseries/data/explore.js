@@ -1,9 +1,9 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { TimeseriesChart } from "../../components/tsChart.js";
-import { Spinner } from "../../components/spinner.js";
-import { TimeseriesSelector } from "../../components/timeseries/selector.js";
+import { InternalAPIRequest } from "../../../tools/fetcher.js";
+import { flaskES6 } from "../../../../app.js";
+import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
+import { TimeseriesChart } from "../../../components/tsChart.js";
+import { Spinner } from "../../../components/spinner.js";
+import { TimeseriesSelector } from "../../../components/timeseries/selector.js";
 
 
 export class TimeseriesDataExploreView {
@@ -287,9 +287,9 @@ export class TimeseriesDataExploreView {
             this.#tsDataCSVReqID = null;
         }
         this.#tsDataCSVReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_data.retrieve_multiple_data`, urlParams),
+            flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
             (data) => {
-                this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries_data.download_multiple`, urlParams));
+                this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries.data.download_multiple`, urlParams));
 
                 let options = {
                     subtitle: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
@@ -323,7 +323,7 @@ export class TimeseriesDataExploreView {
             this.#tsDataStatesReqID = null;
         }
         this.#tsDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`),
+            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {

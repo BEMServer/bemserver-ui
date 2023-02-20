@@ -1,11 +1,11 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { TimeseriesSelector } from  "../../components/timeseries/selector.js";
+import { InternalAPIRequest } from "../../../tools/fetcher.js";
+import { flaskES6 } from "../../../../app.js";
+import { ModalConfirm } from "../../../components/modalConfirm.js";
+import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
+import { TimeseriesSelector } from  "../../../components/timeseries/selector.js";
 
 
-export class EnergyConsumptionConfigView {
+export class EnergyConsumptionSetupView {
 
     #internalAPIRequester = null;
     #postReqID = null;
@@ -114,7 +114,7 @@ export class EnergyConsumptionConfigView {
             if (energyConsTs.id == null) {
                 // Create (post).
                 this.#postReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.energy_consumption.create`),
+                    flaskES6.urlFor(`api.analysis.energy_consumption.setup.create`),
                     payload,
                     (data) => {
                         let confData = this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
@@ -143,7 +143,7 @@ export class EnergyConsumptionConfigView {
             else {
                 // Update (put).
                 this.#putReqID = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.energy_consumption.update`, {id: energyConsTs.id}),
+                    flaskES6.urlFor(`api.analysis.energy_consumption.setup.update`, {id: energyConsTs.id}),
                     payload,
                     energyConsTs.etag,
                     (data) => {
@@ -311,7 +311,7 @@ export class EnergyConsumptionConfigView {
 
                     let energyConsTs = this.#getEnergyConsTs(energySourceConfigData.energy_source_id, configData.energy_use_id);
                     this.#deleteReqID = this.#internalAPIRequester.delete(
-                        flaskES6.urlFor(`api.energy_consumption.delete`, {id: energyConsTs.id, structural_element_type: this.#structuralElement.type}),
+                        flaskES6.urlFor(`api.analysis.energy_consumption.setup.delete`, {id: energyConsTs.id, structural_element_type: this.#structuralElement.type}),
                         energyConsTs.etag,
                         () => {
                             let confData = this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id];

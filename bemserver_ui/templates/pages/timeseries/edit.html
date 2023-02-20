@@ -3,7 +3,7 @@
 {% set title = "Timeseries" %}
 {% set subtitle = "Edit" %}
 
-{% set url_create_property = url_for('timeseries_properties.create', back=url_for('timeseries.edit', id=timeseries.id, tab='properties')|urlencode) %}
+{% set url_create_property = url_for('timeseries.properties.create', back=url_for('timeseries.edit', id=timeseries.id, tab='properties')|urlencode) %}
 
 {% block main_toolbar %}
 {{ super() -}}

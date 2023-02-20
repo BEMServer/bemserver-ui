@@ -10,7 +10,7 @@ from bemserver_ui.common.time import convert_html_form_datetime
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
-blp = flask.Blueprint("timeseries_data", __name__, url_prefix="/timeseries_data")
+blp = flask.Blueprint("data", __name__, url_prefix="/data")
 
 
 @blp.route("/<int:id>/retrieve_data")

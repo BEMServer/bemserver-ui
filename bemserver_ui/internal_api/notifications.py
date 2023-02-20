@@ -12,6 +12,10 @@ import bemserver_api_client.exceptions as bac
 blp = flask.Blueprint("notifications", __name__, url_prefix="/notifications")
 
 
+def register_blueprint(api_blp):
+    api_blp.register_blueprint(blp)
+
+
 @blp.route("/")
 @auth.signin_required
 def retrieve_list():

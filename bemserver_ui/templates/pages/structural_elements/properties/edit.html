@@ -6,7 +6,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<form id="delForm" action="{{ url_for('structural_element_properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; property">
+<form id="delForm" action="{{ url_for('structural_elements.properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; property">
     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
     <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
 </form>
@@ -50,8 +50,8 @@
                 </div>
                 {% endif %}
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ url_for('structural_element_properties.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
-                    <form id="editForm" action="{{ url_for('structural_element_properties.edit', id=property.id) }}" method="POST">
+                    <a href="{{ url_for('structural_elements.properties.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                    <form id="editForm" action="{{ url_for('structural_elements.properties.edit', id=property.id) }}" method="POST">
                         <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                         <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </form>    

@@ -81,12 +81,12 @@
                             <ul class="nav nav-pills flex-column gap-1">
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
-                                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.explore') }}" title="Explore data"><i class="bi bi-bar-chart-line"></i> Explore data</a>
+                                        <a class="nav-link w-100" href="{{ url_for('timeseries.data.explore') }}" title="Explore data"><i class="bi bi-bar-chart-line"></i> Explore data</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">
                                     <div class="d-flex justify-content-between align-items-center gap-1">
-                                        <a class="nav-link w-100" href="{{ url_for('timeseries_data.completeness') }}" title="Data completeness"><i class="bi bi-pie-chart"></i> Data completeness</a>
+                                        <a class="nav-link w-100" href="{{ url_for('timeseries.data.completeness') }}" title="Data completeness"><i class="bi bi-pie-chart"></i> Data completeness</a>
                                     </div>
                                 </li>
                             </ul>
@@ -161,8 +161,8 @@
                                 <ul class="nav nav-pills flex-column gap-1">
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('structural_element_properties.list') }}" title="Manage locations properties"><i class="bi bi-card-list"></i> Properties</a>
-                                            <a class="nav-link" href="{{ url_for('structural_element_properties.create') }}" title="Add a new property"><i class="bi bi-plus-circle"></i></a>
+                                            <a class="nav-link w-100" href="{{ url_for('structural_elements.properties.list') }}" title="Manage locations properties"><i class="bi bi-card-list"></i> Properties</a>
+                                            <a class="nav-link" href="{{ url_for('structural_elements.properties.create') }}" title="Add a new property"><i class="bi bi-plus-circle"></i></a>
                                         </div>
                                     </li>
                                 </ul>
@@ -180,14 +180,14 @@
                                 <ul class="nav nav-pills flex-column gap-1">
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('timeseries_properties.list') }}" title="Manage timeseries properties"><i class="bi bi-card-list"></i> Properties</a>
-                                            <a class="nav-link" href="{{ url_for('timeseries_properties.create') }}" title="Add a new timeseries property"><i class="bi bi-plus-circle"></i></a>
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries.properties.list') }}" title="Manage timeseries properties"><i class="bi bi-card-list"></i> Properties</a>
+                                            <a class="nav-link" href="{{ url_for('timeseries.properties.create') }}" title="Add a new timeseries property"><i class="bi bi-plus-circle"></i></a>
                                         </div>
                                     </li>
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('timeseries_datastates.list') }}" title="Manage timeseries data states"><i class="bi bi-inboxes"></i> Data states</a>
-                                            <a class="nav-link" href="{{ url_for('timeseries_datastates.create') }}" title="Add a new timeseries data state"><i class="bi bi-plus-circle"></i></a>
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries.datastates.list') }}" title="Manage timeseries data states"><i class="bi bi-inboxes"></i> Data states</a>
+                                            <a class="nav-link" href="{{ url_for('timeseries.datastates.create') }}" title="Add a new timeseries data state"><i class="bi bi-plus-circle"></i></a>
                                         </div>
                                     </li>
                                 </ul>
@@ -206,12 +206,12 @@
                                 <ul class="nav nav-pills flex-column gap-1">
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('timeseries_data.upload') }}" title="Import timeseries data"><i class="bi bi-filetype-csv"></i> Import timeseries data</a>
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries.data.upload') }}" title="Import timeseries data"><i class="bi bi-filetype-csv"></i> Import timeseries data</a>
                                         </div>
                                     </li>                    
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('timeseries_data.delete') }}" title="Delete timeseries data"><i class="bi bi-trash3"></i> Delete history</a>
+                                            <a class="nav-link w-100" href="{{ url_for('timeseries.data.delete') }}" title="Delete timeseries data"><i class="bi bi-trash3"></i> Delete history</a>
                                         </div>
                                     </li>
                                 </ul>
@@ -258,8 +258,8 @@
                                 <ul class="nav nav-pills flex-column gap-1">
                                     <li class="nav-item">
                                         <div class="d-flex justify-content-between align-items-center gap-1">
-                                            <a class="nav-link w-100" href="{{ url_for('event_categories.list') }}" title="Manage event categories"><i class="bi bi-tags"></i> Categories</a>
-                                            <a class="nav-link" href="{{ url_for('event_categories.create') }}" title="Add a new event category"><i class="bi bi-plus-circle"></i></a>
+                                            <a class="nav-link w-100" href="{{ url_for('events.categories.list') }}" title="Manage event categories"><i class="bi bi-tags"></i> Categories</a>
+                                            <a class="nav-link" href="{{ url_for('events.categories.create') }}" title="Add a new event category"><i class="bi bi-plus-circle"></i></a>
                                         </div>
                                     </li>
                                 </ul>

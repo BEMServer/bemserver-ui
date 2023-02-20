@@ -7,6 +7,10 @@ from bemserver_ui.extensions import auth
 blp = flask.Blueprint("auth", __name__, url_prefix="/auth")
 
 
+def init_app(app):
+    app.register_blueprint(blp)
+
+
 @blp.route("/signin", methods=["GET", "POST"])
 def signin():
     # Verify if user has already signed in.

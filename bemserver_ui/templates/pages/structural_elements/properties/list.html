@@ -5,7 +5,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('structural_element_properties.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new property"><i class="bi bi-plus-circle"></i> New property</a>
+<a href="{{ url_for('structural_elements.properties.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new property"><i class="bi bi-plus-circle"></i> New property</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -93,7 +93,7 @@
                                 {% endif %}
                             </td>
                             {% endfor %}
-                            <td class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('structural_element_properties.edit', id=prop.id) }}" title="Edit property"><i class="bi bi-pencil"></i></td>
+                            <td class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('structural_elements.properties.edit', id=prop.id) }}" title="Edit property"><i class="bi bi-pencil"></i></td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -14,10 +14,10 @@ def explore():
     return flask.render_template("pages/analysis/energy_consumption/explore.html")
 
 
-@blp.route("/config/<string:structural_element_type>/<int:structural_element_id>")
+@blp.route("/setup/<string:structural_element_type>/<int:structural_element_id>")
 @auth.signin_required
 @ensure_campaign_context
-def config(structural_element_type, structural_element_id):
+def setup(structural_element_type, structural_element_id):
     api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
     if structural_element_type == "site":
         struct_elmt_resp = api_resource.getone(id=structural_element_id)
@@ -101,7 +101,7 @@ def config(structural_element_type, structural_element_id):
             available_energy_sources.append(x["id"])
 
     return flask.render_template(
-        "pages/analysis/energy_consumption/config.html",
+        "pages/analysis/energy_consumption/setup.html",
         structural_element=struct_elmt,
         ener_cons_config=ener_cons_config,
         all_energy_sources=energy_source_by_id,

@@ -1,9 +1,9 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { TimeseriesCompletenessChart } from "../../components/tsCompChart.js";
-import { Spinner } from "../../components/spinner.js";
-import { TimeseriesSelector } from "../../components/timeseries/selector.js";
+import { InternalAPIRequest } from "../../../tools/fetcher.js";
+import { flaskES6 } from "../../../../app.js";
+import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
+import { TimeseriesCompletenessChart } from "../../../components/tsCompChart.js";
+import { Spinner } from "../../../components/spinner.js";
+import { TimeseriesSelector } from "../../../components/timeseries/selector.js";
 
 
 export class TimeSeriesDataCompletenessView {
@@ -142,7 +142,7 @@ export class TimeSeriesDataCompletenessView {
         }
 
         this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.analysis.retrieve_completeness`, urlParams),
+            flaskES6.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
             (data) => {
                 this.#chart.load(data, this.#shouldDisplayTime, this.#timezonePickerElmt.tzName);
             },
@@ -171,7 +171,7 @@ export class TimeSeriesDataCompletenessView {
         }
 
         this.#tsDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries_datastates.retrieve_list`),
+            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {
