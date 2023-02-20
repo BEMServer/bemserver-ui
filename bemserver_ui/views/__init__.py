@@ -22,10 +22,6 @@ MODULES = (
     campaign_scopes,
     structural_elements.structural_elements,
     structural_elements.structural_element_properties,
-    timeseries.timeseries,
-    timeseries.timeseries_datastates,
-    timeseries.timeseries_properties,
-    timeseries.timeseries_data,
     events.events,
     events.event_categories,
     notifications,
@@ -37,5 +33,6 @@ def init_app(app):
     for module in MODULES:
         app.register_blueprint(module.blp)
 
+    timeseries.init_app(app)
     services.init_app(app)
     analysis.init_app(app)

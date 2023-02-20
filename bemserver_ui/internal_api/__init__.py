@@ -9,8 +9,6 @@ from . import structural_elements
 from . import campaigns
 from . import campaign_scopes
 from . import timeseries
-from . import timeseries_data
-from . import timeseries_datastates
 from . import user_groups
 from . import users
 from . import analysis
@@ -26,12 +24,8 @@ MODULES = (
     structural_elements,
     campaigns,
     campaign_scopes,
-    timeseries,
-    timeseries_data,
-    timeseries_datastates,
     user_groups,
     users,
-    services,
     events,
     notifications,
 )
@@ -41,6 +35,7 @@ def init_app(app):
     """Init application internal API"""
     for module in MODULES:
         blp.register_blueprint(module.blp)
+    timeseries.register_blueprint(blp)
     services.register_blueprint(blp)
     analysis.register_blueprint(blp)
     app.register_blueprint(blp)

@@ -5,9 +5,7 @@ import flask
 from bemserver_ui.extensions import auth, Roles
 
 
-blp = flask.Blueprint(
-    "timeseries_properties", __name__, url_prefix="/timeseries_properties"
-)
+blp = flask.Blueprint("properties", __name__, url_prefix="/properties")
 
 
 @blp.route("/", methods=["GET", "POST"])
@@ -39,7 +37,7 @@ def create():
         return flask.redirect(url_next)
 
     url_cancel = urllib.parse.unquote(
-        flask.request.args.get("back") or flask.url_for("timeseries_properties.list")
+        flask.request.args.get("back") or flask.url_for("timeseries.properties.list")
     )
 
     return flask.render_template(
@@ -61,7 +59,7 @@ def edit(id):
         )
         prop_name = prop_resp.data["name"]
         flask.flash(f"{prop_name} timeseries property updated!", "success")
-        return flask.redirect(flask.url_for("timeseries_properties.list"))
+        return flask.redirect(flask.url_for("timeseries.properties.list"))
 
     ts_properties_resp = flask.g.api_client.timeseries_properties.getone(id)
 
@@ -79,4 +77,4 @@ def delete(id):
         id, etag=flask.request.form["delEtag"]
     )
     flask.flash("Timeseries property deleted!", "success")
-    return flask.redirect(flask.url_for("timeseries_properties.list"))
+    return flask.redirect(flask.url_for("timeseries.properties.list"))
