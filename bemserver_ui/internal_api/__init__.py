@@ -24,8 +24,11 @@ MODULES = (
     structural_elements,
     campaigns,
     campaign_scopes,
+    timeseries,
     user_groups,
     users,
+    analysis,
+    services,
     events,
     notifications,
 )
@@ -34,8 +37,5 @@ MODULES = (
 def init_app(app):
     """Init application internal API"""
     for module in MODULES:
-        blp.register_blueprint(module.blp)
-    timeseries.register_blueprint(blp)
-    services.register_blueprint(blp)
-    analysis.register_blueprint(blp)
+        module.register_blueprint(blp)
     app.register_blueprint(blp)

@@ -8,7 +8,7 @@ from . import setup  # noqa
 blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consumption")
 
 
-def register_blueprints(api_blp):
+def register_blueprint(api_blp):
     blp.register_blueprint(breakdowns.blp)
     blp.register_blueprint(setup.blp)
     api_blp.register_blueprint(blp)

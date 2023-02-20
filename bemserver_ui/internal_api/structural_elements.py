@@ -14,6 +14,10 @@ blp = flask.Blueprint(
 )
 
 
+def register_blueprint(api_blp):
+    api_blp.register_blueprint(blp)
+
+
 @blp.route("/")
 @auth.signin_required
 @ensure_campaign_context

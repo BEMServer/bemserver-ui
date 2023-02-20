@@ -9,6 +9,10 @@ from bemserver_ui.extensions.timezones import get_tz_info
 blp = flask.Blueprint("campaigns", __name__, url_prefix="/campaigns")
 
 
+def register_blueprint(api_blp):
+    api_blp.register_blueprint(blp)
+
+
 @blp.route("/<int:id>")
 @auth.signin_required
 def retrieve_data(id):

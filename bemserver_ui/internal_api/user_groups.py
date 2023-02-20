@@ -7,6 +7,10 @@ from bemserver_ui.extensions import auth, Roles
 blp = flask.Blueprint("user_groups", __name__, url_prefix="/user_groups")
 
 
+def register_blueprint(api_blp):
+    api_blp.register_blueprint(blp)
+
+
 @blp.route("/<int:id>/add_user", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def add_user(id):
