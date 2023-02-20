@@ -15,7 +15,6 @@ from . import user_groups
 from . import users
 from . import analysis
 from . import services
-from . import energy_consumption
 from . import events
 from . import notifications
 
@@ -32,8 +31,7 @@ MODULES = (
     timeseries_datastates,
     user_groups,
     users,
-    analysis,
-    energy_consumption,
+    services,
     events,
     notifications,
 )
@@ -44,4 +42,5 @@ def init_app(app):
     for module in MODULES:
         blp.register_blueprint(module.blp)
     services.register_blueprint(blp)
+    analysis.register_blueprint(blp)
     app.register_blueprint(blp)

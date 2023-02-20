@@ -142,7 +142,7 @@ export class TimeSeriesDataCompletenessView {
         }
 
         this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.analysis.retrieve_completeness`, urlParams),
+            flaskES6.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
             (data) => {
                 this.#chart.load(data, this.#shouldDisplayTime, this.#timezonePickerElmt.tzName);
             },

@@ -1,9 +1,9 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { flaskES6, signedUser } from "../../../app.js";
-import { Spinner } from "../../components/spinner.js";
-import { TimeseriesEnergyConsumptionChart } from "../../components/tsEnerConsChart.js";
-import "../../components/tree.js";
+import { InternalAPIRequest } from "../../../tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
+import { flaskES6, signedUser } from "../../../../app.js";
+import { Spinner } from "../../../components/spinner.js";
+import { TimeseriesEnergyConsumptionChart } from "../../../components/tsEnerConsChart.js";
+import "../../../components/tree.js";
 
 
 export class EnergyConsumptionExploreView {
@@ -156,7 +156,7 @@ export class EnergyConsumptionExploreView {
 
     #updateConfigBtn() {
         this.#setupBtnElmt.href = flaskES6.urlFor(
-            `analysis.energy_consumption.config`,
+            `analysis.energy_consumption.setup`,
             {
                 structural_element_type: this.#structuralElementType,
                 structural_element_id: this.#structuralElementId,
@@ -181,7 +181,7 @@ export class EnergyConsumptionExploreView {
             }
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(
-                    `api.analysis.retrieve_ener_cons_brkd`,
+                    `api.analysis.energy_consumption.breakdowns.retrieve_brkd`,
                     {
                         structural_element_type: this.#structuralElementType,
                         structural_element_id: this.#structuralElementId,
@@ -257,7 +257,12 @@ export class EnergyConsumptionExploreView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
+            flaskES6.urlFor(
+                `api.structural_elements.retrieve_tree_sites`,
+                {
+                    types: ["site", "building"],
+                }
+            ),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
