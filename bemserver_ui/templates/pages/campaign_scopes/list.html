@@ -5,7 +5,11 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
+<div class="d-lg-flex d-grid gap-3">
+    <a href="{{ url_for('campaigns.list') }}" class="btn btn-sm btn-outline-secondary text-nowrap ms-auto" title="Back to campaigns"><i class="bi bi-arrow-return-left"></i> Back to campaigns</a>
+    <div class="vr d-none d-lg-block"></div>
+    <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
+</div>
 {% endfilter %}
 {% endblock main_toolbar %}
 
