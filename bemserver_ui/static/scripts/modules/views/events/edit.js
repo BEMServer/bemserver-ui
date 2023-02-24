@@ -102,8 +102,8 @@ export class EventEditView {
         this.#locSelectModalTitleTypeElmt = document.getElementById("locations-selectModalTitleType");
         this.#locSelectModal = new bootstrap.Modal(this.#locSelectModalElmt);
         this.#locSelectedSaveBtnElmt = document.getElementById("locations-selectedSaveBtn");
-        this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
-        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
+        this.#siteSelector = StructuralElementSelector.getInstance("siteSelectorLink");
+        this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelectorLink");
 
         for (let structElmtType of this.#structuralElementTypes) {
             this.#locTabContentElmts[structElmtType] = document.getElementById(`${structElmtType}s-tabcontent`);

@@ -170,10 +170,10 @@
             </div>
             <div class="modal-body">
                 {% filter indent(width=16, first=False) %}
-                {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelector", title=none) -}}
+                {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelectorLink", title=none) -}}
                 {% endfilter %}
                 {% filter indent(width=16, first=False) %}
-                {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelector", title=none) -}}
+                {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelectorLink", title=none) -}}
                 {% endfilter %}
             </div>
             <div class="modal-footer d-flex justify-content-end gap-2">
