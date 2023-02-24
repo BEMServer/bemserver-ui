@@ -8,16 +8,30 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
-    <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
-</form>
+<div class="d-lg-flex d-grid gap-3">
+    {% set url_back = url_for("campaigns.view", id=campaign_scope.campaign_id, tab="scopes") %}
+    <a href="{{ url_back }}" class="btn btn-sm btn-outline-secondary text-nowrap ms-auto" title="Back to campaign"><i class="bi bi-arrow-return-left"></i> Back to campaign</a>
+    <div class="vr d-none d-lg-block"></div>
+    <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id, next=url_back) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
+        <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
+        <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    </form>
+</div>
 {% endfilter %}
 {% endblock main_toolbar %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    <div class="row g-5 mb-3">
+        <div class="col">
+            <div class="d-flex align-items-start gap-3">
+                <h5>Campaign</h5>
+                <span class="fw-bold text-{% if campaign_scope.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ campaign_scope.campaign_state | upper }}]</span>
+            </div>
+            <p class="text-break">{{ campaign_scope.campaign_name }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <ul class="nav nav-tabs app-tabs" role="tablist">
@@ -25,15 +39,13 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span id="userGroupCount" class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">User groups <span id="userGroupCount" class="badge bg-secondary">{{ user_groups|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <div class="d-lg-flex justify-content-between">
                         <dl class="col">
-                            <dt>Campaign</dt>
-                            <dd class="text-break">{{ g.campaign_ctxt.campaign.name }}</dd>
                             <dt>Name</dt>
                             <dd class="text-break">{{ campaign_scope.name }}</dd>
                             <dt>Description</dt>

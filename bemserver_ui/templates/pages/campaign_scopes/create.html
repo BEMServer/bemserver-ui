@@ -2,20 +2,37 @@
 
 {% set title = "Create a new campaign scope" %}
 
+{% set campaign_id = request.args.get("campaign_id") %}
+{% if g.campaign_ctxt.has_campaign %}
+    {% set campaign_id = g.campaign_ctxt.id %}
+{% endif %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
+    {% if campaigns|length <= 0 %}
     <div class="row mb-3">
         <div class="col">
-            <h5>Campaign</h5>
-            <p class="text-break">{{ g.campaign_ctxt.campaign.name }}</p>
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-square me-2"></i>
+                You must first <a href="{{ url_for('campaigns.create') }}" title="Create a new campaign">create a campaign</a> to add a scope to it.
+            </div>
         </div>
     </div>
+    {% endif %}
     <div class="row">
         <div class="col">
-            <form action="{{ url_for('campaign_scopes.create') }}" method="POST">
-                <fieldset>
+            <form action="{{ url_for('campaign_scopes.create', next=url_next) }}" method="POST">
+                <fieldset{% if campaigns|length <= 0 %} disabled{% endif %}>
                     <legend class="invisible d-none">Campaign scope informations</legend>
+                    <div class="mb-3">
+                        <label class="form-label" for="campaign">Campaign</label>
+                        <select class="form-select" id="campaign" name="campaign" aria-label="Select a campaign" required{% if campaign_id %} disabled{% endif %}>
+                            {% for x in campaigns %}
+                            <option value="{{ x.id }}"{% if campaign_id == x.id | string %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label" for="name">Name</label>
                         <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
@@ -25,7 +42,11 @@
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                     </div>
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ url_for('campaign_scopes.list') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
+                        {% set url_cancel = url_for("campaigns.list") %}
+                        {% if campaign_id %}
+                            {% set url_cancel = url_for("campaigns.view", id=campaign_id, tab="scopes") %}
+                        {% endif %}
+                        <a href="{{ url_cancel }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
                         <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </div>
                 </fieldset>

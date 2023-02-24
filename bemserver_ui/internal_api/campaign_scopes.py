@@ -3,7 +3,7 @@ import flask
 
 import bemserver_api_client.exceptions as bac_exc
 
-from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
+from bemserver_ui.extensions import auth, Roles
 
 
 blp = flask.Blueprint("campaign_scopes", __name__, url_prefix="/campaign_scopes")
@@ -32,7 +32,6 @@ def retrieve_list():
 
 @blp.route("/<int:id>/groups")
 @auth.signin_required
-@ensure_campaign_context
 def list_groups(id):
     # Get campaign scope's user groups.
     groups_resp = flask.g.api_client.user_groups_by_campaign_scopes.getall(
@@ -64,7 +63,6 @@ def list_groups(id):
 
 @blp.route("/<int:id>/add_group", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-@ensure_campaign_context
 def add_group(id):
     payload = {
         "campaign_scope_id": id,
@@ -76,7 +74,6 @@ def add_group(id):
 
 @blp.route("/<int:id>/remove_group", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
-@ensure_campaign_context
 def remove_group(id):
     flask.g.api_client.user_groups_by_campaign_scopes.delete(
         flask.request.args["rel_id"]

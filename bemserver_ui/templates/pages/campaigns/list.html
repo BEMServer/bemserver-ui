@@ -6,7 +6,11 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 {% if signed_user.is_admin %}
-<a href="{{ url_for('campaigns.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new campaign"><i class="bi bi-plus-circle"></i> New campaign</a>
+<div class="d-sm-flex d-grid gap-3">
+    <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
+    <div class="vr d-none d-sm-block"></div>
+    <a href="{{ url_for('campaigns.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new campaign"><i class="bi bi-plus-circle"></i> New campaign</a>
+</div>
 {% endif %}
 {% endfilter %}
 {% endblock main_toolbar %}

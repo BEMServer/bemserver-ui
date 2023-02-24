@@ -13,7 +13,7 @@
     {% if is_campaign_selected_edit %}
     <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0 mt-lg-2 mt-0 mt-xl-0">
         {% if signed_user.is_admin %}
-        <a href="{{ url_for('campaign_scopes.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
+        <a href="{{ url_for('campaign_scopes.create', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
         <div class="vr d-none d-xl-block me-xl-2"></div>
         {% endif %}
     </div>
@@ -61,7 +61,10 @@
                 </li>
                 {% if signed_user.is_admin %}
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">Groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
+                    <button class="nav-link{% if tab == 'scopes' %} active{% endif %}" id="scopes-tab" data-bs-toggle="tab" data-bs-target="#scopes-tabcontent" type="button" role="tab" aria-controls="scopes-tabcontent" aria-selected="{% if tab == 'scopes' %}true{% else %}false{% endif %}">Campaign scopes <span class="badge bg-secondary">{{ campaign_scopes|length }}</span></button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'groups' %} active{% endif %}" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups-tabcontent" type="button" role="tab" aria-controls="groups-tabcontent" aria-selected="{% if tab == 'groups' %}true{% else %}false{% endif %}">User groups <span class="badge bg-secondary">{{ user_groups|length }}</span></button>
                 </li>
                 {% endif %}
             </ul>
@@ -93,6 +96,22 @@
                     </div>
                 </div>
                 {% if signed_user.is_admin %}
+                <div class="tab-pane fade{% if tab == 'scopes' %} show active{% endif %} p-3" id="scopes-tabcontent" role="tabpanel" aria-labelledby="scopes-tab">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div class="list-group w-100">
+                            {% for x in campaign_scopes %}
+                            <a class="list-group-item list-group-item-action d-flex gap-2 px-2" href="{{ url_for('campaign_scopes.view', id=x.id) }}" title="View details">
+                                <i class="bi bi-bounding-box-circles"></i>
+                                <div class="d-grid">
+                                    <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
+                                    <small class="text-muted">{{ x.description }}</small>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ url_for('campaign_scopes.create', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
+                    </div>
+                </div>
                 <div class="tab-pane fade{% if tab == 'groups' %} show active{% endif %} p-3" id="groups-tabcontent" role="tabpanel" aria-labelledby="groups-tab">
                     <div class="d-flex justify-content-between align-items-start gap-3">
                         {% if user_groups|length > 0 %}

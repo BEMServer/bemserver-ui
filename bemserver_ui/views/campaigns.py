@@ -80,25 +80,36 @@ def view(id):
     campaign["state"] = deduce_campaign_state(campaign)
     campaign["timezone_info"] = get_tz_info(campaign["timezone"])
 
-    # Get campaign's user groups.
-    ugroups_resp = flask.g.api_client.user_groups_by_campaigns.getall(campaign_id=id)
+    campaign_scopes = []
     ugroups = []
-    for x in ugroups_resp.data:
-        try:
-            ugroup_resp = flask.g.api_client.user_groups.getone(id=x["user_group_id"])
-        except bac_exc.BEMServerAPINotFoundError:
-            # Here, just ignore if a user group has been deleted.
-            pass
-        else:
-            ugroup_data = ugroup_resp.data
-            ugroup_data["rel_id"] = x["id"]
-            ugroups.append(ugroup_data)
+    if flask.session["user"]["data"]["is_admin"]:
+        # Get campaign scopes
+        campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(campaign_id=id)
+        campaign_scopes = campaign_scopes_resp.data
+
+        # Get campaign's user groups.
+        ugroups_resp = flask.g.api_client.user_groups_by_campaigns.getall(
+            campaign_id=id
+        )
+        for x in ugroups_resp.data:
+            try:
+                ugroup_resp = flask.g.api_client.user_groups.getone(
+                    id=x["user_group_id"]
+                )
+            except bac_exc.BEMServerAPINotFoundError:
+                # Here, just ignore if a user group has been deleted.
+                pass
+            else:
+                ugroup_data = ugroup_resp.data
+                ugroup_data["rel_id"] = x["id"]
+                ugroups.append(ugroup_data)
 
     return flask.render_template(
         "pages/campaigns/view.html",
         campaign=campaign,
         etag=campaign_resp.etag,
         user_groups=ugroups,
+        campaign_scopes=campaign_scopes,
         tab=tab,
     )
 
