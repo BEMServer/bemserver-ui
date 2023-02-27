@@ -1,0 +1,27 @@
+{% if g.campaign_ctxt.has_campaign or sidebar_section_plugins | length > 0 %}
+<div class="accordion app-sidebar-accordion rounded bg-secondary bg-opacity-25">
+    <div class="accordion-item border-0">
+        <h2 class="accordion-header" id="panelHeadingServices">
+            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseServices" aria-expanded="false" aria-controls="panelCollapseServices">
+                <span class="app-sidebar-heading"><i class="bi bi-puzzle"></i> Services</span>
+            </button>
+        </h2>
+        <div id="panelCollapseServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingServices">
+            <div class="accordion-body px-0 py-2">
+                <ul class="nav nav-pills flex-column gap-1">
+                    {% filter indent(width=20, first=True) %}
+                    {% if g.campaign_ctxt.has_campaign %}
+                    {{- mac_sidebar.render_nav_item("Cleanup", url_for("services.cleanup.state"), "Cleanup service", ["bi", "bi-magic"]) -}}
+                    {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.campaign_context_state"), "Check missing data service", ["bi", "bi-journal-x"]) -}}
+                    {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.campaign_context_state"), "Check outlier data service", ["bi", "bi-layout-wtf"]) -}}
+                    {% endif %}
+                    {% for sidebar_section_plugin in sidebar_section_plugins %}
+                    {{- mac_sidebar.render_nav_item_from_plugin(sidebar_section_plugin) -}}
+                    {% endfor %}
+                    {% endfilter %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

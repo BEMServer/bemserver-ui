@@ -1,0 +1,17 @@
+{% import "macros/components/sidebar.html" as mac_sidebar with context %}
+{% include "components/campaigns/selector.html" +%}
+<nav id="sidebarMenu" class="col-md-3 col-xl-2 d-md-block bg-light app-sidebar border-end border-2 collapse pb-4">
+    <div class="position-sticky">
+        <div class="d-flex flex-column gap-3">
+            {% filter indent(width=12, first=True) %}
+            {% include "components/sidebar/sidebar_campaign_selector.html" +%}
+            {% include "components/sidebar/sidebar_campaign_context.html" %}
+            {% for sidebar_section in ["tsdata", "analysis", "dashboards", "services"] %}
+            {% set sidebar_section_plugins = sidebar_plugins[sidebar_section] %}
+            {% include "components/sidebar/sidebar_" + sidebar_section + ".html" %}
+            {% endfor %}
+            {% include "components/sidebar/sidebar_admin.html" %}
+            {% endfilter %}
+        </div>
+    </div>
+</nav>

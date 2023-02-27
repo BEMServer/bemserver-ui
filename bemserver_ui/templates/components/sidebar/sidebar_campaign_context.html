@@ -1,0 +1,46 @@
+{% if g.campaign_ctxt.has_campaign %}
+<ul class="nav nav-pills flex-column gap-1">
+    <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link("Sites", url_for("structural_elements.explore"), "Manage locations", ["bi", "bi-building"], extra_classes=["w-100"]) -}}
+        {% endfilter %}
+        {% if signed_user.is_admin %}
+        <div class="dropdown">
+            <button type="button" class="nav-link dropdown-toggle" id="dropdownMenuSites" title="Add sites/buildings..." data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuSites">
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">New site</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">New building</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">New storey</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">New space</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">New zone</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('structural_elements.upload') }}" title="Import CSV files">Import CSV</a></li>
+                <li><a class="dropdown-item disabled" href="#" title="Import IFC file">Import IFC</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </li>
+    <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link("Timeseries", url_for("timeseries.list"), "Manage timeseries", ["bi", "bi-clock-history"], extra_classes=["w-100"]) -}}
+        {% endfilter %}
+        {% if signed_user.is_admin %}
+        <div class="dropdown">
+            <button type="button" class="nav-link dropdown-toggle" id="dropdownMenuTimeseries" title="Add Timeseries..." data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-plus-circle"></i></button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuTimeseries">
+                <li><a class="dropdown-item" href="{{ url_for('timeseries.create') }}" title="Add a new timeseries">New timeseries</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('timeseries.upload') }}" title="Import CSV file">Import CSV</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </li>
+    <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link("Events", url_for("events.list"), "Manage events", ["bi", "bi-calendar2-event"], extra_classes=["w-100"]) -}}
+        {{- mac_sidebar.render_nav_link(none, url_for("events.create"), "Add a new event entry", ["bi", "bi-plus-circle"]) -}}
+        {% endfilter %}
+    </li>
+</ul>
+{% endif %}

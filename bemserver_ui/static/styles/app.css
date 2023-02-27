@@ -90,6 +90,11 @@ body,
     background-color: var(--app-blue) !important;
 }
 
+.app-sidebar .nav-link img {
+    height: 20px !important;
+    width: 20px !important;
+}
+
 .accordion.app-sidebar-accordion .accordion-item {
     background-color: inherit !important;
 }

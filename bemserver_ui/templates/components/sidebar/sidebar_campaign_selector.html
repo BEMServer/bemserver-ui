@@ -1,0 +1,14 @@
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item">
+        <div class="d-flex justify-content-between align-items-center gap-1">
+            <a id="campaignSelectorNavLink" class="nav-link w-100 fw-bold text-center text-{% if g.campaign_ctxt.has_campaign %}truncate{% else %}break{% endif %} app-campaign-selected" role="button" title="{% if g.campaign_ctxt.has_campaign %}{{ g.campaign_ctxt.name }}{% else %}Select a campaign{% endif %}" data-bs-toggle="offcanvas" data-bs-target=".app-campaign-selector" aria-controls="app-campaign-selector">
+                {% if g.campaign_ctxt.has_campaign %}
+                {{ g.campaign_ctxt.name }}
+                {% else %}
+                <span class="fst-italic">Select a campaign</span>
+                {% endif %}
+            </a>
+            <a id="campaignsNavLink" class="nav-link" href="{{ url_for('campaigns.list') }}" title="Manage campaigns"><i class="bi bi-boxes"></i></a>
+        </div>
+    </li>
+</ul>
