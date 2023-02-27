@@ -1,5 +1,5 @@
 import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
+import { flaskES6, campaignContextQueryArgName } from "../../../app.js";
 import { Spinner } from "../../components/spinner.js";
 import { TimeDisplay } from "../../tools/time.js";
 
@@ -21,7 +21,7 @@ export class CampaignSelectorView {
         this.#initEventListeners();
 
         let searchParams = new URLSearchParams(window.location.search);
-        let campaignParam = searchParams.get("campaign");
+        let campaignParam = searchParams.get(campaignContextQueryArgName);
         this.currentCampaign = campaignParam != null ? campaignParam : "";
 
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -68,10 +68,10 @@ export class CampaignSelectorView {
 
         let searchParams = new URLSearchParams(window.location.search);
         if (this.#campaignSelectElmt.value != "") {
-            searchParams.set("campaign", this.#campaignSelectElmt.value);
+            searchParams.set(campaignContextQueryArgName, this.#campaignSelectElmt.value);
         }
         else {
-            searchParams.delete("campaign");
+            searchParams.delete(campaignContextQueryArgName);
         }
 
         let redirUrl = window.location.href.split("?")[0];

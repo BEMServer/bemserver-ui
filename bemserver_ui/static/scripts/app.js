@@ -13,7 +13,8 @@ import { NotificationUpdater } from "./modules/notifications.js";
 // TODO: manage flash messages in through this app class?
 
 
-const flaskES6 = new FlaskES6(flaskEndpoints);
+const campaignContextQueryArgName = "campaign_ctxt";
+const flaskES6 = new FlaskES6(flaskEndpoints, campaignContextQueryArgName);
 
 
 export class App {
@@ -52,4 +53,4 @@ export class App {
 }
 
 
-export { flaskES6, signedUser } ;
+export { flaskES6, signedUser, campaignContextQueryArgName } ;

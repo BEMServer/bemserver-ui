@@ -1,9 +1,11 @@
 export class FlaskES6 {
 
     #endpoints = null;
+    #campaignContextQueryArgName = null;
 
-    constructor(flaskEndpoints) {
+    constructor(flaskEndpoints, campaignContextQueryArgName) {
         this.#endpoints = flaskEndpoints;
+        this.#campaignContextQueryArgName = campaignContextQueryArgName;
     }
 
     urlFor(endpoint, rule) {
@@ -45,8 +47,8 @@ export class FlaskES6 {
 
         // Inject campaign context, if any.
         let currentLocationSearchParams = new URLSearchParams(window.location.search.replace("?", ""));
-        if (currentLocationSearchParams.has("campaign")) {
-            rule["campaign"] = currentLocationSearchParams.get("campaign");
+        if (this.#campaignContextQueryArgName != null && currentLocationSearchParams.has(this.#campaignContextQueryArgName)) {
+            rule[this.#campaignContextQueryArgName] = currentLocationSearchParams.get(this.#campaignContextQueryArgName);
         }
 
         let url = "";

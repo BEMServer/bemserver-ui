@@ -12,6 +12,7 @@ import werkzeug.exceptions as wexc
 import bemserver_api_client.exceptions as bac
 
 
+CAMPAIGN_CONTEXT_QUERY_ARG_NAME = "campaign_ctxt"
 CAMPAIGN_STATE_OVERALL = "overall"
 
 
@@ -133,7 +134,6 @@ class CampaignContext:
 
 # Inspired from https://stackoverflow.com/a/57491317
 def url_for_campaign(endpoint, **kwargs):
-
     if endpoint == "static":
         ignore_campaign = True
     else:
@@ -143,9 +143,12 @@ def url_for_campaign(endpoint, **kwargs):
 
     if not ignore_campaign:
         if forced_campaign is not None:
-            kwargs["campaign"] = forced_campaign
-        elif hasattr(flask.g, "campaign_ctxt") and flask.g.campaign_ctxt.has_campaign:
-            kwargs["campaign"] = flask.g.campaign_ctxt.id
+            kwargs[CAMPAIGN_CONTEXT_QUERY_ARG_NAME] = forced_campaign
+        elif (
+            hasattr(flask.g, CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
+            and flask.g.campaign_ctxt.has_campaign
+        ):
+            kwargs[CAMPAIGN_CONTEXT_QUERY_ARG_NAME] = flask.g.campaign_ctxt.id
 
     return flask_url_for(endpoint, **kwargs)
 
@@ -162,7 +165,7 @@ def init_app(app):
             try:
                 flask.g.campaign_ctxt = CampaignContext(
                     flask.request.args.get("forced_campaign", None)
-                    or flask.request.args.get("campaign")
+                    or flask.request.args.get(CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
                 )
             except bac.BEMServerAPIAuthenticationError as exc:
                 # XXX: Case of deactivated user while already using app.
