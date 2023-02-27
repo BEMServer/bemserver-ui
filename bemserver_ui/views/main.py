@@ -6,6 +6,7 @@ from bemserver_api_client import __version__ as api_client_version
 import bemserver_ui
 from bemserver_ui.extensions import auth
 from bemserver_ui.extensions.campaign_context import CampaignState
+from bemserver_ui.extensions.plugins import PLUGINS_LOADED
 from bemserver_ui.common.const import (
     BEMSERVER_APP_LABELS,
     FULL_STRUCTURAL_ELEMENT_TYPES,
@@ -92,4 +93,14 @@ def about():
     about_versions["API client"] = api_client_version
     about_versions["UI"] = bemserver_ui.__version__
 
-    return flask.render_template("pages/about.html", about_versions=about_versions)
+    plugin_infos = {}
+    for plugin_module in PLUGINS_LOADED:
+        plugin_info = plugin_module.PLUGIN_INFO
+        plugin_info["version"] = plugin_module.__version__
+        plugin_infos[plugin_info["label"]] = plugin_info
+
+    return flask.render_template(
+        "pages/about.html",
+        about_versions=about_versions,
+        plugin_infos=plugin_infos,
+    )

@@ -1,0 +1,30 @@
+{% macro render_nav_link(text, url, title=none, icon_classes=none, icon_url=none, is_plugin=False, extra_classes=none) %}
+<a class="nav-link{% if is_plugin %} d-flex justify-content-between align-items-center gap-2{% endif %}{% if extra_classes %} {{ extra_classes | join(' ') }}{% endif %}" href="{{ url }}" title="{{ title }}">
+    <div class="hstack align-items-center gap-2">
+        {% if icon_classes %}
+        <i class="{{ icon_classes | join(' ') }}"></i>
+        {% elif icon_url %}
+        <img src="{{ icon_url }}">
+        {% endif %}
+        {% if text %}
+        {{ text }}
+        {% endif %}
+    </div>
+    {% if is_plugin and signed_user.is_admin %}
+    <i class="bi bi-plugin opacity-25" title="plugin"></i>
+    {% endif %}
+</a>
+{% endmacro %}
+
+{% macro render_nav_item(text, url, title=none, icon_classes=none, icon_url=none, is_plugin=False) %}
+<li class="nav-item">
+    {% filter indent(width=4, first=True) %}
+    {{- render_nav_link(text, url, title, icon_classes, icon_url, is_plugin, ["w-100"]) -}}
+    {% endfilter %}
+</li>
+{% endmacro %}
+
+{% macro render_nav_item_from_plugin(plugin_sidebar_item) %}
+{% set icon_url = url_for(**plugin_sidebar_item.icon_endpoint_kwargs) if plugin_sidebar_item.icon_endpoint_kwargs else none %}
+{{- render_nav_item(plugin_sidebar_item.text, url_for(**plugin_sidebar_item.endpoint_kwargs), plugin_sidebar_item.text, plugin_sidebar_item.icon_classes, icon_url, True) -}}
+{% endmacro %}

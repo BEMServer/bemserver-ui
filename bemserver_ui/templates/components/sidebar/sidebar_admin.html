@@ -1,0 +1,133 @@
+{% if signed_user.is_admin %}
+<hr>
+<div class="rounded bg-warning bg-opacity-25 mb-2">
+    <h6 class="app-sidebar-heading border-bottom fw-bold text-muted ps-2 pb-2 mt-2 mb-0"><i class="bi bi-gear"></i> Administration</h6>
+    <div class="accordion app-sidebar-accordion" id="accordionAdmininstration">
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminSites">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminSites" aria-expanded="false" aria-controls="panelCollapseAdminSites">
+                    <span class="app-sidebar-heading"><i class="bi bi-building"></i> Sites</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminSites" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminSites">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("Properties", url_for("structural_elements.properties.list"), "Manage locations properties", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("structural_elements.properties.create"), "Add a new locations property", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminTS">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTS" aria-expanded="false" aria-controls="panelCollapseAdminTS">
+                    <span class="app-sidebar-heading"><i class="bi bi-clock-history"></i> Timeseries</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminTS" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminTS">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("Properties", url_for("timeseries.properties.list"), "Manage timeseries properties", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("timeseries.properties.create"), "Add a new timeseries property", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("Data states", url_for("timeseries.datastates.list"), "Manage timeseries data states", ["bi", "bi-inboxes"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("timeseries.datastates.create"), "Add a new timeseries data state", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% if g.campaign_ctxt.has_campaign %}
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminTSData">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminTSData" aria-expanded="false" aria-controls="panelCollapseAdminTSData">
+                    <span class="app-sidebar-heading"><i class="bi bi-server"></i> Timeseries data</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminTSData" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminTSData">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        {% filter indent(width=24, first=True) %}
+                        {{- mac_sidebar.render_nav_item("Import timeseries data", url_for("timeseries.data.upload"), "Import timeseries data", ["bi", "bi-filetype-csv"]) -}}
+                        {{- mac_sidebar.render_nav_item("Delete history", url_for("timeseries.data.delete"), "Delete timeseries data", ["bi", "bi-trash3"]) -}}
+                        {% endfilter %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminServices">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminServices" aria-expanded="false" aria-controls="panelCollapseAdminServices">
+                    <span class="app-sidebar-heading"><i class="bi bi-puzzle"></i> Services</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminServices">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        {% filter indent(width=24, first=True) %}
+                        {{- mac_sidebar.render_nav_item("Cleanup", url_for("services.cleanup.list"), "Manage cleanup service", ["bi", "bi-magic"]) -}}
+                        {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.list"), "Manage missing data service", ["bi", "bi-journal-x"]) -}}
+                        {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.list"), "Manage check outlier data service", ["bi", "bi-layout-wtf"]) -}}
+                        {% endfilter %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminEvents">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminEvents" aria-expanded="false" aria-controls="panelCollapseAdminEvents">
+                    <span class="app-sidebar-heading"><i class="bi bi-calendar2-event"></i> Events</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminEvents" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminEvents">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("Categories", url_for("events.categories.list"), "Manage events categories", ["bi", "bi-tags"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("events.categories.create"), "Add a new event category", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0">
+            <h2 class="accordion-header" id="panelHeadingAdminUsers">
+                <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminUsers" aria-expanded="false" aria-controls="panelCollapseAdminUsers">
+                    <span class="app-sidebar-heading"><i class="bi bi-person-rolodex"></i> Users & groups</span>
+                </button>
+            </h2>
+            <div id="panelCollapseAdminUsers" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminUsers">
+                <div class="accordion-body px-0 py-2">
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("User groups", url_for("user_groups.list"), "Manage user groups", ["bi", "bi-people-fill"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("user_groups.create"), "Add a new user group", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                        <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+                            {% filter indent(width=28, first=True) %}
+                            {{- mac_sidebar.render_nav_link("Users", url_for("users.list"), "Manage users", ["bi", "bi-person-lines-fill"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("users.create"), "Add a new user", ["bi", "bi-plus-circle"]) -}}
+                            {% endfilter %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
