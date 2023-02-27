@@ -8,3 +8,5 @@ BEMSERVER_APP_LABELS = {
     "bemserver_core": "Core",
     "bemserver_api": "API",
 }
+
+SIDEBAR_SECTIONS = ["tsdata", "analysis", "dashboards", "services"]
