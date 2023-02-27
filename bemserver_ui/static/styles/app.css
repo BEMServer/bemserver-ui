@@ -27,6 +27,10 @@ body,
     min-width: 75px !important;
     max-width: 150px !important;
 }
+.app-logo {
+    min-width: 200px !important;
+    max-width: 50% !important;
+}
 
 .app-header,
 .app-sidebar {

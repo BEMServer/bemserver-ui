@@ -6,15 +6,40 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12 col-sm-5 d-flex justify-content-center justify-content-sm-end">
+    <div class="row gy-3 g-sm-0">
+        <div class="col-12 col-sm-6 text-center align-self-center">
             <img class="app-logo" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
         </div>
-        <div class="col-12 col-sm-auto offset-0 offset-sm-1 d-flex justify-content-center align-items-center mt-3 mt-sm-0">
-            <div class="d-flex flex-column">
+        <div class="col-12 col-sm-6 text-center align-self-center">
+            <div class="d-flex flex-column justify-content-start">
                 {% for app_name, app_version in about_versions.items() %}
-                <div class="font-monospace"><span class="text-secondary">{{ app_name }} version</span> <small class="fw-bold">{{ app_version }}</small></div>
+                <div class="hstack gap-2 font-monospace"><span class="text-secondary">{{ app_name }}</span><small class="fw-bold">{{ app_version }}</small></div>
                 {% endfor %}
+                {% if plugin_infos | length > 0 %}
+                <div class="accordion mt-2" id="accordionPlugins">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingPlugins">
+                            <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlugins" aria-controls="collapsePlugins" aria-expanded="false">
+                                <span class="font-monospace text-secondary">UI plugins ({{ plugin_infos | length }})</span>
+                            </button>
+                        </h2>
+                        <div id="collapsePlugins" class="accordion-collapse collapse" aria-labelledby="headingPlugins" data-bs-parent="#accordionPlugins">
+                            <div class="accordion-body p-2">
+                                <div class="d-flex flex-column gap-2">
+                                    {% for plugin_label, plugin_info in plugin_infos.items() %}
+                                    <div class="border rounded p-2">
+                                        <div class="hstack gap-2 font-monospace"><span class="text-secondary text-start">{{ plugin_label }}</span><small class="fw-bold">{{ plugin_info.version }}</small></div>
+                                        {% if plugin_info.description %}
+                                        <div class="text-start ms-2"><small>{{ plugin_info.description }}</small></div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
