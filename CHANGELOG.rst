@@ -1,6 +1,21 @@
 Changelog
 ---------
 
+0.4.0 (2023-02-28)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Move campaign scopes entry point (from sidebar to campaigns list page)
+  - Add plugin system (see `UI plugin example repository <https://github.com/BEMServer/bemserver-ui-plugin-example>`_)
+
+Fixes:
+
+- Fix locations picker in events edit page
+- Improve campaign context management (query arg name...)
+
 0.3.0 (2023-02-17)
 ++++++++++++++++++
 
