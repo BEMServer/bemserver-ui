@@ -23,8 +23,8 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
         },
         grid: {
             bottom: 60,
-            left: "3%",
-            right: 120,
+            left: 20,
+            right: 140,
             containLabel: true,
         },
         toolbox: {
@@ -47,7 +47,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 yAxisIndex: 0,
                 zoomLock: true,
                 width: 20,
-                right: 100,
+                right: 120,
                 start: 0,
                 end: 100,
                 handleSize: 0,
@@ -81,7 +81,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 },
                 nameLocation: "middle",
                 axisLabel: {
-                    width: 90,
+                    width: 100,
                     overflow: "breakAll",
                     hideOverlap: false,
                 },
