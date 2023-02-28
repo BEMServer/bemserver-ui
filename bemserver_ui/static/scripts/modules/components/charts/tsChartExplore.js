@@ -1,9 +1,9 @@
 import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
-import { Parser } from "../tools/parser.js";
-import { TimeDisplay } from "../tools/time.js";
+import { Parser } from "../../tools/parser.js";
+import { TimeDisplay } from "../../tools/time.js";
 
 
-export class TimeseriesChart extends HTMLDivElement {
+export class TimeseriesChartExplore extends HTMLDivElement {
 
     #chart = null;
 
@@ -366,6 +366,6 @@ export class TimeseriesChart extends HTMLDivElement {
 }
 
 
-if (window.customElements.get("app-ts-chart") == null) {
-    window.customElements.define("app-ts-chart", TimeseriesChart, { extends: "div" });
+if (window.customElements.get("app-ts-chart-explore") == null) {
+    window.customElements.define("app-ts-chart-explore", TimeseriesChartExplore, { extends: "div" });
 }

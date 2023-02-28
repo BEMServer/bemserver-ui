@@ -1,7 +1,7 @@
 import { InternalAPIRequest } from "../../../tools/fetcher.js";
 import { flaskES6 } from "../../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
-import { TimeseriesChart } from "../../../components/tsChart.js";
+import { TimeseriesChartExplore } from "../../../components/charts/tsChartExplore.js";
 import { Spinner } from "../../../components/spinner.js";
 import { TimeseriesSelector } from "../../../components/timeseries/selector.js";
 
@@ -24,7 +24,7 @@ export class TimeseriesDataExploreView {
     #aggInputElmt = null;
     #bucketElmt = null;
 
-    #chart = null;
+    #chartExplore = null;
     #tsSelector = null;
 
     #tsParamsContainerElmt = null;
@@ -37,9 +37,9 @@ export class TimeseriesDataExploreView {
         this.#cacheDOM();
         this.#initElements();
 
-        this.#chart = new TimeseriesChart(options);
+        this.#chartExplore = new TimeseriesChartExplore(options);
         this.#chartContainerElmt.innerHTML = "";
-        this.#chartContainerElmt.appendChild(this.#chart);
+        this.#chartContainerElmt.appendChild(this.#chartExplore);
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
@@ -76,7 +76,7 @@ export class TimeseriesDataExploreView {
             position : "left",
             type: "line",
             style: "solid",
-            color: this.#chart.colors[(this.#tsSelector.selectedItems.length - 1) % this.#chart.colors.length],
+            color: this.#chartExplore.colors[(this.#tsSelector.selectedItems.length - 1) % this.#chartExplore.colors.length],
             symbol: tsData.unit_symbol,
         };
 
@@ -260,7 +260,7 @@ export class TimeseriesDataExploreView {
     }
 
     #refreshChart() {
-        this.#chart.showLoading();
+        this.#chartExplore.showLoading();
 
         let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
         this.#loadBtnElmt.innerHTML = "";
@@ -289,20 +289,20 @@ export class TimeseriesDataExploreView {
         this.#tsDataCSVReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
             (data) => {
-                this.#chart.setDownloadCSVLink(flaskES6.urlFor(`timeseries.data.download_multiple`, urlParams));
+                this.#chartExplore.setDownloadCSVLink(flaskES6.urlFor(`timeseries.data.download_multiple`, urlParams));
 
                 let options = {
                     subtitle: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
                     timezone: this.#timezonePickerElmt.tzName,
                     series: this.#tsChartParams,
                 };
-                this.#chart.load(data, options);
+                this.#chartExplore.load(data, options);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
                 this.#messagesElmt.appendChild(flashMsgElmt);
 
-                this.#chart.removeDownloadCSVLink();
+                this.#chartExplore.removeDownloadCSVLink();
             },
             () => {
                 this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
