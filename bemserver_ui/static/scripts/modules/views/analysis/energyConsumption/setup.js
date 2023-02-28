@@ -199,20 +199,26 @@ export class EnergyConsumptionSetupView {
 
     #refreshConf(energySourceId, energyUseId) {
         let idSuffix = `${energySourceId}-${energyUseId}`;
-        let spanTsElmt = document.getElementById(`tsSpan-${idSuffix}`);
-
-        let confData = this.#getEnergyConsTs(energySourceId, energyUseId);
-        spanTsElmt.innerText = `${confData.ts_id ? `${confData.ts_name}${confData.ts_unit ? ` [${confData.ts_unit}]` : ""}` : "none"}`;
-
+        let btnEditConfigElmt = document.getElementById(`btnEditConfig-${idSuffix}`);
         let tsConfigTdElmt = document.getElementById(`tsConfigCell-${idSuffix}`);
         let btnDeleteConfigElmt = document.getElementById(`btnDelConfig-${idSuffix}`);
+
+        let confData = this.#getEnergyConsTs(energySourceId, energyUseId);
         if (confData.id == null) {
+            btnEditConfigElmt.classList.remove("btn-link", "link-secondary", "text-decoration-none");
+            btnEditConfigElmt.classList.add("btn-ouline-secondary", "fst-italic");
+            btnEditConfigElmt.innerText = "Select a timeseries";
+            btnEditConfigElmt.title = btnEditConfigElmt.innerText;
             tsConfigTdElmt.classList.add("table-warning");
-            btnDeleteConfigElmt.classList.add("d-none");
+            btnDeleteConfigElmt.classList.add("d-none", "invisible");
         }
         else {
+            btnEditConfigElmt.classList.remove("btn-ouline-secondary", "fst-italic");
+            btnEditConfigElmt.classList.add("btn-link", "link-secondary", "text-decoration-none");
+            btnEditConfigElmt.innerText = `${confData.ts_name}${confData.ts_unit ? ` [${confData.ts_unit}]` : ""}`;
+            btnEditConfigElmt.title = "Edit selection";
             tsConfigTdElmt.classList.remove("table-warning");
-            btnDeleteConfigElmt.classList.remove("d-none");
+            btnDeleteConfigElmt.classList.remove("d-none", "invisible");
         }
     }
 
@@ -236,45 +242,29 @@ export class EnergyConsumptionSetupView {
 
             let tsConfigTdElmt = document.createElement("td");
             tsConfigTdElmt.id = `tsConfigCell-${idSuffix}`;
-
-            let tdContainerElmt = document.createElement("div");
-            tdContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-center", "gap-2", "p-2");
-
-            let tdSpanContainerElmt = document.createElement("div");
-            tdSpanContainerElmt.classList.add("d-flex", "flex-wrap", "align-items-center", "gap-2");
-
-            let spanTsElmt = document.createElement("span");
-            spanTsElmt.classList.add("text-break");
-            spanTsElmt.id = `tsSpan-${idSuffix}`;
-            spanTsElmt.innerText = `${configData.ts_id ? `${configData.ts_name}${configData.ts_unit ? ` [${configData.ts_unit}]` : ""}` : "none"}`;
-
             if (configData.id == null) {
                 tsConfigTdElmt.classList.add("table-warning");
             }
 
-            tdSpanContainerElmt.appendChild(spanTsElmt);
-
-            tdContainerElmt.appendChild(tdSpanContainerElmt);
+            let tsLabel = `${configData.ts_id ? `${configData.ts_name}${configData.ts_unit ? ` [${configData.ts_unit}]` : ""}` : "none"}`;
 
             if (this.#isEditable) {
                 let editContainerElmt = document.createElement("div");
-                editContainerElmt.classList.add("d-grid", "gap-1");
+                editContainerElmt.classList.add("d-flex", "justify-content-between", "gap-1", "me-1");
 
                 let btnModalTimeseriesSelectorElmt = document.createElement("button");
-                btnModalTimeseriesSelectorElmt.classList.add("btn", "btn-sm", "btn-outline-secondary");
+                btnModalTimeseriesSelectorElmt.id = `btnEditConfig-${idSuffix}`;
+                btnModalTimeseriesSelectorElmt.classList.add("btn", "btn-sm", "btn-link", "link-secondary", "text-decoration-none", "text-break", "mx-auto");
                 btnModalTimeseriesSelectorElmt.setAttribute("data-bs-toggle", "modal");
                 btnModalTimeseriesSelectorElmt.setAttribute("data-bs-target", "#selectTimeseries");
                 btnModalTimeseriesSelectorElmt.setAttribute("data-energy-source", energySourceConfigData.energy_source_id);
                 btnModalTimeseriesSelectorElmt.setAttribute("data-energy-use", configData.energy_use_id);
-
-                let editIconElmt = document.createElement("i");
-                editIconElmt.classList.add("bi", "bi-pencil");
-
-                btnModalTimeseriesSelectorElmt.appendChild(editIconElmt);
+                btnModalTimeseriesSelectorElmt.innerText = tsLabel;
+                btnModalTimeseriesSelectorElmt.title = "Edit selection";
                 editContainerElmt.appendChild(btnModalTimeseriesSelectorElmt);
 
                 let btnDeleteElmt = document.createElement("button");
-                btnDeleteElmt.classList.add("btn", "btn-sm", "btn-outline-danger");
+                btnDeleteElmt.classList.add("btn", "btn-sm", "btn-outline-danger", "my-auto");
                 btnDeleteElmt.id = `btnDelConfig-${idSuffix}`;
 
                 let delIconElmt = document.createElement("i");
@@ -282,7 +272,11 @@ export class EnergyConsumptionSetupView {
                 btnDeleteElmt.appendChild(delIconElmt);
 
                 if (configData.id == null) {
-                    btnDeleteElmt.classList.add("d-none");
+                    btnModalTimeseriesSelectorElmt.classList.remove("btn-link", "link-secondary", "text-decoration-none");
+                    btnModalTimeseriesSelectorElmt.classList.add("btn-ouline-secondary", "fst-italic");
+                    btnModalTimeseriesSelectorElmt.innerText = "Select a timeseries";
+                    btnModalTimeseriesSelectorElmt.title = btnModalTimeseriesSelectorElmt.innerText;
+                    btnDeleteElmt.classList.add("d-none", "invisible");
                 }
 
                 // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
@@ -307,7 +301,7 @@ export class EnergyConsumptionSetupView {
 
                             this.#refreshConf(energySourceConfigData.energy_source_id, configData.energy_use_id);
 
-                            btnDeleteElmt.classList.add("d-none");
+                            btnDeleteElmt.classList.add("d-none", "invisible");
                         },
                         (error) => {
                             let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
@@ -319,7 +313,7 @@ export class EnergyConsumptionSetupView {
                         },
                     );
                 });
-                editContainerElmt.appendChild(modalConfirm);
+                tsConfigTdElmt.appendChild(modalConfirm);
 
                 // Add an event listener to display a confirm message on delete button click.
                 btnDeleteElmt.addEventListener("click", (event) => {
@@ -329,10 +323,15 @@ export class EnergyConsumptionSetupView {
                 });
 
                 editContainerElmt.appendChild(btnDeleteElmt);
-                tdContainerElmt.appendChild(editContainerElmt);
+                tsConfigTdElmt.appendChild(editContainerElmt);
+            }
+            else {
+                if (configData.id == null) {
+                    tsConfigTdElmt.classList.add("fst-italic");
+                }
+                tsConfigTdElmt.innerText = tsLabel;
             }
 
-            tsConfigTdElmt.appendChild(tdContainerElmt);
             rowElmt.appendChild(tsConfigTdElmt);
         }
 
