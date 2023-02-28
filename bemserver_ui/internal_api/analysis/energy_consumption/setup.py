@@ -26,7 +26,6 @@ def create():
         "source_id": flask.request.json["energy_source_id"],
         "end_use_id": flask.request.json["energy_use_id"],
         "timeseries_id": flask.request.json["timeseries_id"],
-        "wh_conversion_factor": flask.request.json["wh_factor"],
     }
     api_resource = getattr(flask.g.api_client, f"energy_cons_ts_by_{struct_elmt_type}s")
     energy_cons_ts_resp = api_resource.create(payload)
@@ -47,7 +46,6 @@ def update(id):
         "source_id": flask.request.json["energy_source_id"],
         "end_use_id": flask.request.json["energy_use_id"],
         "timeseries_id": flask.request.json["timeseries_id"],
-        "wh_conversion_factor": flask.request.json["wh_factor"],
     }
     api_resource = getattr(flask.g.api_client, f"energy_cons_ts_by_{struct_elmt_type}s")
     energy_cons_ts_resp = api_resource.update(id, payload, etag=etag)

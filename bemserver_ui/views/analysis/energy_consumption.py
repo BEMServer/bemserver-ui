@@ -77,7 +77,6 @@ def setup(structural_element_type, structural_element_id):
                 "ts_id": x["timeseries_id"],
                 "ts_name": ts_resp.data["name"],
                 "ts_unit": ts_resp.data["unit_symbol"],
-                "wh_factor": x["wh_conversion_factor"],
                 "etag": api_resource.getone(x["id"]).etag,
             }
 
@@ -91,7 +90,6 @@ def setup(structural_element_type, structural_element_id):
                     "ts_id": None,
                     "ts_name": None,
                     "ts_unit": None,
-                    "wh_factor": 1,
                     "etag": None,
                 }
 
