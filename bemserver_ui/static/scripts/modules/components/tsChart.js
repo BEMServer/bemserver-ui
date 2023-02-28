@@ -1,4 +1,4 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js";
+import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
 import { Parser } from "../tools/parser.js";
 import { TimeDisplay } from "../tools/time.js";
 
