@@ -1,9 +1,9 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js";
-import { Parser } from "../tools/parser.js";
-import { TimeDisplay } from "../tools/time.js";
+import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
+import { Parser } from "../../tools/parser.js";
+import { TimeDisplay } from "../../tools/time.js";
 
 
-export class TimeseriesCompletenessChart extends HTMLDivElement {
+export class TimeseriesChartCompleteness extends HTMLDivElement {
 
     #chart = null;
 
@@ -23,8 +23,8 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
         },
         grid: {
             bottom: 60,
-            left: "3%",
-            right: 120,
+            left: 20,
+            right: 140,
             containLabel: true,
         },
         toolbox: {
@@ -47,7 +47,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 yAxisIndex: 0,
                 zoomLock: true,
                 width: 20,
-                right: 100,
+                right: 120,
                 start: 0,
                 end: 100,
                 handleSize: 0,
@@ -81,7 +81,7 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
                 },
                 nameLocation: "middle",
                 axisLabel: {
-                    width: 90,
+                    width: 100,
                     overflow: "breakAll",
                     hideOverlap: false,
                 },
@@ -203,6 +203,6 @@ export class TimeseriesCompletenessChart extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-ts-completeness-chart") == null) {
-    customElements.define("app-ts-completeness-chart", TimeseriesCompletenessChart, { extends: "div" });
+if (window.customElements.get("app-ts-chart-completeness") == null) {
+    window.customElements.define("app-ts-chart-completeness", TimeseriesChartCompleteness, { extends: "div" });
 }

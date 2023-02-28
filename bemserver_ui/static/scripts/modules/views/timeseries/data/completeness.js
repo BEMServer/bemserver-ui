@@ -1,7 +1,7 @@
 import { InternalAPIRequest } from "../../../tools/fetcher.js";
 import { flaskES6 } from "../../../../app.js";
 import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
-import { TimeseriesCompletenessChart } from "../../../components/tsCompChart.js";
+import { TimeseriesChartCompleteness } from "../../../components/charts/tsChartCompleteness.js";
 import { Spinner } from "../../../components/spinner.js";
 import { TimeseriesSelector } from "../../../components/timeseries/selector.js";
 
@@ -21,7 +21,7 @@ export class TimeSeriesDataCompletenessView {
     #tsDataStatesSelectElmt = null;
     #periodElmt = null;
 
-    #chart = null;
+    #chartCompleteness = null;
 
     #bucketWidthValue = null;
     #bucketWidthUnit = null;
@@ -35,9 +35,9 @@ export class TimeSeriesDataCompletenessView {
         this.#cacheDOM();
         this.#initElements();
 
-        this.#chart = new TimeseriesCompletenessChart(options);
+        this.#chartCompleteness = new TimeseriesChartCompleteness(options);
         this.#chartContainerElmt.innerHTML = "";
-        this.#chartContainerElmt.appendChild(this.#chart);
+        this.#chartContainerElmt.appendChild(this.#chartCompleteness);
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
@@ -118,7 +118,7 @@ export class TimeSeriesDataCompletenessView {
     }
 
     refreshChart() {
-        this.#chart.showLoading();
+        this.#chartCompleteness.showLoading();
 
         let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
         this.#loadBtnElmt.innerHTML = "";
@@ -144,7 +144,7 @@ export class TimeSeriesDataCompletenessView {
         this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
             (data) => {
-                this.#chart.load(data, this.#shouldDisplayTime, this.#timezonePickerElmt.tzName);
+                this.#chartCompleteness.load(data, this.#shouldDisplayTime, this.#timezonePickerElmt.tzName);
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });

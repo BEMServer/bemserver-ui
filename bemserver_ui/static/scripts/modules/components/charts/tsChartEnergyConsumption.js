@@ -1,8 +1,8 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js";
-import { Parser } from "../tools/parser.js";
+import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
+import { Parser } from "../../tools/parser.js";
 
 
-export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
+export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
 
     #chart = null;
 
@@ -265,6 +265,6 @@ export class TimeseriesEnergyConsumptionChart extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-ts-energy-cons-chart") == null) {
-    customElements.define("app-ts-energy-cons-chart", TimeseriesEnergyConsumptionChart, { extends: "div" });
+if (window.customElements.get("app-ts-chart-energy-cons") == null) {
+    window.customElements.define("app-ts-chart-energy-cons", TimeseriesChartEnergyConsumption, { extends: "div" });
 }

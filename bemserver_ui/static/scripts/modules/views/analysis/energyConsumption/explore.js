@@ -2,7 +2,7 @@ import { InternalAPIRequest } from "../../../tools/fetcher.js";
 import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
 import { flaskES6, signedUser } from "../../../../app.js";
 import { Spinner } from "../../../components/spinner.js";
-import { TimeseriesEnergyConsumptionChart } from "../../../components/tsEnerConsChart.js";
+import { TimeseriesChartEnergyConsumption } from "../../../components/charts/tsChartEnergyConsumption.js";
 import "../../../components/tree.js";
 
 
@@ -220,7 +220,7 @@ export class EnergyConsumptionExploreView {
                     }
                     else {
                         for (let [energySource, energyUses] of Object.entries(data["energy"])) {
-                            let energySourceChart = new TimeseriesEnergyConsumptionChart();
+                            let energySourceChart = new TimeseriesChartEnergyConsumption();
                             this.#chartByEnergySource[energySource] = energySourceChart;
 
                             let chartContainerElmt = document.createElement("div");
