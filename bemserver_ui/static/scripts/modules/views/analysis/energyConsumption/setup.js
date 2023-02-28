@@ -36,7 +36,6 @@ export class EnergyConsumptionSetupView {
     #editedEnergyUseInputElmt = null;
     #editedEnergySourceNameElmt = null;
     #editedEnergyUseNameElmt = null;
-    #editedWhFactorInputElmt = null;
 
     constructor(structuralElement, enerConsConfig, energySources, energyUses, availableEnergySources, isEditable) {
         this.#structuralElement = structuralElement;
@@ -76,8 +75,6 @@ export class EnergyConsumptionSetupView {
             this.#editedEnergyUseInputElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergyUse");
             this.#editedEnergySourceNameElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergySourceName");
             this.#editedEnergyUseNameElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergyUseName");
-
-            this.#editedWhFactorInputElmt = document.getElementById("editedWhFactor");
         }
     }
 
@@ -107,7 +104,6 @@ export class EnergyConsumptionSetupView {
                 energy_source_id: this.#editedEnergySourceInputElmt.value,
                 energy_use_id: this.#editedEnergyUseInputElmt.value,
                 timeseries_id: this.#tsSelector.selectedItems[0].id,
-                wh_factor: this.#editedWhFactorInputElmt.value,
             };
 
             let energyConsTs = this.#getEnergyConsTs(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
@@ -122,7 +118,6 @@ export class EnergyConsumptionSetupView {
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
-                        confData.wh_factor = data.data.wh_conversion_factor;
                         confData.etag = data.etag;
                         this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
@@ -151,7 +146,6 @@ export class EnergyConsumptionSetupView {
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
-                        confData.wh_factor = data.data.wh_conversion_factor;
                         confData.etag = data.etag;
                         this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
@@ -184,7 +178,6 @@ export class EnergyConsumptionSetupView {
             this.#editedEnergyUseNameElmt.innerText = this.#energyUses[energyUseId];
             this.#editedEnergySourceInputElmt.value = energySourceId;
             this.#editedEnergyUseInputElmt.value = energyUseId;
-            this.#editedWhFactorInputElmt.value = energyConsTs.wh_factor;
 
             if (energyConsTs.ts_id != null) {
                 this.#tsSelector.select(energyConsTs.ts_id, () => { this.#updateSaveBtnState(); });
@@ -207,22 +200,18 @@ export class EnergyConsumptionSetupView {
     #refreshConf(energySourceId, energyUseId) {
         let idSuffix = `${energySourceId}-${energyUseId}`;
         let spanTsElmt = document.getElementById(`tsSpan-${idSuffix}`);
-        let spanWhFactorElmt = document.getElementById(`whFactorSpan-${idSuffix}`);
 
         let confData = this.#getEnergyConsTs(energySourceId, energyUseId);
-        spanTsElmt.innerText = `[${confData.ts_id ? confData.ts_name : "none"}]`;
-        spanWhFactorElmt.innerText = `x${confData.wh_factor}`;
+        spanTsElmt.innerText = `${confData.ts_id ? `${confData.ts_name}${confData.ts_unit ? ` [${confData.ts_unit}]` : ""}` : "none"}`;
 
         let tsConfigTdElmt = document.getElementById(`tsConfigCell-${idSuffix}`);
         let btnDeleteConfigElmt = document.getElementById(`btnDelConfig-${idSuffix}`);
         if (confData.id == null) {
             tsConfigTdElmt.classList.add("table-warning");
-            spanWhFactorElmt.classList.add("d-none");
             btnDeleteConfigElmt.classList.add("d-none");
         }
         else {
             tsConfigTdElmt.classList.remove("table-warning");
-            spanWhFactorElmt.classList.remove("d-none");
             btnDeleteConfigElmt.classList.remove("d-none");
         }
     }
@@ -257,19 +246,13 @@ export class EnergyConsumptionSetupView {
             let spanTsElmt = document.createElement("span");
             spanTsElmt.classList.add("text-break");
             spanTsElmt.id = `tsSpan-${idSuffix}`;
-            spanTsElmt.innerText = `[${configData.ts_id ? configData.ts_name : "none"}]`;
-
-            let spanWhFactorElmt = document.createElement("span");
-            spanWhFactorElmt.id = `whFactorSpan-${idSuffix}`;
-            spanWhFactorElmt.innerText = `x${configData.wh_factor}`;
+            spanTsElmt.innerText = `${configData.ts_id ? `${configData.ts_name}${configData.ts_unit ? ` [${configData.ts_unit}]` : ""}` : "none"}`;
 
             if (configData.id == null) {
                 tsConfigTdElmt.classList.add("table-warning");
-                spanWhFactorElmt.classList.add("d-none");
             }
 
             tdSpanContainerElmt.appendChild(spanTsElmt);
-            tdSpanContainerElmt.appendChild(spanWhFactorElmt);
 
             tdContainerElmt.appendChild(tdSpanContainerElmt);
 
@@ -319,7 +302,6 @@ export class EnergyConsumptionSetupView {
                             confData.ts_id = null;
                             confData.ts_name = null;
                             confData.ts_unit = null;
-                            confData.wh_factor = 1;
                             confData.etag = null;
                             this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id] = confData;
 
@@ -392,7 +374,6 @@ export class EnergyConsumptionSetupView {
                             ts_id: null,
                             ts_name: null,
                             ts_unit: null,
-                            wh_factor: 1,
                             etag: null,
                         };
                     }
