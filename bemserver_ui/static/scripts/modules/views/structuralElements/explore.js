@@ -326,13 +326,6 @@ export class StructuralElementsExploreView {
 </div>`;
     }
 
-    #renderNoData() {
-        this.#generalTabContentElmt.innerHTML = "";
-        this.#propertiesTabContentElmt.innerHTML = "";
-        this.#tsListElmt.innerHTML = "";
-        this.#eventsListElmt.innerHTML = "";
-    }
-
     #renderGeneral(id, type, path) {
         this.#generalTabContentElmt.innerHTML = "";
         this.#generalTabContentElmt.appendChild(new Spinner());
@@ -614,6 +607,26 @@ export class StructuralElementsExploreView {
         );
     }
 
+    #generateHelpElement(helpContext) {
+        let helpContainerElmt = document.createElement("div");
+        helpContainerElmt.classList.add("alert", "alert-info", "mb-0", "pb-0");
+
+        let helpIconElmt = document.createElement("i");
+        helpIconElmt.classList.add("bi", "bi-question-diamond", "me-2");
+        helpContainerElmt.appendChild(helpIconElmt);
+
+        let helpTitleElmt = document.createElement("span");
+        helpTitleElmt.classList.add("fw-bold");
+        helpTitleElmt.innerText = "Help";
+        helpContainerElmt.appendChild(helpTitleElmt);
+
+        let helpTextElmt = document.createElement("p");
+        helpTextElmt.innerHTML = `Select a <span class="fw-bold">location (site, building...)</span> in the tree to see its <span class="fw-bold">${helpContext}</span>.`;
+        helpContainerElmt.appendChild(helpTextElmt);
+
+        return helpContainerElmt;
+    }
+
     #refreshTabs() {
         let selectedItemData = this.#selectedItemsPerTab[this.#tabSitesSelected.id];
         if (selectedItemData != null) {
@@ -623,7 +636,14 @@ export class StructuralElementsExploreView {
             }
         }
         else {
-            this.#renderNoData();
+            this.#generalTabContentElmt.innerHTML = "";
+            this.#generalTabContentElmt.appendChild(this.#generateHelpElement("description"));
+            this.#propertiesTabContentElmt.innerHTML = "";
+            this.#propertiesTabContentElmt.appendChild(this.#generateHelpElement("properties"));
+            this.#tsListElmt.innerHTML = "";
+            this.#tsListElmt.appendChild(this.#generateHelpElement("related timeseries"));
+            this.#eventsListElmt.innerHTML = "";
+            this.#eventsListElmt.appendChild(this.#generateHelpElement("related events"));
         }
     }
 
