@@ -135,17 +135,21 @@ export class FlashMessage extends HTMLDivElement {
         }
 
         let messageContainerElmt = document.createElement("div");
-        messageContainerElmt.classList.add("hstack", "align-items-start", "p-3", "me-4");
+        messageContainerElmt.classList.add("p-3", "me-4");
         this.appendChild(messageContainerElmt);
 
+        let messageHeaderContainerElmt = document.createElement("div");
+        messageHeaderContainerElmt.classList.add("hstack", "align-items-start", "gap-2");
+        messageContainerElmt.appendChild(messageHeaderContainerElmt);
+
         let iconElmt = document.createElement("i");
-        iconElmt.classList.add("bi", `bi-${this.#messageIcon}`, "me-2");
-        messageContainerElmt.appendChild(iconElmt);
+        iconElmt.classList.add("bi", `bi-${this.#messageIcon}`);
+        messageHeaderContainerElmt.appendChild(iconElmt);
 
         let textElmt = document.createElement("div");
         textElmt.classList.add("text-break");
         textElmt.innerHTML = this.#messageText;
-        messageContainerElmt.appendChild(textElmt);
+        messageHeaderContainerElmt.appendChild(textElmt);
 
         if (this.#isDismissible) {
             this.classList.add("alert-dismissible");

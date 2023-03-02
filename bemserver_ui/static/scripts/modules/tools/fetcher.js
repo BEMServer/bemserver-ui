@@ -1,5 +1,86 @@
 import { generateUUID } from "./uuid.js";
 import { Parser } from "./parser.js";
+import { isDict } from "./dict.js";
+
+
+class InternalAPIRequestError {
+
+    #statusCode = null;
+    #message = null;
+    #validationErrors = null;
+
+    constructor(statusCode=500, message="Internal error", validationErrors=null) {
+        this.#statusCode = statusCode;
+        this.#message = message;
+        this.#validationErrors = validationErrors;
+    }
+
+    toHTML() {
+        let containerElmt = document.createElement("div");
+
+        if (this.#statusCode == 422 && isDict(this.#validationErrors)) {
+            let validationErrorsTitleElmt = document.createElement("p");
+            validationErrorsTitleElmt.classList.add("mb-0");
+            validationErrorsTitleElmt.innerText = "Validation errors";
+            containerElmt.appendChild(validationErrorsTitleElmt);
+
+            if (Array.isArray(this.#validationErrors._general)) {
+                for (let generalError of this.#validationErrors._general) {
+                    let generalErrorElmt = document.createElement("p");
+                    generalErrorElmt.classList.add("fst-italic", "mb-0");
+                    generalErrorElmt.innerText = generalError;
+                    containerElmt.appendChild(generalErrorElmt);
+                }
+                delete this.#validationErrors._general;
+            }
+
+            let validationErrorsContainerElmt = document.createElement("dl");
+            validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
+            containerElmt.appendChild(validationErrorsContainerElmt);
+
+            for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(this.#validationErrors))) {
+                let isLastItem = (index == Object.keys(this.#validationErrors).length - 1);
+
+                let fieldNameElmt = document.createElement("dt");
+                fieldNameElmt.classList.add("col-4");
+                fieldNameElmt.innerText = fieldName;
+                validationErrorsContainerElmt.appendChild(fieldNameElmt);
+
+                let fieldErrorsElmt = document.createElement("dd");
+                fieldErrorsElmt.classList.add("col-8");
+                if (isLastItem) {
+                    fieldErrorsElmt.classList.add("mb-0");
+                }
+                validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
+
+                let _fieldErrors = fieldErrors;
+                if (isDict(fieldErrors)) {
+                    _fieldErrors = [];
+                    for (let fieldErrs of Object.values(fieldErrors)) {
+                        if (Array.isArray(fieldErrs)) {
+                            _fieldErrors.push(...fieldErrs);
+                        }
+                        else {
+                            _fieldErrors.push(fieldErrs);
+                        }
+                    }
+                }
+
+                for (let fieldError of _fieldErrors) {
+                    let fieldErrorElmt = document.createElement("p");
+                    fieldErrorElmt.classList.add("fst-italic", "mb-0");
+                    fieldErrorElmt.innerText = fieldError;
+                    fieldErrorsElmt.appendChild(fieldErrorElmt);
+                }
+            }
+        }
+        else {
+            containerElmt.innerText = this.#message;
+        }
+
+        return containerElmt.outerHTML;
+    }
+}
 
 
 export class InternalAPIRequest {
@@ -18,7 +99,7 @@ export class InternalAPIRequest {
     #initEventListeners() {
         // Ensure to abort pending fetch requests before page unloads.
         // If not, Firefox throws "TypeError: NetworkError when attempting to fetch resource." error.
-        window.addEventListener("beforeunload", (event) => {
+        window.addEventListener("beforeunload", () => {
             for (let abortCtrler of Object.values(this.#abortControllers)) {
                 abortCtrler.abort();
             }
@@ -67,41 +148,23 @@ export class InternalAPIRequest {
             document.location.reload();
         }
         else if (!["AbortError"].includes(error.name)) {
+            if (rejectCallback == null) {
+                rejectCallback = (err) => { return Promise.reject(err); };
+            }
+
             try {
                 error.json().then((errorJSON) => {
-                    let errorMsg = errorJSON.message;
-                    // TODO: handle validation errors data (422, 409)
-                    if (error.status == 409) {
-
-                    }
-                    else if (error.status == 422) {
-                        for (let [fieldName, fieldErrors] of Object.entries(errorJSON._validation_errors)) {
-                            errorMsg += ` (${fieldName}: ${fieldErrors})`;
-                        }
-                    }
-
-                    if (rejectCallback != null) {
-                        rejectCallback(errorMsg);
-                    }
-                    else {
-                        return Promise.reject(errorMsg);
-                    }
+                    let reqJSONError = new InternalAPIRequestError(error.status, errorJSON.message, errorJSON._validation_errors);
+                    rejectCallback(reqJSONError.toHTML());
                 }).catch((innerError) => {
-                    if (rejectCallback != null) {
-                        rejectCallback(innerError);
-                    }
-                    else {
-                        return Promise.reject(innerError);
-                    }
+                    let reqInnerError = new InternalAPIRequestError(error.status, innerError);
+                    rejectCallback(reqInnerError.toHTML());
                 });
             }
             catch {
-                if (rejectCallback != null) {
-                    rejectCallback(`Internal error [${error}]`);
-                }
-                else {
-                    return Promise.reject(`Internal error [${error}]`);
-                }
+                console.log("err 500");
+                let reqInternalError = new InternalAPIRequestError(500, `Internal error [${error}]`);
+                rejectCallback(reqInternalError.toHTML());
             }
         }
     }
