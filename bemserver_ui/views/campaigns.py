@@ -150,7 +150,8 @@ def create():
 
         campaign_resp = flask.g.api_client.campaigns.create(payload)
         flask.flash(f"New campaign created: {campaign_resp.data['name']}", "success")
-        return flask.redirect(flask.url_for("campaigns.list"))
+        url_next = flask.request.args.get("next") or flask.url_for("campaigns.list")
+        return flask.redirect(url_next)
 
     return flask.render_template("pages/campaigns/create.html")
 
