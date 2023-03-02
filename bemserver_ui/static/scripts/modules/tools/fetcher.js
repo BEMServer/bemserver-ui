@@ -162,7 +162,6 @@ export class InternalAPIRequest {
                 });
             }
             catch {
-                console.log("err 500");
                 let reqInternalError = new InternalAPIRequestError(500, `Internal error [${error}]`);
                 rejectCallback(reqInternalError.toHTML());
             }
