@@ -9,6 +9,7 @@ from bemserver_api_client.exceptions import (
     BEMServerAPIValidationError,
     BEMServerAPIPreconditionError,
     BEMServerAPINotModified,
+    BEMServerAPIConflictError,
 )
 
 
@@ -90,13 +91,10 @@ def _handle_409(exc):
         message = "Operation failed!"
         if hasattr(exc, "description"):
             message = exc.description
+        elif hasattr(exc, "message"):
+            message = exc.message
         if _is_from_internal_api():
-            return _handle_for_internal_api(
-                http_status_code,
-                message,
-                exc.errors or {},
-            )
-        flask.session["_validation_errors"] = exc.errors or {}
+            return _handle_for_internal_api(http_status_code, message)
         flask.flash(message, "error")
         return flask.redirect(_get_back_location())
 
@@ -114,24 +112,24 @@ def _handle_412(exc):
         return flask.redirect(_get_back_location())
 
 
-def _handle_422(exc):
+def _handle_422(exc, message=None, errors=None):
     http_status_code = 422
     if _should_handle_error(exc, http_status_code):
-        message = "Operation failed!"
+        message = "Validation errors!"
         if hasattr(exc, "description"):
             message = exc.description
+        elif hasattr(exc, "message"):
+            message = exc.message
+        errors = exc.errors if hasattr(exc, "errors") else {}
+
         if _is_from_internal_api():
-            return _handle_for_internal_api(
-                http_status_code,
-                message,
-                exc.errors or {},
-            )
+            return _handle_for_internal_api(http_status_code, message, errors)
 
         # Special case for sign in page (to clear session, especially auth_data).
         if flask.request.endpoint == "auth.signin":
             flask.session.clear()
 
-        flask.session["_validation_errors"] = exc.errors or {}
+        flask.session["_validation_errors"] = errors
         flask.flash(message, "error")
         return flask.redirect(_get_back_location())
 
@@ -147,7 +145,6 @@ def _handle_428(exc):
 
 
 def init_app(app):
-
     # Internal app errors.
     # 401: unauthorized
     app.register_error_handler(wexc.Unauthorized, _handle_401)
@@ -181,13 +178,9 @@ def init_app(app):
     app.register_error_handler(BEMServerAPINotFoundError, _handle_404)
 
     # 409: conflict
+    app.register_error_handler(BEMServerAPIConflictError, _handle_409)
     # 422: unprocessable entity
-    @app.errorhandler(BEMServerAPIValidationError)
-    def _handle_409_422(exc):
-        if exc.status_code == 409:
-            return _handle_409(exc)
-        elif exc.status_code == 422:
-            return _handle_422(exc)
+    app.register_error_handler(BEMServerAPIValidationError, _handle_422)
 
     # 412: precondition failed
     # 428: unprocessable entity
