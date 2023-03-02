@@ -1,6 +1,26 @@
 Changelog
 ---------
 
+0.4.1 (2023-03-02)
+++++++++++++++++++
+
+Features:
+
+- Analysis:
+
+  - Update energy consumption analysis setup page (remove "wh factor" field)
+
+Fixes:
+
+- Improve 409 status code management (in displayed messages)
+- Improve campaign scope creation mechanics (redirections when created or cancelled...)
+
+Other changes:
+
+- Require bemserver-api-client >=0.12.1 and <0.13.0
+- Require bemserver-api 0.12.1
+- Require bemserver-core 0.10.1
+
 0.4.0 (2023-02-28)
 ++++++++++++++++++
 
