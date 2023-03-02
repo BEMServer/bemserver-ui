@@ -2,6 +2,7 @@
 
 {% set is_campaign_selected_edit = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == campaign.id|string %}
 {% set title = "Campaign" %}
+{% set subtitle = campaign.name %}
 {% if tab is undefined %}
     {% set tab = "general" %}
 {% endif %}
@@ -10,14 +11,7 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d{% if is_campaign_selected_edit %}-xl{% endif %}-flex {% if is_campaign_selected_edit %} d-grid{% endif %} gap-2 mx-auto">
-    {% if is_campaign_selected_edit %}
-    <div class="hstack gap-3 mx-auto ms-lg-auto me-lg-0 mt-lg-2 mt-0 mt-xl-0">
-        {% if signed_user.is_admin %}
-        <a href="{{ url_for('campaign_scopes.create', campaign_id=campaign.id) }}" class="btn btn-sm btn-outline-primary text-nowrap" role="button" title="Add a new campaign scope"><i class="bi bi-plus-circle"></i> New campaign scope</a>
-        <div class="vr d-none d-xl-block me-xl-2"></div>
-        {% endif %}
-    </div>
-    {% else %}
+    {% if not is_campaign_selected_edit %}
     <div class="hstack gap-3 ms-auto">
         <a href="{{ url_for('structural_elements.explore', forced_campaign=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
         {% if signed_user.is_admin %}
