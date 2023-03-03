@@ -190,3 +190,5 @@ def init_app(app):
             return _handle_412(exc)
         elif exc.status_code == 428:
             return _handle_428(exc)
+
+    # TODO: 500: internal server error
