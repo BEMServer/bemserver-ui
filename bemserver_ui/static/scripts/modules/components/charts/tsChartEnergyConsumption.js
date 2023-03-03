@@ -218,12 +218,12 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(timestamps, energySource, energyUses, unit, timeFormat) {
+    load(timestamps, energy, energyUses, unit, timeFormat) {
         this.hideLoading();
 
         let options = this.#chart.getOption();
 
-        options.title[0].subtext = `energy source: ${energySource}`;
+        options.title[0].subtext = `energy: ${energy}`;
         options.toolbox[0].feature.dataView.lang[0] = `${this.#defaultTitle} data`;
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
 
@@ -244,7 +244,7 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
                 itemStyle: {},
             };
             if (energyUse != "all") {
-                serie.stack = energySource;
+                serie.stack = energy;
             }
             if (energyUse in this.#energyUseColors) {
                 serie.itemStyle.color = this.#energyUseColors[energyUse];

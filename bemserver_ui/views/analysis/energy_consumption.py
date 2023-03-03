@@ -39,7 +39,7 @@ def setup(structural_element_type, structural_element_id):
     if struct_elmt is None or struct_elmt["campaign_id"] != flask.g.campaign_ctxt.id:
         return flask.redirect(flask.url_for("analysis.energy_consumption.explore"))
 
-    energy_sources_resp = flask.g.api_client.energy_sources.getall()
+    energies_resp = flask.g.api_client.energies.getall()
     energy_end_uses_resp = flask.g.api_client.energy_end_uses.getall()
 
     api_resource = getattr(
@@ -50,27 +50,27 @@ def setup(structural_element_type, structural_element_id):
         **{f"{structural_element_type}_id": structural_element_id}
     )
 
-    energy_source_by_id = {x["id"]: x["name"] for x in energy_sources_resp.data}
+    energy_by_id = {x["id"]: x["name"] for x in energies_resp.data}
     energy_use_by_id = {x["id"]: x["name"] for x in energy_end_uses_resp.data}
 
     ener_cons_config = {}
-    defined_energy_sources = []
+    defined_energies = []
     defined_energy_uses = []
     for x in all_energy_cons_ts_resp.data:
-        if x["source_id"] not in defined_energy_sources:
-            defined_energy_sources.append(x["source_id"])
-            ener_cons_config[x["source_id"]] = {
-                "energy_source_id": x["source_id"],
-                "energy_source_name": energy_source_by_id[x["source_id"]],
+        if x["energy_id"] not in defined_energies:
+            defined_energies.append(x["energy_id"])
+            ener_cons_config[x["energy_id"]] = {
+                "energy_id": x["energy_id"],
+                "energy_name": energy_by_id[x["energy_id"]],
                 "energy_uses": {},
             }
         if x["end_use_id"] not in defined_energy_uses:
             defined_energy_uses.append(x["end_use_id"])
 
-        if x["end_use_id"] not in ener_cons_config[x["source_id"]]["energy_uses"]:
+        if x["end_use_id"] not in ener_cons_config[x["energy_id"]]["energy_uses"]:
             # get timeseries name and unit symbol
             ts_resp = flask.g.api_client.timeseries.getone(x["timeseries_id"])
-            ener_cons_config[x["source_id"]]["energy_uses"][x["end_use_id"]] = {
+            ener_cons_config[x["energy_id"]]["energy_uses"][x["end_use_id"]] = {
                 "energy_use_id": x["end_use_id"],
                 "energy_use_name": energy_use_by_id[x["end_use_id"]],
                 "id": x["id"],
@@ -93,18 +93,18 @@ def setup(structural_element_type, structural_element_id):
                     "etag": None,
                 }
 
-    available_energy_sources = []
-    for x in energy_sources_resp.data:
-        if x["id"] not in defined_energy_sources:
-            available_energy_sources.append(x["id"])
+    available_energies = []
+    for x in energies_resp.data:
+        if x["id"] not in defined_energies:
+            available_energies.append(x["id"])
 
     return flask.render_template(
         "pages/analysis/energy_consumption/setup.html",
         structural_element=struct_elmt,
         ener_cons_config=ener_cons_config,
-        all_energy_sources=energy_source_by_id,
-        defined_energy_sources=defined_energy_sources,
-        available_energy_sources=available_energy_sources,
+        all_energies=energy_by_id,
+        defined_energies=defined_energies,
+        available_energies=available_energies,
         all_energy_end_uses=energy_use_by_id,
         defined_energy_uses=defined_energy_uses,
     )
