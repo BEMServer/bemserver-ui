@@ -23,7 +23,7 @@ def create():
     struct_elmt_id = flask.request.json.pop("structural_element_id")
     payload = {
         f"{struct_elmt_type}_id": struct_elmt_id,
-        "source_id": flask.request.json["energy_source_id"],
+        "energy_id": flask.request.json["energy_id"],
         "end_use_id": flask.request.json["energy_use_id"],
         "timeseries_id": flask.request.json["timeseries_id"],
     }
@@ -43,7 +43,7 @@ def update(id):
     struct_elmt_id = flask.request.json.pop("structural_element_id")
     payload = {
         f"{struct_elmt_type}_id": struct_elmt_id,
-        "source_id": flask.request.json["energy_source_id"],
+        "energy_id": flask.request.json["energy_id"],
         "end_use_id": flask.request.json["energy_use_id"],
         "timeseries_id": flask.request.json["timeseries_id"],
     }

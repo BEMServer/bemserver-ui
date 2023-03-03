@@ -27,7 +27,7 @@ export class EnergyConsumptionExploreView {
 
     #structuralElementType = null;
     #structuralElementId = null;
-    #chartByEnergySource = {};
+    #chartByEnergy = {};
 
     #previousPeriodType = null;
     #previousYearSelected = null;
@@ -167,10 +167,10 @@ export class EnergyConsumptionExploreView {
 
     #generateCharts() {
         if (this.#structuralElementType != null && this.#structuralElementId != null) {
-            for (let chart of Object.values(this.#chartByEnergySource)) {
+            for (let chart of Object.values(this.#chartByEnergy)) {
                 chart.dispose();
             }
-            this.#chartByEnergySource = {};
+            this.#chartByEnergy = {};
 
             this.#mainChartContainerElmt.innerHTML = "";
             this.#mainChartContainerElmt.appendChild(new Spinner());
@@ -219,13 +219,13 @@ export class EnergyConsumptionExploreView {
                         this.#mainChartContainerElmt.appendChild(colElmt);
                     }
                     else {
-                        for (let [energySource, energyUses] of Object.entries(data["energy"])) {
-                            let energySourceChart = new TimeseriesChartEnergyConsumption();
-                            this.#chartByEnergySource[energySource] = energySourceChart;
+                        for (let [energy, energyUses] of Object.entries(data["energy"])) {
+                            let energyChart = new TimeseriesChartEnergyConsumption();
+                            this.#chartByEnergy[energy] = energyChart;
 
                             let chartContainerElmt = document.createElement("div");
                             chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
-                            chartContainerElmt.appendChild(energySourceChart);
+                            chartContainerElmt.appendChild(energyChart);
 
                             let colElmt = document.createElement("div");
                             colElmt.classList.add("col");
@@ -233,8 +233,8 @@ export class EnergyConsumptionExploreView {
 
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
-                            energySourceChart.showLoading();
-                            energySourceChart.load(data["timestamps"], energySource, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                            energyChart.showLoading();
+                            energyChart.load(data["timestamps"], energy, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
                         }
                     }
                 },

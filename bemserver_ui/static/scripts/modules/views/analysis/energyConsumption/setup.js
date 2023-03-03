@@ -17,32 +17,32 @@ export class EnergyConsumptionSetupView {
     #configTableElmt = null;
     #configTableBodyElmt = null;
     #configTableFooterElmt = null;
-    #addEnergySourceBtnElmt = null;
-    #addEnergySourceMenuElmt = null;
+    #addEnergyBtnElmt = null;
+    #addEnergyMenuElmt = null;
     #saveSelectedTimeseriesBtnElmt = null;
     #itemsCountElmt = null;
 
     #structuralElement = {};
     #config = null;
-    #energySources = {};
+    #energies = {};
     #energyUses = {};
-    #availableEnergySources = [];
+    #availableEnergies = [];
     #tsSelector = null;
     #isEditable = false;
 
     #selectTimeseriesModalElmt = null;
     #selectTimeseriesModal = null;
-    #editedEnergySourceInputElmt = null;
+    #editedEnergyInputElmt = null;
     #editedEnergyUseInputElmt = null;
-    #editedEnergySourceNameElmt = null;
+    #editedEnergyNameElmt = null;
     #editedEnergyUseNameElmt = null;
 
-    constructor(structuralElement, enerConsConfig, energySources, energyUses, availableEnergySources, isEditable) {
+    constructor(structuralElement, enerConsConfig, energies, energyUses, availableEnergies, isEditable) {
         this.#structuralElement = structuralElement;
         this.#config = enerConsConfig;
-        this.#energySources = energySources;
+        this.#energies = energies;
         this.#energyUses = energyUses;
-        this.#availableEnergySources = availableEnergySources;
+        this.#availableEnergies = availableEnergies;
         this.#isEditable = isEditable;
 
         if (this.#isEditable) {
@@ -64,16 +64,16 @@ export class EnergyConsumptionSetupView {
         this.#itemsCountElmt = document.getElementById("itemsCount");
 
         if (this.#isEditable) {
-            this.#addEnergySourceBtnElmt = document.getElementById("addEnergySourceBtn");
-            this.#addEnergySourceMenuElmt = this.#addEnergySourceBtnElmt?.parentElement.querySelector("ul.dropdown-menu");
+            this.#addEnergyBtnElmt = document.getElementById("addEnergyBtn");
+            this.#addEnergyMenuElmt = this.#addEnergyBtnElmt?.parentElement.querySelector("ul.dropdown-menu");
             this.#saveSelectedTimeseriesBtnElmt = document.getElementById("saveSelectedTimeseriesBtn");
 
             this.#selectTimeseriesModalElmt = document.getElementById("selectTimeseries");
             this.#selectTimeseriesModal = new bootstrap.Modal(this.#selectTimeseriesModalElmt);
 
-            this.#editedEnergySourceInputElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergySource");
+            this.#editedEnergyInputElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergy");
             this.#editedEnergyUseInputElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergyUse");
-            this.#editedEnergySourceNameElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergySourceName");
+            this.#editedEnergyNameElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergyName");
             this.#editedEnergyUseNameElmt = this.#selectTimeseriesModalElmt.querySelector("#editedEnergyUseName");
         }
     }
@@ -101,27 +101,27 @@ export class EnergyConsumptionSetupView {
             let payload = {
                 structural_element_type: this.#structuralElement.type,
                 structural_element_id: this.#structuralElement.id,
-                energy_source_id: this.#editedEnergySourceInputElmt.value,
+                energy_id: this.#editedEnergyInputElmt.value,
                 energy_use_id: this.#editedEnergyUseInputElmt.value,
                 timeseries_id: this.#tsSelector.selectedItems[0].id,
             };
 
-            let energyConsTs = this.#getEnergyConsTs(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
+            let energyConsTs = this.#getEnergyConsTs(this.#editedEnergyInputElmt.value, this.#editedEnergyUseInputElmt.value);
             if (energyConsTs.id == null) {
                 // Create (post).
                 this.#postReqID = this.#internalAPIRequester.post(
                     flaskES6.urlFor(`api.analysis.energy_consumption.setup.create`),
                     payload,
                     (data) => {
-                        let confData = this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
+                        let confData = this.#config[this.#editedEnergyInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
                         confData.id = data.data.id;
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
                         confData.etag = data.etag;
-                        this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
+                        this.#config[this.#editedEnergyInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
-                        this.#refreshConf(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
+                        this.#refreshConf(this.#editedEnergyInputElmt.value, this.#editedEnergyUseInputElmt.value);
                     },
                     (error) => {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
@@ -130,7 +130,7 @@ export class EnergyConsumptionSetupView {
                     () => {
                         this.#selectTimeseriesModal.hide();
 
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${this.#editedEnergySourceNameElmt.innerText} - ${this.#editedEnergyUseNameElmt.innerText}] energy consumption configuration saved!`, isDismissible: true});
+                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${this.#editedEnergyNameElmt.innerText} - ${this.#editedEnergyUseNameElmt.innerText}] energy consumption configuration saved!`, isDismissible: true});
                         this.#messagesElmt.appendChild(flashMsgElmt);
                     },
                 );
@@ -142,14 +142,14 @@ export class EnergyConsumptionSetupView {
                     payload,
                     energyConsTs.etag,
                     (data) => {
-                        let confData = this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
+                        let confData = this.#config[this.#editedEnergyInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value];
                         confData.ts_id = data.data.timeseries_id;
                         confData.ts_name = data.data.ts_name;
                         confData.ts_unit = data.data.ts_unit;
                         confData.etag = data.etag;
-                        this.#config[this.#editedEnergySourceInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
+                        this.#config[this.#editedEnergyInputElmt.value].energy_uses[this.#editedEnergyUseInputElmt.value] = confData;
 
-                        this.#refreshConf(this.#editedEnergySourceInputElmt.value, this.#editedEnergyUseInputElmt.value);
+                        this.#refreshConf(this.#editedEnergyInputElmt.value, this.#editedEnergyUseInputElmt.value);
                     },
                     (error) => {
                         let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
@@ -158,7 +158,7 @@ export class EnergyConsumptionSetupView {
                     () => {
                         this.#selectTimeseriesModal.hide();
 
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${this.#editedEnergySourceNameElmt.innerText} - ${this.#editedEnergyUseNameElmt.innerText}] energy consumption configuration saved!`, isDismissible: true});
+                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${this.#editedEnergyNameElmt.innerText} - ${this.#editedEnergyUseNameElmt.innerText}] energy consumption configuration saved!`, isDismissible: true});
                         this.#messagesElmt.appendChild(flashMsgElmt);
                     },
                 );
@@ -169,14 +169,14 @@ export class EnergyConsumptionSetupView {
             this.#tsSelector.clearAllSelection();
 
             // event.relatedTarget is the button that triggered the modal
-            let energySourceId = event.relatedTarget.getAttribute("data-energy-source");
+            let energyId = event.relatedTarget.getAttribute("data-energy");
             let energyUseId = event.relatedTarget.getAttribute("data-energy-use");
 
-            let energyConsTs = this.#getEnergyConsTs(energySourceId, energyUseId);
+            let energyConsTs = this.#getEnergyConsTs(energyId, energyUseId);
 
-            this.#editedEnergySourceNameElmt.innerText = this.#energySources[energySourceId];
+            this.#editedEnergyNameElmt.innerText = this.#energies[energyId];
             this.#editedEnergyUseNameElmt.innerText = this.#energyUses[energyUseId];
-            this.#editedEnergySourceInputElmt.value = energySourceId;
+            this.#editedEnergyInputElmt.value = energyId;
             this.#editedEnergyUseInputElmt.value = energyUseId;
 
             if (energyConsTs.ts_id != null) {
@@ -197,13 +197,13 @@ export class EnergyConsumptionSetupView {
         }
     }
 
-    #refreshConf(energySourceId, energyUseId) {
-        let idSuffix = `${energySourceId}-${energyUseId}`;
+    #refreshConf(energyId, energyUseId) {
+        let idSuffix = `${energyId}-${energyUseId}`;
         let btnEditConfigElmt = document.getElementById(`btnEditConfig-${idSuffix}`);
         let tsConfigTdElmt = document.getElementById(`tsConfigCell-${idSuffix}`);
         let btnDeleteConfigElmt = document.getElementById(`btnDelConfig-${idSuffix}`);
 
-        let confData = this.#getEnergyConsTs(energySourceId, energyUseId);
+        let confData = this.#getEnergyConsTs(energyId, energyUseId);
         if (confData.id == null) {
             btnEditConfigElmt.classList.remove("btn-link", "link-secondary", "text-decoration-none");
             btnEditConfigElmt.classList.add("btn-ouline-secondary", "fst-italic");
@@ -222,23 +222,23 @@ export class EnergyConsumptionSetupView {
         }
     }
 
-    #getEnergyConsTs(energySourceId, energyUseId) {
-        return this.#config[energySourceId].energy_uses[energyUseId];
+    #getEnergyConsTs(energyId, energyUseId) {
+        return this.#config[energyId].energy_uses[energyUseId];
     }
 
-    #addEnergySourceFromConfig(energySourceConfigData) {
+    #addEnergyFromConfig(energyConfigData) {
         let rowElmt = document.createElement("tr");
         rowElmt.classList.add("align-middle");
 
         let thElmt = document.createElement("th");
         thElmt.classList.add("text-center", "text-break");
         thElmt.setAttribute("scope", "row");
-        thElmt.innerText = energySourceConfigData.energy_source_name;
+        thElmt.innerText = energyConfigData.energy_name;
         rowElmt.appendChild(thElmt);
 
         for (let energyUseId of Object.keys(this.#energyUses)) {
-            let configData = energySourceConfigData.energy_uses[energyUseId];
-            let idSuffix = `${energySourceConfigData.energy_source_id}-${energyUseId}`;
+            let configData = energyConfigData.energy_uses[energyUseId];
+            let idSuffix = `${energyConfigData.energy_id}-${energyUseId}`;
 
             let tsConfigTdElmt = document.createElement("td");
             tsConfigTdElmt.id = `tsConfigCell-${idSuffix}`;
@@ -257,7 +257,7 @@ export class EnergyConsumptionSetupView {
                 btnModalTimeseriesSelectorElmt.classList.add("btn", "btn-sm", "btn-link", "link-secondary", "text-decoration-none", "text-break", "mx-auto");
                 btnModalTimeseriesSelectorElmt.setAttribute("data-bs-toggle", "modal");
                 btnModalTimeseriesSelectorElmt.setAttribute("data-bs-target", "#selectTimeseries");
-                btnModalTimeseriesSelectorElmt.setAttribute("data-energy-source", energySourceConfigData.energy_source_id);
+                btnModalTimeseriesSelectorElmt.setAttribute("data-energy", energyConfigData.energy_id);
                 btnModalTimeseriesSelectorElmt.setAttribute("data-energy-use", configData.energy_use_id);
                 btnModalTimeseriesSelectorElmt.innerText = tsLabel;
                 btnModalTimeseriesSelectorElmt.title = "Edit selection";
@@ -280,26 +280,26 @@ export class EnergyConsumptionSetupView {
                 }
 
                 // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
-                let modalConfirm = new ModalConfirm(tsConfigTdElmt.id, `Remove <mark>${energySourceConfigData.energy_source_name} - ${configData.energy_use_name}</mark> energy consumption configuration`, () => {
+                let modalConfirm = new ModalConfirm(tsConfigTdElmt.id, `Remove <mark>${energyConfigData.energy_name} - ${configData.energy_use_name}</mark> energy consumption configuration`, () => {
                     if (this.#deleteReqID != null) {
                         this.#internalAPIRequester.abort(this.#deleteReqID);
                         this.#deleteReqID = null;
                     }
 
-                    let energyConsTs = this.#getEnergyConsTs(energySourceConfigData.energy_source_id, configData.energy_use_id);
+                    let energyConsTs = this.#getEnergyConsTs(energyConfigData.energy_id, configData.energy_use_id);
                     this.#deleteReqID = this.#internalAPIRequester.delete(
                         flaskES6.urlFor(`api.analysis.energy_consumption.setup.delete`, {id: energyConsTs.id, structural_element_type: this.#structuralElement.type}),
                         energyConsTs.etag,
                         () => {
-                            let confData = this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id];
+                            let confData = this.#config[energyConfigData.energy_id].energy_uses[configData.energy_use_id];
                             confData.id = null;
                             confData.ts_id = null;
                             confData.ts_name = null;
                             confData.ts_unit = null;
                             confData.etag = null;
-                            this.#config[energySourceConfigData.energy_source_id].energy_uses[configData.energy_use_id] = confData;
+                            this.#config[energyConfigData.energy_id].energy_uses[configData.energy_use_id] = confData;
 
-                            this.#refreshConf(energySourceConfigData.energy_source_id, configData.energy_use_id);
+                            this.#refreshConf(energyConfigData.energy_id, configData.energy_use_id);
 
                             btnDeleteElmt.classList.add("d-none", "invisible");
                         },
@@ -308,7 +308,7 @@ export class EnergyConsumptionSetupView {
                             this.#messagesElmt.appendChild(flashMsgElmt);
                         },
                         () => {
-                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energySourceConfigData.energy_source_name} - ${configData.energy_use_name}] energy consumption configuration removed!`, isDismissible: true});
+                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energyConfigData.energy_name} - ${configData.energy_use_name}] energy consumption configuration removed!`, isDismissible: true});
                             this.#messagesElmt.appendChild(flashMsgElmt);
                         },
                     );
@@ -344,25 +344,25 @@ export class EnergyConsumptionSetupView {
     refresh() {
         this.#configTableBodyElmt.innerHTML = "";
 
-        for (let energySourceConfigData of Object.values(this.#config)) {
-            this.#addEnergySourceFromConfig(energySourceConfigData);
+        for (let energyConfigData of Object.values(this.#config)) {
+            this.#addEnergyFromConfig(energyConfigData);
         }
 
         if (this.#isEditable) {
-            for (let energySourceId of this.#availableEnergySources) {
+            for (let energyId of this.#availableEnergies) {
                 let menuItemLinkElmt = document.createElement("a");
                 menuItemLinkElmt.classList.add("dropdown-item");
                 menuItemLinkElmt.setAttribute("role", "button");
-                menuItemLinkElmt.innerText = this.#energySources[energySourceId];
+                menuItemLinkElmt.innerText = this.#energies[energyId];
 
                 let menuItemElmt = document.createElement("li");
                 menuItemElmt.appendChild(menuItemLinkElmt);
 
-                this.#addEnergySourceMenuElmt.appendChild(menuItemElmt);
+                this.#addEnergyMenuElmt.appendChild(menuItemElmt);
 
                 menuItemLinkElmt.addEventListener("click", (event) => {
                     menuItemElmt.remove();
-                    this.#availableEnergySources = this.#availableEnergySources.filter((availableEnergySource) => availableEnergySource.id != energySourceId);
+                    this.#availableEnergies = this.#availableEnergies.filter((availableEnergy) => availableEnergy.id != energyId);
 
                     let energyUsesConfigData = {};
                     for (let [energyUseId, energyUseName] of Object.entries(this.#energyUses)) {
@@ -377,21 +377,21 @@ export class EnergyConsumptionSetupView {
                         };
                     }
 
-                    this.#config[energySourceId] = {
-                        energy_source_id: energySourceId,
-                        energy_source_name: this.#energySources[energySourceId],
+                    this.#config[energyId] = {
+                        energy_id: energyId,
+                        energy_name: this.#energies[energyId],
                         energy_uses: energyUsesConfigData,
                     };
 
-                    this.#addEnergySourceFromConfig(this.#config[energySourceId]);
+                    this.#addEnergyFromConfig(this.#config[energyId]);
 
-                    if (this.#availableEnergySources.length <= 0) {
+                    if (this.#availableEnergies.length <= 0) {
                         this.#configTableFooterElmt.classList.add("d-none");
                     }
                 });
             };
 
-            if (this.#availableEnergySources.length <= 0) {
+            if (this.#availableEnergies.length <= 0) {
                 this.#configTableFooterElmt.classList.add("d-none");
             }
         }
