@@ -15,6 +15,7 @@ from . import analysis
 from . import services
 from . import events
 from . import notifications
+from . import semantics
 
 
 blp = flask.Blueprint("api", __name__, url_prefix="/api")
@@ -31,6 +32,7 @@ MODULES = (
     services,
     events,
     notifications,
+    semantics,
 )
 
 
