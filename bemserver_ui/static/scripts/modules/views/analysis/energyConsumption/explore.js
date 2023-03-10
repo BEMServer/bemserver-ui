@@ -13,7 +13,6 @@ export class EnergyConsumptionExploreView {
     #sitesTreeReqID = null;
 
     #messagesElmt = null;
-    #setupBtnElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
     #periodMonthSelectElmt = null;
@@ -56,7 +55,6 @@ export class EnergyConsumptionExploreView {
 
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
-        this.#setupBtnElmt = document.getElementById("setupBtn");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
@@ -70,7 +68,6 @@ export class EnergyConsumptionExploreView {
             this.#structuralElementType = event.detail.type;
             this.#structuralElementId = event.detail.id;
     
-            this.#updateConfigBtn();
             this.#generateCharts();
         });
 
@@ -152,17 +149,6 @@ export class EnergyConsumptionExploreView {
         if (this.#periodTypeSelectElmt.value != "Yearly") {
             this.#previousYearSelected = this.#periodYearSelectElmt.value;
         }
-    }
-
-    #updateConfigBtn() {
-        this.#setupBtnElmt.href = flaskES6.urlFor(
-            `analysis.energy_consumption.setup`,
-            {
-                structural_element_type: this.#structuralElementType,
-                structural_element_id: this.#structuralElementId,
-            }
-        );
-        this.#setupBtnElmt.classList.remove("d-none", "invisible");
     }
 
     #generateCharts() {
