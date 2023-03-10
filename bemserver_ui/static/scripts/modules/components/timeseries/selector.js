@@ -250,6 +250,8 @@ export class TimeseriesSelector extends HTMLElement {
     #zoneSelector = null;
     #siteSelectorRecursiveSwitchElmt = null;
 
+    #availableFilters = ["campaign-scope", "site", "building", "storey", "space", "zone", "extend"];
+
     get selectedItems() {
         return this.#selectedItems;
     }
@@ -271,7 +273,7 @@ export class TimeseriesSelector extends HTMLElement {
         this.#allowedSelectionLimit = Parser.parseIntOrDefault(this.getAttribute("selection-limit") || options.allowedSelectionLimit, this.#allowedSelectionLimit);
 
         let attrFilters = {};
-        for (let filterAttrName of ["campaign-scope", "site", "building", "storey", "space", "zone", "extend"]) {
+        for (let filterAttrName of [this.#availableFilters]) {
             if (this.hasAttribute(filterAttrName)) {
                 attrFilters[filterAttrName] = this.getAttribute(filterAttrName);
             }
@@ -539,6 +541,7 @@ export class TimeseriesSelector extends HTMLElement {
                     selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
 
                     let searchSelectFilterElmt = searchSelectFilterOpts["htmlElement"];
+                    searchSelectFilterElmt.id = searchSelectFilterKey;
                     this.#searchFiltersContainerElmt.insertBefore(searchSelectFilterElmt, this.#filtersRemoveBtnElmt);
                     searchSelectFilterElmt.load(selectOptions, selectedOptionIndex);
                     searchSelectFilterElmt.addEventListener("change", (event) => {
@@ -706,40 +709,73 @@ export class TimeseriesSelector extends HTMLElement {
     select(tsId, afterSelectCallback = null) {
         tsId = Parser.parseIntOrDefault(tsId);
 
-        let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-ts-id="${tsId.toString()}"]`);
-        if (searchResultItemElmt != null) {
-            searchResultItemElmt.click();
+        // Check that tsId is not selected yet, because in this case nothing to do.
+        if (!this.#selectedItems.map((item) => { return item.id }).includes(tsId)) {
+            let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-ts-id="${tsId.toString()}"]`);
+            if (searchResultItemElmt != null) {
+                searchResultItemElmt.click();
 
-            this.#update();
-            afterSelectCallback?.();
+                this.#update();
+                afterSelectCallback?.();
+            }
+            else {
+                if (this.#selectReqID != null) {
+                    this.#internalAPIRequester.abort(this.#selectReqID);
+                    this.#selectReqID = null;
+                }
+
+                this.#selectReqID = this.#internalAPIRequester.get(
+                    flaskES6.urlFor(`api.timeseries.retrieve_one`, {id: tsId}),
+                    (data) => {
+                        let tsItem = new TimeseriesItem(data.data);
+                        let selectedItem = this.#createSelectedItemElement(tsItem, afterSelectCallback);
+
+                        if (this.#selectedItems.length <= 0) {
+                            this.#selectedItemsContainerElmt.innerHTML = "";
+                        }
+                        this.#selectedItemsContainerElmt.appendChild(selectedItem);
+                        this.#selectedItems.push(selectedItem.timeseries);
+                    },
+                    (error) => {
+                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
+                        this.#messagesElmt.appendChild(flashMsgElmt);
+                    },
+                    () => {
+                        this.#update();
+                        afterSelectCallback?.();
+                    },
+                );
+            }
         }
-        else {
-            if (this.#selectReqID != null) {
-                this.#internalAPIRequester.abort(this.#selectReqID);
-                this.#selectReqID = null;
+    }
+
+    setFilters(filters) {
+        let needRefresh = false;
+
+        for (let [optFilterName, optFilterValue] of Object.entries(filters || {})) {
+            if (this.#availableFilters.includes(optFilterName) && this.#defaultFilters[optFilterName] != optFilterValue) {
+                this.#defaultFilters[optFilterName] = optFilterValue;
+                needRefresh = true;
             }
 
-            this.#selectReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.timeseries.retrieve_one`, {id: tsId}),
-                (data) => {
-                    let tsItem = new TimeseriesItem(data.data);
-                    let selectedItem = this.#createSelectedItemElement(tsItem, afterSelectCallback);
+            if (["site", "building", "storey", "space"].includes(optFilterName)) {
+                this.#siteSelector.select(`${optFilterName}-${optFilterValue}`);
+            }
+            else if (optFilterName == "zone") {
+                this.#zoneSelector.select(`${optFilterName}-${optFilterValue}`);
+            }
+            else if (optFilterName == "extend") {
+                this.#siteSelectorRecursiveSwitchElmt.checked = Parser.parseBoolOrDefault(optFilterValue, false);
+            }
+            else if (optFilterName == "campaign-scope") {
+                let filterElmt = this.querySelector(`app-filter-select[id="campaign_scope_id"]`);
+                filterElmt.value = optFilterValue;
+            }
+        }
 
-                    if (this.#selectedItems.length <= 0) {
-                        this.#selectedItemsContainerElmt.innerHTML = "";
-                    }
-                    this.#selectedItemsContainerElmt.appendChild(selectedItem);
-                    this.#selectedItems.push(selectedItem.timeseries);
-                },
-                (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
-                },
-                () => {
-                    this.#update();
-                    afterSelectCallback?.();
-                },
-            );
+        if (needRefresh) {
+            this.#searchResultsPaginationElmt.page = 1;
+            this.refresh();
         }
     }
 
