@@ -168,10 +168,35 @@ export class InternalAPIRequest {
         }
     }
 
-    async #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+    async #executeRequestAsync(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
         let reqID = this.#fetch(url, params);
 
         await this.#fetchPromises[reqID].then(
+            this.#processRawResponse
+        ).then(
+            (data) => {
+                if (data != null) {
+                    resolveCallback?.(data);
+                }
+            }
+        ).catch(
+            (error) => {
+                this.#processError(error, rejectCallback);
+            }
+        ).finally(
+            () => {
+                finallyCallback?.();
+                this.#purge(reqID);
+            }
+        );
+
+        return reqID;
+    }
+
+    #executeRequest(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
+        let reqID = this.#fetch(url, params);
+
+        this.#fetchPromises[reqID].then(
             this.#processRawResponse
         ).then(
             (data) => {
@@ -250,7 +275,7 @@ export class InternalAPIRequest {
         return reqIDByUrl;
     }
 
-    async post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    async postAsync(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
         let params = {
             method: "POST",
             headers: {
@@ -261,7 +286,21 @@ export class InternalAPIRequest {
         if (payload != null) {
             params.body = JSON.stringify(payload);
         }
-        return await this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+        return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        };
+        if (payload != null) {
+            params.body = JSON.stringify(payload);
+        }
+        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     put(url, payload, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
@@ -281,7 +320,7 @@ export class InternalAPIRequest {
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
-    async delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    async deleteAsync(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
         let params = {
             method: "DELETE",
             headers: {
@@ -292,6 +331,20 @@ export class InternalAPIRequest {
         if (etag != null) {
             params.headers["ETag"] = etag;
         }
-        return await this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+        return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        };
+        if (etag != null) {
+            params.headers["ETag"] = etag;
+        }
+        return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 }

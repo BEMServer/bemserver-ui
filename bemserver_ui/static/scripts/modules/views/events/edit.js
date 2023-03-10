@@ -544,7 +544,7 @@ export class EventEditView {
         let errors = [];
 
         for (let ts of this.#tsSelector.selectedItems) {
-            await this.#internalAPIRequester.post(
+            await this.#internalAPIRequester.postAsync(
                 flaskES6.urlFor(`api.events.create_timeseries_link`, {id: this.#eventData.id, ts_id: ts.id}),
                 null,
                 (data) => {
@@ -584,7 +584,7 @@ export class EventEditView {
         let errors = [];
 
         for (let [tsLinkId, tsLinkData] of Object.entries(this.#selectedTimeseriesLinks)) {
-            await this.#internalAPIRequester.delete(
+            await this.#internalAPIRequester.deleteAsync(
                 flaskES6.urlFor(`api.events.delete_timeseries_link`, {link_id: tsLinkId}),
                 null,
                 () => {
@@ -783,7 +783,7 @@ export class EventEditView {
         let errors = [];
 
         for (let [index, locRelId] of Object.keys(this.#selectedLocations[structElmtType]).entries()) {
-            await this.#internalAPIRequester.delete(
+            await this.#internalAPIRequester.deleteAsync(
                 flaskES6.urlFor(`api.events.delete_structural_elements_link`, {type: structElmtType, link_id: locRelId}),
                 null,
                 () => {
