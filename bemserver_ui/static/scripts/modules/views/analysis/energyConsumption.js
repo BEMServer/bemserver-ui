@@ -1,9 +1,9 @@
-import { InternalAPIRequest } from "../../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
-import { flaskES6, signedUser } from "../../../../app.js";
-import { Spinner } from "../../../components/spinner.js";
-import { TimeseriesChartEnergyConsumption } from "../../../components/charts/tsChartEnergyConsumption.js";
-import "../../../components/tree.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/components/charts/tsChartEnergyConsumption.js";
+import "/static/scripts/modules/components/tree.js";
 
 
 export class EnergyConsumptionExploreView {
@@ -13,7 +13,6 @@ export class EnergyConsumptionExploreView {
     #sitesTreeReqID = null;
 
     #messagesElmt = null;
-    #setupBtnElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
     #periodMonthSelectElmt = null;
@@ -56,7 +55,6 @@ export class EnergyConsumptionExploreView {
 
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
-        this.#setupBtnElmt = document.getElementById("setupBtn");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
@@ -70,7 +68,6 @@ export class EnergyConsumptionExploreView {
             this.#structuralElementType = event.detail.type;
             this.#structuralElementId = event.detail.id;
     
-            this.#updateConfigBtn();
             this.#generateCharts();
         });
 
@@ -154,17 +151,6 @@ export class EnergyConsumptionExploreView {
         }
     }
 
-    #updateConfigBtn() {
-        this.#setupBtnElmt.href = flaskES6.urlFor(
-            `analysis.energy_consumption.setup`,
-            {
-                structural_element_type: this.#structuralElementType,
-                structural_element_id: this.#structuralElementId,
-            }
-        );
-        this.#setupBtnElmt.classList.remove("d-none", "invisible");
-    }
-
     #generateCharts() {
         if (this.#structuralElementType != null && this.#structuralElementId != null) {
             for (let chart of Object.values(this.#chartByEnergy)) {
@@ -181,7 +167,7 @@ export class EnergyConsumptionExploreView {
             }
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(
-                    `api.analysis.energy_consumption.breakdowns.retrieve_brkd`,
+                    `api.analysis.energy_consumption.retrieve_breakdown`,
                     {
                         structural_element_type: this.#structuralElementType,
                         structural_element_id: this.#structuralElementId,

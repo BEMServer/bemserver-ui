@@ -7,6 +7,7 @@ from bemserver_ui.common.const import (
     FULL_STRUCTURAL_ELEMENT_TYPES,
     STRUCTURAL_ELEMENT_TYPES,
 )
+from bemserver_api_client.enums import WeatherParameter
 
 
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
@@ -307,3 +308,28 @@ def upload():
         return flask.redirect(flask.url_for("timeseries.list"))
 
     return flask.render_template("pages/timeseries/upload.html")
+
+
+@blp.route("/semantic_setup")
+@auth.signin_required
+@ensure_campaign_context
+def semantic_setup():
+    energies_resp = flask.g.api_client.energies.getall()
+    energy_end_uses_resp = flask.g.api_client.energy_end_uses.getall()
+    energy_prod_technos_resp = flask.g.api_client.energy_prod_technologies.getall()
+
+    energy_by_id = {x["id"]: x["name"] for x in energies_resp.data}
+    energy_use_by_id = {x["id"]: x["name"] for x in energy_end_uses_resp.data}
+    energy_prod_techno_by_id = {
+        x["id"]: x["name"] for x in energy_prod_technos_resp.data
+    }
+
+    weather_params = {x.name: x.value for x in WeatherParameter}
+
+    return flask.render_template(
+        "pages/timeseries/semantic_setup.html",
+        energies=energy_by_id,
+        energy_end_uses=energy_use_by_id,
+        weather_params=weather_params,
+        energy_prod_technos=energy_prod_techno_by_id,
+    )

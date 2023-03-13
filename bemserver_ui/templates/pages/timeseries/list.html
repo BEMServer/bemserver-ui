@@ -6,9 +6,10 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-lg-flex d-grid gap-2">
+<div class="d-lg-flex d-grid gap-3">
     {% if signed_user.is_admin %}
-    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage timeseries structural elements">Manage structural elements</a>
+    <a href="{{ url_for('timeseries.semantic_setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Semantic setup"><i class="bi bi-tags"></i> Semantic setup</a>
+    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage timeseries locations"><i class="bi bi-pin-map"></i> Manage locations</a>
     <div class="vr d-none d-lg-block mx-2"></div>
     {% endif %}
     <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>

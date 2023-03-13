@@ -1,0 +1,203 @@
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
+{% extends "pages/base.html" %}
+
+{% set title = "Timeseries" %}
+{% set subtitle = "Semantic setup" %}
+
+{% if not tab %}
+    {% set tab = "weather" %}
+{% endif %}
+{% set is_editable = signed_user.is_admin %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<a href="{{ url_for('timeseries.list') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Back to timeseries"><i class="bi bi-arrow-return-left"></i> Back to timeseries</a>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h5 class="text-secondary"><i class="bi bi-building"></i> Sites and buildings</h5>
+            <app-tree id="sitesTree" class="bg-light"></app-tree>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h5 class="text-secondary"><i class="bi bi-clock-history"></i> Timeseries semantic setup</h5>
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'weather' %} active{% endif %}" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-tabcontent" type="button" role="tab" aria-controls="weather-tabcontent" aria-selected="{% if tab == 'weather' %}true{% else %}false{% endif %}">Weather</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'energy_prod' %} active{% endif %}" id="energyProd-tab" data-bs-toggle="tab" data-bs-target="#energyProd-tabcontent" type="button" role="tab" aria-controls="energyProd-tabcontent" aria-selected="{% if tab == 'energy_prod' %}true{% else %}false{% endif %}">Energy production</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'energy_cons' %} active{% endif %}" id="energyCons-tab" data-bs-toggle="tab" data-bs-target="#energyCons-tabcontent" type="button" role="tab" aria-controls="energyCons-tabcontent" aria-selected="{% if tab == 'energy_cons' %}true{% else %}false{% endif %}">Energy consumption</button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane{% if tab == 'weather' %} show active{% endif %} p-3" id="weather-tabcontent" role="tabpanel" aria-labelledby="weather-tab">
+                    <div class="alert alert-info mb-0 pb-0" id="weatherSetupHelp">
+                        <i class="bi bi-question-diamond me-2"></i>
+                        <span class="fw-bold">Help</span>
+                        <p>Select a <span class="fw-bold">site</span> in the tree to see its <span class="fw-bold">weather parameters</span> setup.</p>
+                    </div>
+                    <div class="table-responsive-xl d-none invisible">
+                        <table class="table table-sm table-bordered caption-top" id="weatherSetupTable">
+                            <caption class="text-end">
+                                <small><app-items-count id="weatherItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="align-middle w-25">
+                                        <div class="hstack justify-content-center align-items-center gap-2">
+                                            <span>Weather parameter</span>
+                                            {% if is_editable %}
+                                            <div class="dropdown my-2">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="weatherAddParamBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Define a weather parameter">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="weatherAddParamBtn"></ul>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="text-center align-middle">Timeseries</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane{% if tab == 'energy_prod' %} show active{% endif %} p-3" id="energyProd-tabcontent" role="tabpanel" aria-labelledby="energyProd-tab">
+                    <div class="alert alert-info mb-0 pb-0" id="energyProdSetupHelp">
+                        <i class="bi bi-question-diamond me-2"></i>
+                        <span class="fw-bold">Help</span>
+                        <p>Select a <span class="fw-bold">site</span> or a <span class="fw-bold">building</span> in the tree to see its <span class="fw-bold">energy production</span> setup.</p>
+                    </div>
+                    <div class="table-responsive-xl d-none invisible">
+                        <table class="table table-sm table-bordered caption-top" id="energyProdSetupTable">
+                            <caption class="text-end">
+                                <small><app-items-count id="energyProdItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr class="align-middle">
+                                    <th scope="col" rowspan="2" class="w-25">
+                                        <div class="hstack justify-content-center align-items-center gap-2">
+                                            <span>Energy</span>
+                                            {% if is_editable %}
+                                            <div class="dropdown my-2">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="energyProdAddEnergyBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Define an energy">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="energyProdAddEnergyBtn"></ul>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th scope="col" colspan="{{ energy_prod_technos | length }}" class="text-center">Production technologies</th>
+                                </tr>
+                                <tr class="align-middle">
+                                    {% for energy_prod_techno_name in energy_prod_technos.values() %}
+                                    <th scope="col" class="text-center">{{ energy_prod_techno_name }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane{% if tab == 'energy_cons' %} show active{% endif %} p-3" id="energyCons-tabcontent" role="tabpanel" aria-labelledby="energyCons-tab">
+                    <div class="alert alert-info mb-0 pb-0" id="energyConsSetupHelp">
+                        <i class="bi bi-question-diamond me-2"></i>
+                        <span class="fw-bold">Help</span>
+                        <p>Select a <span class="fw-bold">site</span> or a <span class="fw-bold">building</span> in the tree to see its <span class="fw-bold">energy consumption</span> setup.</p>
+                    </div>
+                    <div class="table-responsive-xl d-none invisible">
+                        <table class="table table-sm table-bordered caption-top" id="energyConsSetupTable">
+                            <caption class="text-end">
+                                <small><app-items-count id="energyConsItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col" rowspan="2" class="align-middle w-25">
+                                        <div class="hstack justify-content-center align-items-center gap-2">
+                                            <span>Energy</span>
+                                            {% if is_editable %}
+                                            <div class="dropdown my-2">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="energyConsAddEnergyBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Define an energy">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="energyConsAddEnergyBtn"></ul>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th scope="col" colspan="{{ energy_end_uses | length }}" class="text-center align-middle">Energy end uses</th>
+                                </tr>
+                                <tr>
+                                    {% for energy_end_use_name in energy_end_uses.values() %}
+                                    <th scope="col" class="text-center align-middle">{{ energy_end_use_name }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% if is_editable %}
+<div class="modal fade" id="selectTimeseries" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="selectTimeseriesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectTimeseriesLabel">Select a timeseries for <span id="selectTimeseriesTargetText">?</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% filter indent(width=16, first=False) %}
+                {{ mac_ts_selector.render_ts_selector(element_id="tsSelector", selection_limit=1, filters={"extend": True}) -}}
+                {% endfilter %}
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="selectedTimeseriesSaveBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module">
+    import { TimeseriesSemanticSetupView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/semanticSetup.js') }}";
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        let view = new TimeseriesSemanticSetupView(
+            {{ energies | tojson }},
+            {{ energy_end_uses | tojson }},
+            {{ weather_params | tojson }},
+            {{ energy_prod_technos | tojson }},
+            {{ is_editable | tojson }},
+        );
+        view.mount();
+
+    });
+</script>
+{% endfilter %}
+{% endblock body_scripts %}

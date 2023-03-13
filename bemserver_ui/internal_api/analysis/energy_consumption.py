@@ -7,13 +7,13 @@ from bemserver_api_client.enums import BucketWidthUnit, StructuralElement
 from bemserver_ui.extensions import auth, ensure_campaign_context
 
 
-blp = flask.Blueprint("breakdowns", __name__, url_prefix="/breakdowns")
+blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consumption")
 
 
 @blp.route("/<string:structural_element_type>/<int:structural_element_id>")
 @auth.signin_required
 @ensure_campaign_context
-def retrieve_brkd(structural_element_type, structural_element_id):
+def retrieve_breakdown(structural_element_type, structural_element_id):
     tz_name = flask.request.args.get("timezone", flask.g.campaign_ctxt.tz_name)
     period_type = flask.request.args["period_type"]
     period_month = int(flask.request.args["period_month"])

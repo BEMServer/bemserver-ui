@@ -2,13 +2,6 @@
 
 {% set title = "Energy consumption" %}
 
-{% block main_toolbar %}
-{{ super() -}}
-{% filter indent(width=20, first=True) %}
-<a id="setupBtn" class="btn btn-sm btn-outline-secondary text-nowrap d-none invisible" title="View energy consumption configuration"><i class="bi bi-tools"></i> Setup</a>
-{% endfilter %}
-{% endblock main_toolbar %}
-
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -82,7 +75,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumption/explore.js') }}";
+    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumption.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
