@@ -1,9 +1,9 @@
-import { InternalAPIRequest } from "../../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
-import { flaskES6, signedUser } from "../../../../app.js";
-import { Spinner } from "../../../components/spinner.js";
-import { TimeseriesChartEnergyConsumption } from "../../../components/charts/tsChartEnergyConsumption.js";
-import "../../../components/tree.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/components/charts/tsChartEnergyConsumption.js";
+import "/static/scripts/modules/components/tree.js";
 
 
 export class EnergyConsumptionExploreView {
@@ -167,7 +167,7 @@ export class EnergyConsumptionExploreView {
             }
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(
-                    `api.analysis.energy_consumption.breakdowns.retrieve_brkd`,
+                    `api.analysis.energy_consumption.retrieve_breakdown`,
                     {
                         structural_element_type: this.#structuralElementType,
                         structural_element_id: this.#structuralElementId,

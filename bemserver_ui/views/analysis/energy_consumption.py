@@ -11,4 +11,4 @@ blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consum
 @auth.signin_required
 @ensure_campaign_context
 def explore():
-    return flask.render_template("pages/analysis/energy_consumption/explore.html")
+    return flask.render_template("pages/analysis/energy_consumption.html")

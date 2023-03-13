@@ -75,7 +75,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumption/explore.js') }}";
+    import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumption.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
