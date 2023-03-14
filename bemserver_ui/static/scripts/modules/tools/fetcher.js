@@ -27,6 +27,9 @@ class InternalAPIRequestError {
             validationErrorsTitleElmt.innerText = "Validation errors";
             containerElmt.appendChild(validationErrorsTitleElmt);
 
+            if (this.#validationErrors._general != null && typeof(this.#validationErrors._general) === "string") {
+                this.#validationErrors._general = [this.#validationErrors._general];
+            }
             if (Array.isArray(this.#validationErrors._general)) {
                 for (let generalError of this.#validationErrors._general) {
                     let generalErrorElmt = document.createElement("p");
@@ -37,43 +40,45 @@ class InternalAPIRequestError {
                 delete this.#validationErrors._general;
             }
 
-            let validationErrorsContainerElmt = document.createElement("dl");
-            validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
-            containerElmt.appendChild(validationErrorsContainerElmt);
+            if (Object.keys(this.#validationErrors).length > 0) {
+                let validationErrorsContainerElmt = document.createElement("dl");
+                validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
+                containerElmt.appendChild(validationErrorsContainerElmt);
 
-            for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(this.#validationErrors))) {
-                let isLastItem = (index == Object.keys(this.#validationErrors).length - 1);
+                for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(this.#validationErrors))) {
+                    let isLastItem = (index == Object.keys(this.#validationErrors).length - 1);
 
-                let fieldNameElmt = document.createElement("dt");
-                fieldNameElmt.classList.add("col-4");
-                fieldNameElmt.innerText = fieldName;
-                validationErrorsContainerElmt.appendChild(fieldNameElmt);
+                    let fieldNameElmt = document.createElement("dt");
+                    fieldNameElmt.classList.add("col-4");
+                    fieldNameElmt.innerText = fieldName;
+                    validationErrorsContainerElmt.appendChild(fieldNameElmt);
 
-                let fieldErrorsElmt = document.createElement("dd");
-                fieldErrorsElmt.classList.add("col-8");
-                if (isLastItem) {
-                    fieldErrorsElmt.classList.add("mb-0");
-                }
-                validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
+                    let fieldErrorsElmt = document.createElement("dd");
+                    fieldErrorsElmt.classList.add("col-8");
+                    if (isLastItem) {
+                        fieldErrorsElmt.classList.add("mb-0");
+                    }
+                    validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
 
-                let _fieldErrors = fieldErrors;
-                if (isDict(fieldErrors)) {
-                    _fieldErrors = [];
-                    for (let fieldErrs of Object.values(fieldErrors)) {
-                        if (Array.isArray(fieldErrs)) {
-                            _fieldErrors.push(...fieldErrs);
-                        }
-                        else {
-                            _fieldErrors.push(fieldErrs);
+                    let _fieldErrors = fieldErrors;
+                    if (isDict(fieldErrors)) {
+                        _fieldErrors = [];
+                        for (let fieldErrs of Object.values(fieldErrors)) {
+                            if (Array.isArray(fieldErrs)) {
+                                _fieldErrors.push(...fieldErrs);
+                            }
+                            else {
+                                _fieldErrors.push(fieldErrs);
+                            }
                         }
                     }
-                }
 
-                for (let fieldError of _fieldErrors) {
-                    let fieldErrorElmt = document.createElement("p");
-                    fieldErrorElmt.classList.add("fst-italic", "mb-0");
-                    fieldErrorElmt.innerText = fieldError;
-                    fieldErrorsElmt.appendChild(fieldErrorElmt);
+                    for (let fieldError of _fieldErrors) {
+                        let fieldErrorElmt = document.createElement("p");
+                        fieldErrorElmt.classList.add("fst-italic", "mb-0");
+                        fieldErrorElmt.innerText = fieldError;
+                        fieldErrorsElmt.appendChild(fieldErrorElmt);
+                    }
                 }
             }
         }
