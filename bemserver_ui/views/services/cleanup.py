@@ -23,7 +23,7 @@ def _ensure_cleanup_campaign_data(cleanup_campaign):
         cleanup_campaign["campaign_name"] = "?"
         cleanup_campaign["campaign_state"] = "?"
         cleanup_campaign["campaign_timezone"] = (
-            flask.current_app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
+            flask.current_app.config.get("BEMSERVER_UI_TIMEZONE_NAME") or "UTC"
         )
     return cleanup_campaign
 

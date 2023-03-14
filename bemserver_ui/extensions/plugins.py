@@ -21,7 +21,7 @@ class BEMServerUIVersionError(Exception):
 
 def init_app(app):
     # Load and init UI plugins, if any.
-    plugin_paths = app.config.get("BEMSERVER_PLUGINS")
+    plugin_paths = app.config.get("BEMSERVER_UI_PLUGINS")
 
     if plugin_paths is not None:
         for plugin_path in plugin_paths:

@@ -1,4 +1,6 @@
-"""Extension to get partners data from `BEMSERVER_PARTNERS_FILE` extra config file."""
+"""
+Extension to get partners data from `BEMSERVER_UI_PARTNERS_FILE` extra config file.
+"""
 import json
 from pathlib import Path
 
@@ -8,7 +10,7 @@ def init_app(app):
     def inject_partners():
         partners_data = dict()
 
-        partners_file = app.config.get("BEMSERVER_PARTNERS_FILE")
+        partners_file = app.config.get("BEMSERVER_UI_PARTNERS_FILE")
         if partners_file is not None:
             partners_filepath = Path(partners_file)
             if partners_filepath.exists():

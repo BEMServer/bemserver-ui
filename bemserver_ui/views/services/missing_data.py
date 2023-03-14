@@ -32,7 +32,7 @@ def _extend_data(status_svc_campaign_data):
             status_svc_campaign_data["campaign_name"] = "?"
         status_svc_campaign_data["campaign_state"] = "?"
         status_svc_campaign_data["campaign_timezone"] = (
-            flask.current_app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
+            flask.current_app.config.get("BEMSERVER_UI_TIMEZONE_NAME") or "UTC"
         )
         status_svc_campaign_data["is_selected"] = False
     return status_svc_campaign_data
