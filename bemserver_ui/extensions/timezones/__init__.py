@@ -13,7 +13,7 @@ def init_app(app):
         tz_tool = TimezoneTool()
         tz_tool.prepare_data()
 
-        default_tz_name = app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
+        default_tz_name = app.config.get("BEMSERVER_UI_TIMEZONE_NAME") or "UTC"
         default_tz_region = tz_tool.get_tz_info(default_tz_name)["region"]
 
         module_content = dedent(

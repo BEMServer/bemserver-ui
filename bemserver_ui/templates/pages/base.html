@@ -56,7 +56,7 @@
 
         let options = {
             campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
-            notificationUpdaterDelay: {{ config.BEMSERVER_NOTIFICATION_UPDATER_DELAY }},
+            notificationUpdaterDelay: {{ config.BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY }},
         };
 
         let app = new App(options);

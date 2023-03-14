@@ -34,14 +34,14 @@ Flask custom var config available:
         Is API published through SSL?
     **BEMSERVER_API_AUTH_METHOD = "http_basic"**
         API authentication method
-    **BEMSERVER_TIMEZONE_NAME = "UTC"**
+    **BEMSERVER_UI_TIMEZONE_NAME = "UTC"**
         Default application timezone name, when not overrided campaign timezone
-    **BEMSERVER_NOTIFICATION_UPDATER_DELAY = 60000**
+    **BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY = 60000**
         Delay, in seconds, between each check of new notifications
-    *(optional)* **BEMSERVER_PARTNERS_FILE = None**
+    *(optional)* **BEMSERVER_UI_PARTNERS_FILE = None**
         Absolute path of json file that describes the project's partners
 
-        Example of ``BEMSERVER_PARTNERS_FILE`` file structure::
+        Example of ``BEMSERVER_UI_PARTNERS_FILE`` file structure::
 
             [
                 {
@@ -66,5 +66,5 @@ Flask custom var config available:
                 }
             ]
 
-    *(optional)* **BEMSERVER_PLUGINS = None**
+    *(optional)* **BEMSERVER_UI_PLUGINS = None**
         List of absolute folder paths that locate the ``__init__.py`` file from each UI plugin package to load

@@ -73,7 +73,7 @@ class CampaignContext:
     def tz_name(self):
         if self._campaign is not None:
             return self._campaign["data"]["timezone"]
-        return flask.current_app.config.get("BEMSERVER_TIMEZONE_NAME") or "UTC"
+        return flask.current_app.config.get("BEMSERVER_UI_TIMEZONE_NAME") or "UTC"
 
     @property
     def name(self):
