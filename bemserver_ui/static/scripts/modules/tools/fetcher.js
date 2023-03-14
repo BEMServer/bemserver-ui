@@ -3,6 +3,9 @@ import { Parser } from "./parser.js";
 import { isDict } from "./dict.js";
 
 
+// TODO: rework fetch use in order to better use async/await when needed
+
+
 class InternalAPIRequestError {
 
     #statusCode = null;
@@ -24,6 +27,9 @@ class InternalAPIRequestError {
             validationErrorsTitleElmt.innerText = "Validation errors";
             containerElmt.appendChild(validationErrorsTitleElmt);
 
+            if (this.#validationErrors._general != null && typeof(this.#validationErrors._general) === "string") {
+                this.#validationErrors._general = [this.#validationErrors._general];
+            }
             if (Array.isArray(this.#validationErrors._general)) {
                 for (let generalError of this.#validationErrors._general) {
                     let generalErrorElmt = document.createElement("p");
@@ -34,43 +40,45 @@ class InternalAPIRequestError {
                 delete this.#validationErrors._general;
             }
 
-            let validationErrorsContainerElmt = document.createElement("dl");
-            validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
-            containerElmt.appendChild(validationErrorsContainerElmt);
+            if (Object.keys(this.#validationErrors).length > 0) {
+                let validationErrorsContainerElmt = document.createElement("dl");
+                validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
+                containerElmt.appendChild(validationErrorsContainerElmt);
 
-            for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(this.#validationErrors))) {
-                let isLastItem = (index == Object.keys(this.#validationErrors).length - 1);
+                for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(this.#validationErrors))) {
+                    let isLastItem = (index == Object.keys(this.#validationErrors).length - 1);
 
-                let fieldNameElmt = document.createElement("dt");
-                fieldNameElmt.classList.add("col-4");
-                fieldNameElmt.innerText = fieldName;
-                validationErrorsContainerElmt.appendChild(fieldNameElmt);
+                    let fieldNameElmt = document.createElement("dt");
+                    fieldNameElmt.classList.add("col-4");
+                    fieldNameElmt.innerText = fieldName;
+                    validationErrorsContainerElmt.appendChild(fieldNameElmt);
 
-                let fieldErrorsElmt = document.createElement("dd");
-                fieldErrorsElmt.classList.add("col-8");
-                if (isLastItem) {
-                    fieldErrorsElmt.classList.add("mb-0");
-                }
-                validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
+                    let fieldErrorsElmt = document.createElement("dd");
+                    fieldErrorsElmt.classList.add("col-8");
+                    if (isLastItem) {
+                        fieldErrorsElmt.classList.add("mb-0");
+                    }
+                    validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
 
-                let _fieldErrors = fieldErrors;
-                if (isDict(fieldErrors)) {
-                    _fieldErrors = [];
-                    for (let fieldErrs of Object.values(fieldErrors)) {
-                        if (Array.isArray(fieldErrs)) {
-                            _fieldErrors.push(...fieldErrs);
-                        }
-                        else {
-                            _fieldErrors.push(fieldErrs);
+                    let _fieldErrors = fieldErrors;
+                    if (isDict(fieldErrors)) {
+                        _fieldErrors = [];
+                        for (let fieldErrs of Object.values(fieldErrors)) {
+                            if (Array.isArray(fieldErrs)) {
+                                _fieldErrors.push(...fieldErrs);
+                            }
+                            else {
+                                _fieldErrors.push(fieldErrs);
+                            }
                         }
                     }
-                }
 
-                for (let fieldError of _fieldErrors) {
-                    let fieldErrorElmt = document.createElement("p");
-                    fieldErrorElmt.classList.add("fst-italic", "mb-0");
-                    fieldErrorElmt.innerText = fieldError;
-                    fieldErrorsElmt.appendChild(fieldErrorElmt);
+                    for (let fieldError of _fieldErrors) {
+                        let fieldErrorElmt = document.createElement("p");
+                        fieldErrorElmt.classList.add("fst-italic", "mb-0");
+                        fieldErrorElmt.innerText = fieldError;
+                        fieldErrorsElmt.appendChild(fieldErrorElmt);
+                    }
                 }
             }
         }
@@ -100,6 +108,8 @@ export class InternalAPIRequest {
         // Ensure to abort pending fetch requests before page unloads.
         // If not, Firefox throws "TypeError: NetworkError when attempting to fetch resource." error.
         window.addEventListener("beforeunload", () => {
+            // TODO: manage 'keepalive' fetch parameter. If true, request should not be aborted on page unload.
+
             for (let abortCtrler of Object.values(this.#abortControllers)) {
                 abortCtrler.abort();
             }
@@ -117,15 +127,26 @@ export class InternalAPIRequest {
         params.keepalive = true;
         params.signal = abortController.signal;
 
+        // TODO: Manage an event listener on signal 'abort' event, when needed.
+
         let fetchPromise = window.fetch(url, params);
         this.#fetchPromises[reqID] = fetchPromise;
 
         return reqID;
     }
 
-    #processRawResponse(response) {
+    #processRawResponse(response, makeAsync = false) {
         if (response.ok) {
-            return response.json();
+            let getRespJson = async () => {
+                if (makeAsync) {
+                    return await response.json();
+                }
+                else {
+                    return response.json();
+                }
+            };
+
+            return getRespJson();
         }
         else if (response.status == 304) {
             // Data not modified.
@@ -170,25 +191,21 @@ export class InternalAPIRequest {
 
     async #executeRequestAsync(url, params = {}, resolveCallback = null, rejectCallback = null, finallyCallback = null) {
         let reqID = this.#fetch(url, params);
+        let response = await this.#fetchPromises[reqID];
 
-        await this.#fetchPromises[reqID].then(
-            this.#processRawResponse
-        ).then(
-            (data) => {
-                if (data != null) {
-                    resolveCallback?.(data);
-                }
+        try {
+            let data = await this.#processRawResponse(response, true);
+            if (data != null) {
+                resolveCallback?.(data);
             }
-        ).catch(
-            (error) => {
-                this.#processError(error, rejectCallback);
-            }
-        ).finally(
-            () => {
-                finallyCallback?.();
-                this.#purge(reqID);
-            }
-        );
+        }
+        catch (error) {
+            this.#processError(error, rejectCallback);
+        }
+        finally {
+            this.#purge(reqID);
+            finallyCallback?.();
+        }
 
         return reqID;
     }
@@ -275,7 +292,7 @@ export class InternalAPIRequest {
         return reqIDByUrl;
     }
 
-    async postAsync(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    #preparePost(payload) {
         let params = {
             method: "POST",
             headers: {
@@ -286,20 +303,16 @@ export class InternalAPIRequest {
         if (payload != null) {
             params.body = JSON.stringify(payload);
         }
+        return params;
+    }
+
+    async postAsync(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = this.#preparePost(payload);
         return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-        };
-        if (payload != null) {
-            params.body = JSON.stringify(payload);
-        }
+        let params = this.#preparePost(payload);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
@@ -320,7 +333,7 @@ export class InternalAPIRequest {
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
-    async deleteAsync(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+    #prepareDelete(etag) {
         let params = {
             method: "DELETE",
             headers: {
@@ -331,20 +344,16 @@ export class InternalAPIRequest {
         if (etag != null) {
             params.headers["ETag"] = etag;
         }
+        return params;
+    }
+
+    async deleteAsync(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let params = this.#prepareDelete(etag);
         return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = {
-            method: "DELETE",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-        };
-        if (etag != null) {
-            params.headers["ETag"] = etag;
-        }
+        let params = this.#prepareDelete(etag);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 }

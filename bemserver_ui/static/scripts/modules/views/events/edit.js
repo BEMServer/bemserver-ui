@@ -541,7 +541,6 @@ export class EventEditView {
 
     async #linkTimeseriesSelected(doneCallback = null) {
         let linkedTsNames = [];
-        let errors = [];
 
         for (let ts of this.#tsSelector.selectedItems) {
             await this.#internalAPIRequester.postAsync(
@@ -551,25 +550,15 @@ export class EventEditView {
                     linkedTsNames.push(data.timeseries.name);
                 },
                 (error) => {
-                    errors.push(`<span class="fw-bold fst-italic">${ts.name}</span>: ${error}`);
+                    let errorMsg = `<p class="mb-0">Failed to link <span class="fw-bold fst-italic">${ts.name}</span></p>${error}`;
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
                 },
             );
         }
 
         if (linkedTsNames.length > 0) {
             let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
-        }
-
-        if (errors.length > 0) {
-            let details = `<ul class="mb-0">`;
-            for (let err of errors) {
-                details += `<li>${err}</li>`;
-            }
-            details += "</ul>";
-
-            let errorMsg = `<p class="mb-0">Failed to link ${errors.length} timeseries:</p>${details}`;
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
             this.#messagesElmt.appendChild(flashMsgElmt);
         }
 
@@ -581,35 +570,24 @@ export class EventEditView {
 
     async #unlinkTimeseriesSelected(doneCallback = null) {
         let unlinkedTsNames = [];
-        let errors = [];
 
         for (let [tsLinkId, tsLinkData] of Object.entries(this.#selectedTimeseriesLinks)) {
             await this.#internalAPIRequester.deleteAsync(
                 flaskES6.urlFor(`api.events.delete_timeseries_link`, {link_id: tsLinkId}),
                 null,
                 () => {
-                    unlinkedTsNames.push(tsLinkData.name);
+                    unlinkedTsNames.push(tsLinkData.timeseries.name);
                 },
                 (error) => {
-                    errors.push(`<span class="fw-bold fst-italic">${tsLinkData.name}</span>: ${error}`);
+                    let errorMsg = `<p class="mb-0">Failed to unlink <span class="fw-bold fst-italic">${tsLinkData.timeseries.name}</span></p>${error}`;
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
                 },
             );
         }
 
         if (unlinkedTsNames.length > 0) {
             let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
-        }
-
-        if (errors.length > 0) {
-            let details = `<ul class="mb-0">`;
-            for (let err of errors) {
-                details += `<li>${err}</li>`;
-            }
-            details += "</ul>";
-
-            let errorMsg = `<p class="mb-0">Failed to unlink ${errors.length} timeseries:</p>${details}`;
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
             this.#messagesElmt.appendChild(flashMsgElmt);
         }
 
@@ -780,7 +758,6 @@ export class EventEditView {
     async #unlinkStructuralElementsSelected(structElmtType, doneCallback = null) {
         let selectedItems = Object.values(this.#selectedLocations[structElmtType]).map((itemData) => { return `${itemData.name}${itemData.path != null && itemData.path != "" ? ` (${itemData.path})` : ""}`; });
         let unlinkedItems = [];
-        let errors = [];
 
         for (let [index, locRelId] of Object.keys(this.#selectedLocations[structElmtType]).entries()) {
             await this.#internalAPIRequester.deleteAsync(
@@ -790,25 +767,15 @@ export class EventEditView {
                     unlinkedItems.push(selectedItems[index]);
                 },
                 (error) => {
-                    errors.push(`<span class="fw-bold fst-italic">${selectedItems[index]}</span>: ${error}`);
+                    let errorMsg = `<p class="mb-0">Failed to unlink <span class="fw-bold fst-italic">${selectedItems[index]}</span> ${structElmtType}</p>${error}`;
+                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
+                    this.#messagesElmt.appendChild(flashMsgElmt);
                 },
             );
         }
 
         if (unlinkedItems.length > 0) {
             let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedItems.length}/${selectedItems.length} ${structElmtType}${unlinkedItems.length > 1 ? "s" : ""} unlinked: ${unlinkedItems.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
-        }
-
-        if (errors.length > 0) {
-            let details = `<ul class="mb-0">`;
-            for (let err of errors) {
-                details += `<li>${err}</li>`;
-            }
-            details += "</ul>";
-
-            let errorMsg = `<p class="mb-0">Failed to unlink ${errors.length} ${structElmtType}${errors.length > 1 ? "s" : ""}:</p>${details}`;
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
             this.#messagesElmt.appendChild(flashMsgElmt);
         }
 
