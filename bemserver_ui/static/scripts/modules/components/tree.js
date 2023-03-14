@@ -24,6 +24,11 @@ export class Tree extends HTMLElement {
 
     #treeNodeSelected = null;
 
+    #resizeObserver = null;
+    #width = 0;
+    #treeWidth = 0;
+    #toolbarWidth = 0;
+
     constructor(options = {}) {
         super();
 
@@ -45,10 +50,10 @@ export class Tree extends HTMLElement {
         this.#treeContainerElmt.classList.add("nav-tree");
 
         this.#toolbarElmt = document.createElement("div");
-        this.#toolbarElmt.classList.add("d-sm-flex", "d-grid", "justify-content-end", "gap-sm-3", "gap-1");
+        this.#toolbarElmt.classList.add("d-flex", "flex-nowrap", "align-items-start", "gap-3", "ms-auto");
 
         this.#collapseAllBtnElmt = document.createElement("a");
-        this.#collapseAllBtnElmt.classList.add("link-primary", "text-decoration-none");
+        this.#collapseAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap");
         this.#collapseAllBtnElmt.setAttribute("role", "button");
         this.#toolbarElmt.appendChild(this.#collapseAllBtnElmt);
 
@@ -62,7 +67,7 @@ export class Tree extends HTMLElement {
         this.#collapseAllBtnElmt.appendChild(collapseTextElmt);
 
         this.#expandAllBtnElmt = document.createElement("a");
-        this.#expandAllBtnElmt.classList.add("link-primary", "text-decoration-none");
+        this.#expandAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap");
         this.#expandAllBtnElmt.setAttribute("role", "button");
         this.#toolbarElmt.appendChild(this.#expandAllBtnElmt);
 
@@ -79,6 +84,39 @@ export class Tree extends HTMLElement {
     #initEventListeners() {
         this.#collapseAllBtnElmt?.addEventListener("click", () => { this.collapseAll(); });
         this.#expandAllBtnElmt?.addEventListener("click", () => { this.expandAll(); });
+
+        this.#resizeObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                if (entry.contentRect.width != 0) {
+                    if (entry.target === this && this.#width != entry.contentRect.width) {
+                        this.#width = entry.contentRect.width;
+                    }
+                    else if (entry.target === this.#treeContainerElmt && this.#treeWidth != entry.contentRect.width) {
+                        this.#treeWidth = entry.contentRect.width;
+                    }
+                    else if (entry.target === this.#toolbarElmt && this.#toolbarWidth != entry.contentRect.width) {
+                        this.#toolbarWidth = entry.contentRect.width;
+                    }
+                }
+            }
+
+            if ((this.#treeWidth + this.#toolbarWidth) > this.#width)
+            {
+                this.classList.replace("d-flex", "vstack");
+                this.classList.replace("gap-3", "gap-1");
+                this.#treeContainerElmt.classList.add("order-last");
+                this.#toolbarElmt.classList.add("order-first");
+            }
+            else {
+                this.classList.replace("vstack", "d-flex");
+                this.classList.replace("gap-1", "gap-3");
+                this.#treeContainerElmt.classList.remove("order-last");
+                this.#toolbarElmt.classList.remove("order-first");
+            }
+        });
+        this.#resizeObserver.observe(this);
+        this.#resizeObserver.observe(this.#treeContainerElmt);
+        this.#resizeObserver.observe(this.#toolbarElmt);
     }
 
     #getCollapsableFromItem(itemElmt, switchable=false, ancestor=false) {
