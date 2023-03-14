@@ -13,7 +13,7 @@ def create_app():
     """Create application"""
     app = flask.Flask(__name__)
     app.config.from_object("bemserver_ui.settings.Config")
-    app.config.from_envvar("FLASK_SETTINGS_FILE", silent=True)
+    app.config.from_envvar("BEMSERVER_UI_SETTINGS_FILE", silent=True)
 
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
