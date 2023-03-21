@@ -1,6 +1,40 @@
 Changelog
 ---------
 
+0.4.2 (2023-03-21)
+++++++++++++++++++
+
+Features:
+
+- Timeseries:
+
+  - Improve timeseries selector component (function to set filters after init)
+  - Add timeseries semantics setup page
+
+- Analysis:
+
+  - Remove energy consumption analysis setup page (feature is now covered by timeseries semantics)
+
+Fixes:
+
+- Improve edit (link/unlink timeseries or locations) events feedback messages
+
+Other changes:
+
+- Support Python 3.11
+- Require bemserver-api-client >=0.15.0 and <0.16.0
+- Require bemserver-api 0.15.0
+- Require bemserver-core 0.12.0
+- Rename app config vars:
+
+  - ``FLASK_SETTINGS_FILE`` into ``BEMSERVER_UI_SETTINGS_FILE``
+  - ``BEMSERVER_TIMEZONE_NAME`` into ``BEMSERVER_UI_TIMEZONE_NAME``
+  - ``BEMSERVER_NOTIFICATION_UPDATER_DELAY`` into ``BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY``
+  - ``BEMSERVER_PARTNERS_FILE`` into ``BEMSERVER_UI_PARTNERS_FILE``
+  - ``BEMSERVER_PLUGINS`` into ``BEMSERVER_UI_PLUGINS``
+
+- Add deployment docs
+
 0.4.1 (2023-03-02)
 ++++++++++++++++++
 
