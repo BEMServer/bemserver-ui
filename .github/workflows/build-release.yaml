@@ -14,8 +14,27 @@ jobs:
       - run: python -m pip install --upgrade pip wheel
       - run: pip install tox
       - run: tox -elint
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: '3.9', python: '3.9', tox: py39}
+          - {name: '3.10', python: '3.10', tox: py310}
+          - {name: '3.11', python: '3.11', tox: py311}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --upgrade pip wheel
+      - run: pip install tox codecov
+      - run: tox -e${{ matrix.tox }}
+      - run: codecov
   release:
-    needs: [lint]
+    needs: [lint, tests]
     name: PyPI release
     if: startsWith(github.ref, 'refs/tags')
     runs-on: ubuntu-latest

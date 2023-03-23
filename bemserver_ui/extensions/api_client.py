@@ -13,7 +13,8 @@ def init_app(app):
     host = app.config["BEMSERVER_API_HOST"]
     use_ssl = app.config["BEMSERVER_API_USE_SSL"]
 
-    _check_api_version(host, use_ssl)
+    if not app.config.get("TESTING", False):
+        _check_api_version(host, use_ssl)
 
     def make_api_client(_):
         authentication_method = None
