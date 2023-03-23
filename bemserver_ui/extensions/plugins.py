@@ -67,8 +67,11 @@ def _load_and_init_plugin_module(plugin_path, app):
 def check_required_ui_version(plugin_req_ui_version):
     try:
         version_ui = Version(bemserver_ui.__version__)
-    except InvalidVersion as exc:
-        raise BEMServerUIVersionError(f"Invalid UI version: {str(exc)}")
+    except (
+        TypeError,
+        InvalidVersion,
+    ) as exc:
+        raise BEMServerUIVersionError(f"Invalid UI version: {str(exc)}") from exc
     version_min = plugin_req_ui_version["min"]
     version_max = plugin_req_ui_version["max"]
     if not (version_min <= version_ui < version_max):
