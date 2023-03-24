@@ -13,8 +13,8 @@ import bemserver_api_client.exceptions as bac
 
 
 CAMPAIGN_CONTEXT_QUERY_ARG_NAME = "campaign_ctxt"
-# TODO: IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME = "ignore_campaign_ctxt"
-# TODO: FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME = "forced_campaign_ctxt"
+IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME = f"ignore_{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}"
+FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME = f"forced_{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}"
 
 CAMPAIGN_STATE_OVERALL = "overall"
 
@@ -140,11 +140,9 @@ def url_for_campaign(endpoint, **kwargs):
     if endpoint == "static":
         ignore_campaign = True
     else:
-        # TODO: f"ignore_{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}"
-        ignore_campaign = kwargs.pop("ignore_campaign", False)
+        ignore_campaign = kwargs.pop(IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME, False)
 
-    # TODO: f"forced_{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}"
-    forced_campaign = kwargs.pop("forced_campaign", None)
+    forced_campaign = kwargs.pop(FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME, None)
 
     if not ignore_campaign:
         if forced_campaign is not None:
@@ -171,8 +169,7 @@ def init_app(app):
         ):
             try:
                 flask.g.campaign_ctxt = CampaignContext(
-                    # TODO: f"forced_{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}"
-                    flask.request.args.get("forced_campaign")
+                    flask.request.args.get(FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
                     or flask.request.args.get(CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
                 )
             except bac.BEMServerAPIAuthenticationError as exc:

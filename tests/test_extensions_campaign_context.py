@@ -9,6 +9,8 @@ from bemserver_ui.extensions.campaign_context import (
     CampaignState,
     url_for_campaign,
     CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+    IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+    FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
     CampaignContext,
     CAMPAIGN_STATE_OVERALL,
 )
@@ -200,11 +202,14 @@ class TestExtensionCampaignContext:
                 == "http://localhost/static/images/bemserver.svg"
             )
 
-            # forced_campaign does nothing on static resources
+            # forced_campaign_ctxt does nothing on static resources
             assert (
                 url_for_campaign(
                     "static",
-                    **{"filename": "images/bemserver.svg", "forced_campaign": 1},
+                    **{
+                        "filename": "images/bemserver.svg",
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 1,
+                    },
                 )
                 == "http://localhost/static/images/bemserver.svg"
             )
@@ -213,7 +218,7 @@ class TestExtensionCampaignContext:
                     "static",
                     **{
                         "filename": "images/bemserver.svg",
-                        "forced_campaign": 1,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 1,
                         "whatever": "nevermind",
                     },
                 )
@@ -242,11 +247,14 @@ class TestExtensionCampaignContext:
                 == "http://localhost/static/images/bemserver.svg"
             )
 
-            # forced_campaign does nothing on static resources
+            # forced_campaign_ctxt does nothing on static resources
             assert (
                 url_for_campaign(
                     "static",
-                    **{"filename": "images/bemserver.svg", "forced_campaign": 1},
+                    **{
+                        "filename": "images/bemserver.svg",
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 1,
+                    },
                 )
                 == "http://localhost/static/images/bemserver.svg"
             )
@@ -255,7 +263,7 @@ class TestExtensionCampaignContext:
                     "static",
                     **{
                         "filename": "images/bemserver.svg",
-                        "forced_campaign": 1,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 1,
                         "whatever": "nevermind",
                     },
                 )
@@ -293,12 +301,12 @@ class TestExtensionCampaignContext:
                 == "http://localhost/timeseries/?whatever=nevermind"
             )
 
-            # forced_campaign defines query arg on non static resources
+            # forced_campaign_ctxt defines query arg on non static resources
             assert (
                 url_for_campaign(
                     "timeseries.list",
                     **{
-                        "forced_campaign": 42,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
                     },
                 )
                 == f"http://localhost/timeseries/?{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}=42"
@@ -307,20 +315,20 @@ class TestExtensionCampaignContext:
                 "timeseries.list",
                 **{
                     "whatever": "nevermind",
-                    "forced_campaign": 42,
+                    FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
                 },
             ) == (
                 "http://localhost/timeseries/?whatever=nevermind"
                 f"&{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}=42"
             )
-            # ignore_campaign take hold of forced_campaign
+            # ignore_campaign_ctxt take hold of forced_campaign_ctxt
             assert (
                 url_for_campaign(
                     "timeseries.list",
                     **{
                         "whatever": "nevermind",
-                        "forced_campaign": 42,
-                        "ignore_campaign": True,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
+                        IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True,
                     },
                 )
                 == "http://localhost/timeseries/?whatever=nevermind"
@@ -361,12 +369,12 @@ class TestExtensionCampaignContext:
                 f"&{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}=1"
             )
 
-            # forced_campaign take hold of context on non static resources
+            # forced_campaign_ctxt take hold of context on non static resources
             assert (
                 url_for_campaign(
                     "timeseries.list",
                     **{
-                        "forced_campaign": 42,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
                     },
                 )
                 == f"http://localhost/timeseries/?{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}=42"
@@ -375,33 +383,33 @@ class TestExtensionCampaignContext:
                 "timeseries.list",
                 **{
                     "whatever": "nevermind",
-                    "forced_campaign": 42,
+                    FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
                 },
             ) == (
                 "http://localhost/timeseries/?whatever=nevermind"
                 f"&{CAMPAIGN_CONTEXT_QUERY_ARG_NAME}=42"
             )
 
-            # ignore_campaign to not apply context
+            # ignore_campaign_ctxt to not apply context
             assert (
                 url_for_campaign(
                     "timeseries.list",
                     **{
                         "whatever": "nevermind",
-                        "ignore_campaign": True,
+                        IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True,
                     },
                 )
                 == "http://localhost/timeseries/?whatever=nevermind"
             )
 
-            # ignore_campaign take hold of forced_campaign
+            # ignore_campaign_ctxt take hold of forced_campaign_ctxt
             assert (
                 url_for_campaign(
                     "timeseries.list",
                     **{
                         "whatever": "nevermind",
-                        "forced_campaign": 42,
-                        "ignore_campaign": True,
+                        FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: 42,
+                        IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True,
                     },
                 )
                 == "http://localhost/timeseries/?whatever=nevermind"

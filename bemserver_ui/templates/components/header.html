@@ -24,7 +24,7 @@
                     <li><a class="dropdown-item" href="{{ url_for('users.view', id=signed_user.id) }}" title="My user profile">My profile</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ url_for('main.about') }}" title="About BEMServer">About BEMServer...</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('auth.signout', ignore_campaign=True) }}" title="Sign out"><i class="bi bi-power"></i> Sign out</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.signout', ignore_campaign_ctxt=True) }}" title="Sign out"><i class="bi bi-power"></i> Sign out</a></li>
                 </ul>
             </div>
         </div>

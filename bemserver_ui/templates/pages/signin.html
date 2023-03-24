@@ -19,7 +19,7 @@
             <img class="mx-auto m-lg-0 my-0 my-lg-auto app-logo" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
             <div class="vstack gap-2 p-4 app-signin-panel">
                 <h1 class="h3 text-center d-none d-lg-block">Sign in to BEMServer</h1>
-                <form id="signinForm" class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign=True) }}" method="POST">
+                <form id="signinForm" class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign_ctxt=True) }}" method="POST">
                     <div class="form-floating">
                         <input type="email" form="signinForm" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
                         <label for="email">Email address</label>

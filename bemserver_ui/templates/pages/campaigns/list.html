@@ -92,9 +92,9 @@
                     <div class="text-center my-md-auto my-3 me-3">
                         {% if is_campaign_selected %}
                         {% set extra_kwargs = {"state": request.args["state"]} if "state" in request.args else {} %}
-                        <a href="{{ url_for(request.endpoint, ignore_campaign=True, **extra_kwargs) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect">Unselect</a>
+                        <a href="{{ url_for(request.endpoint, ignore_campaign_ctxt=True, **extra_kwargs) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect">Unselect</a>
                         {% else %}
-                        <a href="{{ url_for('structural_elements.explore', forced_campaign=x.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
+                        <a href="{{ url_for('structural_elements.explore', forced_campaign_ctxt=x.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
                         {% endif %}
                     </div>
                 </div>

@@ -2,6 +2,9 @@
 import flask
 
 from bemserver_ui.extensions import auth
+from bemserver_ui.extensions.campaign_context import (  # noqa: F401
+    IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+)
 
 
 blp = flask.Blueprint("auth", __name__, url_prefix="/auth")
@@ -36,7 +39,11 @@ def signin():
         user_json["data"] = user_json["data"][0]
         flask.session["user"] = user_json
         flask.flash(f"Welcome back {user_json['data']['name']}!", "message")
-        return flask.redirect(flask.url_for("main.index", ignore_campaign=True))
+        url_redir = flask.url_for(
+            "main.index",
+            IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME=True,
+        )
+        return flask.redirect(url_redir)
 
     # Render sign in form.
     return flask.render_template("pages/signin.html")
