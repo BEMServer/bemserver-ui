@@ -44,7 +44,7 @@ setup(
             "GNU Affero General Public License v3 or later (AGPLv3+)"
         ),
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     install_requires=[
         "flask>=2.2.3,<3.0.0",
         "python-dotenv>=1.0.0,<2.0.0",
