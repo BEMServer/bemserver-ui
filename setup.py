@@ -44,10 +44,10 @@ setup(
             "GNU Affero General Public License v3 or later (AGPLv3+)"
         ),
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     install_requires=[
-        "flask>=2.2.2",
-        "python-dotenv>=0.21.0",
+        "flask>=2.2.3,<3.0.0",
+        "python-dotenv>=1.0.0,<2.0.0",
         "bemserver-api-client>=0.15.0,<0.16.0",
     ],
     extras_require=EXTRAS_REQUIRE,
