@@ -136,7 +136,6 @@ export class TimeseriesManageStructuralElementsView {
                                 let structuralElementId = tsStructElmtLink[`${structuralElementType}_id`];
 
                                 let tsStructElmtLinkId = tsStructElmtLink.id;
-                                let tsStructElmtLinkEtag = tsStructElmtLink.etag;
 
                                 // Search item in tree.
                                 let searchTree = structuralElementType == "zone" ? this.#zonesTreeElmt : this.#sitesTreeElmt;
@@ -149,7 +148,7 @@ export class TimeseriesManageStructuralElementsView {
                                 let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, () => {
                                     this.#internalAPIRequester.post(
                                         flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
-                                        {"type": structuralElementType, "rel_id": tsStructElmtLinkId, "etag": tsStructElmtLinkEtag},
+                                        {"type": structuralElementType, "rel_id": tsStructElmtLinkId},
                                         () => {
                                             dropZoneElmt.removeElement(dropedItemElmt);
                                         },
@@ -222,7 +221,7 @@ export class TimeseriesManageStructuralElementsView {
 
                             this.#internalAPIRequester.post(
                                 flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
-                                {type: jsonData.sourceNodeData.type, rel_id: data.data.id, etag: data.etag},
+                                {type: jsonData.sourceNodeData.type, rel_id: data.data.id},
                                 () => {
                                     dropZoneElmt.removeElement(dropedItemElmt);
                                 },
