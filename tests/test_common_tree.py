@@ -1,11 +1,16 @@
 """Common tree tools tests"""
 from bemserver_ui.common.tree import (
+    PATH_SEPARATOR,
     build_tree,
     build_tree_node,
     search_tree_node,
     _get_node_level_from_type,
+    build_tree_node_path,
 )
-from bemserver_ui.common.const import STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    STRUCTURAL_ELEMENT_TYPES,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+)
 
 
 SITES_DATA = [
@@ -155,6 +160,9 @@ def get_tree_data(structural_element_types=STRUCTURAL_ELEMENT_TYPES):
 
 
 class TestCommonTree:
+    def test_path_separator(self):
+        assert PATH_SEPARATOR == "/"
+
     def test_build_tree_node(self):
         site_node = build_tree_node(SITES_DATA[0]["id"], SITES_DATA[0]["name"], "site")
         for field_name in [
@@ -194,7 +202,9 @@ class TestCommonTree:
         assert not building_node["is_draggable"]
         assert building_node["is_selectable"]
         assert building_node["path"] == "Anglet"
-        assert building_node["full_path"] == "Anglet / Nobatek HQ"
+        assert building_node["full_path"] == (
+            f" {PATH_SEPARATOR} ".join(["Anglet", "Nobatek HQ"])
+        )
         assert building_node["parent_node_id"] == "site-1"
         assert building_node["nodes"] == []
 
@@ -208,8 +218,12 @@ class TestCommonTree:
         assert storey_node["type"] == "storey"
         assert not storey_node["is_draggable"]
         assert storey_node["is_selectable"]
-        assert storey_node["path"] == "Anglet / Nobatek HQ"
-        assert storey_node["full_path"] == "Anglet / Nobatek HQ / Ground floor"
+        assert storey_node["path"] == (
+            f" {PATH_SEPARATOR} ".join(["Anglet", "Nobatek HQ"])
+        )
+        assert storey_node["full_path"] == (
+            f" {PATH_SEPARATOR} ".join(["Anglet", "Nobatek HQ", "Ground floor"])
+        )
         assert storey_node["parent_node_id"] == "building-1"
         assert storey_node["nodes"] == []
 
@@ -223,8 +237,14 @@ class TestCommonTree:
         assert space_node["type"] == "space"
         assert not space_node["is_draggable"]
         assert space_node["is_selectable"]
-        assert space_node["path"] == "Anglet / Nobatek HQ / Ground floor"
-        assert space_node["full_path"] == "Anglet / Nobatek HQ / Ground floor / Ground"
+        assert space_node["path"] == (
+            f" {PATH_SEPARATOR} ".join(["Anglet", "Nobatek HQ", "Ground floor"])
+        )
+        assert space_node["full_path"] == (
+            f" {PATH_SEPARATOR} ".join(
+                ["Anglet", "Nobatek HQ", "Ground floor", "Ground"]
+            )
+        )
         assert space_node["parent_node_id"] == "storey-1"
         assert space_node["nodes"] == []
 
@@ -461,3 +481,107 @@ class TestCommonTree:
         assert found_node is None
         found_node = search_tree_node(tree, "zone", 666)
         assert found_node is None
+
+    def test_build_tree_node_path(self):
+        base_data = {
+            "id": 0,
+            "timeseries_id": 0,
+        }
+        base_site_data = {
+            "site": {
+                "name": "Site A",
+                "description": "AAAAAA",
+                "ifc_id": "AAAAAA",
+                "campaign_id": 0,
+            },
+        }
+        site_data = {
+            **base_data,
+            **base_site_data,
+            "site_id": 0,
+        }
+        path = build_tree_node_path("site", site_data)
+        assert path == ""
+
+        base_building_data = {
+            "building": {
+                "name": "Building A",
+                "description": "AAAAAA",
+                "ifc_id": "AAAAAA",
+                "site_id": 0,
+            },
+        }
+        building_data = {
+            **base_data,
+            **base_site_data,
+            **base_building_data,
+            "building_id": 0,
+        }
+        path = build_tree_node_path("building", building_data)
+        assert path == "Site A"
+
+        base_storey_data = {
+            "storey": {
+                "name": "Storey A",
+                "description": "AAAAAA",
+                "ifc_id": "AAAAAA",
+                "building_id": 0,
+            },
+        }
+        storey_data = {
+            **base_data,
+            **base_site_data,
+            **base_building_data,
+            **base_storey_data,
+            "storey_id": 0,
+        }
+        path = build_tree_node_path("storey", storey_data)
+        assert path == f" {PATH_SEPARATOR} ".join(["Site A", "Building A"])
+
+        base_space_data = {
+            "space": {
+                "name": "Space A",
+                "description": "AAAAAA",
+                "ifc_id": "AAAAAA",
+                "storey_id": 0,
+            },
+        }
+        space_data = {
+            **base_data,
+            **base_site_data,
+            **base_building_data,
+            **base_storey_data,
+            **base_space_data,
+            "space_id": 0,
+        }
+        path = build_tree_node_path("space", space_data)
+        assert path == f" {PATH_SEPARATOR} ".join(["Site A", "Building A", "Storey A"])
+
+        zone_data = {
+            "id": 0,
+            "zone": {
+                "name": "Zone A",
+                "description": "AAAAAA",
+                "ifc_id": "AAAAAA",
+                "campaign_id": 0,
+            },
+            "timeseries_id": 0,
+            "zone_id": 0,
+        }
+        path = build_tree_node_path("zone", zone_data)
+        assert path == ""
+
+        for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
+            path = build_tree_node_path(struct_elmt_type, {})
+            assert path == ""
+        path = build_tree_node_path("whatever", site_data)
+        assert path is None
+        path = build_tree_node_path("whatever", zone_data)
+        assert path is None
+
+        path = build_tree_node_path("building", site_data)
+        assert path == "Site A"
+        path = build_tree_node_path("building", storey_data)
+        assert path == "Site A"
+        path = build_tree_node_path("storey", building_data)
+        assert path == f" {PATH_SEPARATOR} ".join(["Site A", "Building A"])

@@ -5,10 +5,8 @@ import flask
 from bemserver_api_client.enums import EventLevel
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.time import convert_html_form_datetime
-from bemserver_ui.common.const import (
-    FULL_STRUCTURAL_ELEMENT_TYPES,
-    STRUCTURAL_ELEMENT_TYPES,
-)
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.tree import build_tree_node_path
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
@@ -152,19 +150,6 @@ def delete_timeseries_link(link_id):
     return flask.jsonify({"success": True})
 
 
-def _build_structural_element_path(struct_elmt_type, struct_elmt_data):
-    path = None
-    if struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
-        path = " / ".join(
-            [
-                struct_elmt_data[x]["name"]
-                for x in STRUCTURAL_ELEMENT_TYPES
-                if x != struct_elmt_type and x in struct_elmt_data
-            ]
-        )
-    return path
-
-
 @blp.route("/<int:id>/structural_elements/<string:type>")
 @auth.signin_required
 def retrieve_structural_elements(id, type):
@@ -179,9 +164,7 @@ def retrieve_structural_elements(id, type):
 
     structural_elements = []
     for struct_elmt_event in struct_elmt_event_resp.data:
-        struct_elmt_event["path"] = _build_structural_element_path(
-            type, struct_elmt_event
-        )
+        struct_elmt_event["path"] = build_tree_node_path(type, struct_elmt_event)
         struct_elmt_event = {**struct_elmt_event, **struct_elmt_event[type]}
         structural_elements.append(struct_elmt_event)
 
@@ -208,9 +191,7 @@ def retrieve_structural_elements_links(id, type):
 
     structural_elements = []
     for struct_elmt_event in struct_elmt_event_resp.data:
-        struct_elmt_event["path"] = _build_structural_element_path(
-            type, struct_elmt_event
-        )
+        struct_elmt_event["path"] = build_tree_node_path(type, struct_elmt_event)
         struct_elmt_event = {**struct_elmt_event, **struct_elmt_event[type]}
         structural_elements.append(struct_elmt_event)
 
@@ -232,9 +213,7 @@ def create_structural_elements_link(id, type, structural_element_id):
     api_events_resource = getattr(flask.g.api_client, f"event_by_{type}s")
     struct_elmt_event_resp = api_events_resource.create(payload)
     struct_elmt_event_data = struct_elmt_event_resp.data
-    struct_elmt_event_data["path"] = _build_structural_element_path(
-        type, struct_elmt_event_data
-    )
+    struct_elmt_event_data["path"] = build_tree_node_path(type, struct_elmt_event_data)
     struct_elmt_event_data = {**struct_elmt_event_data, **struct_elmt_event_data[type]}
     return flask.jsonify(struct_elmt_event_data)
 

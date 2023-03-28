@@ -223,9 +223,9 @@ export class TimeseriesListView {
             for (let tsStructElmtLink of data.data[structuralElementType]) {
                 structuralElementContentHTML += `<div class="d-flex flex-nowrap align-items-center border rounded bg-white px-2 py-1 gap-1">
 <i class="bi bi-${structuralElementType == "zone" ? "bullseye" : "building"}"></i>
-<span class="fw-bold">${tsStructElmtLink.structural_element.name}</span>`;
-                if (structuralElementType != "zone" && tsStructElmtLink.structural_element.path.length > 0) {
-                    structuralElementContentHTML += `<small class="text-muted ms-2">${tsStructElmtLink.structural_element.path}</small>`;
+<span class="fw-bold">${tsStructElmtLink[structuralElementType].name}</span>`;
+                if (structuralElementType != "zone" && tsStructElmtLink.path.length > 0) {
+                    structuralElementContentHTML += `<small class="text-muted ms-2">${tsStructElmtLink.path}</small>`;
                 }
                 structuralElementContentHTML += `</div>`;
 

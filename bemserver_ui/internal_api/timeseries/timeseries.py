@@ -3,11 +3,7 @@ import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
-from bemserver_ui.common.tree import search_tree_node
-from bemserver_ui.internal_api.structural_elements import (
-    _build_tree_sites,
-    _build_tree_zones,
-)
+from bemserver_ui.common.tree import build_tree_node_path
 
 
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
@@ -82,10 +78,6 @@ def retrieve_property_data(id):
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_structural_elements(id):
-    campaign_id = flask.g.campaign_ctxt.id
-    tree_sites = _build_tree_sites(campaign_id)
-    tree_zones = _build_tree_zones(campaign_id)
-
     data = {}
     for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
         data[struct_elmt_type] = []
@@ -100,11 +92,9 @@ def retrieve_structural_elements(id):
             # Get ETag.
             link_resp = api_ts_by_struct_elmt.getone(ts_struct_elmt["id"])
             ts_struct_elmt["etag"] = link_resp.etag
-            # Get structural element tree node data.
-            ts_struct_elmt["structural_element"] = search_tree_node(
-                tree_sites if struct_elmt_type != "zone" else tree_zones,
-                struct_elmt_type,
-                link_resp.data[f"{struct_elmt_type}_id"],
+            # Get structural element tree node path.
+            ts_struct_elmt["path"] = build_tree_node_path(
+                struct_elmt_type, ts_struct_elmt
             )
 
     return flask.jsonify(
