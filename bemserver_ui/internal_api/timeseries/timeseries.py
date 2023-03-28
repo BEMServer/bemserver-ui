@@ -3,11 +3,7 @@ import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
-from bemserver_ui.common.tree import search_tree_node
-from bemserver_ui.internal_api.structural_elements import (
-    _build_tree_sites,
-    _build_tree_zones,
-)
+from bemserver_ui.common.tree import build_tree_node_path
 
 
 blp = flask.Blueprint("timeseries", __name__, url_prefix="/timeseries")
@@ -82,10 +78,6 @@ def retrieve_property_data(id):
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_structural_elements(id):
-    campaign_id = flask.g.campaign_ctxt.id
-    tree_sites = _build_tree_sites(campaign_id)
-    tree_zones = _build_tree_zones(campaign_id)
-
     data = {}
     for struct_elmt_type in FULL_STRUCTURAL_ELEMENT_TYPES:
         data[struct_elmt_type] = []
@@ -97,14 +89,9 @@ def retrieve_structural_elements(id):
         )
         data[struct_elmt_type] = ts_struct_elmt_resp.data
         for ts_struct_elmt in data[struct_elmt_type]:
-            # Get ETag.
-            link_resp = api_ts_by_struct_elmt.getone(ts_struct_elmt["id"])
-            ts_struct_elmt["etag"] = link_resp.etag
-            # Get structural element tree node data.
-            ts_struct_elmt["structural_element"] = search_tree_node(
-                tree_sites if struct_elmt_type != "zone" else tree_zones,
-                struct_elmt_type,
-                link_resp.data[f"{struct_elmt_type}_id"],
+            # Get structural element tree node path.
+            ts_struct_elmt["path"] = build_tree_node_path(
+                struct_elmt_type, ts_struct_elmt
             )
 
     return flask.jsonify(
@@ -127,13 +114,7 @@ def post_structural_elements(id):
     )
     payload = {"timeseries_id": id, f"{struct_elmt_type}_id": struct_elmt_id}
     ret_resp = api_tsbystructelmt_resource.create(payload)
-
-    return flask.jsonify(
-        {
-            "data": ret_resp.data,
-            "etag": ret_resp.etag,
-        }
-    )
+    return flask.jsonify(ret_resp.toJSON())
 
 
 @blp.route("/<int:id>/remove_structural_elements", methods=["POST"])
@@ -142,11 +123,10 @@ def post_structural_elements(id):
 def remove_structural_elements(id):
     struct_elmt_type = flask.request.json["type"]
     rel_id = flask.request.json["rel_id"]
-    etag = flask.request.json["etag"]
 
     api_tsbystructelmt_resource = getattr(
         flask.g.api_client, f"timeseries_by_{struct_elmt_type}s"
     )
-    api_tsbystructelmt_resource.delete(rel_id, etag=etag)
+    api_tsbystructelmt_resource.delete(rel_id)
 
     return flask.jsonify({"success": True})

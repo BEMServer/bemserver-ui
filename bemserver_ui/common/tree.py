@@ -1,5 +1,28 @@
 """BEMServer UI common tree tools."""
-from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    STRUCTURAL_ELEMENT_TYPES,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+)
+
+
+PATH_SEPARATOR = "/"
+
+
+def build_tree_node_path(structural_element_type, structural_element_data):
+    path = None
+    if structural_element_type in FULL_STRUCTURAL_ELEMENT_TYPES:
+        node_level = _get_node_level_from_type(structural_element_type)
+        path = f" {PATH_SEPARATOR} ".join(
+            [
+                structural_element_data[x]["name"]
+                for x in STRUCTURAL_ELEMENT_TYPES
+                if (
+                    _get_node_level_from_type(x) < node_level
+                    and x in structural_element_data
+                )
+            ]
+        )
+    return path
 
 
 def build_tree_node(
@@ -16,7 +39,9 @@ def build_tree_node(
     if parent_node is not None:
         node_level = parent_node["node_level"] + 1
         if len(parent_node["full_path"]) > 0:
-            full_path = " / ".join([parent_node["full_path"], full_path])
+            full_path = f" {PATH_SEPARATOR} ".join(
+                [parent_node["full_path"], full_path]
+            )
     return {
         "node_id": f"{data_type}-{id}",
         "node_level": node_level,
