@@ -3,10 +3,10 @@ import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
-from bemserver_ui.views.structural_elements.structural_elements import (
+from bemserver_ui.common.tree import search_tree_node
+from bemserver_ui.internal_api.structural_elements import (
     _build_tree_sites,
     _build_tree_zones,
-    _search_tree_node,
 )
 
 
@@ -101,7 +101,7 @@ def retrieve_structural_elements(id):
             link_resp = api_ts_by_struct_elmt.getone(ts_struct_elmt["id"])
             ts_struct_elmt["etag"] = link_resp.etag
             # Get structural element tree node data.
-            ts_struct_elmt["structural_element"] = _search_tree_node(
+            ts_struct_elmt["structural_element"] = search_tree_node(
                 tree_sites if struct_elmt_type != "zone" else tree_zones,
                 struct_elmt_type,
                 link_resp.data[f"{struct_elmt_type}_id"],

@@ -4,111 +4,12 @@ import flask
 import bemserver_api_client.exceptions as bac_exc
 
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
-from bemserver_ui.common.const import (
-    STRUCTURAL_ELEMENT_TYPES,
-    FULL_STRUCTURAL_ELEMENT_TYPES,
-)
+from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
 
 
 blp = flask.Blueprint(
     "structural_elements", __name__, url_prefix="/structural_elements"
 )
-
-
-def _extract_data(data, data_type, parent_data=None, *, is_draggable=False):
-    node_level = 0
-    full_path = data["name"]
-    if parent_data is not None:
-        node_level = parent_data["node_level"] + 1
-        if len(parent_data["full_path"]) > 0:
-            full_path = " / ".join([parent_data["full_path"], full_path])
-    return {
-        "node_id": f"{data_type}-{data['id']}",
-        "node_level": node_level,
-        "id": data["id"],
-        "name": data["name"],
-        "type": data_type,
-        "is_draggable": is_draggable,
-        "is_selectable": True,
-        "path": "" if parent_data is None else parent_data["full_path"],
-        "full_path": full_path,
-        "parent_node_id": None if parent_data is None else parent_data["node_id"],
-        "nodes": [],
-    }
-
-
-def _build_tree_sites(
-    campaign_id,
-    *,
-    structural_element_types=STRUCTURAL_ELEMENT_TYPES,
-    is_draggable=False,
-):
-    # Get all structure elements for campaign.
-    structural_elements = {}
-    for structural_element_type in structural_element_types:
-        api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
-        api_resource_resp = api_resource.getall(campaign_id=campaign_id, sort="+name")
-        structural_elements[structural_element_type] = api_resource_resp.data
-
-    # Build structural elements tree.
-    tree_data = []
-    for site in structural_elements.get("site", []):
-        site_data = _extract_data(site, "site", is_draggable=is_draggable)
-        for building in structural_elements.get("building", []):
-            if building["site_id"] != site["id"]:
-                continue
-            building_data = _extract_data(
-                building, "building", site_data, is_draggable=is_draggable
-            )
-            for storey in structural_elements.get("storey", []):
-                if storey["building_id"] != building["id"]:
-                    continue
-                storey_data = _extract_data(
-                    storey, "storey", building_data, is_draggable=is_draggable
-                )
-                for space in structural_elements.get("space", []):
-                    if space["storey_id"] != storey["id"]:
-                        continue
-                    space_data = _extract_data(
-                        space, "space", storey_data, is_draggable=is_draggable
-                    )
-                    storey_data["nodes"].append(space_data)
-                building_data["nodes"].append(storey_data)
-            site_data["nodes"].append(building_data)
-        tree_data.append(site_data)
-    return tree_data
-
-
-def _build_tree_zones(campaign_id, *, is_draggable=False):
-    zones_resp = flask.g.api_client.zones.getall(campaign_id=campaign_id, sort="+name")
-    tree_data = []
-    for zone in zones_resp.data:
-        zone_data = _extract_data(zone, "zone", is_draggable=is_draggable)
-        tree_data.append(zone_data)
-    return tree_data
-
-
-def _get_node_level_from_type(node_type):
-    level = 0
-    if node_type == "building":
-        level = 1
-    elif node_type == "storey":
-        level = 2
-    elif node_type == "space":
-        level = 3
-    return level
-
-
-def _search_tree_node(tree, node_type, node_id):
-    node_level = _get_node_level_from_type(node_type)
-    for node in tree:
-        if node["type"] == node_type and node["id"] == node_id:
-            return node
-        if len(node["nodes"]) > 0 and node_level > node["node_level"]:
-            ret = _search_tree_node(node["nodes"], node_type, node_id)
-            if ret is not None:
-                return ret
-    return None
 
 
 @blp.route("/")

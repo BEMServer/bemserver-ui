@@ -2,11 +2,11 @@
 import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context
-from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
-from bemserver_ui.views.structural_elements.structural_elements import (
-    _build_tree_sites,
-    _build_tree_zones,
+from bemserver_ui.common.const import (
+    STRUCTURAL_ELEMENT_TYPES,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
 )
+from bemserver_ui.common.tree import build_tree
 
 
 blp = flask.Blueprint(
@@ -16,6 +16,28 @@ blp = flask.Blueprint(
 
 def register_blueprint(api_blp):
     api_blp.register_blueprint(blp)
+
+
+def _build_tree_sites(
+    campaign_id,
+    *,
+    structural_element_types=STRUCTURAL_ELEMENT_TYPES,
+    is_draggable=False,
+):
+    # Get all structure elements data for campaign.
+    structural_elements_data = {}
+    for structural_element_type in structural_element_types:
+        api_resource = getattr(flask.g.api_client, f"{structural_element_type}s")
+        api_resource_resp = api_resource.getall(campaign_id=campaign_id, sort="+name")
+        structural_elements_data[structural_element_type] = api_resource_resp.data
+
+    # Build structural elements tree.
+    return build_tree(structural_elements_data, is_draggable=is_draggable)
+
+
+def _build_tree_zones(campaign_id, *, is_draggable=False):
+    zones_resp = flask.g.api_client.zones.getall(campaign_id=campaign_id, sort="+name")
+    return build_tree({"zone": zones_resp.data}, is_draggable=is_draggable)
 
 
 @blp.route("/")
