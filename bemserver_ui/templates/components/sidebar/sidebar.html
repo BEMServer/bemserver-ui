@@ -6,6 +6,7 @@
             {% filter indent(width=12, first=True) %}
             {% include "components/sidebar/sidebar_campaign_selector.html" +%}
             {% include "components/sidebar/sidebar_campaign_context.html" %}
+            {% set sidebar_plugins = get_sidebar_plugins(g.campaign_ctxt) %}
             {% for sidebar_section in ["tsdata", "analysis", "dashboards", "services"] %}
             {% set sidebar_section_plugins = sidebar_plugins[sidebar_section] %}
             {% include "components/sidebar/sidebar_" + sidebar_section + ".html" %}

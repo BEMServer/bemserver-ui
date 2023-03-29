@@ -1,10 +1,10 @@
 {% macro render_nav_link(text, url, title=none, icon_classes=none, icon_url=none, is_plugin=False, extra_classes=none) %}
 <a class="nav-link{% if is_plugin %} d-flex justify-content-between align-items-center gap-2{% endif %}{% if extra_classes %} {{ extra_classes | join(' ') }}{% endif %}" href="{{ url }}" title="{{ title }}">
     <div class="hstack align-items-center gap-2">
-        {% if icon_classes %}
+        {% if icon_url %}
+        <img src="{{ icon_url }}"{% if icon_classes %}class="{{ icon_classes | join(' ') }}"{% endif %}>
+        {% elif icon_classes %}
         <i class="{{ icon_classes | join(' ') }}"></i>
-        {% elif icon_url %}
-        <img src="{{ icon_url }}">
         {% endif %}
         {% if text %}
         {{ text }}

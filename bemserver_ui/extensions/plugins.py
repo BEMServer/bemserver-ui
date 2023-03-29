@@ -1,6 +1,9 @@
-"""Extension to manage plugin packages `BEMSERVER_PLUGINS_PATH` folder."""
+"""Extension to manage BEMServer UI plugin packages.
+
+For a plugin example, see:
+https://github.com/BEMServer/bemserver-ui-plugin-example
+"""
 import logging
-import flask
 from pathlib import Path
 from packaging.version import Version, InvalidVersion
 
@@ -12,11 +15,14 @@ from ..common.tools import import_module
 
 BSUI_PLUGINS_LOGGER = logging.getLogger(__name__)
 PLUGINS_LOADED = []
-PLUGINS_SIDEBAR = {x: [] for x in SIDEBAR_SECTIONS}
 
 
 class BEMServerUIVersionError(Exception):
     """BEMServer UI version error"""
+
+
+class BEMServerUIPluginError(Exception):
+    """BEMServer UI plugin error"""
 
 
 def init_app(app):
@@ -28,25 +34,25 @@ def init_app(app):
             if plugin_module := _load_and_init_plugin_module(plugin_path, app):
                 PLUGINS_LOADED.append(plugin_module)
 
-                plugin_sidebar = plugin_module.PLUGIN_INFO["sidebar"]
-                for sidebar_section, sidebar_data in plugin_sidebar.items():
-                    PLUGINS_SIDEBAR[sidebar_section].extend(sidebar_data)
-
     # Inject plugins sidebar entries.
     @app.context_processor
-    def inject_plugins_sidebars():
-        sidebar_plugins = {}
-        for sidebar_section in SIDEBAR_SECTIONS:
-            sidebar_plugins[sidebar_section] = []
-            for sidebar_section_plugin in PLUGINS_SIDEBAR[sidebar_section]:
-                requires_context = sidebar_section_plugin.get(
-                    "requires_campaign_context", False
-                )
-                if not requires_context or (
-                    requires_context and flask.g.campaign_ctxt.has_campaign
-                ):
-                    sidebar_plugins[sidebar_section].append(sidebar_section_plugin)
-        return dict(sidebar_plugins=sidebar_plugins)
+    def inject_plugins_sidebar_entries():
+        def _get_plugins_sidebar(campaign_ctxt):
+            sidebar_plugins = {x: [] for x in SIDEBAR_SECTIONS}
+            for plugin_module in PLUGINS_LOADED:
+                plugin_sidebar = plugin_module.get_sidebar(campaign_ctxt)
+                for sidebar_section, sidebar_data in plugin_sidebar.items():
+                    if sidebar_section not in SIDEBAR_SECTIONS:
+                        BSUI_PLUGINS_LOGGER.warn(
+                            "Unknown %s sidebar section for %s plugin",
+                            sidebar_section,
+                            plugin_module.__name__,
+                        )
+                        continue
+                    sidebar_plugins[sidebar_section].extend(sidebar_data)
+            return sidebar_plugins
+
+        return dict(get_sidebar_plugins=_get_plugins_sidebar)
 
 
 def _load_and_init_plugin_module(plugin_path, app):
@@ -54,9 +60,11 @@ def _load_and_init_plugin_module(plugin_path, app):
     if plugin_path.exists():
         plugin_module = import_module(plugin_path.parent.name, plugin_path)
         try:
-            check_required_ui_version(plugin_module.REQUIRED_UI_VERSION)
-        except BEMServerUIVersionError as exc:
+            _check_required_minimal_attributes(plugin_module)
+            _check_required_ui_version(plugin_module.REQUIRED_UI_VERSION)
+        except (BEMServerUIPluginError, BEMServerUIVersionError) as exc:
             BSUI_PLUGINS_LOGGER.error(str(exc))
+            BSUI_PLUGINS_LOGGER.error("%s plugin NOT loaded!", plugin_module.__name__)
         else:
             plugin_module.init_app(app)
             BSUI_PLUGINS_LOGGER.debug("%s plugin loaded!", plugin_module.__name__)
@@ -64,7 +72,7 @@ def _load_and_init_plugin_module(plugin_path, app):
     return None
 
 
-def check_required_ui_version(plugin_req_ui_version):
+def _check_required_ui_version(plugin_req_ui_version):
     try:
         version_ui = Version(bemserver_ui.__version__)
     except (
@@ -79,3 +87,12 @@ def check_required_ui_version(plugin_req_ui_version):
             f"UI version ({str(version_ui)}) not supported!"
             f" (expected: >={str(version_min)},<{str(version_max)})"
         )
+
+
+def _check_required_minimal_attributes(plugin_module):
+    # Verfify that plugin module has minimal required attributes and functions.
+    for func_name in ["REQUIRED_UI_VERSION", "PLUGIN_INFO", "init_app", "get_sidebar"]:
+        if not hasattr(plugin_module, func_name):
+            raise BEMServerUIPluginError(
+                f"Missing {func_name} in {plugin_module.__name__}!"
+            )
