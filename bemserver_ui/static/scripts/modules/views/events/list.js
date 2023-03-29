@@ -610,7 +610,7 @@ export class EventListView {
                 "fetchUrl": `api.events.retrieve_structural_elements`,
                 "fetchUrlParams": {id: eventId, type: structuralElmentType, page_size: this.#defaultEventInfoTabListPageSize},
                 "listItemRenderer": this.#createStructuralElementsElement,
-                "iconClasses": structuralElmentType != "zone" ? ["bi", "bi-building", "me-1"] : ["bi", "bi-bullseye", "me-1"],
+                "iconClasses": structuralElmentType != "zone" ? ["bi", "bi-buildings", "me-1"] : ["bi", "bi-bullseye", "me-1"],
             };
         }
 

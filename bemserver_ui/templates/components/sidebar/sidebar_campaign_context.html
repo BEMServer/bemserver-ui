@@ -2,7 +2,7 @@
 <ul class="nav nav-pills flex-column gap-1">
     <li class="nav-item d-flex justify-content-between align-items-center gap-1">
         {% filter indent(width=8, first=True) %}
-        {{- mac_sidebar.render_nav_link("Sites", url_for("structural_elements.explore"), "Manage locations", ["bi", "bi-building"], extra_classes=["w-100"]) -}}
+        {{- mac_sidebar.render_nav_link("Sites", url_for("structural_elements.explore"), "Manage locations", ["bi", "bi-buildings"], extra_classes=["w-100"]) -}}
         {% endfilter %}
         {% if signed_user.is_admin %}
         <div class="dropdown">
