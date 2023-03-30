@@ -1,6 +1,28 @@
 Changelog
 ---------
 
+0.5.0 (2023-03-30)
+++++++++++++++++++
+
+Features:
+
+- Timeseries:
+
+  - Improve timeseries list page (locations are loaded faster)
+
+Other changes:
+
+- Require bemserver-api-client >=0.16.0 and <0.17.0
+- Require bemserver-api 0.16.0
+- Still require bemserver-core 0.12.0
+- Rename campaign context query args for consistency with ``campaign_ctxt``:
+
+  - ``forced_campaign`` into ``forced_campaign_ctxt``
+  - ``ignore_campaign`` into ``ignore_campaign_ctxt``
+
+- Add tests on some internal core features
+- Rework plugins extension (provide campaign context to a ``get_sidebar`` function inside UI plugins)
+
 0.4.2 (2023-03-21)
 ++++++++++++++++++
 
