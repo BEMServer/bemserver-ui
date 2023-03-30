@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/install.txt --resolver=backtracking setup.py
 #
-bemserver-api-client==0.15.0
+bemserver-api-client==0.16.0
     # via bemserver-ui (setup.py)
 certifi==2021.10.8
     # via requests
