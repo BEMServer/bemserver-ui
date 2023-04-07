@@ -35,7 +35,7 @@
     <div class="row mb-3">
         <div class="col"> 
             <div class="d-flex justify-content-between align-items-center">
-                <form id="formFiltersElmt" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
+                <form id="formFiltersElmt" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint, **request.view_args) }}" method="POST">
                     <input type="hidden" name="sort" id="sort" value="{{ sort }}">
                     <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
                     <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-asc" autocomplete="off" {% if sort == "+timeseries_name" %} checked{% endif %}>
