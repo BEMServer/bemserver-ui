@@ -1,6 +1,9 @@
 import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
 import { Parser } from "../../tools/parser.js";
 import { TimeDisplay } from "../../tools/time.js";
+import { flaskES6 } from "../../../app.js";
+import { InternalAPIRequest } from "../../tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
 
 
 export class TimeseriesChartExplore extends HTMLDivElement {
@@ -11,6 +14,10 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         height: 500,
     };
     #theme = null;
+
+    #internalAPIRequester = null;
+    #filterReqIDs = {};
+    #searchReqID = null;
 
     #downloadCSVUrl = null;
 
@@ -127,6 +134,8 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
         this.#initOptions = options || this.#initOptions;
         this.#theme = theme;
+
+        this.#internalAPIRequester = new InternalAPIRequest();
     }
 
     #initEventListeners() {
@@ -282,7 +291,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data, parameters) {
+    load(data, parameters) { // dataEvents = null
         this.hideLoading();
         let listUnit = [];
         let listDistinctUnitByAxis = { 0: [], 1: [], };
@@ -293,6 +302,45 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
         options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
+
+
+        if (this.#searchReqID != null) {
+            this.#internalAPIRequester.abort(this.#searchReqID);
+            this.#searchReqID = null;
+        }
+
+        // Ts name = data.ts_headers
+
+        console.log("Timeseries:");
+
+        this.#searchReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.timeseries.retrieve_list`),
+            (data) => {
+                console.log(data.data); 
+            },
+            (error) => {
+                console.error(error);
+            },
+        );
+
+        console.log("Events:");
+
+
+        let eventsOptions = {
+            "timeseries_id": 3,
+        };
+
+        this.#searchReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
+            (data) => {
+                console.log(data.data); 
+            },
+            (error) => {
+                console.error(error);
+            },
+        );
+
+
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {

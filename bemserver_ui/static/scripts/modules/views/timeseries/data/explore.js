@@ -286,7 +286,10 @@ export class TimeseriesDataExploreView {
             this.#internalAPIRequester.abort(this.#tsDataCSVReqID);
             this.#tsDataCSVReqID = null;
         }
-        this.#tsDataCSVReqID = this.#internalAPIRequester.get(
+
+        // tab des url pour chaque ts
+
+        this.#tsDataCSVReqID = this.#internalAPIRequester.get( //gets
             flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chartExplore.setDownloadCSVLink(flaskES6.urlFor(`timeseries.data.download_multiple`, urlParams));
