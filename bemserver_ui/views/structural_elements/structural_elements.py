@@ -32,6 +32,9 @@ def create(type):
         }
 
         if type in ("site", "zone"):
+            if type == "site":
+                payload["latitude"] = flask.request.form["latitude"]
+                payload["longitude"] = flask.request.form["longitude"]
             payload["campaign_id"] = flask.g.campaign_ctxt.id
         elif type == "building":
             payload["site_id"] = flask.request.form["site"]
@@ -115,7 +118,10 @@ def edit(type, id):
             "name": flask.request.form["name"],
             "description": flask.request.form["description"],
             "ifc_id": flask.request.form["ifc_id"],
+            "latitude": flask.request.form["latitude"],
+            "longitude": flask.request.form["longitude"],
         }
+
         ret_resp = api_resource.update(id, payload, etag=flask.request.form["editEtag"])
         flask.flash(f"{type} updated: {ret_resp.data['name']}", "success")
 

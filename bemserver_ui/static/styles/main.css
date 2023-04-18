@@ -36,6 +36,12 @@ h2 {
     color: var(--app-green);
 }
 
+input:invalid:not(:focus) {
+    border-color: var(--bs-danger);
+    border-left-width: 8px;
+    background-color: rgba(var(--bs-danger-rgb), 0.05);
+}
+
 .vr {
     color: var(--app-gray) !important;
 }

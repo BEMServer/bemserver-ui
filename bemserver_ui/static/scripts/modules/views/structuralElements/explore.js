@@ -267,7 +267,7 @@ export class StructuralElementsExploreView {
     }
 
     #getGeneralHTML(data, path) {
-        return `<div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        let htmlContent = `<div class="d-flex justify-content-between align-items-start gap-3 mb-3">
     <div>
         <h5 class="text-break">${data.structural_element.name}</h5>
         <h6 class="text-break">${path}</h6>
@@ -281,6 +281,21 @@ export class StructuralElementsExploreView {
         <dd>${(data.structural_element.ifc_id != null && data.structural_element.ifc_id != "") ? data.structural_element.ifc_id : "-"}</dd>
     </dl>
 </div>`;
+
+        if (data.type == "site") {
+            htmlContent += `<div class="row">
+    <dl class="col">
+        <dt>Latitude <small class="text-muted">[°]</small></dt>
+        <dd>${data.structural_element.latitude != null ? data.structural_element.latitude : "-"}</dd>
+    </dl>
+    <dl class="col">
+        <dt>Longitude <small class="text-muted">[°]</small></dt>
+        <dd>${data.structural_element.longitude != null ? data.structural_element.longitude : "-"}</dd>
+    </dl>
+</div>`;
+        }
+
+        return htmlContent;
     }
 
     #getItemHelpHTML(itemDescription, withSpace = true) {
