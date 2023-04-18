@@ -268,7 +268,8 @@ export class TimeseriesDataExploreView {
         this.#loadBtnElmt.setAttribute("disabled", true);
 
         let urlParams = {
-            timeseries: this.#tsSelector.selectedItems.map(ts => ts.name),
+            timeseriesName: this.#tsSelector.selectedItems.map(ts => ts.name),
+            timseriesId: this.#tsSelector.selectedItems.map(ts => ts.id),
             data_state: this.#tsDataStatesSelectElmt.value,
             start_date: this.#startDatetimePickerElmt.date,
             start_time: this.#startDatetimePickerElmt.time,
