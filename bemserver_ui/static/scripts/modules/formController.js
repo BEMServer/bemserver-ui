@@ -14,7 +14,7 @@ export class FormController {
     #cacheDOM() {
         this.#confirmFormElmts = [].slice.call(document.querySelectorAll(`form[data-modal-confirm-message]`));
         this.#requiredInputElmts = [].slice.call(document.querySelectorAll(`input:required, select:required, div[is^="app-"][required]`));
-        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll(`input[minlength], input[maxlength], textarea[minlength], textarea[maxlength]`));
+        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll(`input[minlength], input[maxlength], textarea[minlength], textarea[maxlength], input[min], input[max]`));
     }
 
     #getRequiredLabelElmt() {
@@ -24,13 +24,13 @@ export class FormController {
         return requiredLabelElmt;
     }
 
-    #getMinMaxLabelElmt(minLength, maxLength) {
+    #getMinMaxLabelElmt(minLength, maxLength, isNumber = false) {
         let texts = new Array();
         if (minLength != null) {
-            texts.push(`min. ${minLength} character${minLength > 1 ? "s" : ""}`);
+            texts.push(`min. ${minLength}${!isNumber ? ` character${minLength > 1 ? "s" : ""}` : ""}`);
         }
         if (maxLength != null) {
-            texts.push(`max. ${maxLength} character${maxLength > 1 ? "s": ""}`);
+            texts.push(`max. ${maxLength}${!isNumber ? ` character${maxLength > 1 ? "s" : ""}` : ""}`);
         }
 
         let minMaxText = ``;
@@ -70,7 +70,14 @@ export class FormController {
         for (let minMaxInputElmt of this.#minMaxInputElmts) {
             let minLength = minMaxInputElmt.getAttribute("minlength");
             let maxLength = minMaxInputElmt.getAttribute("maxlength");
-            minMaxInputElmt.parentElement.appendChild(this.#getMinMaxLabelElmt(minLength, maxLength));
+            if (minLength != null || maxLength != null) {
+                minMaxInputElmt.parentElement.appendChild(this.#getMinMaxLabelElmt(minLength, maxLength));
+            }
+            else {
+                let min = minMaxInputElmt.getAttribute("min");
+                let max = minMaxInputElmt.getAttribute("max");
+                minMaxInputElmt.parentElement.appendChild(this.#getMinMaxLabelElmt(min, max, true));
+            }
         }
     }
 }
