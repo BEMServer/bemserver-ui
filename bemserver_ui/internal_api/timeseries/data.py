@@ -101,8 +101,7 @@ def retrieve_data(id):
 @ensure_campaign_context
 def retrieve_multiple_data():
     campaign = flask.g.campaign_ctxt.id
-    ts_names = [str(x) for x in flask.request.args["timeseriesName"].split(",")]
-    ts_ids = [int(x) for x in flask.request.args["timeseriesId"].split(",")]
+    ts_names = [str(x) for x in flask.request.args["timeseries"].split(",")]
     data_state_id = flask.request.args["data_state"]
     tz_name = flask.request.args["timezone"]
     start_date = flask.request.args["start_date"]
@@ -140,7 +139,6 @@ def retrieve_multiple_data():
             dt_end.isoformat(),
             data_state_id,
             ts_names,
-            ts_ids,
             timezone=tz_name,
             aggregation=Aggregation(aggregation),
             bucket_width_value=bucket_width_value,
@@ -154,12 +152,11 @@ def retrieve_multiple_data():
             dt_end.isoformat(),
             data_state_id,
             ts_names,
-            ts_ids,
             timezone=tz_name,
             format=DataFormat.csv,
         )
 
-    ts_headers = ["Datetime"] + ts_names + ts_ids
+    ts_headers = ["Datetime"] + ts_names
     csv_data = ts_data_csv.data.decode("utf-8")
     reader = csv.DictReader(StringIO(csv_data))
     ts_data = list(reader)

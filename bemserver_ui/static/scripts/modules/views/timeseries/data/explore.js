@@ -11,6 +11,7 @@ export class TimeseriesDataExploreView {
     #internalAPIRequester = null;
     #tsDataStatesReqID = null;
     #tsDataCSVReqID = null;
+    #searchReqID = null;
 
     #messagesElmt = null;
     #chartContainerElmt = null;
@@ -268,8 +269,7 @@ export class TimeseriesDataExploreView {
         this.#loadBtnElmt.setAttribute("disabled", true);
 
         let urlParams = {
-            timeseriesName: this.#tsSelector.selectedItems.map(ts => ts.name),
-            timseriesId: this.#tsSelector.selectedItems.map(ts => ts.id),
+            timeseries: this.#tsSelector.selectedItems.map((ts) => ts.name),
             data_state: this.#tsDataStatesSelectElmt.value,
             start_date: this.#startDatetimePickerElmt.date,
             start_time: this.#startDatetimePickerElmt.time,
@@ -288,8 +288,6 @@ export class TimeseriesDataExploreView {
             this.#tsDataCSVReqID = null;
         }
 
-        // tab des url pour chaque ts
-
         this.#tsDataCSVReqID = this.#internalAPIRequester.get( //gets
             flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
             (data) => {
@@ -300,7 +298,73 @@ export class TimeseriesDataExploreView {
                     timezone: this.#timezonePickerElmt.tzName,
                     series: this.#tsChartParams,
                 };
-                this.#chartExplore.load(data, options);
+
+                let ts = this.#tsSelector.selectedItems;
+
+                if (this.#searchReqID != null) {
+                    this.#internalAPIRequester.abort(this.#searchReqID);
+                    this.#searchReqID = null;
+                }
+
+                let urls = [];
+
+                for (let i = 0; i < ts.length; i++) {
+                    urls.push(flaskES6.urlFor(`api.events.retrieve_list`, {"timeseries_id": ts[i].id, "date_min": urlParams.start_date, "date_max": urlParams.end_date, "timezone": urlParams.timezone, "data_state": urlParams.data_state, "event_type": "event"}));
+                }
+
+                let TsXEventsMap = new Map();
+
+                this.#searchReqID = this.#internalAPIRequester.gets(urls,
+                    (data) => {
+                        this.#searchReqID = null;
+                        for (let i = 0; i < data.length; i++) {
+                            let events = [];
+                            for (let [key, value] of Object.entries(data[i])) {
+                                for (let j = 0; j < value.length; j++) {
+                                    let event = value[j];
+                                    let eventMap = new Map();
+                                    eventMap.set("ts_id", ts[i].id.toString());
+                                    eventMap.set("ts_name", ts[i].name.toString());
+                                    for (let [key, value] of Object.entries(event)) {
+                                        let color;
+                                        if(key == "level") {
+                                            if(value == "INFO") {
+                                                color = "rbga(82, 165, 127, 1)";
+                                            }
+                                            else if (value == "DEBUG") {
+                                                color = "rbga(138, 140, 142, 1)";
+                                            }
+                                            else if(value == "WARNING") {
+                                                color = "rbga(250, 219, 125, 1)";
+                                            }
+                                            else if(value == "ERROR") {
+                                                color = "rbga(232, 148, 156, 1)";
+                                            }
+                                            else if(value == "CRITICAL") {
+                                                color = "rbga(220, 53, 69, 1)";
+                                            }
+                                            eventMap.set(key, value);
+                                        }
+                                        else if(key == "timestamp") {
+                                            eventMap.set(key, value);
+                                        }
+                                        else if(key == "description") {
+                                            eventMap.set(key, value);
+                                        }
+                                    }
+                                    events.push(eventMap);
+                                }
+                            }
+                            TsXEventsMap.set(ts[i].name.toString(), events);
+                        }
+                    },
+                    (error) => {
+                        console.log(error);
+                    },
+                    () => {
+                        this.#chartExplore.load(data, options, TsXEventsMap);
+                    }
+                );
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});

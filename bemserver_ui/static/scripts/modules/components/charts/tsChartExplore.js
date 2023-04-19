@@ -291,7 +291,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(data, parameters) { // dataEvents = null
+    load(data, parameters, TsXEventsMap) {
         this.hideLoading();
         let listUnit = [];
         let listDistinctUnitByAxis = { 0: [], 1: [], };
@@ -302,45 +302,6 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
         options.title[0].subtext = parameters.subtitle;
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
-
-
-        if (this.#searchReqID != null) {
-            this.#internalAPIRequester.abort(this.#searchReqID);
-            this.#searchReqID = null;
-        }
-
-        // Ts name = data.ts_headers
-
-        console.log("Timeseries:");
-
-        this.#searchReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.retrieve_list`),
-            (data) => {
-                console.log(data.data); 
-            },
-            (error) => {
-                console.error(error);
-            },
-        );
-
-        console.log("Events:");
-
-
-        let eventsOptions = {
-            "timeseries_id": 3,
-        };
-
-        this.#searchReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
-            (data) => {
-                console.log(data.data); 
-            },
-            (error) => {
-                console.error(error);
-            },
-        );
-
-
 
         options.series.length = 0;
         options.series = data.ts_headers.filter((header) => {
@@ -353,6 +314,25 @@ export class TimeseriesChartExplore extends HTMLDivElement {
             listUnit.push(unitSymbol);
             if (unitSymbol != null && unitSymbol != "" && !listDistinctUnitByAxis[yAxisIndex].includes(unitSymbol)) {
                 listDistinctUnitByAxis[yAxisIndex].push(unitSymbol);
+            }
+
+            const markPointData = [];
+            for (let event of TsXEventsMap.get(header)) {
+                markPointData.push({
+                    coord: [event.get("timestamp"), "max"],
+                    value: event.get("level"),
+                    label: {
+                        fontSize: 8,
+                        width: 25,
+                        overflow: "breakAll",
+                        color: parameters.series[header]?.color || "#000000",
+                    },
+                    symbol: "pin",
+                    itemStyle: {
+                        borderWidth: 4,
+                        borderColor: event.get("color"),
+                    },
+                });
             }
 
             return {
@@ -369,6 +349,9 @@ export class TimeseriesChartExplore extends HTMLDivElement {
                 data: data.ts_data.map((row) => {
                     return [row["Datetime"], Parser.parseFloatOrDefault(row[header], Number.NaN, 2)];
                 }),
+                markPoint: {
+                    data: markPointData,
+                },
             };
         });
 
