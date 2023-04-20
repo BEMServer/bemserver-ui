@@ -45,8 +45,8 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Aggregation mode</span>
                         <select class="form-select" id="agg" name="agg" aria-label="Select an aggregation mode">
-                            <option value="none" selected>No aggregation</option>
-                            <option value="avg">average</option>
+                            <option value="none">No aggregation</option>
+                            <option value="avg"selected>average</option>
                             <option value="sum">sum</option>
                             <option value="min">minimum</option>
                             <option value="max">maximum</option>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="col d-none invisible">
-                    <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="day" value="1"></div>
+                    <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="hour" value="1"></div>
                 </div>
             </div>
             <div class="row mb-3">

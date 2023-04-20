@@ -288,7 +288,11 @@ export class TimeseriesDataExploreView {
             this.#tsDataCSVReqID = null;
         }
 
-        this.#tsDataCSVReqID = this.#internalAPIRequester.get( //gets
+        /**
+         * TODO: Faire passer les events logbook (qui n'ont pas de timeseries)
+         */
+
+        this.#tsDataCSVReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
             (data) => {
                 this.#chartExplore.setDownloadCSVLink(flaskES6.urlFor(`timeseries.data.download_multiple`, urlParams));
@@ -305,7 +309,7 @@ export class TimeseriesDataExploreView {
                     this.#internalAPIRequester.abort(this.#searchReqID);
                     this.#searchReqID = null;
                 }
-
+                
                 let urls = [];
 
                 for (let i = 0; i < ts.length; i++) {
@@ -326,24 +330,39 @@ export class TimeseriesDataExploreView {
                                     eventMap.set("ts_id", ts[i].id.toString());
                                     eventMap.set("ts_name", ts[i].name.toString());
                                     for (let [key, value] of Object.entries(event)) {
-                                        let color;
                                         if(key == "level") {
+                                            let color;
+                                            let shape;
+                                            let symbolSize;
                                             if(value == "INFO") {
-                                                color = "rbga(82, 165, 127, 1)";
+                                                color = "#4fa27c";
+                                                shape = "roundRect";
+                                                symbolSize = 20;
                                             }
                                             else if (value == "DEBUG") {
-                                                color = "rbga(138, 140, 142, 1)";
+                                                color = "#8a8c8e";
+                                                shape = "circle";
+                                                symbolSize = 20;
                                             }
                                             else if(value == "WARNING") {
-                                                color = "rbga(250, 219, 125, 1)";
+                                                color = "#fadb7d";
+                                                shape = "triangle";
+                                                symbolSize = 20;
                                             }
                                             else if(value == "ERROR") {
-                                                color = "rbga(232, 148, 156, 1)";
+                                                color = "#e8949c";
+                                                shape = "square";
+                                                symbolSize = 17;
                                             }
                                             else if(value == "CRITICAL") {
-                                                color = "rbga(220, 53, 69, 1)";
+                                                color = "#dc3545";
+                                                shape = "diamond";
+                                                symbolSize = 22;
                                             }
-                                            eventMap.set(key, value);
+                                            eventMap.set("symbolSize", symbolSize);
+                                            eventMap.set("shape", shape);
+                                            eventMap.set("color", color);
+                                            eventMap.set("level", value);
                                         }
                                         else if(key == "timestamp") {
                                             eventMap.set(key, value);

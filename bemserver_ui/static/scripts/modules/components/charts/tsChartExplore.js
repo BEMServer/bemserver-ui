@@ -63,12 +63,13 @@ export class TimeseriesChartExplore extends HTMLDivElement {
                 },
             },
         },
-        tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "cross",
+        tooltip:
+            {
+                trigger: "axis",
+                axisPointer: {
+                    type: "cross",
+                },
             },
-        },
         legend: [
             {
                 data: [],
@@ -83,7 +84,14 @@ export class TimeseriesChartExplore extends HTMLDivElement {
                 bottom: 0,
                 right: 0,
                 type: "scroll",
-            }
+            },
+            {
+                data: [],
+                width: "100%",
+                type: "plain",
+                top: 10,
+                left: "center",
+            },
         ],
         dataZoom: [
             {
@@ -108,7 +116,18 @@ export class TimeseriesChartExplore extends HTMLDivElement {
                 position: "right",
             },
         ],
-        series: [],
+        series: [
+            {
+                markPoint: {
+                    data: [
+                        {
+                            type: "max",
+                            name: "Maximum",
+                        },
+                    ],
+                },
+            }
+        ],
         useUTC: false,
     };
 
@@ -299,8 +318,9 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         let options = this.#chart.getOption();
         options.legend[0].data = [];
         options.legend[1].data = [];
+        options.legend[2].data = [];
 
-        options.title[0].subtext = parameters.subtitle;
+
         options.toolbox[0].feature.dataView.lang[0] = this.#defaultTitle;
 
         options.series.length = 0;
@@ -316,21 +336,29 @@ export class TimeseriesChartExplore extends HTMLDivElement {
                 listDistinctUnitByAxis[yAxisIndex].push(unitSymbol);
             }
 
+            /**
+             * TODO: Afficher une fois l'event si il y a plusieurs timeseries avec le même event
+             * TODO: Afficher les infos sur un tooltip ou fenêtre modale lors du clic sur l'event (nom, description, date, etc.)
+             */
+            
             const markPointData = [];
             for (let event of TsXEventsMap.get(header)) {
                 markPointData.push({
                     coord: [event.get("timestamp"), "max"],
-                    value: event.get("level"),
+                    y : 35,
                     label: {
-                        fontSize: 8,
-                        width: 25,
+                        fontSize: 10,
+                        fontWeight: "bold",
+                        width: 30,
                         overflow: "breakAll",
-                        color: parameters.series[header]?.color || "#000000",
+                        color: "#000000",
                     },
-                    symbol: "pin",
+                    symbol: event.get("shape"),
+                    symbolSize: event.get("symbolSize"),
                     itemStyle: {
                         borderWidth: 4,
-                        borderColor: event.get("color"),
+                        borderColor: parameters.series[header]?.color || "#000000",
+                        color: event.get("color"),
                     },
                 });
             }
@@ -364,7 +392,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         options.yAxis[1].nameGap = 50;
 
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, listUnit, null, parameters.timezone); };
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone);};
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, listUnit, null, parameters.timezone); };
 
         options.legend[0].formatter = (name) => {
             return name + " [" + parameters.series[name]?.symbol + "] ";
@@ -377,6 +405,29 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         this.#chart.clear();
 
         this.#chart.setOption(options);
+
+        console.log(TsXEventsMap);
+
+        this.#chart.on('click', (params) => {
+            if (params.componentType == "markPoint") {
+                // TODO: Modal window with event details
+                //console.log("Event clicked: ", params);
+                //console.log("Event clicked: ", params.borderColor, parameters);
+                for (let [key, value] of Object.entries(parameters)) {
+                    if (key == "series") {
+                        for (let [key2, value2] of Object.entries(value)) {
+                            for (let [key3, value3] of Object.entries(value2)) {
+                                if (key3 == "color") {
+                                    if (value3 == params.borderColor) {
+                                        console.log("Event: ", key2, value2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     setDownloadCSVLink(url) {
