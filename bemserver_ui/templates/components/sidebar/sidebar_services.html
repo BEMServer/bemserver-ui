@@ -14,6 +14,7 @@
                     {{- mac_sidebar.render_nav_item("Cleanup", url_for("services.cleanup.state"), "Cleanup service", ["bi", "bi-magic"]) -}}
                     {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.campaign_context_state"), "Check missing data service", ["bi", "bi-journal-x"]) -}}
                     {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.campaign_context_state"), "Check outlier data service", ["bi", "bi-layout-wtf"]) -}}
+                    {{- mac_sidebar.render_nav_item("Weather data", url_for("services.weather_data.manage"), "Weather data service", ["bi", "bi-cloud-sun"]) -}}
                     {% endif %}
                     {% for sidebar_section_plugin in sidebar_section_plugins %}
                     {{- mac_sidebar.render_nav_item_from_plugin(sidebar_section_plugin) -}}

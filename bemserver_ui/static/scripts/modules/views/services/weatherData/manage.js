@@ -1,0 +1,532 @@
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { Spinner } from "../../../components/spinner.js";
+import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
+
+
+class WeatherDataServiceManageView {
+
+    #internalAPIRequester = null;
+    #listReqID = null;
+    #updateStateReqID = null;
+    #getSvcEtagReqID = null;
+    #getSemanticsReqID = null;
+
+    #messagesElmt = null;
+
+    #filtersContainerElmt = null;
+    #siteNameSearchElmt = null;
+    #serviceStateFilterElmt = null;
+    #removeFiltersBtnElmt = null;
+
+    #itemsCountElmt = null;
+    #serviceStatesContainerElmt = null;
+
+    #fetchDataModalElmt = null;
+    #fetchDataModal = null;
+    #fetchDataSiteIdElmt = null;
+    #fetchDataDatetimeStartElmt = null;
+    #fetchDataDatetimeEndElmt = null;
+    #fetchDataBtnElmt = null;
+    #fetchDataModalParamsContainerElmt = null;
+
+    constructor() {
+        this.#internalAPIRequester = new InternalAPIRequest();
+
+        this.#cacheDOM();
+        this.#initFilters();
+        this.#initEventListeners();
+    }
+    
+    #cacheDOM() {
+        this.#messagesElmt = document.getElementById("messages");
+
+        this.#filtersContainerElmt = document.getElementById("filtersContainer");
+        this.#siteNameSearchElmt = document.getElementById("siteNameSearch");
+        this.#removeFiltersBtnElmt = document.getElementById("removeFiltersBtn");
+
+        this.#itemsCountElmt = document.getElementById("itemsCount");
+        this.#serviceStatesContainerElmt = document.getElementById("serviceStatesContainer");
+
+        if (signedUser.is_admin) {
+            this.#fetchDataModalElmt = document.getElementById("fetchDataModal");
+            this.#fetchDataModal = new bootstrap.Modal(this.#fetchDataModalElmt);
+            this.#fetchDataSiteIdElmt = document.getElementById("fetchDataSiteId");
+            this.#fetchDataDatetimeStartElmt = document.getElementById("fetchDataDatetimeStart");
+            this.#fetchDataDatetimeEndElmt = document.getElementById("fetchDataDatetimeEnd");
+            this.#fetchDataBtnElmt = document.getElementById("fetchDataBtn");
+            this.#fetchDataModalParamsContainerElmt = document.getElementById("fetchDataModalParamsContainer");
+        }
+    }
+
+    #initFilters() {
+        this.#serviceStateFilterElmt = new FilterSelect();
+        this.#filtersContainerElmt.insertBefore(this.#serviceStateFilterElmt, this.#removeFiltersBtnElmt);
+        this.#serviceStateFilterElmt.load([
+            {value: "all", text: "All"},
+            {value: "on", text: "ON"},
+            {value: "off", text: "OFF"},
+        ]);
+        this.#serviceStateFilterElmt.setAttribute("data-default", "all");
+    }
+
+    #initEventListeners() {
+        this.#siteNameSearchElmt.addEventListener("input", (event) => {
+            event.preventDefault();
+
+            this.#updateSiteNameSearch();
+            this.#refreshList();
+        });
+
+        this.#serviceStateFilterElmt.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#refreshList();
+        });
+
+        this.#removeFiltersBtnElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            let hasFilterChanged = false;
+            if (this.#siteNameSearchElmt.value != "") {
+                this.#siteNameSearchElmt.value = "";
+                this.#updateSiteNameSearch();
+                hasFilterChanged = true;
+            }
+
+            let serviceStateFilterDefault = this.#serviceStateFilterElmt.getAttribute("data-default");
+            if (this.#serviceStateFilterElmt.value != serviceStateFilterDefault) {
+                this.#serviceStateFilterElmt.reset();
+                hasFilterChanged = true;
+            }
+
+            if (hasFilterChanged) {
+                this.#refreshList();
+            }
+        });
+
+        if (signedUser.is_admin) {
+            this.#fetchDataDatetimeStartElmt.addEventListener("datetimeChange", (event) => {
+                event.preventDefault();
+
+                this.#fetchDataDatetimeEndElmt.dateMin = this.#fetchDataDatetimeStartElmt.date;
+                this.#updateFetchDataBtn();
+            });
+
+            this.#fetchDataDatetimeEndElmt.addEventListener("datetimeChange", (event) => {
+                event.preventDefault();
+
+                this.#fetchDataDatetimeStartElmt.dateMax = this.#fetchDataDatetimeEndElmt.date;
+                this.#updateFetchDataBtn();
+            });
+
+            this.#fetchDataBtnElmt.addEventListener("click", () => {
+                this.#internalAPIRequester.put(
+                    flaskES6.urlFor(`api.structural_elements.fetch_weather_data`, {id: this.#fetchDataSiteIdElmt.value}),
+                    {
+                        "start_date": this.#fetchDataDatetimeStartElmt.date,
+                        "start_time": this.#fetchDataDatetimeStartElmt.time,
+                        "end_date": this.#fetchDataDatetimeEndElmt.date,
+                        "end_time": this.#fetchDataDatetimeEndElmt.time,
+                    },
+                    null,
+                    () => {
+                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Command sent with success. Weather data will be fetched soon.`, isDismissible: true });
+                        this.#messagesElmt.appendChild(flashMsgElmt);
+
+                        this.#fetchDataModal.hide();
+                    },
+                    (error) => {
+                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                        this.#messagesElmt.appendChild(flashMsgElmt);
+
+                        this.#fetchDataModal.hide();
+                    },
+                );
+            });
+        }
+    }
+
+    #updateSiteNameSearch() {
+        if (this.#siteNameSearchElmt.value == "") {
+            this.#siteNameSearchElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+        }
+        else if (!this.#siteNameSearchElmt.classList.contains("border-info")) {
+            this.#siteNameSearchElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+        }
+    }
+
+    #updateFetchDataBtn() {
+        if (this.#fetchDataDatetimeStartElmt.date != null && this.#fetchDataDatetimeStartElmt.time != null && this.#fetchDataDatetimeEndElmt.date != null && this.#fetchDataDatetimeEndElmt.time != null) {
+            this.#fetchDataBtnElmt.removeAttribute("disabled");
+        }
+        else {
+            this.#fetchDataBtnElmt.setAttribute("disabled", true);
+        }
+    }
+
+    #createEntryElement(serviceStateData) {
+        let trElmt = document.createElement("tr");
+        trElmt.classList.add("align-middle");
+
+        let thElmt = document.createElement("th");
+        thElmt.classList.add("text-break");
+        thElmt.setAttribute("scope", "row");
+        thElmt.innerText = serviceStateData.site_name;
+        trElmt.appendChild(thElmt);
+
+        let svcCtrlElmt = document.createElement("div");
+        svcCtrlElmt.classList.add("d-flex", "gap-1", "my-auto", "placeholder-glow");
+
+        if (signedUser.is_admin) {
+            let svcEtagInputElmt = document.createElement("input");
+            svcEtagInputElmt.setAttribute("type", "hidden");
+            svcCtrlElmt.appendChild(svcEtagInputElmt);
+
+            let svcOnInputElmt = document.createElement("input");
+            svcOnInputElmt.id = `radio-svc-state-${serviceStateData.site_id}-on`;
+            svcOnInputElmt.name = `radio-svc-state-${serviceStateData.site_id}`;
+            svcOnInputElmt.classList.add("btn-check");
+            svcOnInputElmt.setAttribute("type", "radio");
+            svcOnInputElmt.setAttribute("autocomplete", "off");
+            svcCtrlElmt.appendChild(svcOnInputElmt);
+
+            let svcOnLabelElmt = document.createElement("label");
+            svcOnLabelElmt.classList.add("btn", "btn-sm", "btn-outline-success");
+            svcOnLabelElmt.setAttribute("for", svcOnInputElmt.id);
+            svcOnLabelElmt.setAttribute("title", "Enable service");
+            svcOnLabelElmt.innerText = "ON";
+            svcCtrlElmt.appendChild(svcOnLabelElmt);
+
+            let svcOffInputElmt = document.createElement("input");
+            svcOffInputElmt.id = `radio-svc-state-${serviceStateData.site_id}-off`;
+            svcOffInputElmt.name = `radio-svc-state-${serviceStateData.site_id}`;
+            svcOffInputElmt.classList.add("btn-check");
+            svcOffInputElmt.setAttribute("type", "radio");
+            svcOffInputElmt.setAttribute("autocomplete", "off");
+            svcCtrlElmt.appendChild(svcOffInputElmt);
+
+            let svcOffLabelElmt = document.createElement("label");
+            svcOffLabelElmt.classList.add("btn", "btn-sm", "btn-outline-danger");
+            svcOffLabelElmt.setAttribute("for", svcOffInputElmt.id);
+            svcOffLabelElmt.setAttribute("title", "Disable service");
+            svcOffLabelElmt.innerText = "OFF";
+            svcCtrlElmt.appendChild(svcOffLabelElmt);
+
+            let updateSvcInputState = () => {
+                if (serviceStateData.is_enabled) {
+                    svcOffInputElmt.removeAttribute("checked");
+                    svcOnInputElmt.setAttribute("checked", "true");
+                }
+                else {
+                    svcOnInputElmt.removeAttribute("checked");
+                    svcOffInputElmt.setAttribute("checked", "true");
+                }
+
+                svcOnLabelElmt.classList.remove("placeholder");
+                svcOffLabelElmt.classList.remove("placeholder");
+            }
+
+
+            updateSvcInputState();
+
+
+            let updateServiceState = (isEnabled) => {
+                svcOnLabelElmt.classList.add("placeholder");
+                svcOffLabelElmt.classList.add("placeholder");
+
+                if (this.#updateStateReqID != null) {
+                    this.#internalAPIRequester.abort(this.#updateStateReqID);
+                    this.#updateStateReqID = null;
+                }
+
+                if (serviceStateData.id == null) {
+                    if (isEnabled) {
+                        // Enable weather data service for site.
+                        this.#updateStateReqID = this.#internalAPIRequester.post(
+                            flaskES6.urlFor(`api.services.weather_data.enable`),
+                            { site_id: serviceStateData.site_id, is_enabled: isEnabled },
+                            (data) => {
+                                serviceStateData = data.data;
+                                svcEtagInputElmt.value = data.etag;
+                                updateSvcInputState();
+
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: "Weather data service enabled!", isDismissible: true });
+                                this.#messagesElmt.appendChild(flashMsgElmt);
+                            },
+                            (error) => {
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                                this.#messagesElmt.appendChild(flashMsgElmt);
+
+                                svcOnLabelElmt.classList.remove("placeholder");
+                                svcOffLabelElmt.classList.remove("placeholder");
+                            },
+                        );
+                    }
+                }
+                else {
+                    let _updateSvcState = (isEnabled) => {
+                        // Update weather data service state for site.
+                        this.#updateStateReqID = this.#internalAPIRequester.put(
+                            flaskES6.urlFor(`api.services.weather_data.update_state`, {id: serviceStateData.id}),
+                            { is_enabled: isEnabled },
+                            svcEtagInputElmt.value,
+                            (data) => {
+                                serviceStateData = data.data;
+                                svcEtagInputElmt.value = data.etag;
+                                updateSvcInputState();
+
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Weather data service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
+                                this.#messagesElmt.appendChild(flashMsgElmt);
+                            },
+                            (error) => {
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                                this.#messagesElmt.appendChild(flashMsgElmt);
+
+                                updateSvcInputState();
+                            },
+                        );
+                    }
+
+                    if (svcEtagInputElmt.value == "") {
+                        if (this.#getSvcEtagReqID != null) {
+                            this.#internalAPIRequester.abort(this.#getSvcEtagReqID);
+                            this.#getSvcEtagReqID = null;
+                        }
+
+                        this.#getSvcEtagReqID = this.#internalAPIRequester.get(
+                            flaskES6.urlFor(`api.services.weather_data.retrieve_one`, {id: serviceStateData.id}),
+                            (data) => {
+                                svcEtagInputElmt.value = data.etag;
+                                _updateSvcState(true);
+                            },
+                            (error) => {
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                                this.#messagesElmt.appendChild(flashMsgElmt);
+
+                                updateSvcInputState();
+                            },
+                        );
+                    }
+                    else {
+                        _updateSvcState(isEnabled);
+                    }
+                }
+            };
+
+
+            svcOnInputElmt.addEventListener("change", () => {
+                if (svcOnInputElmt.checked) {
+                    updateServiceState(true);
+                }
+            });
+
+            svcOffInputElmt.addEventListener("change", () => {
+                if (svcOffInputElmt.checked) {
+                    updateServiceState(false);
+                }
+            });
+        }
+        else {
+            let spanStateElmt = document.createElement("span");
+            spanStateElmt.classList.add("fw-bold", "text-opacity-75");
+            if (serviceStateData.is_enabled) {
+                spanStateElmt.classList.add("text-success");
+                spanStateElmt.innerText = "ON";
+            }
+            else {
+                spanStateElmt.classList.add("text-danger");
+                spanStateElmt.innerText = "OFF";
+            }
+            svcCtrlElmt.appendChild(spanStateElmt);
+        }
+
+        let tdStateElmt = document.createElement("td");
+        tdStateElmt.classList.add("d-flex", "gap-4");
+        tdStateElmt.appendChild(svcCtrlElmt);
+        trElmt.appendChild(tdStateElmt);
+
+        if (signedUser.is_admin) {
+            if (serviceStateData.id == null) {
+                let warnAlertElmt = this.#createWarnAlertElement("Never launched yet");
+                tdStateElmt.appendChild(warnAlertElmt);
+            }
+
+            // Verify that the site has long/lat coordinates.
+            let warnSiteCoordElmt = null;
+            this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: "site", id: serviceStateData.site_id}),
+                (data) => {
+                    if (data.structural_element.latitude == null || data.structural_element.longitude == null) {
+                        warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
+                        tdStateElmt.appendChild(warnSiteCoordElmt);
+                    }
+                },
+                (error) => {
+                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                    this.#messagesElmt.appendChild(flashMsgElmt);
+                },
+            );
+
+            let tdFetchElmt = document.createElement("td");
+            trElmt.appendChild(tdFetchElmt);
+
+            let fetchLinkElmt = document.createElement("a");
+            fetchLinkElmt.classList.add("btn", "btn-sm", "btn-outline-primary");
+            fetchLinkElmt.setAttribute("role", "button");
+            fetchLinkElmt.setAttribute("title", "Fetch weather data from external service");
+            fetchLinkElmt.setAttribute("data-bs-toggle", "modal");
+            fetchLinkElmt.setAttribute("data-bs-target", `#${this.#fetchDataModalElmt.id}`);
+            tdFetchElmt.appendChild(fetchLinkElmt);
+
+            let fetchIconElmt = document.createElement("i");
+            fetchIconElmt.classList.add("bi", "bi-cloud-download");
+            fetchLinkElmt.appendChild(fetchIconElmt);
+
+            fetchLinkElmt.addEventListener("click", () => {
+                this.#fetchDataSiteIdElmt.value = serviceStateData.site_id.toString();
+                this.#fetchDataDatetimeStartElmt.reset({ ignoreTime: true });
+                this.#fetchDataDatetimeEndElmt.reset({ ignoreTime: true });
+                this.#updateFetchDataBtn();
+
+                this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+                this.#fetchDataModalParamsContainerElmt.appendChild(new Spinner());
+
+                if (this.#getSemanticsReqID != null) {
+                    this.#internalAPIRequester.abort(this.#getSemanticsReqID);
+                    this.#getSemanticsReqID = null;
+                }
+
+                this.#getSemanticsReqID = this.#internalAPIRequester.get(
+                    flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id}),
+                    (data) => {
+                        this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+
+                        if (data.data.length > 0) {
+                            let weatherParamsTitleElmt = document.createElement("h6");
+                            weatherParamsTitleElmt.innerText = `${data.data.length} weather parameter${data.data.length > 1 ? "s" : ""} will be fetched:`;
+                            this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsTitleElmt);
+
+                            let weatherParamsListElmt = document.createElement("dl");
+                            weatherParamsListElmt.classList.add("d-flex", "flex-wrap", "gap-3");
+                            this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsListElmt);
+                            for (let weatherParam of data.data) {
+                                let weatherParamsListItemElmt = document.createElement("div");
+                                weatherParamsListElmt.appendChild(weatherParamsListItemElmt);
+
+                                let weatherParamsListItemTitleElmt = document.createElement("dt");
+                                weatherParamsListItemTitleElmt.innerText = `${weatherParam["parameter_label"]}`;
+                                weatherParamsListItemElmt.appendChild(weatherParamsListItemTitleElmt);
+
+                                let weatherParamsListItemTextElmt = document.createElement("dd");
+                                weatherParamsListItemTextElmt.innerText = `${weatherParam["timeseries"]["name"]}${weatherParam["timeseries"]["unit_symbol"] != null ? ` [${weatherParam["timeseries"]["unit_symbol"]}]` : ""}`;
+                                weatherParamsListItemElmt.appendChild(weatherParamsListItemTextElmt);
+                            }
+                        }
+                        else {
+                            let warnAlertElmt = this.#createWarnAlertElement("No weather parameter to fetch. You should set timeseries semantics for weather parameters.");
+                            this.#fetchDataModalParamsContainerElmt.appendChild(warnAlertElmt);
+                        }
+
+                        if (warnSiteCoordElmt != null) {
+                            this.#fetchDataModalParamsContainerElmt.appendChild(warnSiteCoordElmt);
+                        }
+                    },
+                    (error) => {
+                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                        this.#messagesElmt.appendChild(flashMsgElmt);
+                    },
+                );
+            });
+        }
+
+        return trElmt;
+    }
+
+    #createWarnAlertElement(text) {
+        let warnContainerElmt = document.createElement("div");
+        warnContainerElmt.classList.add("alert", "alert-warning", "border", "border-warning", "mb-0", "py-1");
+        warnContainerElmt.setAttribute("role", "alert");
+
+        let warnIconElmt = document.createElement("i");
+        warnIconElmt.classList.add("bi", "bi-exclamation-triangle", "me-1");
+        warnContainerElmt.appendChild(warnIconElmt);
+
+        let warnTextElmt = document.createElement("span");
+        warnTextElmt.classList.add("fst-italic");
+        warnTextElmt.innerText = text;
+        warnContainerElmt.appendChild(warnTextElmt);
+
+        return warnContainerElmt;
+    }
+
+    #setListLoading() {
+        let loadingContainerElmt = document.createElement("td");
+        loadingContainerElmt.setAttribute("colspan", "3");
+        loadingContainerElmt.classList.add("text-center", "p-4", "w-100");
+        loadingContainerElmt.appendChild(new Spinner());
+        this.#serviceStatesContainerElmt.appendChild(loadingContainerElmt);
+    }
+
+    #refreshList() {
+        this.#itemsCountElmt.setLoading();
+        this.#serviceStatesContainerElmt.innerHTML = "";
+        this.#setListLoading();
+
+        if (this.#listReqID != null) {
+            this.#internalAPIRequester.abort(this.#listReqID);
+            this.#listReqID = null;
+        }
+
+        let filters = {};
+        if (this.#siteNameSearchElmt.value != "") {
+            filters["in_site_name"] = this.#siteNameSearchElmt.value;
+        }
+        if (this.#serviceStateFilterElmt.value == "on") {
+            filters["is_enabled"] = true;
+        }
+        else if (this.#serviceStateFilterElmt.value == "off") {
+            filters["is_enabled"] = false;
+        }
+
+        this.#listReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.services.weather_data.retrieve_list`, filters),
+            (data) => {
+                this.#serviceStatesContainerElmt.innerHTML = "";
+                if (data.length > 0) {
+                    for (let row of data) {
+                        row.is_enabled = row.is_enabled == null ? false : row.is_enabled;
+                        this.#serviceStatesContainerElmt.appendChild(this.#createEntryElement(row));
+                    }
+                }
+                else {
+                    let noItemElmt = document.createElement("p");
+                    noItemElmt.classList.add("fst-italic", "text-center", "text-muted", "w-100");
+                    noItemElmt.innerText = "No download weather data service states for sites";
+                    this.#serviceStatesContainerElmt.appendChild(noItemElmt);
+                }
+
+                this.#itemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    mount() {
+        this.#refreshList();
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    let view = new WeatherDataServiceManageView();
+    view.mount();
+
+});
