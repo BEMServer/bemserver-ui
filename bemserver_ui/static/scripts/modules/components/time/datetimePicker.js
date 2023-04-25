@@ -237,12 +237,16 @@ export class DatetimePicker extends HTMLDivElement {
         this.#initEventListeners();
     }
 
-    reset() {
-        this.#date = null;
-        this.#time = null;
-        this.#dateMin = null;
-        this.#dateMax = null;
-        this.#updateDateBounds();
+    reset(options = { ignoreDate: false, ignoreTime: false }) {
+        if (!options.ignoreDate) {
+            this.#date = null;
+            this.#dateMin = null;
+            this.#dateMax = null;
+            this.#updateDateBounds();
+        }
+        if (!options.ignoreTime) {
+            this.#time = null;
+        }
         this.#updateDateAndTime();
         this.#updateStyle();
     }

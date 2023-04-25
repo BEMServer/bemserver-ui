@@ -1,0 +1,108 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Weather data service" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row g-5 mb-3">
+        <div class="col-auto">
+            <div class="d-flex align-items-start gap-3">
+                <h5>Campaign</h5>
+                <span class="fw-bold text-{% if g.campaign_ctxt.campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ g.campaign_ctxt.campaign.state | upper }}]</span>
+            </div>
+            <p class="text-break">{{ g.campaign_ctxt.name }}</p>
+        </div>
+        <div class="col">
+            <div class="alert alert-info border border-info mb-0" role="alert">
+                <i class="bi bi-info-square me-1"></i>
+                For each site, {% if signed_user.is_admin %}by using the ON/OFF buttons below, {% endif %}weather data can be fetched automatically from <a href="https://oikolab.com/" target="_blank">oikolab</a> web service.
+                {% if signed_user.is_admin %}
+                <p class="mb-0">You can also do it manually using the fetch data button (<i class="bi bi-cloud-download text-primary"></i>), weither the automatic fetch service is enabled or not.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button{% if not is_filtered %} collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="{{ is_filtered | lower }}">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel"></i> Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <div id="filtersContainer" class="d-sm-flex d-grid align-items-center gap-2">
+                                <input type="text" class="form-control form-control-sm" id="siteNameSearch" placeholder="Site..." aria-label="Site name search" aria-describedby="siteNameSearch" autofocus>
+                                <a id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap my-auto" role="button" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="table-responsive-xl">
+            <table class="table table-sm table-hover caption-top">
+                <caption class="text-end">
+                    <small class="text-nowrap text-muted"><app-items-count id="itemsCount"></app-items-count></small>
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Site</th>
+                        <th scope="col">State</th>
+                        {% if signed_user.is_admin %}
+                        <th scope="col">Fetch data</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider" id="serviceStatesContainer">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% if signed_user.is_admin %}
+<div class="modal fade" id="fetchDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fetchDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fetchDataModalLabel">Fetch weather data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fetchDataSiteId">
+                <div class="row d-xl-flex d-grid mb-4">
+                    <div class="col pb-2 pb-xl-0">
+                        <div is="app-datetime-picker" id="fetchDataDatetimeStart" title="From" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                            <div is="app-spinner"></div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div is="app-datetime-picker" id="fetchDataDatetimeEnd" title="Until" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                            <div is="app-spinner"></div>
+                        </div>
+                        <small class="fst-italic text-muted">(excluded from the interval)</small>
+                    </div>
+                </div>
+                <div id="fetchDataModalParamsContainer"></div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="fetchDataBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-cloud-download"></i> Fetch</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/weatherData/manage.js') }}"></script>
+{% endfilter %}
+{% endblock body_scripts %}
