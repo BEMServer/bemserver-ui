@@ -1,12 +1,15 @@
 """Structural elements internal API"""
+import zoneinfo
 import flask
 
-from bemserver_ui.extensions import auth, ensure_campaign_context
+from bemserver_ui.extensions import auth, ensure_campaign_context, Roles
 from bemserver_ui.common.const import (
     STRUCTURAL_ELEMENT_TYPES,
     FULL_STRUCTURAL_ELEMENT_TYPES,
 )
 from bemserver_ui.common.tree import build_tree
+from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
 blp = flask.Blueprint(
@@ -116,6 +119,37 @@ def retrieve_property_data(type, id):
             "properties": properties,
         }
     )
+
+
+@blp.route("/site/<int:id>/fetch_weather_data", methods=["PUT"])
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def fetch_weather_data(id):
+    tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
+    try:
+        dt_start = convert_html_form_datetime(
+            flask.request.json["start_date"],
+            flask.request.json["start_time"],
+            tz=tz,
+        )
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid start datetime!")
+    try:
+        dt_end = convert_html_form_datetime(
+            flask.request.json["end_date"],
+            flask.request.json["end_time"],
+            tz=tz,
+        )
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
+
+    flask.g.api_client.sites.download_weather_data(
+        id,
+        dt_start.isoformat(),
+        dt_end.isoformat(),
+    )
+
+    return flask.jsonify({"success": True})
 
 
 @blp.route("/tree/sites")
