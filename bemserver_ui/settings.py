@@ -5,6 +5,7 @@ class Config:
     """Default configuration"""
 
     SESSION_COOKIE_SAMESITE = "Lax"
+    JSON_SORT_KEYS = False
 
     BEMSERVER_API_HOST = ""
     BEMSERVER_API_USE_SSL = True
