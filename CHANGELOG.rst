@@ -1,6 +1,37 @@
 Changelog
 ---------
 
+0.5.1 (2023-04-27)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Add (optional) latitude/longitude coordinates on sites
+
+- Timeseries:
+
+  - Add data stats tab in timeseries list page
+
+- Analysis:
+
+  - Add site degree days analysis page
+
+- Services:
+
+  - Add weather data service management page
+
+Fixes:
+
+- Fix internal server error on cleanup service page
+
+Other changes:
+
+- Require bemserver-api-client >=0.18.0 and <0.19.0
+- Require bemserver-api 0.18.2
+- Require bemserver-core 0.13.4
+
 0.5.0 (2023-03-30)
 ++++++++++++++++++
 
