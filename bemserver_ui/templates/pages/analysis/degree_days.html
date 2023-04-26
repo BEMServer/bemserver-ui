@@ -1,0 +1,100 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Degree days" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="accordion" id="accordionParams">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingParams">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParams" aria-controls="collapseParams" aria-expanded="true">
+                            <span class="fw-bold text-secondary"><i class="bi bi-easel"></i> Analysis parameters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseParams" class="accordion-collapse collapse show" aria-labelledby="headingParams" data-bs-parent="#accordionParams">
+                        <div class="accordion-body">
+                            <div class="row row-cols-1 row-cols-xl-2 g-3 g-xl-4 mb-3">
+                                <div class="col">
+                                    <h5 class="text-secondary"><i class="bi bi-buildings"></i> Sites</h5>
+                                    <app-tree id="sitesTree" toolbar="false"></app-tree>
+                                </div>
+                                <div class="col">
+                                    <h5 class="text-secondary"><i class="bi bi-calendar4-range"></i> Period</h5>
+                                    <div class="d-grid gap-2 mb-3">
+                                        <select id="periodType" class="form-select form-select-sm" aria-label="Select a period" required>
+                                            <option value="Month-Daily">Daily over 1 month</option>
+                                            <option value="Year-Monthly" selected>Monthly over 1 year</option>
+                                            <option value="Yearly">Yearly</option>
+                                        </select>
+                                        <div class="d-flex gap-2">
+                                            <select id="periodMonth" class="form-select form-select-sm d-none invisible" aria-label="Select a period month" required>
+                                                <option value="1">January</option>
+                                                <option value="2">February</option>
+                                                <option value="3">March</option>
+                                                <option value="4">April</option>
+                                                <option value="5">May</option>
+                                                <option value="6">June</option>
+                                                <option value="7">July</option>
+                                                <option value="8">August</option>
+                                                <option value="9">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                            <select id="periodYear" class="form-select form-select-sm d-none invisible" aria-label="Select a period year" required></select>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2" id="compareOptsContainer">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="comparePeriodSwitch">
+                                            <label class="form-check-label text-nowrap" for="comparePeriodSwitch">compare to</label>
+                                        </div>
+                                        <select id="comparePeriod" class="form-select form-select-sm" aria-label="Select a compare period" disabled></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <h5 class="text-secondary"><i class="bi bi-sliders2-vertical"></i> Degree days parameters</h5>
+                                    <div class="d-lg-flex d-grid gap-2">
+                                        <select id="ddType" class="form-select form-select-sm" aria-label="Select a type" required>
+                                            {% for dd_type_name, dd_type_value in dd_types.items() %}
+                                            <option value="{{ dd_type_name }}"{% if dd_type_name == dd_type_default %} selected{% endif %}>{{ dd_type_value }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="hstack gap-2">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text" id="BaseLabel">Base</span>
+                                                <input id="ddBase" type="number" class="form-control form-control-sm" aria-label="Base" aria-describedby="BaseLabel" value="18">
+                                            </div>
+                                            <input id="ddBaseUnit" type="text" class="form-control form-control-sm" value="°C">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col" id="chartContainer">
+            <div class="alert alert-info mb-0 pb-0 w-50 mx-auto" role="alert">
+                <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
+                <p>To see the degree days, <span class="fw-bold">select a site</span> in the tree and <span class="fw-bold">choose a period</span>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/analysis/degreeDays.js') }}" async></script>
+{% endfilter %}
+{% endblock body_scripts %}
