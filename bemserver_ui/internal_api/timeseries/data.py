@@ -6,7 +6,11 @@ import flask
 
 from bemserver_api_client.enums import DataFormat, Aggregation, BucketWidthUnit
 from bemserver_ui.extensions import auth, ensure_campaign_context
-from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.time import (
+    convert_html_form_datetime,
+    convert_from_iso,
+    strfdelta,
+)
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
 
@@ -201,3 +205,32 @@ def delete_data():
     )
 
     return flask.jsonify({"success": True})
+
+
+@blp.route("/stats")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_stats():
+    ts_ids = [int(x) for x in flask.request.args["timeseries"].split(",")]
+    data_state_id = flask.request.args["data_state"]
+    tz_name = flask.request.args.get("timezone") or flask.g.campaign_ctxt.tz_name
+
+    ts_data_stats_resp = flask.g.api_client.timeseries_data.get_stats(
+        data_state_id,
+        ts_ids,
+        timezone=tz_name,
+    )
+
+    data_stats = ts_data_stats_resp.data["stats"]
+
+    tz = zoneinfo.ZoneInfo(tz_name)
+    for ts_stats in data_stats.values():
+        try:
+            dt_first = convert_from_iso(ts_stats["first_timestamp"], tz=tz)
+            dt_last = convert_from_iso(ts_stats["last_timestamp"], tz=tz)
+            ts_stats["elapsed_time"] = strfdelta(dt_last - dt_first)
+        except BEMServerUICommonInvalidDatetimeError:
+            # Exception raised if timestamps are None.
+            ts_stats["elapsed_time"] = None
+
+    return flask.jsonify(data_stats)

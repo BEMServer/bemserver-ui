@@ -137,6 +137,9 @@
                                     <button class="nav-link" id="locations-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#locations-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="locations-tabcontent-{{ x.id }}">Locations</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="stats-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#stats-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="stats-tabcontent-{{ x.id }}">Data statistics</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="events-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#events-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="events-tabcontent-{{ x.id }}">Events</button>
                                 </li>
                             </ul>
@@ -154,6 +157,21 @@
                                 </div>
                                 <div class="tab-pane fade p-3" id="locations-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="locations-tab-{{ x.id }}">
                                     <div id="timeseriesStructuralElements-{{ x.id }}" data-ts-loaded="false"></div>
+                                </div>
+                                <div class="tab-pane fade p-3" id="stats-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="tats-tab-{{ x.id }}">
+                                    <div class="row mb-2 gap-3">
+                                        <div class="col-auto">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Timeseries data state</span>
+                                                <select id="tsDataStatsStates-{{ x.id }}" class="form-select form-select-sm">
+                                                    {% for ts_datastate in ts_data_states %}
+                                                    <option value="{{ ts_datastate.id }}"{% if loop.first %} selected{% endif %}>{{ ts_datastate.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div id="tsDataStats-{{ x.id }}" class="col d-flex flex-wrap gap-3" data-ts-loaded="false"></div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane fade p-3" id="events-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="events-tab-{{ x.id }}">
                                     <nav class="row mb-2" aria-label="Events pagination">

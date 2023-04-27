@@ -15,6 +15,7 @@ export class TimeseriesListView {
     #internalAPIRequester = null;
     #getStructElmtsReqID = null;
     #getPropDataReqID = null;
+    #getStatsReqID = {};
     #getEventsReqID = null;
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
@@ -100,6 +101,7 @@ export class TimeseriesListView {
                 let tsId = event.target.getAttribute("data-ts-id");
                 this.#renderProperties(tsId);
                 this.#renderStructuralElements(tsId);
+                this.#renderStats(tsId);
                 this.#renderEvents(tsId);
             });
         }
@@ -250,6 +252,55 @@ export class TimeseriesListView {
 </div>`;
     }
 
+    #populateStats(tsDataStats, statsContainerElmt) {
+        statsContainerElmt.innerHTML = "";
+
+        let createListGroupItemElmt = (title, value) => {
+            let listGroupItemElmt = document.createElement("li");
+            listGroupItemElmt.classList.add("list-group-item", "d-flex", "align-items-center", "justify-content-between", "gap-2");
+            timestampsBoundsListElmt.appendChild(listGroupItemElmt);
+            let listGroupItemTitleElmt = document.createElement("h6");
+            listGroupItemTitleElmt.classList.add("fw-bold", "text-muted", "mb-0");
+            listGroupItemTitleElmt.innerText = title;
+            listGroupItemElmt.appendChild(listGroupItemTitleElmt);
+            let listGroupItemValueElmt = document.createElement("small");
+            listGroupItemValueElmt.classList.add("text-nowrap");
+            listGroupItemValueElmt.innerText = value;
+            listGroupItemElmt.appendChild(listGroupItemValueElmt);
+            return listGroupItemElmt;
+        };
+
+        let timestampsCardElmt = document.createElement("div");
+        timestampsCardElmt.classList.add("card", "mb-auto");
+        statsContainerElmt.appendChild(timestampsCardElmt);
+        let timestampsCardHeaderElmt = document.createElement("div");
+        timestampsCardHeaderElmt.classList.add("card-header", "fw-bold");
+        timestampsCardHeaderElmt.innerText = "Timestamp bounds";
+        timestampsCardElmt.appendChild(timestampsCardHeaderElmt);
+        let timestampsBoundsListElmt = document.createElement("ul");
+        timestampsBoundsListElmt.classList.add("list-group", "list-group-flush");
+        timestampsCardElmt.appendChild(timestampsBoundsListElmt);
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", tsDataStats["first_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["first_timestamp"]), {timezone: this.#tzName}) : "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", tsDataStats["last_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["last_timestamp"]), {timezone: this.#tzName}) : "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Elapsed", tsDataStats["elapsed_time"] || "-"));
+
+        let statsCardElmt = document.createElement("div");
+        statsCardElmt.classList.add("card", "mb-auto");
+        statsContainerElmt.appendChild(statsCardElmt);
+        let statsCardHeaderElmt = document.createElement("div");
+        statsCardHeaderElmt.classList.add("card-header", "fw-bold");
+        statsCardHeaderElmt.innerText = "Values statistics";
+        statsCardElmt.appendChild(statsCardHeaderElmt);
+        let statsListElmt = document.createElement("ul");
+        statsListElmt.classList.add("list-group", "list-group-flush");
+        statsCardElmt.appendChild(statsListElmt);
+        statsListElmt.appendChild(createListGroupItemElmt("Count", Parser.parseIntOrDefault(tsDataStats["count"])));
+        statsListElmt.appendChild(createListGroupItemElmt("Minimum", Parser.parseFloatOrDefault(tsDataStats["min"], Number.NaN, 2)));
+        statsListElmt.appendChild(createListGroupItemElmt("Maximum", Parser.parseFloatOrDefault(tsDataStats["max"], Number.NaN, 2)));
+        statsListElmt.appendChild(createListGroupItemElmt("Average", Parser.parseFloatOrDefault(tsDataStats["avg"], Number.NaN, 2)));
+        statsListElmt.appendChild(createListGroupItemElmt("Standard deviation", Parser.parseFloatOrDefault(tsDataStats["stddev"], Number.NaN, 2)));
+    }
+
     #populateEventList(eventsList, eventsContainerElmt) {
         eventsContainerElmt.innerHTML = "";
         if (eventsList.length > 0) {
@@ -355,6 +406,37 @@ export class TimeseriesListView {
                     timeseriesStructuralElementsElmt.innerHTML = this.#getErrorHTML(error.message);
                 },
             );
+        }
+    }
+
+    #renderStats(tsId) {
+        let tsDataStatsStatesElmt = document.getElementById(`tsDataStatsStates-${tsId}`);
+        let tsDataStatsContainerElmt = document.getElementById(`tsDataStats-${tsId}`);
+        let alreadyLoaded = JSON.parse(tsDataStatsContainerElmt.getAttribute("data-ts-loaded"));
+
+        if (!alreadyLoaded) {
+            tsDataStatsContainerElmt.innerHTML = "";
+                tsDataStatsContainerElmt.appendChild(new Spinner());
+
+                if (this.#getStatsReqID[tsId] != null) {
+                    this.#internalAPIRequester.abort(this.#getStatsReqID[tsId]);
+                    this.#getStatsReqID[tsId] = null;
+                }
+                this.#getStatsReqID[tsId] = this.#internalAPIRequester.get(
+                    flaskES6.urlFor(`api.timeseries.data.retrieve_stats`, {data_state: tsDataStatsStatesElmt.value, timeseries: [tsId]}),
+                    (data) => {
+                        this.#populateStats(data[tsId.toString()], tsDataStatsContainerElmt);
+                        tsDataStatsContainerElmt.setAttribute("data-ts-loaded", true);
+                    },
+                    (error) => {
+                        tsDataStatsContainerElmt.innerHTML = this.#getErrorHTML(error);
+                    },
+                );
+
+            tsDataStatsStatesElmt.addEventListener("change", () => {
+                tsDataStatsContainerElmt.setAttribute("data-ts-loaded", false);
+                this.#renderStats(tsId);
+            });
         }
     }
 
