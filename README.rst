@@ -67,4 +67,4 @@ Flask custom var config available:
             ]
 
     *(optional)* **BEMSERVER_UI_PLUGINS = None**
-        List of absolute folder paths that locate the ``__init__.py`` file from each UI plugin package to load
+        List of absolute file paths that locate the ``__init__.py`` file from each UI plugin package to load
