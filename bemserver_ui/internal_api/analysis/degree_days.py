@@ -3,7 +3,6 @@ import datetime as dt
 import flask
 import zoneinfo
 import calendar
-import math
 
 from bemserver_api_client.enums import DegreeDaysPeriod, DegreeDaysType
 from bemserver_ui.extensions import auth, ensure_campaign_context
@@ -76,12 +75,8 @@ def retrieve(site_id):
                 dd_data["degree_days"][dt_row.year] = {}
             month_name = calendar.month_abbr[dt_row.month]
             if month_name not in dd_data["degree_days"][dt_row.year]:
-                dd_data["degree_days"][dt_row.year][month_name] = (
-                    None if math.isnan(v) else v
-                )
+                dd_data["degree_days"][dt_row.year][month_name] = v
     else:
         dd_data["degree_days"] = analysis_resp.data["degree_days"]
-        for k, v in analysis_resp.data["degree_days"].items():
-            dd_data["degree_days"][k] = None if math.isnan(v) else v
 
     return flask.jsonify(dd_data)
