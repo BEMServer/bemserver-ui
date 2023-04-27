@@ -123,6 +123,9 @@ def list():
             ts_data["campaign_scope_id"]
         ]["name"]
 
+    # Get timeseries data states for stats.
+    ts_data_states_resp = flask.g.api_client.timeseries_datastates.getall()
+
     return flask.render_template(
         "pages/timeseries/list.html",
         timeseries=timeseries_data,
@@ -130,6 +133,7 @@ def list():
         filters={**filters, **ui_filters},
         is_filtered=is_filtered,
         pagination=prepare_pagination(timeseries_resp.pagination),
+        ts_data_states=ts_data_states_resp.data,
     )
 
 
