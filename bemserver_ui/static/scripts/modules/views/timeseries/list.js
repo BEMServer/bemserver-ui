@@ -275,7 +275,7 @@ export class TimeseriesListView {
         statsContainerElmt.appendChild(timestampsCardElmt);
         let timestampsCardHeaderElmt = document.createElement("div");
         timestampsCardHeaderElmt.classList.add("card-header", "fw-bold");
-        timestampsCardHeaderElmt.innerText = "Timestamp bounds";
+        timestampsCardHeaderElmt.innerText = "Timestamps statistics";
         timestampsCardElmt.appendChild(timestampsCardHeaderElmt);
         let timestampsBoundsListElmt = document.createElement("ul");
         timestampsBoundsListElmt.classList.add("list-group", "list-group-flush");
@@ -283,6 +283,7 @@ export class TimeseriesListView {
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", tsDataStats["first_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["first_timestamp"]), {timezone: this.#tzName}) : "-"));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", tsDataStats["last_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["last_timestamp"]), {timezone: this.#tzName}) : "-"));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Elapsed", tsDataStats["elapsed_time"] || "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last data since", tsDataStats["last_data_since"] || "-"));
 
         let statsCardElmt = document.createElement("div");
         statsCardElmt.classList.add("card", "mb-auto");

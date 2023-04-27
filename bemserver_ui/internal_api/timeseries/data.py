@@ -2,6 +2,7 @@
 from io import StringIO
 import csv
 import zoneinfo
+import datetime as dt
 import flask
 
 from bemserver_api_client.enums import DataFormat, Aggregation, BucketWidthUnit
@@ -224,13 +225,16 @@ def retrieve_stats():
     data_stats = ts_data_stats_resp.data["stats"]
 
     tz = zoneinfo.ZoneInfo(tz_name)
+    dt_now = dt.datetime.now(tz=tz)
     for ts_stats in data_stats.values():
         try:
             dt_first = convert_from_iso(ts_stats["first_timestamp"], tz=tz)
             dt_last = convert_from_iso(ts_stats["last_timestamp"], tz=tz)
             ts_stats["elapsed_time"] = strfdelta(dt_last - dt_first)
+            ts_stats["last_data_since"] = strfdelta(dt_now - dt_last)
         except BEMServerUICommonInvalidDatetimeError:
             # Exception raised if timestamps are None.
             ts_stats["elapsed_time"] = None
+            ts_stats["last_data_since"] = None
 
     return flask.jsonify(data_stats)
