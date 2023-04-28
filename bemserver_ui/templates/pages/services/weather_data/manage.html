@@ -68,12 +68,12 @@
 {% if signed_user.is_admin %}
 <div class="modal fade" id="fetchDataModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fetchDataModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content placeholder-glow">
             <div class="modal-header">
                 <h5 class="modal-title" id="fetchDataModalLabel">Fetch weather data</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="fetchDataModalBody">
                 <input type="hidden" id="fetchDataSiteId">
                 <div class="row d-xl-flex d-grid mb-4">
                     <div class="col pb-2 pb-xl-0">
