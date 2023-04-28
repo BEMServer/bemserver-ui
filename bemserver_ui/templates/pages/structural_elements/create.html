@@ -36,6 +36,18 @@
                         <label class="form-label" for="name">Name</label>
                         <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
                     </div>
+                    {% if type == 'site' %}
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="latitude">Latitude <span class="fst-italic text-muted">[°]</span></label>
+                            <input type="number" class="form-control hide-arrows" id="latitude" name="latitude" min="-90" max="90" step="any">
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="longitude">Longitude <span class="fst-italic text-muted">[°]</span></label>
+                            <input type="number" class="form-control hide-arrows" id="longitude" name="longitude" min="-180" max="180" step="any">
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="mb-3">
                         <label class="form-label" for="description">Description</label>
                         <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
@@ -44,16 +56,6 @@
                         <label class="form-label" for="ifc_id">IFC ID</label>
                         <input type="text" class="form-control" id="ifc_id" name="ifc_id" maxlength="22">
                     </div>
-                    {% if type == 'site' %}
-                    <div class="mb-3">
-                        <label class="form-label" for="latitude">Latitude <span class="fst-italic text-muted">[°]</span></label>
-                        <input type="number" class="form-control" id="latitude" name="latitude" min="-90" max="90" step="0.00001">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="longitude">Longitude <span class="fst-italic text-muted">[°]</span></label>
-                        <input type="number" class="form-control" id="longitude" name="longitude" min="-180" max="180" step="0.00001">
-                    </div>
-                    {% endif %}
                 </fieldset>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('structural_elements.explore') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>

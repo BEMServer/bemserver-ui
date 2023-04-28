@@ -42,6 +42,18 @@ input:invalid:not(:focus) {
     background-color: rgba(var(--bs-danger-rgb), 0.05);
 }
 
+/* Firefow */
+input[type=number].hide-arrows {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+/* Chrome, Safari, Edge, Opera */
+input[type=number].hide-arrows::-webkit-outer-spin-button,
+input[type=number].hide-arrows::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .vr {
     color: var(--app-gray) !important;
 }
