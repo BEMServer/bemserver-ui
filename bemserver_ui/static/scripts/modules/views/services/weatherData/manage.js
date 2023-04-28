@@ -356,12 +356,13 @@ class WeatherDataServiceManageView {
             }
 
             // Verify that the site has long/lat coordinates.
-            let warnSiteCoordElmt = null;
+            let siteHasCoord = true;
             this.#internalAPIRequester.get(
                 flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: "site", id: serviceStateData.site_id}),
                 (data) => {
                     if (data.structural_element.latitude == null || data.structural_element.longitude == null) {
-                        warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
+                        siteHasCoord = false;
+                        let warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
                         tdStateElmt.appendChild(warnSiteCoordElmt);
                     }
                 },
@@ -431,7 +432,8 @@ class WeatherDataServiceManageView {
                             this.#fetchDataModalParamsContainerElmt.appendChild(warnAlertElmt);
                         }
 
-                        if (warnSiteCoordElmt != null) {
+                        if (!siteHasCoord) {
+                            let warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
                             this.#fetchDataModalParamsContainerElmt.appendChild(warnSiteCoordElmt);
                         }
                     },
