@@ -237,6 +237,15 @@ export class DatetimePicker extends HTMLDivElement {
         this.#initEventListeners();
     }
 
+    focus(options = { focusOnTime: false }) {
+        if (options.focusOnTime) {
+            this.#timeInputElmt.focus();
+        }
+        else {
+            this.#dateInputElmt.focus();
+        }
+    }
+
     reset(options = { ignoreDate: false, ignoreTime: false }) {
         if (!options.ignoreDate) {
             this.#date = null;

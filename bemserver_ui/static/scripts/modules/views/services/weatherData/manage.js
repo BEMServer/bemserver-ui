@@ -27,6 +27,7 @@ class WeatherDataServiceManageView {
 
     #fetchDataModalElmt = null;
     #fetchDataModal = null;
+    #fetchDataModalBodyElmt = null;
     #fetchDataSiteIdElmt = null;
     #fetchDataDatetimeStartElmt = null;
     #fetchDataDatetimeEndElmt = null;
@@ -54,6 +55,7 @@ class WeatherDataServiceManageView {
         if (signedUser.is_admin) {
             this.#fetchDataModalElmt = document.getElementById("fetchDataModal");
             this.#fetchDataModal = new bootstrap.Modal(this.#fetchDataModalElmt);
+            this.#fetchDataModalBodyElmt = document.getElementById("fetchDataModalBody");
             this.#fetchDataSiteIdElmt = document.getElementById("fetchDataSiteId");
             this.#fetchDataDatetimeStartElmt = document.getElementById("fetchDataDatetimeStart");
             this.#fetchDataDatetimeEndElmt = document.getElementById("fetchDataDatetimeEnd");
@@ -123,7 +125,14 @@ class WeatherDataServiceManageView {
                 this.#updateFetchDataBtn();
             });
 
+            this.#fetchDataModalElmt.addEventListener("shown.bs.modal", () => {
+                this.#fetchDataDatetimeStartElmt.focus();
+            });
+
             this.#fetchDataBtnElmt.addEventListener("click", () => {
+                this.#fetchDataBtnElmt.classList.add("placeholder");
+                this.#fetchDataModalBodyElmt.classList.add("placeholder");
+
                 this.#internalAPIRequester.put(
                     flaskES6.urlFor(`api.structural_elements.fetch_weather_data`, {id: this.#fetchDataSiteIdElmt.value}),
                     {
@@ -134,13 +143,13 @@ class WeatherDataServiceManageView {
                     },
                     null,
                     () => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Command sent with success. Weather data will be fetched soon.`, isDismissible: true });
+                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.SUCCESS, text: `Weather data successfully fetched.`, isDismissible: true, isTimed: false });
                         this.#messagesElmt.appendChild(flashMsgElmt);
 
                         this.#fetchDataModal.hide();
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true, isTimed: false });
                         this.#messagesElmt.appendChild(flashMsgElmt);
 
                         this.#fetchDataModal.hide();
@@ -160,6 +169,13 @@ class WeatherDataServiceManageView {
     }
 
     #updateFetchDataBtn() {
+        if (this.#fetchDataBtnElmt.classList.contains("placeholder")) {
+            this.#fetchDataBtnElmt.classList.remove("placeholder");
+        }
+        if (this.#fetchDataModalBodyElmt.classList.contains("placeholder")) {
+            this.#fetchDataModalBodyElmt.classList.remove("placeholder");
+        }
+
         if (this.#fetchDataDatetimeStartElmt.date != null && this.#fetchDataDatetimeStartElmt.time != null && this.#fetchDataDatetimeEndElmt.date != null && this.#fetchDataDatetimeEndElmt.time != null) {
             this.#fetchDataBtnElmt.removeAttribute("disabled");
         }
