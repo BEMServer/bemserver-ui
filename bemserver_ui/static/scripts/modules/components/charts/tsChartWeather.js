@@ -2,7 +2,7 @@ import "https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js";
 import { Parser } from "../../tools/parser.js";
 
 
-export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
+export class TimeseriesChartWeather extends HTMLDivElement {
 
     #chart = null;
 
@@ -12,7 +12,7 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
     };
     #theme = null;
 
-    #defaultTitle = "Energy consumption";
+    #defaultTitle = "Weather data";
     #defaultOptions = {
         title: {
             left: "center",
@@ -65,6 +65,13 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
                 type: "value",
                 nameLocation: "middle",
                 axisLabel: {},
+                position: "left",
+            },
+            {
+                type: "value",
+                nameLocation: "middle",
+                axisLabel: {},
+                position: "right",
             },
         ],
         series: [],
@@ -72,12 +79,10 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
     };
 
     #energyUseColors = {
-        "all": "#6e8a98",
-        "heating": "#ee6666",
-        "cooling": "#73c0de",
-        "ventilation": "#3ba272",
-        "lighting": "#fac858",
-        "appliances": "#9a60b4",
+        "Air temperature": "#0880A4",
+        "Relative humidity": "#7C4F00",
+        "Direct normal solar radiation": "#EF1919",
+        "Surface solar radiation": "#E38028",
     };
 
     constructor(options = null, theme = null) {
@@ -184,7 +189,8 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
             serieValueContainerElmt.appendChild(serieValueElmt);
 
             let serieValueUnitElmt = document.createElement("small");
-            serieValueUnitElmt.innerText = unit;
+            if (unit.length > 1) { serieValueUnitElmt.innerText = unit[index];}
+            else { serieValueUnitElmt.innerText = unit;}
             serieValueContainerElmt.appendChild(serieValueUnitElmt);
 
             liElmt.appendChild(serieNameElmt);
@@ -218,23 +224,28 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(timestamps, energy, energyUses, unit, timeFormat) {
+    load(timestamps, energy, energyUses, timeFormat, parameters) {
         this.hideLoading();
 
         let options = this.#chart.getOption();
+        let yAxisIndex = 0;
 
-        options.title[0].subtext = `energy: ${energy}`;
+        options.title[0].text = parameters.title;
+        options.title[0].subtext = `${energy}`;
         options.toolbox[0].feature.dataView.lang[0] = `${this.#defaultTitle} data`;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, parameters.unit, timeFormat); };
 
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
-
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, parameters.unit, timeFormat); };
+        
         options.series.length = 0;
         options.series = Object.entries(energyUses).map(([energyUse, consumptions]) => {
+            if(energy == "Outdoor conditions" && energyUse == "Relative humidity") {
+                yAxisIndex = 1;
+            }
             let serie = {
                 id: energyUse,
                 name: energyUse,
-                type: "bar",
+                type: parameters.type,
                 data: timestamps.map((time, index) => {
                     return [time, Parser.parseFloatOrDefault(consumptions[index], Number.NaN, 2)];
                 }),
@@ -242,8 +253,10 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
                     focus: "series",
                 },
                 itemStyle: {},
+                yAxisIndex: yAxisIndex,
             };
-            if (energyUse != "all") {
+
+            if (energyUse != "all" && parameters.type == "bar") {
                 serie.stack = energy;
             }
             if (energyUse in this.#energyUseColors) {
@@ -255,7 +268,15 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
         options.yAxis[0].data = options.series.map((serie) => {
             return serie.name;
         });
-        options.yAxis[0].axisLabel.formatter = `{value} ${unit}`;
+        
+        options.yAxis[0].axisLabel.formatter = `{value} ${parameters.unit[0]}`;
+
+        options.yAxis[1].data = options.series.map((serie) => {
+            return serie.name;
+        });
+        
+        options.yAxis[1].axisLabel.formatter = `{value} ${parameters.unit[1]}`;
+
 
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
@@ -266,5 +287,5 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
 
 
 if (window.customElements.get("app-ts-chart-energy-cons") == null) {
-    window.customElements.define("app-ts-chart-energy-cons", TimeseriesChartEnergyConsumption, { extends: "div" });
+    window.customElements.define("app-ts-chart-energy-cons", TimeseriesChartWeather, { extends: "div" });
 }

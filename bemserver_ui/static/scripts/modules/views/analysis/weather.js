@@ -2,8 +2,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
-import { TimeseriesChartExplore } from "/static/scripts/modules/components/charts/tsChartExplore.js";
-import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/components/charts/tsChartEnergyConsumption.js";
+import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
 
 
@@ -16,13 +15,17 @@ export class WeatherExploreView {
     #messagesElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
+    #periodDaySelectElmt = null;
     #periodMonthSelectElmt = null;
     #periodYearSelectElmt = null;
     #sitesTreeElmt = null;
 
+    #forecast = null;
+
     #tzName = "UTC";
     #yearRef = null;
     #monthRef = null;
+    #dayRef = null;
     #maxPastYears = 20;
 
     #structuralElementType = null;
@@ -30,14 +33,22 @@ export class WeatherExploreView {
     #chartByEnergy = {};
 
     #previousPeriodType = null;
+    #previousDaySelected = null;
     #previousYearSelected = null;
 
     #timeFormatPerPeriodType = {
+        "Day-Minute": "{dd} {MMMM} {yyyy} {HH}:{mm}",
+        "Week-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
         "Month-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
         "Month-Daily": "{dd} {MMMM} {yyyy}",
+        "Year-Daily": "{dd} {MMMM} {yyyy}",
         "Year-Monthly": "{MMMM} {yyyy}",
         "Yearly": "{yyyy}",
     };
+
+    #monthNames = [
+        "January", "February", "March", "April", "May", "June", "July", "August", "September", "Octobre", "November", "December"
+    ]
 
     constructor(tzName = "UTC", year = null, month = null) {
         this.#tzName = tzName || "UTC";
@@ -45,6 +56,7 @@ export class WeatherExploreView {
         let date = new Date();
         this.#yearRef = year || date.getUTCFullYear();
         this.#monthRef = month || date.getUTCMonth() + 1;
+        this.#dayRef = date.getDate();
 
         this.#cacheDOM();
         this.#initEventListeners();
@@ -60,8 +72,10 @@ export class WeatherExploreView {
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
         this.#periodTypeSelectElmt = document.getElementById("periodType");
+        this.#periodDaySelectElmt = document.getElementById("periodDay");
         this.#periodMonthSelectElmt = document.getElementById("periodMonth");
         this.#periodYearSelectElmt = document.getElementById("periodYear");
+        this.#forecast = document.getElementById("forecast");
     }
 
     #initEventListeners() {
@@ -72,6 +86,12 @@ export class WeatherExploreView {
             this.#generateCharts();
         });
 
+        this.#forecast.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#generateCharts();
+        });
+
         this.#periodTypeSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
@@ -79,76 +99,119 @@ export class WeatherExploreView {
             this.#generateCharts();
         });
 
-        this.#periodMonthSelectElmt.addEventListener("change", (event) => {
+        this.#periodDaySelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
+            this.#previousDaySelected = this.#periodDaySelectElmt.value;
+            this.#generateCharts();
+        });
+        
+        this.#periodMonthSelectElmt.addEventListener("change", (event) => {
+            event.preventDefault();
+            
+            this.#updateDaysInMonth();
+            this.#previousDaySelected = this.#periodDaySelectElmt.value;
             this.#generateCharts();
         });
 
         this.#periodYearSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#updatePreviousYearSelected();
+            this.#updateDaysInMonth();
+            this.#previousDaySelected = this.#periodDaySelectElmt.value;
+            this.#previousYearSelected = this.#periodYearSelectElmt.value;
             this.#generateCharts();
         });
     }
 
     #updatePeriodSelect() {
-        if (this.#periodTypeSelectElmt.value == "Yearly") {
-            if (this.#previousPeriodType != this.#periodTypeSelectElmt.value) {
-                this.#periodYearSelectElmt.innerHTML = "";
-                let offsetPastYear = 0;
-                let offsetStep = 5;
-                let isOptSelected = false;
-                while (offsetPastYear <= this.#maxPastYears) {
-                    let yearMin = this.#yearRef - (offsetPastYear + offsetStep);
-                    let optionElmt = document.createElement("option");
-                    optionElmt.value = offsetPastYear + offsetStep;
-                    optionElmt.innerText = `Last ${offsetPastYear + offsetStep} years [${this.#yearRef} - ${yearMin}]`;
-                    if (!isOptSelected) {
-                        isOptSelected = (this.#previousYearSelected != null && this.#previousYearSelected >= yearMin);
-                        optionElmt.selected = isOptSelected;
-                    }
-                    this.#periodYearSelectElmt.appendChild(optionElmt);
-                    offsetPastYear += offsetStep;
-                }
+        if (this.#previousPeriodType == null) {
+            this.#periodYearSelectElmt.innerHTML = "";
+            for (let year = this.#yearRef; year >= this.#yearRef - this.#maxPastYears; year--) {
+                let option = document.createElement("option");
+                option.value = year;
+                option.textContent = year;
+                this.#periodYearSelectElmt.appendChild(option);
             }
 
-            this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
-            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
+            this.#periodMonthSelectElmt.innerHTML = "";
+            for (let month = 1; month <= 12; month++) {
+                let option = document.createElement("option");
+                option.value = month;
+                option.textContent = this.#monthNames[month - 1];
+                if(month == this.#monthRef){
+                    option.selected = true;
+                }
+                this.#periodMonthSelectElmt.appendChild(option);
+            }
+
+            this.#periodDaySelectElmt.innerHTML = "";
+            let monthRef = this.#monthRef;
+            if (this.#monthRef == 2 && this.#yearRef % 4 == 0) {
+                monthRef = 29;
+            }
+            else if (this.#monthRef == 2) {
+                monthRef = 28;
+            }
+            for (let day = 1; day <= new Date(this.#yearRef, monthRef, 0).getDate() ; day++) {
+                let option = document.createElement("option");
+                option.value = day;
+                option.textContent = day;
+                if(day == this.#dayRef){
+                    option.selected = true;
+                }
+                this.#periodDaySelectElmt.appendChild(option);
+            }
+        }
+
+        if (this.#periodTypeSelectElmt.value.startsWith("Month")) {
+            if (this.#previousPeriodType == null) {
+                this.#periodMonthSelectElmt.value = this.#monthRef.toString();
+            }
+            this.#periodMonthSelectElmt.classList.remove("d-none", "invisible");
         }
         else {
-            if (this.#previousPeriodType == null || this.#previousPeriodType == "Yearly") {
-                this.#periodYearSelectElmt.innerHTML = "";
-                for (let offsetPastYear = 0 ; offsetPastYear < this.#maxPastYears ; offsetPastYear++) {
-                    let year = this.#yearRef - offsetPastYear;
-                    let optionElmt = document.createElement("option");
-                    optionElmt.value = year.toString();
-                    optionElmt.innerText = year.toString();
-                    optionElmt.selected = ((this.#previousYearSelected != null && year == this.#previousYearSelected) || offsetPastYear == 0);
-                    this.#periodYearSelectElmt.appendChild(optionElmt);
-                }
-            }
-
-            if (this.#periodTypeSelectElmt.value.startsWith("Month-")) {
-                if (this.#previousPeriodType == null) {
-                    this.#periodMonthSelectElmt.value = this.#monthRef.toString();
-                }
-                this.#periodMonthSelectElmt.classList.remove("d-none", "invisible");
-            }
-            else {
-                this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
-            }
-            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
+            this.#periodMonthSelectElmt.classList.add("d-none", "invisible");
         }
 
+        if (this.#periodTypeSelectElmt.value.startsWith("Day") || this.#periodTypeSelectElmt.value.startsWith("Week")) {
+            if (this.#previousPeriodType == null) {
+                this.#periodDaySelectElmt.value = this.#dayRef.toString();
+            }
+            this.#periodDaySelectElmt.classList.remove("d-none", "invisible");
+            this.#periodMonthSelectElmt.classList.remove("d-none", "invisible");
+        }
+        else {
+            this.#periodDaySelectElmt.classList.add("d-none", "invisible");
+        }
+
+        if (this.#periodTypeSelectElmt.value.startsWith("Last") ) {
+            this.#periodYearSelectElmt.classList.add("d-none", "invisible");
+        }
+        else {
+            this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
+        }
+        
         this.#previousPeriodType = this.#periodTypeSelectElmt.value;
-        this.#updatePreviousYearSelected();
+        this.#previousDaySelected = this.#periodDaySelectElmt.value;
+        this.#previousYearSelected = this.#periodYearSelectElmt.value;
     }
 
-    #updatePreviousYearSelected() {
-        if (this.#periodTypeSelectElmt.value != "Yearly") {
-            this.#previousYearSelected = this.#periodYearSelectElmt.value;
+    #updateDaysInMonth() {
+        let daysInMonth = new Date(this.#periodYearSelectElmt.value, this.#periodMonthSelectElmt.value, 0).getDate();
+        this.#periodDaySelectElmt.innerHTML = "";
+        if(this.#periodMonthSelectElmt.value == 2 && this.#periodYearSelectElmt.value % 4 == 0){
+            daysInMonth = 29;
+        }
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            let option = document.createElement("option");
+            option.value = day;
+            option.textContent = day;
+            if(day == this.#previousDaySelected){
+                option.selected = true;
+            }
+            this.#periodDaySelectElmt.appendChild(option);
         }
     }
 
@@ -174,10 +237,12 @@ export class WeatherExploreView {
                         structural_element_type: this.#structuralElementType,
                         site_id: this.#structuralElementId,
                         period_type: this.#periodTypeSelectElmt.value,
+                        period_day: this.#periodDaySelectElmt.value,
                         period_month: this.#periodMonthSelectElmt.value,
                         period_year: this.#periodYearSelectElmt.value,
                         year_reference: this.#yearRef,
                         timezone: this.#tzName,
+                        forecast: this.#forecast.checked,
                     }
                 ),
                 (data) => {
@@ -208,12 +273,12 @@ export class WeatherExploreView {
                     }
                     else {
                         for (let [energy, energyUses] of Object.entries(data["energy"])) {
-                            let energyChart = new TimeseriesChartEnergyConsumption();
-                            this.#chartByEnergy[energy] = energyChart;
+                            let weatherChart = new TimeseriesChartWeather();
+                            this.#chartByEnergy[energy] = weatherChart;
 
                             let chartContainerElmt = document.createElement("div");
                             chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
-                            chartContainerElmt.appendChild(energyChart);
+                            chartContainerElmt.appendChild(weatherChart);
 
                             let colElmt = document.createElement("div");
                             colElmt.classList.add("col");
@@ -232,9 +297,8 @@ export class WeatherExploreView {
                             else if (energy == "Solar radiation") {
                                 parameters["unit"] = ["W/m²"];
                             }
-
-                            energyChart.showLoading();
-                            energyChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
+                            weatherChart.showLoading();
+                            weatherChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
                             
                         }
                     }

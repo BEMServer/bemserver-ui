@@ -21,70 +21,77 @@ def retrieve(site_id):
     structural_element_type = flask.request.args["structural_element_type"]
     tz_name = flask.request.args.get("timezone", flask.g.campaign_ctxt.tz_name)
     period_type = flask.request.args["period_type"]
+    period_day = int(flask.request.args["period_day"])
     period_month = int(flask.request.args["period_month"])
     period_year = int(flask.request.args["period_year"])
-    year_reference = int(flask.request.args["year_reference"])
+    forecast = flask.request.args.get("forecast", False)
 
-    bucket_width_value = 1
-    bucket_width_unit = BucketWidthUnit.hour
+    bucket_width_value = 10
+    bucket_width_unit = BucketWidthUnit.minute
     tz = zoneinfo.ZoneInfo(tz_name)
-    if period_type == "Month-Hourly":
+    if period_type == "Day-Minute":
+        dt_start = dt.datetime(
+            period_year, period_month, period_day, 0, 0, 0, tzinfo=tz
+        )
+        if period_day == 31:
+            end_month = period_month + 1
+            if end_month == 13:
+                end_month = 1
+                end_year = period_year + 1
+            else:
+                end_year = period_year
+            dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
+        else:
+            dt_end = dt.datetime(
+                period_year, period_month, period_day + 1, 0, 0, 0, tzinfo=tz
+            )
+    elif period_type == "Week-Hourly":
+        bucket_width_value = 1
+        bucket_width_unit = BucketWidthUnit.hour
+        dt_start = dt.datetime(
+            period_year, period_month, period_day, 0, 0, 0, tzinfo=tz
+        )
+        dt_end = dt_start + dt.timedelta(days=7)
+    elif period_type == "Month-Hourly":
+        bucket_width_value = 1
+        bucket_width_unit = BucketWidthUnit.hour
         dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
         end_year = period_year + (period_month // 12)
         end_month = (period_month % 12) + 1
         dt_end = dt.datetime(end_year, end_month, 1, 1, 0, 0, tzinfo=tz)
-    elif period_type == "Month-Daily":
+    elif period_type == "Year-Daily":
+        bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.day
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-    elif period_type == "Year-Monthly":
-        bucket_width_unit = BucketWidthUnit.month
         dt_start = dt.datetime(period_year, 1, 1, 0, 0, 0, tzinfo=tz)
         dt_end = dt.datetime(period_year + 1, 1, 1, 0, 0, 0, tzinfo=tz)
-    elif period_type == "Yearly":
-        bucket_width_unit = BucketWidthUnit.year
-        dt_start = dt.datetime(year_reference - period_year, 1, 1, 0, 0, 0, tzinfo=tz)
-        dt_end = dt.datetime(year_reference + 1, 1, 1, 0, 0, 0, tzinfo=tz)
-
-    """
-    tz = zoneinfo.ZoneInfo(tz_name)
-    if period_type == "Minute-Day":
-        print("AVANT")
-        print(period_year)
-        print(period_month)
+    elif period_type == "Last-Day":
         bucket_width_value = 10
         bucket_width_unit = BucketWidthUnit.minute
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-        print("APRES")
-        print(dt_start)
-        print(dt_end)
-    elif period_type == "Hour-Week":
+        dt_end = dt.datetime.now(tz)
+        dt_start = dt_end - dt.timedelta(days=1)
+
+    elif period_type == "Last-Week":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.hour
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-    elif period_type == "Hour-Month":
+        dt_end = dt.datetime.now(tz)
+        dt_start = dt_end - dt.timedelta(days=7)
+
+    elif period_type == "Last-Month":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.hour
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-    elif period_type == "Day-Year":
+        dt_end = dt.datetime.now(tz)
+        dt_start = dt_end - dt.timedelta(days=30)
+
+    elif period_type == "Last-Year":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.day
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-    """
+        dt_end = dt.datetime.now(tz)
+        dt_start = dt_end - dt.timedelta(days=365)
+
+    # Add 5 days for forecast
+    if forecast == "true":
+        print("forecast : True")
+    #    dt_end = dt_end + dt.timedelta(days=5)
 
     resp = flask.g.api_client.weather_ts_by_sites.getall(
         dt_start=dt_start,
@@ -93,9 +100,6 @@ def retrieve(site_id):
 
     parameters = {}
     parameters["energy"] = {}
-
-    parameters["energy"]["Outdoor conditions"] = {}
-    parameters["energy"]["Solar radiation"] = {}
 
     weather_data = flask.g.api_client.timeseries_data.download_aggregate(
         start_time=dt_start.isoformat(),
@@ -107,45 +111,62 @@ def retrieve(site_id):
     )
 
     for data in resp.data:
-        if data["parameter"] == "AIR_TEMPERATURE":
-            data["parameter"] = WeatherParameter.AIR_TEMPERATURE.value
-            parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
-        elif data["parameter"] == "RELATIVE_HUMIDITY":
-            data["parameter"] = WeatherParameter.RELATIVE_HUMIDITY.value
-            parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
-        elif data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION":
-            data["parameter"] = WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-            parameters["energy"]["Solar radiation"][data["parameter"]] = []
-        elif data["parameter"] == "SURFACE_DIRECT_SOLAR_RADIATION":
-            data["parameter"] = WeatherParameter.SURFACE_DIRECT_SOLAR_RADIATION.value
-            parameters["energy"]["Solar radiation"][data["parameter"]] = []
+        if data["site_id"] == site_id:
+            if (
+                data["parameter"] == "AIR_TEMPERATURE"
+                or data["parameter"] == "RELATIVE_HUMIDITY"
+            ):
+                parameters["energy"]["Outdoor conditions"] = {}
+            elif (
+                data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION"
+                or data["parameter"] == "SURFACE_SOLAR_RADIATION"
+            ):
+                parameters["energy"]["Solar radiation"] = {}
 
-        if str(data["timeseries_id"]) in weather_data.data:
-            for val in weather_data.data[str(data["timeseries_id"])].values():
-                if data["parameter"] == WeatherParameter.AIR_TEMPERATURE.value:
-                    parameters["energy"]["Outdoor conditions"][
-                        data["parameter"]
-                    ].append(val)
-                elif data["parameter"] == WeatherParameter.RELATIVE_HUMIDITY.value:
-                    parameters["energy"]["Outdoor conditions"][
-                        data["parameter"]
-                    ].append(val)
-                elif (
-                    data["parameter"]
-                    == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-                ):
-                    parameters["energy"]["Solar radiation"][data["parameter"]].append(
-                        val
-                    )
-                elif (
-                    data["parameter"]
-                    == WeatherParameter.SURFACE_DIRECT_SOLAR_RADIATION.value
-                ):
-                    parameters["energy"]["Solar radiation"][data["parameter"]].append(
-                        val
-                    )
+    for data in resp.data:
+        if data["site_id"] == site_id:
+            if data["parameter"] == "AIR_TEMPERATURE":
+                data["parameter"] = WeatherParameter.AIR_TEMPERATURE.value
+                parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
+            elif data["parameter"] == "RELATIVE_HUMIDITY":
+                data["parameter"] = WeatherParameter.RELATIVE_HUMIDITY.value
+                parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
+            elif data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION":
+                data["parameter"] = WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                parameters["energy"]["Solar radiation"][data["parameter"]] = []
+            elif data["parameter"] == "SURFACE_SOLAR_RADIATION":
+                data["parameter"] = WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                parameters["energy"]["Solar radiation"][data["parameter"]] = []
 
-    # ---------------------------- A CHANGER PLUS TARD --------------------------- #
+            if str(data["timeseries_id"]) in weather_data.data:
+                for val in weather_data.data[str(data["timeseries_id"])].values():
+                    if val is not None:
+                        if data["parameter"] == WeatherParameter.AIR_TEMPERATURE.value:
+                            parameters["energy"]["Outdoor conditions"][
+                                data["parameter"]
+                            ].append(val)
+                        elif (
+                            data["parameter"]
+                            == WeatherParameter.RELATIVE_HUMIDITY.value
+                        ):
+                            parameters["energy"]["Outdoor conditions"][
+                                data["parameter"]
+                            ].append(val)
+                        elif (
+                            data["parameter"]
+                            == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                        ):
+                            parameters["energy"]["Solar radiation"][
+                                data["parameter"]
+                            ].append(val)
+                        elif (
+                            data["parameter"]
+                            == WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                        ):
+                            parameters["energy"]["Solar radiation"][
+                                data["parameter"]
+                            ].append(val)
+
     analysis_resp = flask.g.api_client.analysis.get_energy_consumption_breakdown(
         StructuralElement(structural_element_type),
         site_id,

@@ -219,14 +219,8 @@ export class EnergyConsumptionExploreView {
 
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
-                            let parameters = {
-                                title : "Energy consumption",
-                                type : "bar",
-                                unit : ["Wh"],
-                            }
-
                             energyChart.showLoading();
-                            energyChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
+                            energyChart.load(data["timestamps"], energy, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
                         }
                     }
                 },

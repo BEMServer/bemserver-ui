@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Explore weather data" %}
+{% set title = "Weather data" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -16,7 +16,7 @@
                     </h2>
                     <div id="collapseParams" class="accordion-collapse collapse show" aria-labelledby="headingParams" data-bs-parent="#accordionParams">
                         <div class="accordion-body">
-                            <div class="row row-cols-1 row-cols-xl-2 g-3 g-xl-4">
+                            <div class="row row-cols-1 row-cols-xl-2 g-3 g-xl-4 mb-2">
                                 <div class="col">
                                     <h5 class="text-secondary"><i class="bi bi-buildings"></i> Sites and buildings</h5>
                                     <app-tree id="sitesTree" toolbar="false"></app-tree>
@@ -25,30 +25,25 @@
                                     <h5 class="text-secondary"><i class="bi bi-calendar4-range"></i> Period</h5>
                                     <div class="d-grid gap-2">
                                         <select id="periodType" class="form-select" aria-label="Select a period" required>
-                                            <option value="Month-Hourly" selected>Hourly consumption over 1 month</option>
-                                            <option value="Month-Daily">Daily consumption over 1 month</option>
-                                            <option value="Year-Monthly">Monthly consumption over 1 year</option>
-                                            <option value="Yearly">Yearly consumption</option>
+                                            <option value="Last-Day" selected>Last 24 hours</option>
+                                            <option value="Last-Week">Last 7 days</option>
+                                            <option value="Last-Month">Last 30 days</option>
+                                            <option value="Last-Year">Last 12 months</option>
+                                            <option value="Day-Minute">A day</option>
+                                            <option value="Week-Hourly">A week</option>
+                                            <option value="Month-Hourly">A month</option>
+                                            <option value="Year-Daily">A year</option>
                                         </select>
                                         <div class="d-flex gap-2">
-                                            <select id="periodMonth" class="form-select d-none invisible" aria-label="Select a period month" required>
-                                                <option value="1">January</option>
-                                                <option value="2">February</option>
-                                                <option value="3">March</option>
-                                                <option value="4">April</option>
-                                                <option value="5">May</option>
-                                                <option value="6">June</option>
-                                                <option value="7">July</option>
-                                                <option value="8">August</option>
-                                                <option value="9">September</option>
-                                                <option value="10">October</option>
-                                                <option value="11">November</option>
-                                                <option value="12">December</option>
-                                            </select>
+                                            <select id="periodDay" class="form-select d-none invisible" aria-label="Select a period day" required></select>
+                                            <select id="periodMonth" class="form-select d-none invisible" aria-label="Select a period month" required></select>
                                             <select id="periodYear" class="form-select d-none invisible" aria-label="Select a period year" required></select>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="row">
+                                <h5 class="text-secondary"><i class="bi bi-cloud-lightning-rain"></i> Forecast  <input type="checkbox" name="forecast" id="forecast" checked></h5>
                             </div>
                         </div>
                     </div>
@@ -75,7 +70,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { WeatherExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/explore.js') }}";
+    import { WeatherExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/weather.js') }}";
 
 
     document.addEventListener("DOMContentLoaded", () => {
