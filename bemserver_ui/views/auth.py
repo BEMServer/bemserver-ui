@@ -2,7 +2,7 @@
 import flask
 
 from bemserver_ui.extensions import auth
-from bemserver_ui.extensions.campaign_context import (  # noqa: F401
+from bemserver_ui.extensions.campaign_context import (
     IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
 )
 
@@ -41,7 +41,7 @@ def signin():
         flask.flash(f"Welcome back {user_json['data']['name']}!", "message")
         url_redir = flask.url_for(
             "main.index",
-            IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME=True,
+            **{IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True},
         )
         return flask.redirect(url_redir)
 
