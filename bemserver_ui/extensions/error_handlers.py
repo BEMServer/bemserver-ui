@@ -12,7 +12,7 @@ from bemserver_api_client.exceptions import (
     BEMServerAPIConflictError,
 )
 
-from bemserver_ui.extensions.campaign_context import (  # noqa: F401
+from bemserver_ui.extensions.campaign_context import (
     IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
 )
 
@@ -65,7 +65,9 @@ def _handle_401(exc):
         flask.session.clear()
         flask.flash(message, "error")
         return flask.redirect(
-            flask.url_for("auth.signin", IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME=True)
+            flask.url_for(
+                "auth.signin", **{IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True}
+            )
         )
 
 
