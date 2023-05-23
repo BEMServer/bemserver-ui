@@ -634,9 +634,11 @@ export class TimeseriesSelector extends HTMLElement {
             event.preventDefault();
 
             let searchResultItem = this.#searchResultsContainerElmt.querySelector(`button[data-ts-id="${tsData.id.toString()}"]`);
+            if (searchResultItem == null) {
+                searchResultItem = this.#createSearchResultItemElement(tsData);
+            }
             searchResultItem.isActive = false;
 
-            this.#updateSelectedItemsContainer();
             afterRemoveSelectedCallback?.();
         });
 
