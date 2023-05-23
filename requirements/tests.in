@@ -1,2 +1,3 @@
 pytest
 pytest-cov
+packaging>=23.1
