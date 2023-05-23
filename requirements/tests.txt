@@ -6,10 +6,14 @@
 #
 coverage[toml]==7.2.2
     # via pytest-cov
+exceptiongroup==1.1.1
+    # via pytest
 iniconfig==2.0.0
     # via pytest
-packaging==23.0
-    # via pytest
+packaging==23.1
+    # via
+    #   -r requirements/tests.in
+    #   pytest
 pluggy==1.0.0
     # via pytest
 pytest==7.3.1
@@ -18,3 +22,5 @@ pytest==7.3.1
     #   pytest-cov
 pytest-cov==4.0.0
     # via -r requirements/tests.in
+tomli==2.0.1
+    # via pytest
