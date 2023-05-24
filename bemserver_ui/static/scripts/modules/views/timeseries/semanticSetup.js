@@ -13,6 +13,7 @@ export class TimeseriesSemanticSetupView {
     #internalAPIRequester = null;
     #sitesTreeReqID = null;
     #weatherSetupGetReqID = null;
+    #forecastWeatherSetupGetReqID = null;
     #energyProdSetupGetReqID = null;
     #energyConsSetupGetReqID = null;
     #postReqIDByTab = {};
@@ -23,6 +24,7 @@ export class TimeseriesSemanticSetupView {
 
     #sitesTreeElmt = null;
     #weatherTabElmt = null;
+    #forecastWeatherTabElmt = null;
     #energyProdTabElmt = null;
     #energyConsTabElmt = null;
 
@@ -31,6 +33,12 @@ export class TimeseriesSemanticSetupView {
     #weatherSetupItemsCountElmt = null;
     #weatherAddParamBtnElmt = null;
     #weatherAddParamMenuElmt = null;
+
+    #forecastWeatherSetupHelpElmt = null;
+    #forecastWeatherSetupTableElmt = null;
+    #forecastWeatherSetupItemsCountElmt = null;
+    #forecastWeatherAddParamBtnElmt = null;
+    #forecastWeatherAddParamMenuElmt = null;
 
     #energyProdSetupHelpElmt = null;
     #energyProdSetupTableElmt = null;
@@ -60,6 +68,8 @@ export class TimeseriesSemanticSetupView {
     #structuralElementId = null;
     // Weather setup (parameter <-> timeseries) by weather parameter.
     #weatherSetupByParam = {};
+    // Forecast weather setup (parameter <-> timeseries) by weather parameter.
+    #forecastWeatherSetupByParam = {};
     // Energy production setup by energy and production techno (energy <-> prod techno <-> timeseries).
     #energyProdSetupByEnergyAndTech = {};
     // Energy consumption setup by energy and energy use (energy <-> energy use <-> timeseries).
@@ -67,6 +77,7 @@ export class TimeseriesSemanticSetupView {
 
     #selectedTab = null;
     #weatherParamEdited = null;
+    #forecastWeatherParamEdited = null;
     #energyEdited = null;
     #endUseEdited = null;
     #prodTechEdited = null;
@@ -96,6 +107,7 @@ export class TimeseriesSemanticSetupView {
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
         this.#weatherTabElmt = document.getElementById("weather-tab");
+        this.#forecastWeatherTabElmt = document.getElementById("weatherForecast-tab");
         this.#energyProdTabElmt = document.getElementById("energyProd-tab");
         this.#energyConsTabElmt = document.getElementById("energyCons-tab");
 
@@ -104,6 +116,12 @@ export class TimeseriesSemanticSetupView {
         this.#weatherSetupItemsCountElmt = document.getElementById("weatherItemsCount");
         this.#weatherAddParamBtnElmt = document.getElementById("weatherAddParamBtn");
         this.#weatherAddParamMenuElmt = this.#weatherAddParamBtnElmt?.parentElement.querySelector("ul.dropdown-menu");
+
+        this.#forecastWeatherSetupHelpElmt = document.getElementById("weatherForecastSetupHelp");
+        this.#forecastWeatherSetupTableElmt = document.getElementById("weatherForecastSetupTable");
+        this.#forecastWeatherSetupItemsCountElmt = document.getElementById("weatherForecastItemsCount");
+        this.#forecastWeatherAddParamBtnElmt = document.getElementById("weatherForecastAddParamBtn");
+        this.#forecastWeatherAddParamMenuElmt = this.#forecastWeatherAddParamBtnElmt?.parentElement.querySelector("ul.dropdown-menu");
 
         this.#energyProdSetupHelpElmt = document.getElementById("energyProdSetupHelp");
         this.#energyProdSetupTableElmt = document.getElementById("energyProdSetupTable");
@@ -137,12 +155,17 @@ export class TimeseriesSemanticSetupView {
             this.#tsSelector.clearAllSelection();
 
             this.#loadWeatherParametersSetup();
+            this.#loadForecastWeatherParametersSetup();
             this.#loadEnergyProductionSetup();
             this.#loadEnergyConsumptionSetup();
         });
 
         this.#weatherTabElmt.addEventListener("show.bs.tab", () => {
             this.#selectedTab = this.#weatherTabElmt;
+        });
+
+        this.#forecastWeatherTabElmt.addEventListener("show.bs.tab", () => {
+            this.#selectedTab = this.#forecastWeatherTabElmt;
         });
 
         this.#energyProdTabElmt.addEventListener("show.bs.tab", () => {
@@ -167,6 +190,7 @@ export class TimeseriesSemanticSetupView {
 
         this.#selectTimeseriesModalElmt?.addEventListener("hide.bs.modal", () => {
             this.#weatherParamEdited = null;
+            this.#forecastWeatherParamEdited = null;
             this.#energyEdited = null;
             this.#prodTechEdited = null;
             this.#endUseEdited = null;
@@ -218,9 +242,61 @@ export class TimeseriesSemanticSetupView {
                 parameter: this.#weatherParamEdited,
                 site_id: this.#structuralElementId,
                 timeseries_id: this.#tsSelector.selectedItems[0].id,
+                forecast: false,
             };
 
             let weatherData = this.#weatherSetupByParam[this.#weatherParamEdited];
+            if (weatherData.id == null) {
+                // Create setup (post call).
+                this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
+                    flaskES6.urlFor(`api.semantics.weather.create`),
+                    payload,
+                    updateSetupCallback,
+                    this.#internalApiErrorCallback,
+                    updateSetupDoneCallback,
+                );
+            }
+            else if (weatherData.timeseries_id != this.#tsSelector.selectedItems[0].id) {
+                // Update setup (put call).
+                this.#putReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.put(
+                    flaskES6.urlFor(`api.semantics.weather.update`, {id: weatherData.id}),
+                    payload,
+                    weatherData.etag,
+                    updateSetupCallback,
+                    this.#internalApiErrorCallback,
+                    updateSetupDoneCallback,
+                );
+            }
+            else {
+                // Nothing to do but just hide timeseries selection modal.
+                this.#selectTimeseriesModal.hide();
+            }
+        }
+        // Forecast weather parameter tab case.
+        if (this.#selectedTab == this.#forecastWeatherTabElmt) {
+            let updateSetupCallback = (data) => {
+                let updatedData = data.data;
+                updatedData.etag = data.etag;
+                this.#forecastWeatherSetupByParam[updatedData.parameter] = updatedData;
+                this.#refreshSetup(updatedData.timeseries, `weatherForecast-${updatedData.parameter}`);
+            };
+            let updateSetupDoneCallback = () => {
+                let weatherData = this.#forecastWeatherSetupByParam[this.#forecastWeatherParamEdited];
+
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${weatherData.parameter_label} weather parameter setup saved!`, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
+
+                this.#selectTimeseriesModal.hide();
+            };
+
+            let payload = {
+                parameter: this.#forecastWeatherParamEdited,
+                site_id: this.#structuralElementId,
+                timeseries_id: this.#tsSelector.selectedItems[0].id,
+                forecast: true,
+            };
+
+            let weatherData = this.#forecastWeatherSetupByParam[this.#forecastWeatherParamEdited];
             if (weatherData.id == null) {
                 // Create setup (post call).
                 this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
@@ -505,34 +581,39 @@ export class TimeseriesSemanticSetupView {
     #createWeatherParamRowElement(data) {
         let rowElmt = this.#createRowElement(data.parameter_label);
 
-        let suffixId = `weather-${data.parameter}`;
+        let suffixId = `weather${data.forecast ? "Forecast" : ""}-${data.parameter}`;
 
         let tdElmt = this.#createTimeseriesSetupCellElement(
             suffixId,
             `${data.timeseries_id != null ? `${data.timeseries.name}${data.timeseries.unit_symbol ? ` [${data.timeseries.unit_symbol}]` : ""}` : "none"}`,
             data.timeseries_id != null,
             () => {
-                this.#selectTimeseriesTargetTextElmt.innerText = `${data.parameter_label} weather parameter`;
+                this.#selectTimeseriesTargetTextElmt.innerText = `${data.parameter_label.toLowerCase()} weather parameter`;
                 this.#tsSelector.clearAllSelection();
                 this.#updateSaveBtnState();
 
                 // In update case, get resource etag if not known.
                 this.#reloadWeatherParameterSetupForEtag(
-                    data.parameter,
+                    data,
                     () => {
                         // Get up-to-date setup data.
-                        let dataToEdit = this.#weatherSetupByParam[data.parameter];
+                        let dataToEdit = data.forecast ? this.#forecastWeatherSetupByParam[data.parameter] : this.#weatherSetupByParam[data.parameter];
                         if (dataToEdit.timeseries_id != null) {
                             this.#tsSelector.select(dataToEdit.timeseries_id, () => { this.#updateSaveBtnState(); });
                         }
                     },
                 );
 
-                this.#weatherParamEdited = data.parameter;
+                if (!data.forecast) {
+                    this.#weatherParamEdited = data.parameter;
+                }
+                else {
+                    this.#forecastWeatherParamEdited = data.parameter;
+                }
             },
             `Remove <mark>${data.parameter_label}</mark> weather parameter setup`,
             () => {
-                let dataToDelete = this.#weatherSetupByParam[data.parameter];
+                let dataToDelete = data.forecast ? this.#forecastWeatherSetupByParam[data.parameter] : this.#weatherSetupByParam[data.parameter];
                 this.#deleteReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.delete(
                     flaskES6.urlFor(`api.semantics.weather.delete`, {id: dataToDelete.id}),
                     dataToDelete.etag,
@@ -541,7 +622,12 @@ export class TimeseriesSemanticSetupView {
                         dataToDelete.timeseries_id = null;
                         dataToDelete.timeseries = null;
                         dataToDelete.etag = null;
-                        this.#weatherSetupByParam[dataToDelete.parameter] = dataToDelete;
+                        if (!dataToDelete.forecast) {
+                            this.#weatherSetupByParam[dataToDelete.parameter] = dataToDelete;
+                        }
+                        else {
+                            this.#forecastWeatherSetupByParam[dataToDelete.parameter] = dataToDelete;
+                        }
 
                         this.#refreshSetup(dataToDelete.timeseries, suffixId);
                     },
@@ -555,9 +641,14 @@ export class TimeseriesSemanticSetupView {
             () => {
                 // In delete case, get resource etag if not known.
                 this.#reloadWeatherParameterSetupForEtag(
-                    data.parameter,
+                    data,
                     () => {
-                        this.#weatherParamEdited = data.parameter;
+                        if (!data.forecast) {
+                            this.#weatherParamEdited = data.parameter;
+                        }
+                        else {
+                            this.#forecastWeatherParamEdited = data.parameter;
+                        }
                     },
                 );
             },
@@ -567,15 +658,20 @@ export class TimeseriesSemanticSetupView {
         return rowElmt;
     }
 
-    #reloadWeatherParameterSetupForEtag(weatherParam, afterEtagLoadedCallback = null) {
-        let weatherData = this.#weatherSetupByParam[weatherParam];
+    #reloadWeatherParameterSetupForEtag(weatherTsData, afterEtagLoadedCallback = null) {
+        let weatherData = weatherTsData.forecast ? this.#forecastWeatherSetupByParam[weatherTsData.parameter] : this.#weatherSetupByParam[weatherTsData.parameter];
         if (weatherData.id != null && weatherData.etag == null) {
             this.#internalAPIRequester.get(
                 flaskES6.urlFor(`api.semantics.weather.retrieve_one`, {id: weatherData.id}),
                 (data) => {
                     weatherData = data.data;
                     weatherData.etag = data.etag;
-                    this.#weatherSetupByParam[weatherParam] = weatherData;
+                    if (!weatherData.forecast) {
+                        this.#weatherSetupByParam[weatherTsData.parameter] = weatherData;
+                    }
+                    else {
+                        this.#forecastWeatherSetupByParam[weatherTsData.parameter] = weatherData;
+                    }
 
                     afterEtagLoadedCallback?.();
                 },
@@ -606,7 +702,7 @@ export class TimeseriesSemanticSetupView {
             }
 
             this.#weatherSetupGetReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId}),
+                flaskES6.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: false}),
                 (data) => {
                     tableBodyElmt.innerHTML = "";
                     if (data.data.length > 0) {
@@ -646,6 +742,7 @@ export class TimeseriesSemanticSetupView {
                                         "timeseries": null,
                                         "site_id": this.#structuralElementId,
                                         "timeseries_id": null,
+                                        "forecast": false,
                                     };
 
                                     if (Object.keys(this.#weatherSetupByParam).length <= 0) {
@@ -681,7 +778,102 @@ export class TimeseriesSemanticSetupView {
         this.#weatherSetupItemsCountElmt.update({totalCount: totalCount, firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount});
     }
 
-    #createEnergyProdRowElement(energyID, energyName, energyProdSetup) {
+    #loadForecastWeatherParametersSetup() {
+        this.#forecastWeatherSetupByParam = {};
+
+        if (this.#structuralElementType == "site") {
+            this.#forecastWeatherSetupHelpElmt.classList.add("d-none", "invisible");
+            this.#forecastWeatherSetupTableElmt.parentElement.classList.remove("d-none", "invisible");
+            this.#forecastWeatherAddParamBtnElmt.parentElement.classList.remove("d-none", "invisible");
+
+            let tableBodyElmt = this.#forecastWeatherSetupTableElmt.querySelector("tbody");
+            tableBodyElmt.innerHTML = "";
+            tableBodyElmt.appendChild(new Spinner());
+            this.#forecastWeatherSetupItemsCountElmt.setLoading();
+
+            if (this.#forecastWeatherSetupGetReqID != null) {
+                this.#internalAPIRequester.abort(this.#forecastWeatherSetupGetReqID);
+                this.#forecastWeatherSetupGetReqID = null;
+            }
+
+            this.#forecastWeatherSetupGetReqID = this.#internalAPIRequester.get(
+                flaskES6.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: true}),
+                (data) => {
+                    tableBodyElmt.innerHTML = "";
+                    if (data.data.length > 0) {
+                        for (let row of data.data) {
+                            this.#forecastWeatherSetupByParam[row.parameter] = row;
+                            let itemElmt = this.#createWeatherParamRowElement(row);
+                            tableBodyElmt.appendChild(itemElmt);
+                        }
+                    }
+                    else {
+                        let trElmt = document.createElement("tr");
+                        tableBodyElmt.appendChild(trElmt);
+    
+                        let tdElmt = document.createElement("td");
+                        tdElmt.setAttribute("colspan", 2);
+                        trElmt.appendChild(tdElmt);
+    
+                        let noItemElmt = document.createElement("p");
+                        noItemElmt.classList.add("fst-italic", "text-center", "text-muted", "pt-2", "w-100");
+                        noItemElmt.innerText = "Nothing configured yet";
+                        tdElmt.appendChild(noItemElmt);
+                    }
+
+                    this.#updateForecastWeatherItemsCount();
+
+                    let definedWeatherParamIDs = Object.keys(this.#forecastWeatherSetupByParam);
+                    this.#forecastWeatherAddParamMenuElmt.innerHTML = "";
+                    for (let [weatherParamID, weatherParamLabel] of Object.entries(this.#weatherParams)) {
+                        if (!definedWeatherParamIDs.includes(weatherParamID)) {
+                            let menuItemElmt = this.#createDropDownMenuItemElement(
+                                weatherParamLabel,
+                                () => {
+                                    let weatherParamSetup = {
+                                        "id": null,
+                                        "parameter": weatherParamID,
+                                        "parameter_label": weatherParamLabel,
+                                        "timeseries": null,
+                                        "site_id": this.#structuralElementId,
+                                        "timeseries_id": null,
+                                        "forecast": true,
+                                    };
+
+                                    if (Object.keys(this.#forecastWeatherSetupByParam).length <= 0) {
+                                        tableBodyElmt.innerHTML = "";
+                                    }
+                                    let rowElmt = this.#createWeatherParamRowElement(weatherParamSetup);
+                                    tableBodyElmt.appendChild(rowElmt);
+    
+                                    this.#forecastWeatherSetupByParam[weatherParamID] = weatherParamSetup;
+    
+                                    this.#updateForecastWeatherItemsCount();
+    
+                                    if (this.#forecastWeatherAddParamMenuElmt.childElementCount <= 0) {
+                                        this.#forecastWeatherAddParamBtnElmt.parentElement.classList.add("d-none", "invisible");
+                                    }
+                                },
+                            );
+                            this.#forecastWeatherAddParamMenuElmt.appendChild(menuItemElmt);
+                        }
+                    }
+                },
+                this.#internalApiErrorCallback,
+            );
+        }
+        else {
+            this.#forecastWeatherSetupHelpElmt.classList.remove("d-none", "invisible");
+            this.#forecastWeatherSetupTableElmt.parentElement.classList.add("d-none", "invisible");
+        }
+    }
+
+    #updateForecastWeatherItemsCount() {
+        let totalCount = Object.keys(this.#forecastWeatherSetupByParam).length;
+        this.#forecastWeatherSetupItemsCountElmt.update({totalCount: totalCount, firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount});
+    }
+
+    #createEnergyProdRowElement(energ7261530yID, energyName, energyProdSetup) {
         let rowElmt = this.#createRowElement(energyName);
 
         for (let energyProdTechSetup of Object.values(energyProdSetup)) {
@@ -693,7 +885,7 @@ export class TimeseriesSemanticSetupView {
                 `${energyProdTechSetup.timeseries_id != null ? `${energyProdTechSetup.timeseries.name}${energyProdTechSetup.timeseries.unit_symbol ? ` [${energyProdTechSetup.timeseries.unit_symbol}]` : ""}` : "none"}`,
                 energyProdTechSetup.timeseries_id != null,
                 () => {
-                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName} - ${prodTechName}] energy production`;
+                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName.toLowerCase()} - ${prodTechName.toLowerCase()}] energy production`;
                     this.#tsSelector.clearAllSelection();
                     this.#updateSaveBtnState();
 
@@ -898,7 +1090,7 @@ export class TimeseriesSemanticSetupView {
                 `${energyConsEndUseSetup.timeseries_id != null ? `${energyConsEndUseSetup.timeseries.name}${energyConsEndUseSetup.timeseries.unit_symbol ? ` [${energyConsEndUseSetup.timeseries.unit_symbol}]` : ""}` : "none"}`,
                 energyConsEndUseSetup.timeseries_id != null,
                 () => {
-                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName} - ${endUseName}] energy consumption`;
+                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName.toLowerCase()} - ${endUseName.toLowerCase()}] energy consumption`;
                     this.#tsSelector.clearAllSelection();
                     this.#updateSaveBtnState();
 

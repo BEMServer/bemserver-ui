@@ -33,6 +33,9 @@
                     <button class="nav-link{% if tab == 'weather' %} active{% endif %}" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-tabcontent" type="button" role="tab" aria-controls="weather-tabcontent" aria-selected="{% if tab == 'weather' %}true{% else %}false{% endif %}">Weather</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'weather_forecast' %} active{% endif %}" id="weatherForecast-tab" data-bs-toggle="tab" data-bs-target="#weatherForecast-tabcontent" type="button" role="tab" aria-controls="weatherForecast-tabcontent" aria-selected="{% if tab == 'weather_forecast' %}true{% else %}false{% endif %}">Weather forecast</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link{% if tab == 'energy_prod' %} active{% endif %}" id="energyProd-tab" data-bs-toggle="tab" data-bs-target="#energyProd-tabcontent" type="button" role="tab" aria-controls="energyProd-tabcontent" aria-selected="{% if tab == 'energy_prod' %}true{% else %}false{% endif %}">Energy production</button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -62,6 +65,40 @@
                                                     <i class="bi bi-plus-circle"></i>
                                                 </button>
                                                 <ul class="dropdown-menu" aria-labelledby="weatherAddParamBtn"></ul>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="text-center align-middle">Timeseries</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane{% if tab == 'weather_forecast' %} show active{% endif %} p-3" id="weatherForecast-tabcontent" role="tabpanel" aria-labelledby="weatherForecast-tab">
+                    <div class="alert alert-info mb-0 pb-0" id="weatherForecastSetupHelp">
+                        <i class="bi bi-question-diamond me-2"></i>
+                        <span class="fw-bold">Help</span>
+                        <p>Select a <span class="fw-bold">site</span> in the tree to see its <span class="fw-bold">weather forecast parameters</span> setup.</p>
+                    </div>
+                    <div class="table-responsive-xl d-none invisible">
+                        <table class="table table-sm table-bordered caption-top" id="weatherForecastSetupTable">
+                            <caption class="text-end">
+                                <small><app-items-count id="weatherForecastItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="align-middle w-25">
+                                        <div class="hstack justify-content-center align-items-center gap-2">
+                                            <span>Weather parameter</span>
+                                            {% if is_editable %}
+                                            <div class="dropdown my-2">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="weatherForecastAddParamBtn" data-bs-toggle="dropdown" aria-expanded="false" title="Define a forecast weather parameter">
+                                                    <i class="bi bi-plus-circle"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="weatherForecastAddParamBtn"></ul>
                                             </div>
                                             {% endif %}
                                         </div>
