@@ -31,6 +31,8 @@ def list():
         filters["parameter"] = flask.request.args["parameter"]
     if "timeseries" in flask.request.args:
         filters["timeseries_id"] = flask.request.args["timeseries"]
+    if "forecast" in flask.request.args:
+        filters["forecast"] = flask.request.args["forecast"]
     ts_weather_resp = flask.g.api_client.weather_ts_by_sites.getall(**filters)
     json_data = ts_weather_resp.toJSON()
     for param in json_data["data"]:
@@ -41,7 +43,10 @@ def list():
 @blp.route("/", methods=["POST"])
 @auth.signin_required(roles=[Roles.admin])
 def create():
-    ts_weather_resp = flask.g.api_client.weather_ts_by_sites.create(flask.request.json)
+    payload = flask.request.json
+    if "forecast" not in payload:
+        payload["forecast"] = False
+    ts_weather_resp = flask.g.api_client.weather_ts_by_sites.create(payload)
 
     json_data = ts_weather_resp.toJSON()
     json_data["data"] = _extend_data(json_data["data"])
@@ -61,8 +66,11 @@ def retrieve_one(id):
 @blp.route("/<int:id>", methods=["PUT"])
 @auth.signin_required(roles=[Roles.admin])
 def update(id):
+    payload = flask.request.json
+    if "forecast" not in payload:
+        payload["forecast"] = False
     ts_weather_resp = flask.g.api_client.weather_ts_by_sites.update(
-        id, flask.request.json, etag=flask.request.headers["ETag"]
+        id, payload, etag=flask.request.headers["ETag"]
     )
 
     json_data = ts_weather_resp.toJSON()
