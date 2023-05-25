@@ -230,11 +230,11 @@ def retrieve_stats():
         try:
             dt_first = convert_from_iso(ts_stats["first_timestamp"], tz=tz)
             dt_last = convert_from_iso(ts_stats["last_timestamp"], tz=tz)
-            ts_stats["elapsed_time"] = strfdelta(dt_last - dt_first)
+            ts_stats["period_duration"] = strfdelta(dt_last - dt_first)
             ts_stats["last_data_since"] = strfdelta(dt_now - dt_last)
         except BEMServerUICommonInvalidDatetimeError:
             # Exception raised if timestamps are None.
-            ts_stats["elapsed_time"] = None
+            ts_stats["period_duration"] = None
             ts_stats["last_data_since"] = None
 
     return flask.jsonify(data_stats)
