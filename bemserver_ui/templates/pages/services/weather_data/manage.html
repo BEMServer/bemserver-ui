@@ -2,6 +2,10 @@
 
 {% set title = "Weather data service" %}
 
+{% if not tab %}
+    {% set tab = "weather" %}
+{% endif %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -45,23 +49,54 @@
         </div>
     </div>
     <div class="row">
-        <div class="table-responsive-xl">
-            <table class="table table-sm table-hover caption-top">
-                <caption class="text-end">
-                    <small class="text-nowrap text-muted"><app-items-count id="itemsCount"></app-items-count></small>
-                </caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Site</th>
-                        <th scope="col">State</th>
-                        {% if signed_user.is_admin %}
-                        <th scope="col">Fetch data</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody class="table-group-divider" id="serviceStatesContainer">
-                </tbody>
-            </table>
+        <div class="col">
+            <ul class="nav nav-tabs app-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'weather' %} active{% endif %}" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-tabcontent" type="button" role="tab" aria-controls="weather-tabcontent" aria-selected="{% if tab == 'weather' %}true{% else %}false{% endif %}">Weather</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link{% if tab == 'weather_forecast' %} active{% endif %}" id="weatherForecast-tab" data-bs-toggle="tab" data-bs-target="#weatherForecast-tabcontent" type="button" role="tab" aria-controls="weatherForecast-tabcontent" aria-selected="{% if tab == 'weather_forecast' %}true{% else %}false{% endif %}">Weather forecast</button>
+                </li>
+            </ul>
+            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
+                <div class="tab-pane{% if tab == 'weather' %} show active{% endif %} p-3" id="weather-tabcontent" role="tabpanel" aria-labelledby="weather-tab">
+                    <div class="table-responsive-xl">
+                        <table class="table table-sm table-hover caption-top">
+                            <caption class="text-end">
+                                <small class="text-nowrap text-muted"><app-items-count id="weatherItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Site</th>
+                                    <th scope="col">State</th>
+                                    {% if signed_user.is_admin %}
+                                    <th scope="col">Fetch data</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider" id="weatherServiceStatesContainer">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane{% if tab == 'weather_forecast' %} show active{% endif %} p-3" id="weatherForecast-tabcontent" role="tabpanel" aria-labelledby="weatherForecast-tab">
+                    <div class="table-responsive-xl">
+                        <table class="table table-sm table-hover caption-top">
+                            <caption class="text-end">
+                                <small class="text-nowrap text-muted"><app-items-count id="weatherForecastItemsCount"></app-items-count></small>
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Site</th>
+                                    <th scope="col">State</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider" id="weatherForecastServiceStatesContainer">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -103,6 +138,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/weatherData/manage.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/weatherData/manage.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

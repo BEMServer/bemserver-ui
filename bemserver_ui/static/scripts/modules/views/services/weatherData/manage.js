@@ -10,7 +10,8 @@ import "/static/scripts/modules/components/time/datetimePicker.js";
 class WeatherDataServiceManageView {
 
     #internalAPIRequester = null;
-    #listReqID = null;
+    #weatherListReqID = null;
+    #forecastWeatherListReqID = null;
     #updateStateReqID = null;
     #getSvcEtagReqID = null;
     #getSemanticsReqID = null;
@@ -22,8 +23,11 @@ class WeatherDataServiceManageView {
     #serviceStateFilterElmt = null;
     #removeFiltersBtnElmt = null;
 
-    #itemsCountElmt = null;
-    #serviceStatesContainerElmt = null;
+    #weatherItemsCountElmt = null;
+    #weatherServiceStatesContainerElmt = null;
+
+    #forecastWeatherItemsCountElmt = null;
+    #forecastWeatherServiceStatesContainerElmt = null;
 
     #fetchDataModalElmt = null;
     #fetchDataModal = null;
@@ -49,8 +53,11 @@ class WeatherDataServiceManageView {
         this.#siteNameSearchElmt = document.getElementById("siteNameSearch");
         this.#removeFiltersBtnElmt = document.getElementById("removeFiltersBtn");
 
-        this.#itemsCountElmt = document.getElementById("itemsCount");
-        this.#serviceStatesContainerElmt = document.getElementById("serviceStatesContainer");
+        this.#weatherItemsCountElmt = document.getElementById("weatherItemsCount");
+        this.#weatherServiceStatesContainerElmt = document.getElementById("weatherServiceStatesContainer");
+
+        this.#forecastWeatherItemsCountElmt = document.getElementById("weatherForecastItemsCount");
+        this.#forecastWeatherServiceStatesContainerElmt = document.getElementById("weatherForecastServiceStatesContainer");
 
         if (signedUser.is_admin) {
             this.#fetchDataModalElmt = document.getElementById("fetchDataModal");
@@ -80,13 +87,15 @@ class WeatherDataServiceManageView {
             event.preventDefault();
 
             this.#updateSiteNameSearch();
-            this.#refreshList();
+            this.#refreshWeatherList();
+            this.#refreshForecastWeatherList();
         });
 
         this.#serviceStateFilterElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#refreshList();
+            this.#refreshWeatherList();
+            this.#refreshForecastWeatherList();
         });
 
         this.#removeFiltersBtnElmt.addEventListener("click", (event) => {
@@ -106,7 +115,8 @@ class WeatherDataServiceManageView {
             }
 
             if (hasFilterChanged) {
-                this.#refreshList();
+                this.#refreshWeatherList();
+                this.#refreshForecastWeatherList();
             }
         });
 
@@ -184,7 +194,9 @@ class WeatherDataServiceManageView {
         }
     }
 
-    #createEntryElement(serviceStateData) {
+    #createEntryElement(serviceStateData, forecast=false) {
+        let suffixId = `${forecast ? "forecast-" : ""}${serviceStateData.site_id}`;
+
         let trElmt = document.createElement("tr");
         trElmt.classList.add("align-middle");
 
@@ -203,8 +215,8 @@ class WeatherDataServiceManageView {
             svcCtrlElmt.appendChild(svcEtagInputElmt);
 
             let svcOnInputElmt = document.createElement("input");
-            svcOnInputElmt.id = `radio-svc-state-${serviceStateData.site_id}-on`;
-            svcOnInputElmt.name = `radio-svc-state-${serviceStateData.site_id}`;
+            svcOnInputElmt.id = `radio-svc-state-${suffixId}-on`;
+            svcOnInputElmt.name = `radio-svc-state-${suffixId}`;
             svcOnInputElmt.classList.add("btn-check");
             svcOnInputElmt.setAttribute("type", "radio");
             svcOnInputElmt.setAttribute("autocomplete", "off");
@@ -218,8 +230,8 @@ class WeatherDataServiceManageView {
             svcCtrlElmt.appendChild(svcOnLabelElmt);
 
             let svcOffInputElmt = document.createElement("input");
-            svcOffInputElmt.id = `radio-svc-state-${serviceStateData.site_id}-off`;
-            svcOffInputElmt.name = `radio-svc-state-${serviceStateData.site_id}`;
+            svcOffInputElmt.id = `radio-svc-state-${suffixId}-off`;
+            svcOffInputElmt.name = `radio-svc-state-${suffixId}`;
             svcOffInputElmt.classList.add("btn-check");
             svcOffInputElmt.setAttribute("type", "radio");
             svcOffInputElmt.setAttribute("autocomplete", "off");
@@ -263,14 +275,14 @@ class WeatherDataServiceManageView {
                     if (isEnabled) {
                         // Enable weather data service for site.
                         this.#updateStateReqID = this.#internalAPIRequester.post(
-                            flaskES6.urlFor(`api.services.weather_data.enable`),
+                            flaskES6.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}enable`),
                             { site_id: serviceStateData.site_id, is_enabled: isEnabled },
                             (data) => {
                                 serviceStateData = data.data;
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: "Weather data service enabled!", isDismissible: true });
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `${forecast ? "Forecast w": "W"}eather data service enabled!`, isDismissible: true });
                                 this.#messagesElmt.appendChild(flashMsgElmt);
                             },
                             (error) => {
@@ -284,18 +296,18 @@ class WeatherDataServiceManageView {
                     }
                 }
                 else {
-                    let _updateSvcState = (isEnabled) => {
+                    let _updateSvcState = (_isEnabled) => {
                         // Update weather data service state for site.
                         this.#updateStateReqID = this.#internalAPIRequester.put(
-                            flaskES6.urlFor(`api.services.weather_data.update_state`, {id: serviceStateData.id}),
-                            { is_enabled: isEnabled },
+                            flaskES6.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}update_state`, {id: serviceStateData.id}),
+                            { is_enabled: _isEnabled },
                             svcEtagInputElmt.value,
                             (data) => {
                                 serviceStateData = data.data;
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Weather data service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
+                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `${forecast ? "Forecast w": "W"}eather data service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
                                 this.#messagesElmt.appendChild(flashMsgElmt);
                             },
                             (error) => {
@@ -314,10 +326,10 @@ class WeatherDataServiceManageView {
                         }
 
                         this.#getSvcEtagReqID = this.#internalAPIRequester.get(
-                            flaskES6.urlFor(`api.services.weather_data.retrieve_one`, {id: serviceStateData.id}),
+                            flaskES6.urlFor(`api.services.weather_data.retrieve_${forecast ? "forecast_": ""}one`, {id: serviceStateData.id}),
                             (data) => {
                                 svcEtagInputElmt.value = data.etag;
-                                _updateSvcState(true);
+                                _updateSvcState(isEnabled);
                             },
                             (error) => {
                                 let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
@@ -388,77 +400,79 @@ class WeatherDataServiceManageView {
                 },
             );
 
-            let tdFetchElmt = document.createElement("td");
-            trElmt.appendChild(tdFetchElmt);
+            if (!forecast) {
+                let tdFetchElmt = document.createElement("td");
+                trElmt.appendChild(tdFetchElmt);
 
-            let fetchLinkElmt = document.createElement("a");
-            fetchLinkElmt.classList.add("btn", "btn-sm", "btn-outline-primary");
-            fetchLinkElmt.setAttribute("role", "button");
-            fetchLinkElmt.setAttribute("title", "Fetch weather data from external service");
-            fetchLinkElmt.setAttribute("data-bs-toggle", "modal");
-            fetchLinkElmt.setAttribute("data-bs-target", `#${this.#fetchDataModalElmt.id}`);
-            tdFetchElmt.appendChild(fetchLinkElmt);
+                let fetchLinkElmt = document.createElement("a");
+                fetchLinkElmt.classList.add("btn", "btn-sm", "btn-outline-primary");
+                fetchLinkElmt.setAttribute("role", "button");
+                fetchLinkElmt.setAttribute("title", "Fetch weather data from external service");
+                fetchLinkElmt.setAttribute("data-bs-toggle", "modal");
+                fetchLinkElmt.setAttribute("data-bs-target", `#${this.#fetchDataModalElmt.id}`);
+                tdFetchElmt.appendChild(fetchLinkElmt);
 
-            let fetchIconElmt = document.createElement("i");
-            fetchIconElmt.classList.add("bi", "bi-cloud-download");
-            fetchLinkElmt.appendChild(fetchIconElmt);
+                let fetchIconElmt = document.createElement("i");
+                fetchIconElmt.classList.add("bi", "bi-cloud-download");
+                fetchLinkElmt.appendChild(fetchIconElmt);
 
-            fetchLinkElmt.addEventListener("click", () => {
-                this.#fetchDataSiteIdElmt.value = serviceStateData.site_id.toString();
-                this.#fetchDataDatetimeStartElmt.reset({ ignoreTime: true });
-                this.#fetchDataDatetimeEndElmt.reset({ ignoreTime: true });
-                this.#updateFetchDataBtn();
+                fetchLinkElmt.addEventListener("click", () => {
+                    this.#fetchDataSiteIdElmt.value = serviceStateData.site_id.toString();
+                    this.#fetchDataDatetimeStartElmt.reset({ ignoreTime: true });
+                    this.#fetchDataDatetimeEndElmt.reset({ ignoreTime: true });
+                    this.#updateFetchDataBtn();
 
-                this.#fetchDataModalParamsContainerElmt.innerHTML = "";
-                this.#fetchDataModalParamsContainerElmt.appendChild(new Spinner());
+                    this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+                    this.#fetchDataModalParamsContainerElmt.appendChild(new Spinner());
 
-                if (this.#getSemanticsReqID != null) {
-                    this.#internalAPIRequester.abort(this.#getSemanticsReqID);
-                    this.#getSemanticsReqID = null;
-                }
+                    if (this.#getSemanticsReqID != null) {
+                        this.#internalAPIRequester.abort(this.#getSemanticsReqID);
+                        this.#getSemanticsReqID = null;
+                    }
 
-                this.#getSemanticsReqID = this.#internalAPIRequester.get(
-                    flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id}),
-                    (data) => {
-                        this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+                    this.#getSemanticsReqID = this.#internalAPIRequester.get(
+                        flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id}),
+                        (data) => {
+                            this.#fetchDataModalParamsContainerElmt.innerHTML = "";
 
-                        if (data.data.length > 0) {
-                            let weatherParamsTitleElmt = document.createElement("h6");
-                            weatherParamsTitleElmt.innerText = `${data.data.length} weather parameter${data.data.length > 1 ? "s" : ""} will be fetched:`;
-                            this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsTitleElmt);
+                            if (data.data.length > 0) {
+                                let weatherParamsTitleElmt = document.createElement("h6");
+                                weatherParamsTitleElmt.innerText = `${data.data.length} weather parameter${data.data.length > 1 ? "s" : ""} will be fetched:`;
+                                this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsTitleElmt);
 
-                            let weatherParamsListElmt = document.createElement("dl");
-                            weatherParamsListElmt.classList.add("d-flex", "flex-wrap", "gap-3");
-                            this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsListElmt);
-                            for (let weatherParam of data.data) {
-                                let weatherParamsListItemElmt = document.createElement("div");
-                                weatherParamsListElmt.appendChild(weatherParamsListItemElmt);
+                                let weatherParamsListElmt = document.createElement("dl");
+                                weatherParamsListElmt.classList.add("d-flex", "flex-wrap", "gap-3");
+                                this.#fetchDataModalParamsContainerElmt.appendChild(weatherParamsListElmt);
+                                for (let weatherParam of data.data) {
+                                    let weatherParamsListItemElmt = document.createElement("div");
+                                    weatherParamsListElmt.appendChild(weatherParamsListItemElmt);
 
-                                let weatherParamsListItemTitleElmt = document.createElement("dt");
-                                weatherParamsListItemTitleElmt.innerText = `${weatherParam["parameter_label"]}`;
-                                weatherParamsListItemElmt.appendChild(weatherParamsListItemTitleElmt);
+                                    let weatherParamsListItemTitleElmt = document.createElement("dt");
+                                    weatherParamsListItemTitleElmt.innerText = `${weatherParam["parameter_label"]}`;
+                                    weatherParamsListItemElmt.appendChild(weatherParamsListItemTitleElmt);
 
-                                let weatherParamsListItemTextElmt = document.createElement("dd");
-                                weatherParamsListItemTextElmt.innerText = `${weatherParam["timeseries"]["name"]}${weatherParam["timeseries"]["unit_symbol"] != null ? ` [${weatherParam["timeseries"]["unit_symbol"]}]` : ""}`;
-                                weatherParamsListItemElmt.appendChild(weatherParamsListItemTextElmt);
+                                    let weatherParamsListItemTextElmt = document.createElement("dd");
+                                    weatherParamsListItemTextElmt.innerText = `${weatherParam["timeseries"]["name"]}${weatherParam["timeseries"]["unit_symbol"] != null ? ` [${weatherParam["timeseries"]["unit_symbol"]}]` : ""}`;
+                                    weatherParamsListItemElmt.appendChild(weatherParamsListItemTextElmt);
+                                }
                             }
-                        }
-                        else {
-                            let warnAlertElmt = this.#createWarnAlertElement("No weather parameter to fetch. You should set timeseries semantics for weather parameters.");
-                            this.#fetchDataModalParamsContainerElmt.appendChild(warnAlertElmt);
-                        }
+                            else {
+                                let warnAlertElmt = this.#createWarnAlertElement("No weather parameter to fetch. You should set timeseries semantics for weather parameters.");
+                                this.#fetchDataModalParamsContainerElmt.appendChild(warnAlertElmt);
+                            }
 
-                        if (!siteHasCoord) {
-                            let warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
-                            this.#fetchDataModalParamsContainerElmt.appendChild(warnSiteCoordElmt);
-                        }
-                    },
-                    (error) => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
-                    },
-                );
-            });
+                            if (!siteHasCoord) {
+                                let warnSiteCoordElmt = this.#createWarnAlertElement("Site latitude/longitude coordinates are not defined!");
+                                this.#fetchDataModalParamsContainerElmt.appendChild(warnSiteCoordElmt);
+                            }
+                        },
+                        (error) => {
+                            let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                            this.#messagesElmt.appendChild(flashMsgElmt);
+                        },
+                    );
+                });
+            }
         }
 
         return trElmt;
@@ -481,22 +495,22 @@ class WeatherDataServiceManageView {
         return warnContainerElmt;
     }
 
-    #setListLoading() {
+    #getListLoadingElement() {
         let loadingContainerElmt = document.createElement("td");
         loadingContainerElmt.setAttribute("colspan", "3");
         loadingContainerElmt.classList.add("text-center", "p-4", "w-100");
         loadingContainerElmt.appendChild(new Spinner());
-        this.#serviceStatesContainerElmt.appendChild(loadingContainerElmt);
+        return loadingContainerElmt;
     }
 
-    #refreshList() {
-        this.#itemsCountElmt.setLoading();
-        this.#serviceStatesContainerElmt.innerHTML = "";
-        this.#setListLoading();
+    #refreshWeatherList() {
+        this.#weatherItemsCountElmt.setLoading();
+        this.#weatherServiceStatesContainerElmt.innerHTML = "";
+        this.#weatherServiceStatesContainerElmt.appendChild(this.#getListLoadingElement());
 
-        if (this.#listReqID != null) {
-            this.#internalAPIRequester.abort(this.#listReqID);
-            this.#listReqID = null;
+        if (this.#weatherListReqID != null) {
+            this.#internalAPIRequester.abort(this.#weatherListReqID);
+            this.#weatherListReqID = null;
         }
 
         let filters = {};
@@ -510,24 +524,71 @@ class WeatherDataServiceManageView {
             filters["is_enabled"] = false;
         }
 
-        this.#listReqID = this.#internalAPIRequester.get(
+        this.#weatherListReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.services.weather_data.retrieve_list`, filters),
             (data) => {
-                this.#serviceStatesContainerElmt.innerHTML = "";
+                this.#weatherServiceStatesContainerElmt.innerHTML = "";
                 if (data.length > 0) {
                     for (let row of data) {
                         row.is_enabled = row.is_enabled == null ? false : row.is_enabled;
-                        this.#serviceStatesContainerElmt.appendChild(this.#createEntryElement(row));
+                        this.#weatherServiceStatesContainerElmt.appendChild(this.#createEntryElement(row));
                     }
                 }
                 else {
                     let noItemElmt = document.createElement("p");
                     noItemElmt.classList.add("fst-italic", "text-center", "text-muted", "w-100");
                     noItemElmt.innerText = "No download weather data service states for sites";
-                    this.#serviceStatesContainerElmt.appendChild(noItemElmt);
+                    this.#weatherServiceStatesContainerElmt.appendChild(noItemElmt);
                 }
 
-                this.#itemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
+                this.#weatherItemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
+            },
+            (error) => {
+                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
+                this.#messagesElmt.appendChild(flashMsgElmt);
+            },
+        );
+    }
+
+    #refreshForecastWeatherList() {
+        this.#forecastWeatherItemsCountElmt.setLoading();
+        this.#forecastWeatherServiceStatesContainerElmt.innerHTML = "";
+        this.#forecastWeatherServiceStatesContainerElmt.appendChild(this.#getListLoadingElement());
+
+        if (this.#forecastWeatherListReqID != null) {
+            this.#internalAPIRequester.abort(this.#forecastWeatherListReqID);
+            this.#forecastWeatherListReqID = null;
+        }
+
+        let filters = {};
+        if (this.#siteNameSearchElmt.value != "") {
+            filters["in_site_name"] = this.#siteNameSearchElmt.value;
+        }
+        if (this.#serviceStateFilterElmt.value == "on") {
+            filters["is_enabled"] = true;
+        }
+        else if (this.#serviceStateFilterElmt.value == "off") {
+            filters["is_enabled"] = false;
+        }
+
+        this.#forecastWeatherListReqID = this.#internalAPIRequester.get(
+            flaskES6.urlFor(`api.services.weather_data.retrieve_forecast_list`, filters),
+            (data) => {
+                this.#forecastWeatherServiceStatesContainerElmt.innerHTML = "";
+                if (data.length > 0) {
+                    for (let row of data) {
+                        row.is_enabled = row.is_enabled == null ? false : row.is_enabled;
+                        this.#forecastWeatherServiceStatesContainerElmt.appendChild(this.#createEntryElement(row, true));
+                    }
+                }
+                else {
+                    let noItemElmt = document.createElement("p");
+                    noItemElmt.classList.add("fst-italic", "text-center", "text-muted", "w-100");
+                    noItemElmt.innerText = "No download weather data service states for sites";
+                    this.#forecastWeatherServiceStatesContainerElmt.appendChild(noItemElmt);
+                }
+
+                this.#forecastWeatherItemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
@@ -537,7 +598,8 @@ class WeatherDataServiceManageView {
     }
 
     mount() {
-        this.#refreshList();
+        this.#refreshWeatherList();
+        this.#refreshForecastWeatherList();
     }
 }
 
