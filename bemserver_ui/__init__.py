@@ -6,7 +6,7 @@ from . import internal_api
 from . import views
 
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 
 def create_app(config_override=None):
