@@ -1,6 +1,31 @@
 Changelog
 ---------
 
+0.5.2 (2023-05-25)
+++++++++++++++++++
+
+Features:
+
+- Timeseries:
+
+  - Add weather forecast timeseries semantics setup
+
+- Services:
+
+  - Add weather forecast data service management page
+
+Fixes:
+
+- Fix site latitude/longitude coordinates inputs
+- Fix timeseris data explore page (unselected timeseries remained in the chart)
+- Fix sites tree load in degree days analysis page
+
+Other changes:
+
+- Require bemserver-api-client >=0.19.1 and <0.20.0
+- Require bemserver-api 0.20.1
+- Require bemserver-core 0.15.1
+
 0.5.1 (2023-04-27)
 ++++++++++++++++++
 
