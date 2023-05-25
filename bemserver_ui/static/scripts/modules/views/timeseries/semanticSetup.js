@@ -885,7 +885,7 @@ export class TimeseriesSemanticSetupView {
                 `${energyProdTechSetup.timeseries_id != null ? `${energyProdTechSetup.timeseries.name}${energyProdTechSetup.timeseries.unit_symbol ? ` [${energyProdTechSetup.timeseries.unit_symbol}]` : ""}` : "none"}`,
                 energyProdTechSetup.timeseries_id != null,
                 () => {
-                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName.toLowerCase()} - ${prodTechName.toLowerCase()}] energy production`;
+                    this.#selectTimeseriesTargetTextElmt.innerText = `${energyName.toLowerCase()} energy production of ${prodTechName.toLowerCase()} system`;
                     this.#tsSelector.clearAllSelection();
                     this.#updateSaveBtnState();
 
@@ -1090,7 +1090,7 @@ export class TimeseriesSemanticSetupView {
                 `${energyConsEndUseSetup.timeseries_id != null ? `${energyConsEndUseSetup.timeseries.name}${energyConsEndUseSetup.timeseries.unit_symbol ? ` [${energyConsEndUseSetup.timeseries.unit_symbol}]` : ""}` : "none"}`,
                 energyConsEndUseSetup.timeseries_id != null,
                 () => {
-                    this.#selectTimeseriesTargetTextElmt.innerText = `[${energyName.toLowerCase()} - ${endUseName.toLowerCase()}] energy consumption`;
+                    this.#selectTimeseriesTargetTextElmt.innerText = `${energyName.toLowerCase()} energy consumption of ${endUseName.toLowerCase()} end use`;
                     this.#tsSelector.clearAllSelection();
                     this.#updateSaveBtnState();
 
