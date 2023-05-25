@@ -24,7 +24,7 @@ def retrieve(site_id):
     period_day = int(flask.request.args["period_day"])
     period_month = int(flask.request.args["period_month"])
     period_year = int(flask.request.args["period_year"])
-    forecast = flask.request.args.get("forecast", False)
+    forecast = flask.request.args.get("forecast", "false")
 
     bucket_width_value = 10
     bucket_width_unit = BucketWidthUnit.minute
@@ -88,15 +88,26 @@ def retrieve(site_id):
         dt_end = dt.datetime.now(tz)
         dt_start = dt_end - dt.timedelta(days=365)
 
-    # Add 5 days for forecast
-    if forecast == "true":
-        print("forecast : True")
-    #    dt_end = dt_end + dt.timedelta(days=5)
+    if period_type.startswith("Last-") and forecast == "true":
+        dt_end = dt_end + dt.timedelta(days=5)
 
     resp = flask.g.api_client.weather_ts_by_sites.getall(
-        dt_start=dt_start,
-        dt_end=dt_end,
+        dt_start=dt_start, dt_end=dt_end, forecast=not forecast
     )
+
+    new_data = []
+    for data in resp.data:
+        new_data.append(data)
+
+    if forecast == "true" and period_type.startswith("Last-"):
+        respForecast = flask.g.api_client.weather_ts_by_sites.getall(
+            dt_start=dt_start,
+            dt_end=dt_end,
+            forecast=forecast == "true",
+        )
+
+        for data in respForecast.data:
+            new_data.append(data)
 
     parameters = {}
     parameters["energy"] = {}
@@ -105,12 +116,12 @@ def retrieve(site_id):
         start_time=dt_start.isoformat(),
         end_time=dt_end.isoformat(),
         data_state=1,
-        timeseries_ids=[data["timeseries_id"] for data in resp.data],
+        timeseries_ids=[data["timeseries_id"] for data in new_data],
         bucket_width_unit=bucket_width_unit,
         bucket_width_value=bucket_width_value,
     )
 
-    for data in resp.data:
+    for data in new_data:
         if data["site_id"] == site_id:
             if (
                 data["parameter"] == "AIR_TEMPERATURE"
@@ -123,31 +134,60 @@ def retrieve(site_id):
             ):
                 parameters["energy"]["Solar radiation"] = {}
 
-    for data in resp.data:
+    for data in new_data:
         if data["site_id"] == site_id:
             if data["parameter"] == "AIR_TEMPERATURE":
-                data["parameter"] = WeatherParameter.AIR_TEMPERATURE.value
+                if data["forecast"] is True:
+                    data["parameter"] = (
+                        WeatherParameter.AIR_TEMPERATURE.value + " forecast"
+                    )
+                else:
+                    data["parameter"] = WeatherParameter.AIR_TEMPERATURE.value
                 parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
             elif data["parameter"] == "RELATIVE_HUMIDITY":
-                data["parameter"] = WeatherParameter.RELATIVE_HUMIDITY.value
+                if data["forecast"] is True:
+                    data["parameter"] = (
+                        WeatherParameter.RELATIVE_HUMIDITY.value + " forecast"
+                    )
+                else:
+                    data["parameter"] = WeatherParameter.RELATIVE_HUMIDITY.value
                 parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
             elif data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION":
-                data["parameter"] = WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                if data["forecast"] is True:
+                    data["parameter"] = (
+                        WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                        + " forecast"
+                    )
+                else:
+                    data[
+                        "parameter"
+                    ] = WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
                 parameters["energy"]["Solar radiation"][data["parameter"]] = []
             elif data["parameter"] == "SURFACE_SOLAR_RADIATION":
-                data["parameter"] = WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                if data["forecast"] is True:
+                    data["parameter"] = (
+                        WeatherParameter.SURFACE_SOLAR_RADIATION.value + " forecast"
+                    )
+                else:
+                    data["parameter"] = WeatherParameter.SURFACE_SOLAR_RADIATION.value
                 parameters["energy"]["Solar radiation"][data["parameter"]] = []
 
             if str(data["timeseries_id"]) in weather_data.data:
                 for val in weather_data.data[str(data["timeseries_id"])].values():
                     if val is not None:
-                        if data["parameter"] == WeatherParameter.AIR_TEMPERATURE.value:
+                        if (
+                            data["parameter"] == WeatherParameter.AIR_TEMPERATURE.value
+                            or data["parameter"]
+                            == WeatherParameter.AIR_TEMPERATURE.value + " forecast"
+                        ):
                             parameters["energy"]["Outdoor conditions"][
                                 data["parameter"]
                             ].append(val)
                         elif (
                             data["parameter"]
                             == WeatherParameter.RELATIVE_HUMIDITY.value
+                            or data["parameter"]
+                            == WeatherParameter.RELATIVE_HUMIDITY.value + " forecast"
                         ):
                             parameters["energy"]["Outdoor conditions"][
                                 data["parameter"]
@@ -155,6 +195,9 @@ def retrieve(site_id):
                         elif (
                             data["parameter"]
                             == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                            or data["parameter"]
+                            == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                            + " forecast"
                         ):
                             parameters["energy"]["Solar radiation"][
                                 data["parameter"]
@@ -162,6 +205,9 @@ def retrieve(site_id):
                         elif (
                             data["parameter"]
                             == WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                            or data["parameter"]
+                            == WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                            + " forecast"
                         ):
                             parameters["energy"]["Solar radiation"][
                                 data["parameter"]

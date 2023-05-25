@@ -21,6 +21,7 @@ export class WeatherExploreView {
     #sitesTreeElmt = null;
 
     #forecast = null;
+    #forecastWrapper = null;
 
     #tzName = "UTC";
     #yearRef = null;
@@ -40,10 +41,11 @@ export class WeatherExploreView {
         "Day-Minute": "{dd} {MMMM} {yyyy} {HH}:{mm}",
         "Week-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
         "Month-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Month-Daily": "{dd} {MMMM} {yyyy}",
         "Year-Daily": "{dd} {MMMM} {yyyy}",
-        "Year-Monthly": "{MMMM} {yyyy}",
-        "Yearly": "{yyyy}",
+        "Last-Day": "{dd} {MMMM} {yyyy} {HH}:{mm}",
+        "Last-Week": "{dd} {MMMM} {yyyy} {HH}:{mm}",
+        "Last-Month": "{dd} {MMMM} {yyyy} {HH}:{mm}",
+        "Last-Year": "{dd} {MMMM} {yyyy}",
     };
 
     #monthNames = [
@@ -75,7 +77,8 @@ export class WeatherExploreView {
         this.#periodDaySelectElmt = document.getElementById("periodDay");
         this.#periodMonthSelectElmt = document.getElementById("periodMonth");
         this.#periodYearSelectElmt = document.getElementById("periodYear");
-        this.#forecast = document.getElementById("forecast");
+        this.#forecast = document.getElementById("forecastSwitch");
+        this.#forecastWrapper = document.getElementById("forecastWrapper");
     }
 
     #initEventListeners() {
@@ -187,11 +190,13 @@ export class WeatherExploreView {
 
         if (this.#periodTypeSelectElmt.value.startsWith("Last") ) {
             this.#periodYearSelectElmt.classList.add("d-none", "invisible");
+            this.#forecastWrapper.classList.remove("d-none", "invisible");
         }
         else {
             this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
+            this.#forecastWrapper.classList.add("d-none", "invisible");
         }
-        
+
         this.#previousPeriodType = this.#periodTypeSelectElmt.value;
         this.#previousDaySelected = this.#periodDaySelectElmt.value;
         this.#previousYearSelected = this.#periodYearSelectElmt.value;
@@ -203,7 +208,7 @@ export class WeatherExploreView {
         if(this.#periodMonthSelectElmt.value == 2 && this.#periodYearSelectElmt.value % 4 == 0){
             daysInMonth = 29;
         }
-        
+
         for (let day = 1; day <= daysInMonth; day++) {
             let option = document.createElement("option");
             option.value = day;
@@ -289,13 +294,21 @@ export class WeatherExploreView {
                             let parameters = {
                                 title : "Weather data",
                                 type : "line",
+                                unit : [],
                             }
 
-                            if (energy == "Outdoor conditions") {
-                                parameters["unit"] = ["°C", "%"];
-                            }
-                            else if (energy == "Solar radiation") {
+                            if (energy == "Solar radiation") {
                                 parameters["unit"] = ["W/m²"];
+                            }
+                            else if (energy == "Outdoor conditions") {
+                                for (let [key, value] of Object.entries(data["energy"]["Outdoor conditions"])) {
+                                    if (key.includes("temperature")) {
+                                        parameters["unit"].push("°C");
+                                    }
+                                    else if (key.includes("humidity")) {
+                                        parameters["unit"].push("%");
+                                    }
+                                }
                             }
                             weatherChart.showLoading();
                             weatherChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
