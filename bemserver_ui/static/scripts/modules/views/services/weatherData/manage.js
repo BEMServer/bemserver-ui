@@ -431,7 +431,7 @@ class WeatherDataServiceManageView {
                     }
 
                     this.#getSemanticsReqID = this.#internalAPIRequester.get(
-                        flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id}),
+                        flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id, forecast: false}),
                         (data) => {
                             this.#fetchDataModalParamsContainerElmt.innerHTML = "";
 
