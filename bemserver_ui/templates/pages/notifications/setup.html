@@ -1,14 +1,7 @@
 {% extends "pages/base.html" %}
 
 {% set title = "Notifications" %}
-{% set subtitle = "Setup" %}
-
-{% block main_toolbar %}
-{{ super() -}}
-{% filter indent(width=20, first=True) %}
-<a href="{{ url_for('notifications.explore') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Back to notifications"><i class="bi bi-arrow-return-left"></i> Back to notifications</a>
-{% endfilter %}
-{% endblock main_toolbar %}
+{% set subtitle = "Settings" %}
 
 {% block main_content %}
 {{ super() -}}
