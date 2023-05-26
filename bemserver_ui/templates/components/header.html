@@ -16,12 +16,18 @@
         <div class="d-flex flex-nowrap justify-content-end gap-4 me-3">
             <a id="notifBell" href="{{ url_for('notifications.explore', state='unread') }}" class="link-secondary position-relative" title="You have no unread notifications" role="button"><i class="bi bi-bell"></i></a>
             <div class="dropdown">
-                <a role="button" title="{{ signed_user.name }}" class="link-secondary text-decoration-none dropdown-toggle d-flex align-items-center" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <a role="button" title="{{ signed_user.name }}" class="link-secondary text-decoration-none dropdown-toggle d-flex align-items-center" id="userMenu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i class="bi bi-person-circle me-1"></i>
                     <span class="fw-bold">{{ signed_user.name }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
                     <li><a class="dropdown-item" href="{{ url_for('users.view', id=signed_user.id) }}" title="My user profile">My profile</a></li>
+                    <li class="dropstart">
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#" title="Settings">Settings...</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('notifications.setup') }}" title="Notifications settings">Notifications</a></li>
+                        </ul>
+                    </li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ url_for('main.about') }}" title="About BEMServer">About BEMServer...</a></li>
                     <li><a class="dropdown-item" href="{{ url_for('auth.signout', ignore_campaign_ctxt=True) }}" title="Sign out"><i class="bi bi-power"></i> Sign out</a></li>
