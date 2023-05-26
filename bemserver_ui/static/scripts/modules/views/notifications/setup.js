@@ -240,6 +240,7 @@ export class NotificationSetupView {
             this.#availableEventCategoryIds.push(eventCategoryConfigData.category_id);
             this.#addEventCatMenuItemElmt(eventCategoryConfigData.category_id);
             this.#updateAddEventCategorySectionState();
+            this.#updateItemsCount();
         };
 
         // Add a modal confirm component for this item, defining an "ok" callback function to remove it.
@@ -280,8 +281,7 @@ export class NotificationSetupView {
 
         this.#configTableBodyElmt.appendChild(rowElmt);
 
-        let totalCount = Object.keys(this.#config).length;
-        this.#itemsCountElmt.update({firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount, totalCount: totalCount});
+        this.#updateItemsCount();
     }
 
     #addEventCatMenuItemElmt(eventCategoryId) {
@@ -295,7 +295,7 @@ export class NotificationSetupView {
 
         this.#addEventCategoryMenuElmt.appendChild(menuItemElmt);
 
-        menuItemLinkElmt.addEventListener("click", (event) => {
+        menuItemLinkElmt.addEventListener("click", () => {
             menuItemElmt.remove();
             this.#availableEventCategoryIds = this.#availableEventCategoryIds.filter((availableEventCategoryId) => availableEventCategoryId != eventCategoryId);
 
@@ -317,6 +317,11 @@ export class NotificationSetupView {
         else {
             this.#addEventCategorySectionElmt.classList.remove("d-none");
         }
+    }
+
+    #updateItemsCount() {
+        let totalCount = Object.keys(this.#config).length;
+        this.#itemsCountElmt.update({firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount, totalCount: totalCount});
     }
 
     refresh() {
