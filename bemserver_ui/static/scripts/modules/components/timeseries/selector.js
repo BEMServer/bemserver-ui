@@ -224,6 +224,7 @@ export class TimeseriesSelector extends HTMLElement {
     #messagesElmt = null;
 
     #selectedItemsContainerElmt = null;
+    #clearSelectionBtnElmt = null;
     #selectedItems = [];
     #dropdownSearchPanelElmt = null;
     #bsDropdownSearchPanel = null;
@@ -290,6 +291,7 @@ export class TimeseriesSelector extends HTMLElement {
         this.#messagesElmt = document.getElementById("messages");
 
         this.#selectedItemsContainerElmt = document.getElementById("selectedItemsContainer");
+        this.#clearSelectionBtnElmt = this.querySelector("#clearSelectionBtn");
         this.#dropdownSearchPanelElmt = document.getElementById("dropdownSearchPanel");
         this.#bsDropdownSearchPanel = bootstrap.Dropdown.getOrCreateInstance(this.#dropdownSearchPanelElmt);
 
@@ -317,6 +319,12 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     #initEventListeners() {
+        this.#clearSelectionBtnElmt.addEventListener("click", (event) => {
+            event.preventDefault();
+
+            this.clearAllSelection();
+        });
+
         this.#searchInputElmt.addEventListener("input", (event) => {
             event.preventDefault();
 
@@ -473,11 +481,15 @@ export class TimeseriesSelector extends HTMLElement {
     #updateSelectedItemsContainer() {
         if (this.#selectedItems.length <= 0) {
             this.#selectedItemsContainerElmt.innerHTML = "";
+
+            this.#clearSelectionBtnElmt.classList.add("d-none", "invisible");
         }
 
         this.#countResultsSelectedElmt.innerText = `No items selected`;
         if (this.#selectedItems.length > 0) {
             this.#countResultsSelectedElmt.innerText = `${this.#selectedItems.length.toString()}${this.#allowedSelectionLimit != -1 ? `/${this.#allowedSelectionLimit.toString()}`: ""} item${this.#selectedItems.length > 1 ? "s" : ""} selected out of ${this.#searchResultsPaginationElmt.totalItems.toString()}`;
+
+            this.#clearSelectionBtnElmt.classList.remove("d-none", "invisible");
         }
 
         if (this.#isSelectionLimitReached()) {
