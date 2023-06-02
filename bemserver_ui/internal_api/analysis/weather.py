@@ -3,9 +3,10 @@ import datetime as dt
 import zoneinfo
 import flask
 
+from bemserver_ui.common import time
+
 from bemserver_api_client.enums import (
     BucketWidthUnit,
-    StructuralElement,
     WeatherParameter,
 )
 from bemserver_ui.extensions import auth, ensure_campaign_context
@@ -18,7 +19,6 @@ blp = flask.Blueprint("weather", __name__, url_prefix="/weather")
 @auth.signin_required
 @ensure_campaign_context
 def retrieve(site_id):
-    structural_element_type = flask.request.args["structural_element_type"]
     tz_name = flask.request.args.get("timezone", flask.g.campaign_ctxt.tz_name)
     period_type = flask.request.args["period_type"]
     period_day = int(flask.request.args["period_day"])
@@ -30,40 +30,23 @@ def retrieve(site_id):
     bucket_width_unit = BucketWidthUnit.minute
     tz = zoneinfo.ZoneInfo(tz_name)
     if period_type == "Day-Minute":
-        dt_start = dt.datetime(
-            period_year, period_month, period_day, 0, 0, 0, tzinfo=tz
-        )
-        if period_day == 31:
-            end_month = period_month + 1
-            if end_month == 13:
-                end_month = 1
-                end_year = period_year + 1
-            else:
-                end_year = period_year
-            dt_end = dt.datetime(end_year, end_month, 1, 0, 0, 0, tzinfo=tz)
-        else:
-            dt_end = dt.datetime(
-                period_year, period_month, period_day + 1, 0, 0, 0, tzinfo=tz
-            )
+        dt_start = dt.datetime(period_year, period_month, period_day, tzinfo=tz)
+        dt_end = dt_start + dt.timedelta(days=1)
     elif period_type == "Week-Hourly":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.hour
-        dt_start = dt.datetime(
-            period_year, period_month, period_day, 0, 0, 0, tzinfo=tz
-        )
+        dt_start = dt.datetime(period_year, period_month, period_day, tzinfo=tz)
         dt_end = dt_start + dt.timedelta(days=7)
     elif period_type == "Month-Hourly":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.hour
-        dt_start = dt.datetime(period_year, period_month, 1, 0, 0, 0, tzinfo=tz)
-        end_year = period_year + (period_month // 12)
-        end_month = (period_month % 12) + 1
-        dt_end = dt.datetime(end_year, end_month, 1, 1, 0, 0, tzinfo=tz)
+        dt_start = dt.datetime(period_year, period_month, 1, tzinfo=tz)
+        dt_end = time.add_time(dt_start, months=1)
     elif period_type == "Year-Daily":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.day
-        dt_start = dt.datetime(period_year, 1, 1, 0, 0, 0, tzinfo=tz)
-        dt_end = dt.datetime(period_year + 1, 1, 1, 0, 0, 0, tzinfo=tz)
+        dt_start = dt.datetime(period_year, 1, 1, tzinfo=tz)
+        dt_end = time.add_time(dt_start, years=1)
     elif period_type == "Last-Day":
         bucket_width_value = 10
         bucket_width_unit = BucketWidthUnit.minute
@@ -80,149 +63,194 @@ def retrieve(site_id):
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.hour
         dt_end = dt.datetime.now(tz)
-        dt_start = dt_end - dt.timedelta(days=30)
+        dt_start = time.add_time(dt_end, months=-1)
 
     elif period_type == "Last-Year":
         bucket_width_value = 1
         bucket_width_unit = BucketWidthUnit.day
         dt_end = dt.datetime.now(tz)
-        dt_start = dt_end - dt.timedelta(days=365)
+        dt_start = time.add_time(dt_end, years=-1)
 
-    if period_type.startswith("Last-") and forecast == "true":
-        dt_end = dt_end + dt.timedelta(days=5)
+    dt_end_forecast = dt_end + dt.timedelta(days=5)
+
+    respData = {
+        "Outdoor conditions": {
+            WeatherParameter.AIR_TEMPERATURE.name: {
+                "forecast": {
+                    "name": WeatherParameter.AIR_TEMPERATURE.value + " forecast",
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+                "current": {
+                    "name": WeatherParameter.AIR_TEMPERATURE.value,
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+            },
+            WeatherParameter.RELATIVE_HUMIDITY.name: {
+                "forecast": {
+                    "name": WeatherParameter.RELATIVE_HUMIDITY.value + " forecast",
+                    "data": {},
+                    "yAxis": 1,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+                "current": {
+                    "name": WeatherParameter.RELATIVE_HUMIDITY.value,
+                    "data": {},
+                    "yAxis": 1,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+            },
+        },
+        "Solar radiation": {
+            WeatherParameter.SURFACE_SOLAR_RADIATION.name: {
+                "forecast": {
+                    "name": WeatherParameter.SURFACE_SOLAR_RADIATION.value
+                    + " forecast",
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+                "current": {
+                    "name": WeatherParameter.SURFACE_SOLAR_RADIATION.value,
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+            },
+            WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.name: {
+                "forecast": {
+                    "name": WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
+                    + " forecast",
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+                "current": {
+                    "name": WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value,
+                    "data": {},
+                    "yAxis": 0,
+                    "timeseries": {
+                        "id": "",
+                        "name": "",
+                        "desc": "",
+                        "unit": "",
+                    },
+                },
+            },
+        },
+        # Add other graphs here
+    }
 
     resp = flask.g.api_client.weather_ts_by_sites.getall(
-        dt_start=dt_start, dt_end=dt_end, forecast=not forecast
+        dt_start=dt_start, dt_end=dt_end, site_id=site_id
     )
 
-    new_data = []
+    liste_ts_id = []
+    liste_forecast_ts_id = []
+    tsIDs_by_weather_param_dict = {}
+
     for data in resp.data:
-        new_data.append(data)
+        for key in respData.keys():
+            if data["parameter"] in respData[key].keys():
+                weather_type = "forecast" if data["forecast"] else "current"
+                respData[key][data["parameter"]][weather_type]["timeseries"] = data[
+                    "timeseries"
+                ]
+                respData[key][data["parameter"]][weather_type]["timeseries"][
+                    "id"
+                ] = data["timeseries_id"]
+                if weather_type == "forecast":
+                    liste_forecast_ts_id.append(data["timeseries_id"])
+                else:
+                    liste_ts_id.append(data["timeseries_id"])
+                tsIDs_by_weather_param_dict[data["timeseries_id"]] = {}
+                tsIDs_by_weather_param_dict[data["timeseries_id"]]["chart"] = key
+                tsIDs_by_weather_param_dict[data["timeseries_id"]]["name"] = data[
+                    "parameter"
+                ]
 
-    if forecast == "true" and period_type.startswith("Last-"):
-        respForecast = flask.g.api_client.weather_ts_by_sites.getall(
-            dt_start=dt_start,
-            dt_end=dt_end,
-            forecast=forecast == "true",
+    ts_data_state = flask.g.api_client.timeseries_datastates.getall()
+
+    for data in ts_data_state.data:
+        if data["name"] == "Clean":
+            ts_data_state_id = data["id"]
+
+    if len(liste_ts_id) > 0:
+        weather_data = flask.g.api_client.timeseries_data.download_aggregate(
+            start_time=dt_start.isoformat(),
+            end_time=dt_end.isoformat(),
+            data_state=ts_data_state_id,
+            timeseries_ids=[data for data in liste_ts_id if data is not None],
+            bucket_width_unit=bucket_width_unit,
+            bucket_width_value=bucket_width_value,
+            # convert_to = ["degC", "percent"] for Outdoor conditions
         )
+    else:
+        weather_data = None
 
-        for data in respForecast.data:
-            new_data.append(data)
+    if forecast == "true" and len(liste_forecast_ts_id) > 0:
+        weather_forecast_data = flask.g.api_client.timeseries_data.download_aggregate(
+            start_time=dt_start.isoformat(),
+            end_time=dt_end_forecast.isoformat(),
+            data_state=ts_data_state_id,
+            timeseries_ids=[data for data in liste_forecast_ts_id if data is not None],
+            bucket_width_unit=bucket_width_unit,
+            bucket_width_value=bucket_width_value,
+            # convert_to = ["degC", "percent"] for Outdoor conditions
+        )
+    else:
+        weather_forecast_data = None
 
-    parameters = {}
-    parameters["energy"] = {}
+    if weather_data is not None:
+        for key, value in weather_data.data.items():
+            weather_params = tsIDs_by_weather_param_dict[int(key)]
+            respData[weather_params["chart"]][weather_params["name"]]["current"][
+                "data"
+            ] = value
 
-    weather_data = flask.g.api_client.timeseries_data.download_aggregate(
-        start_time=dt_start.isoformat(),
-        end_time=dt_end.isoformat(),
-        data_state=1,
-        timeseries_ids=[data["timeseries_id"] for data in new_data],
-        bucket_width_unit=bucket_width_unit,
-        bucket_width_value=bucket_width_value,
-    )
+    if weather_forecast_data is not None and forecast == "true":
+        for key, value in weather_forecast_data.data.items():
+            weather_params = tsIDs_by_weather_param_dict[int(key)]
+            respData[weather_params["chart"]][weather_params["name"]]["forecast"][
+                "data"
+            ] = value
 
-    for data in new_data:
-        if data["site_id"] == site_id:
-            if (
-                data["parameter"] == "AIR_TEMPERATURE"
-                or data["parameter"] == "RELATIVE_HUMIDITY"
-            ):
-                parameters["energy"]["Outdoor conditions"] = {}
-            elif (
-                data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION"
-                or data["parameter"] == "SURFACE_SOLAR_RADIATION"
-            ):
-                parameters["energy"]["Solar radiation"] = {}
-
-    for data in new_data:
-        if data["site_id"] == site_id:
-            if data["parameter"] == "AIR_TEMPERATURE":
-                if data["forecast"] is True:
-                    data["parameter"] = (
-                        WeatherParameter.AIR_TEMPERATURE.value + " forecast"
-                    )
-                else:
-                    data["parameter"] = WeatherParameter.AIR_TEMPERATURE.value
-                parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
-            elif data["parameter"] == "RELATIVE_HUMIDITY":
-                if data["forecast"] is True:
-                    data["parameter"] = (
-                        WeatherParameter.RELATIVE_HUMIDITY.value + " forecast"
-                    )
-                else:
-                    data["parameter"] = WeatherParameter.RELATIVE_HUMIDITY.value
-                parameters["energy"]["Outdoor conditions"][data["parameter"]] = []
-            elif data["parameter"] == "DIRECT_NORMAL_SOLAR_RADIATION":
-                if data["forecast"] is True:
-                    data["parameter"] = (
-                        WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-                        + " forecast"
-                    )
-                else:
-                    data[
-                        "parameter"
-                    ] = WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-                parameters["energy"]["Solar radiation"][data["parameter"]] = []
-            elif data["parameter"] == "SURFACE_SOLAR_RADIATION":
-                if data["forecast"] is True:
-                    data["parameter"] = (
-                        WeatherParameter.SURFACE_SOLAR_RADIATION.value + " forecast"
-                    )
-                else:
-                    data["parameter"] = WeatherParameter.SURFACE_SOLAR_RADIATION.value
-                parameters["energy"]["Solar radiation"][data["parameter"]] = []
-
-            if str(data["timeseries_id"]) in weather_data.data:
-                for val in weather_data.data[str(data["timeseries_id"])].values():
-                    if val is not None:
-                        if (
-                            data["parameter"] == WeatherParameter.AIR_TEMPERATURE.value
-                            or data["parameter"]
-                            == WeatherParameter.AIR_TEMPERATURE.value + " forecast"
-                        ):
-                            parameters["energy"]["Outdoor conditions"][
-                                data["parameter"]
-                            ].append(val)
-                        elif (
-                            data["parameter"]
-                            == WeatherParameter.RELATIVE_HUMIDITY.value
-                            or data["parameter"]
-                            == WeatherParameter.RELATIVE_HUMIDITY.value + " forecast"
-                        ):
-                            parameters["energy"]["Outdoor conditions"][
-                                data["parameter"]
-                            ].append(val)
-                        elif (
-                            data["parameter"]
-                            == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-                            or data["parameter"]
-                            == WeatherParameter.DIRECT_NORMAL_SOLAR_RADIATION.value
-                            + " forecast"
-                        ):
-                            parameters["energy"]["Solar radiation"][
-                                data["parameter"]
-                            ].append(val)
-                        elif (
-                            data["parameter"]
-                            == WeatherParameter.SURFACE_SOLAR_RADIATION.value
-                            or data["parameter"]
-                            == WeatherParameter.SURFACE_SOLAR_RADIATION.value
-                            + " forecast"
-                        ):
-                            parameters["energy"]["Solar radiation"][
-                                data["parameter"]
-                            ].append(val)
-
-    analysis_resp = flask.g.api_client.analysis.get_energy_consumption_breakdown(
-        StructuralElement(structural_element_type),
-        site_id,
-        dt_start.isoformat(),
-        dt_end.isoformat(),
-        bucket_width_value,
-        bucket_width_unit,
-        timezone=tz_name,
-    )
-
-    parameters["timestamps"] = analysis_resp.data["timestamps"]
-
-    return parameters
+    return flask.jsonify(respData)

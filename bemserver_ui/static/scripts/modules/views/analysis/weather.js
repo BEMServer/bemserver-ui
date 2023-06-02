@@ -4,7 +4,7 @@ import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
-
+import { TimeCalendar } from "/static/scripts/modules/tools/time.js";
 
 export class WeatherExploreView {
 
@@ -31,7 +31,7 @@ export class WeatherExploreView {
 
     #structuralElementType = null;
     #structuralElementId = null;
-    #chartByEnergy = {};
+    #chartWeather = {};
 
     #previousPeriodType = null;
     #previousDaySelected = null;
@@ -149,14 +149,8 @@ export class WeatherExploreView {
             }
 
             this.#periodDaySelectElmt.innerHTML = "";
-            let monthRef = this.#monthRef;
-            if (this.#monthRef == 2 && this.#yearRef % 4 == 0) {
-                monthRef = 29;
-            }
-            else if (this.#monthRef == 2) {
-                monthRef = 28;
-            }
-            for (let day = 1; day <= new Date(this.#yearRef, monthRef, 0).getDate() ; day++) {
+            const daysInMonth = TimeCalendar.getDaysInMonth(this.#yearRef, this.#monthRef);
+            for (let day = 1; day <= new Date(this.#yearRef, daysInMonth, 0).getDate() ; day++) {
                 let option = document.createElement("option");
                 option.value = day;
                 option.textContent = day;
@@ -195,6 +189,7 @@ export class WeatherExploreView {
         else {
             this.#periodYearSelectElmt.classList.remove("d-none", "invisible");
             this.#forecastWrapper.classList.add("d-none", "invisible");
+            this.#forecast.checked = false;
         }
 
         this.#previousPeriodType = this.#periodTypeSelectElmt.value;
@@ -203,11 +198,8 @@ export class WeatherExploreView {
     }
 
     #updateDaysInMonth() {
-        let daysInMonth = new Date(this.#periodYearSelectElmt.value, this.#periodMonthSelectElmt.value, 0).getDate();
+        const daysInMonth = TimeCalendar.getDaysInMonth(this.#periodYearSelectElmt.value, this.#periodMonthSelectElmt.value);
         this.#periodDaySelectElmt.innerHTML = "";
-        if(this.#periodMonthSelectElmt.value == 2 && this.#periodYearSelectElmt.value % 4 == 0){
-            daysInMonth = 29;
-        }
 
         for (let day = 1; day <= daysInMonth; day++) {
             let option = document.createElement("option");
@@ -222,10 +214,10 @@ export class WeatherExploreView {
 
     #generateCharts() {
         if (this.#structuralElementType != null && this.#structuralElementId != null) {
-            for (let chart of Object.values(this.#chartByEnergy)) {
+            for (let chart of Object.values(this.#chartWeather)) {
                 chart.dispose();
             }
-            this.#chartByEnergy = {};
+            this.#chartWeather = {};
 
             this.#mainChartContainerElmt.innerHTML = "";
             this.#mainChartContainerElmt.appendChild(new Spinner());
@@ -239,21 +231,18 @@ export class WeatherExploreView {
                 flaskES6.urlFor(
                     `api.analysis.weather.retrieve`,
                     {
-                        structural_element_type: this.#structuralElementType,
                         site_id: this.#structuralElementId,
                         period_type: this.#periodTypeSelectElmt.value,
                         period_day: this.#periodDaySelectElmt.value,
                         period_month: this.#periodMonthSelectElmt.value,
                         period_year: this.#periodYearSelectElmt.value,
-                        year_reference: this.#yearRef,
                         timezone: this.#tzName,
                         forecast: this.#forecast.checked,
                     }
                 ),
                 (data) => {
                     this.#mainChartContainerElmt.innerHTML = "";
-
-                    if (Object.keys(data["energy"]).length <= 0) {
+                    if ( data == null || data.length == 0) {
                         let colElmt = document.createElement("div");
                         colElmt.classList.add("col", "text-start", "text-muted");
 
@@ -277,9 +266,10 @@ export class WeatherExploreView {
                         this.#mainChartContainerElmt.appendChild(colElmt);
                     }
                     else {
-                        for (let [energy, energyUses] of Object.entries(data["energy"])) {
+                        for (let [name, dataset] of Object.entries(data)) {
                             let weatherChart = new TimeseriesChartWeather();
-                            this.#chartByEnergy[energy] = weatherChart;
+
+                            this.#chartWeather[name] = weatherChart;
 
                             let chartContainerElmt = document.createElement("div");
                             chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
@@ -291,28 +281,8 @@ export class WeatherExploreView {
 
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
-                            let parameters = {
-                                title : "Weather data",
-                                type : "line",
-                                unit : [],
-                            }
-
-                            if (energy == "Solar radiation") {
-                                parameters["unit"] = ["W/m²"];
-                            }
-                            else if (energy == "Outdoor conditions") {
-                                for (let [key, value] of Object.entries(data["energy"]["Outdoor conditions"])) {
-                                    if (key.includes("temperature")) {
-                                        parameters["unit"].push("°C");
-                                    }
-                                    else if (key.includes("humidity")) {
-                                        parameters["unit"].push("%");
-                                    }
-                                }
-                            }
                             weatherChart.showLoading();
-                            weatherChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
-                            
+                            weatherChart.load(name, dataset, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
                         }
                     }
                 },

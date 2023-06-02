@@ -114,7 +114,7 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         });
     }
 
-    #optionToContent(opt, unit, timeFormat) {
+    #optionToContent(opt, dataset, timeFormat) {
         let timestamps = opt.series[0].data.map((serieData) => {
             return echarts.time.format(serieData[0], timeFormat);
         });
@@ -145,7 +145,7 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         for (let serie of opt.series) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = `${serie.name}${unit ? ` (${unit})`: ""}`;
+            tableHeadThElmt.innerText = serie.name + (serie.unit ? ` (${serie.unit})`: "");
             tableHeadTrElmt.appendChild(tableHeadThElmt);
         }
         tableHeadElmt.appendChild(tableHeadTrElmt);
@@ -158,9 +158,11 @@ export class TimeseriesChartWeather extends HTMLDivElement {
             tableCellTimestampElmt.innerText = timestamp;
             tableTrElmt.appendChild(tableCellTimestampElmt);
             for (let serie of opt.series) {
-                let tableCellElmt = document.createElement("td");
-                tableCellElmt.innerText = Parser.parseFloatOrDefault(serie.data[index][1], Number.NaN, 2).toString();
-                tableTrElmt.appendChild(tableCellElmt);
+                if (serie.data && serie.data[index]) {
+                    let tableCellElmt = document.createElement("td");
+                    tableCellElmt.innerText = serie.data[index][1].toString();
+                    tableTrElmt.appendChild(tableCellElmt);
+                }
             }
             tableBodyElmt.appendChild(tableTrElmt);
         }
@@ -171,7 +173,7 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat) {
+    #tooltipFormatter(params, dataset, timeFormat) {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -201,8 +203,13 @@ export class TimeseriesChartWeather extends HTMLDivElement {
             serieValueContainerElmt.appendChild(serieValueElmt);
 
             let serieValueUnitElmt = document.createElement("small");
-            if (unit.length > 1) { serieValueUnitElmt.innerText = unit[index];}
-            else { serieValueUnitElmt.innerText = unit;}
+            for (let [key, value] of Object.entries(dataset)) {
+                for (let [key2, value2] of Object.entries(value)) {
+                    if (value2.name == serieParams.seriesName) {
+                        serieValueUnitElmt.innerText = value2.timeseries.unit_symbol;
+                    }
+                }
+            }
             serieValueContainerElmt.appendChild(serieValueUnitElmt);
 
             liElmt.appendChild(serieNameElmt);
@@ -236,80 +243,76 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(timestamps, energy, energyUses, timeFormat, parameters) {
+    load(name, dataset, timeFormat) {
         this.hideLoading();
 
         let options = this.#chart.getOption();
-        let yAxisIndex = 0;
-        console.log(timeFormat);
+        let listUnit = {0: [], 1: []};
 
-        options.title[0].text = `${energy}`;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, parameters.unit, timeFormat); };
+        options.legend[0].data = [];
+        options.legend[1].data = [];
 
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, parameters.unit, timeFormat); };
+        options.title[0].text = `${name}`;
         
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, dataset, timeFormat); };
+
+        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, dataset, timeFormat); };
+
         options.series.length = 0;
-        options.series = Object.entries(energyUses).map(([energyUse, consumptions]) => {
-            if(energy == "Outdoor conditions") {
-                if (energyUse.includes("Relative humidity")) {
-                    yAxisIndex = 1;
-                }
-                else {
-                    yAxisIndex = 0;
-                }
-                yAxisIndex == 0 ? options.legend[0].data.push(energyUse) : options.legend[1].data.push(energyUse);
-                options.legend[0].formatter = (name) => {
-                    return name ;
-                };
-                options.legend[1].formatter = (name) => {
-                    return name ;
-                };
-            }
-            else {
-                options.legend[0] = {
-                    type: "scroll",
-                    bottom: 10,
-                }
-            }
-            
-            let serie = {
-                id: energyUse,
-                name: energyUse,
-                type: parameters.type,
-                data: timestamps.map((time, index) => {
-                    return [time, Parser.parseFloatOrDefault(consumptions[index], Number.NaN, 2)];
-                }),
-                emphasis: {
-                    focus: "series",
-                },
-                itemStyle: {},
-                yAxisIndex: yAxisIndex,
-            };
 
-            if (energyUse in this.#energyUseColors) {
-                serie.itemStyle.color = this.#energyUseColors[energyUse];
-            }
-            if (energyUse.includes("forecast")) {
-                serie.lineStyle = {
-                    type: "dashed",
-                };
-            }
-            return serie;
-        });
+        let series = [];
+        for (let [_parameter, serieParams] of Object.entries(dataset)) {
+            for (let [_settings, value] of Object.entries(serieParams)) {
+                let chartData = Object.entries(value.data).map(([date, value]) => [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)]);
+                if (chartData.length > 0) {
+                    let serie = {
+                        name: value.name,
+                        type: "line",
+                        data: Object.entries(value.data).map(([date, value]) => [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)]),
+                        emphasis: {
+                            focus: "series"
+                        },
+                        itemStyle: {
+                            color: this.#energyUseColors[value.name]
+                        },
+                        lineStyle: {
+                            width: 2,
+                            type: value.name.includes("forecast") ? "dashed" : "solid",
+                        },
+                        yAxisIndex: value.yAxis,
+                        unit: value.timeseries.unit_symbol,
+                    };
+                    series.push(serie);
+                    if (!listUnit[value.yAxis].includes(serie.unit))
+                        listUnit[value.yAxis].push(serie.unit);
 
-        options.yAxis[0].data = options.series.map((serie) => {
-            return serie.name;
-        });
+                    options.legend[value.yAxis].data.push(value.name);
+                }
+            }
+        }
+        options.series = series;
+
+        options.yAxis[0].data = options.series.map((serie) => serie.name);
+        options.yAxis[0].axisLabel.formatter = (value, index) => { return `${value} (${listUnit[0]})`; };
+
+        options.yAxis[1].data = options.series.map((serie) => serie.name);
+        options.yAxis[1].axisLabel.formatter = (value, index) => { return `${value} (${listUnit[1]})`; };
+
+        if (options.legend[1].data.length == 0) {
+            options.legend[0].left = "center";
+            options.legend[0].width = "auto";
+        };
+
+        options.legend[0].formatter = (name) => {
+            let serie = options.series.find((serie) => serie.name == name);
+            return `${name} (${serie.unit})`;
+        };
+
+        options.legend[1].formatter = (name) => {
+            let serie = options.series.find((serie) => serie.name == name);
+            return `${name} (${serie.unit})`;
+        };
         
-        options.yAxis[0].axisLabel.formatter = `{value} ${parameters.unit[0]}`;
-
-        options.yAxis[1].data = options.series.map((serie) => {
-            return serie.name;
-        });
-        
-        options.yAxis[1].axisLabel.formatter = `{value} ${parameters.unit[1]}`;
-
-
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
 
@@ -317,7 +320,6 @@ export class TimeseriesChartWeather extends HTMLDivElement {
     }
 }
 
-
-if (window.customElements.get("app-ts-chart-energy-cons") == null) {
-    window.customElements.define("app-ts-chart-energy-cons", TimeseriesChartWeather, { extends: "div" });
+if (window.customElements.get("app-ts-chart-weather") == null) {
+    window.customElements.define("app-ts-chart-weather", TimeseriesChartWeather, { extends: "div" });
 }
