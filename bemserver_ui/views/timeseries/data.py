@@ -49,7 +49,10 @@ def upload():
 @auth.signin_required
 @ensure_campaign_context
 def explore():
-    return flask.render_template("pages/timeseries/data/explore.html")
+    return flask.render_template(
+        "pages/timeseries/data/explore.html",
+        dt_end=dt.datetime.now(tz=zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)),
+    )
 
 
 @blp.route("/completeness")

@@ -5,11 +5,12 @@
 :root {
     --app-sidebar-bg: #f3f8e9;
     --app-header-height: 60px;
+    --app-min-width: 420px;
 }
 
 body,
 .app-header {
-    min-width: 420px;
+    min-width: var(--app-min-width);
 }
 
 .app-messages {
@@ -222,4 +223,19 @@ body,
     top: 0;
     right: 0;
     animation: ring 8s 1s ease-in-out infinite;
+}
+
+.app-chart-settings-panel {
+    top: var(--app-header-height) !important;
+    width: 66% !important;
+}
+@media (max-width: 767.98px) {
+    .app-chart-settings-panel {
+        width: 100% !important;
+    }
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .app-chart-settings-panel {
+        width: 75% !important;
+    }
 }
