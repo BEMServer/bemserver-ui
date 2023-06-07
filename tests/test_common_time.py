@@ -7,6 +7,7 @@ from bemserver_ui.common.time import (
     convert_html_form_datetime,
     convert_from_iso,
     strfdelta,
+    add_time,
 )
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
@@ -106,3 +107,52 @@ class TestCommonTime:
         assert strfdelta(2, "{D}d {H}h", "d") == "2d 0h"
         assert strfdelta(3, "{W}w {D}d {H}h", "w") == "3w 0d 0h"
         assert strfdelta(3, "{D}d {H}h", "w") == "21d 0h"
+
+    def test_add_time(self):
+        tz = ZoneInfo("Europe/Paris")
+        dt_ref = dt.datetime(2023, 6, 2, 18, 11, 42, tzinfo=tz)
+
+        assert add_time(dt_ref, years=1) == (
+            dt.datetime(2024, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=-1) == (
+            dt.datetime(2022, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+
+        assert add_time(dt_ref, months=1) == (
+            dt.datetime(2023, 7, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, months=12) == (
+            dt.datetime(2024, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, months=14) == (
+            dt.datetime(2024, 8, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, months=-1) == (
+            dt.datetime(2023, 5, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, months=-12) == (
+            dt.datetime(2022, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, months=-14) == (
+            dt.datetime(2022, 4, 2, 18, 11, 42, tzinfo=tz)
+        )
+
+        assert add_time(dt_ref, years=1, months=2) == (
+            dt.datetime(2024, 8, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=1, months=-2) == (
+            dt.datetime(2024, 4, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=1, months=-12) == (
+            dt.datetime(2023, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=-1, months=-12) == (
+            dt.datetime(2021, 6, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=1, months=-14) == (
+            dt.datetime(2023, 4, 2, 18, 11, 42, tzinfo=tz)
+        )
+        assert add_time(dt_ref, years=-1, months=14) == (
+            dt.datetime(2023, 8, 2, 18, 11, 42, tzinfo=tz)
+        )

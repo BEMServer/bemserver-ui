@@ -116,3 +116,31 @@ def strfdelta(tdelta, fmt="{D:02}d {H:02}h {M:02}m {S:02}s", inputtype="timedelt
         if field in desired_fields and field in constants:
             values[field], remainder = divmod(remainder, constants[field])
     return f.format(fmt, **values)
+
+
+def add_time(dt_ref, years=0, months=0):
+    """Add or subtract years and/or months to a datetime.
+    Years and months are cumulated if used at the same time.
+
+    :param `datetime.datetime` dt_ref: The datetime instance to update.
+    :param int years: The number of years used to update dt_ref.
+        If positive value, years are added.
+        If negative value, years are subtracted.
+    :param int months: The number of months used to update dt_ref.
+        If positive value, months are added.
+        If negative value, months are subtracted.
+    :return `datetime.datetime`: A timezone aware datetime instance updated.
+    """
+    month_factor = 1 if months >= 0 else -1
+    _months = int(abs(months) % 12)
+    _years = years + int((abs(months) - _months) / 12) * month_factor
+    return dt.datetime(
+        dt_ref.year + _years,
+        dt_ref.month + _months * month_factor,
+        dt_ref.day,
+        dt_ref.hour,
+        dt_ref.minute,
+        dt_ref.second,
+        dt_ref.microsecond,
+        tzinfo=dt_ref.tzinfo,
+    )
