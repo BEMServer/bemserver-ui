@@ -11,6 +11,7 @@ from bemserver_ui.common.time import (
     convert_html_form_datetime,
     convert_from_iso,
     strfdelta,
+    add_time,
 )
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 
@@ -171,6 +172,72 @@ def retrieve_multiple_data():
             "ts_end_time": end_time,
         }
     )
+
+
+@blp.route("/retrieve_data_json")
+@auth.signin_required
+@ensure_campaign_context
+def retrieve_multiple_data_json():
+    ts_ids = [int(x) for x in flask.request.args["timeseries"].split(",")]
+    data_state_id = flask.request.args["data_state"]
+    tz_name = flask.request.args["timezone"]
+    period = flask.request.args["period"]
+    end_date = flask.request.args["end_date"]
+    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
+    aggregation = flask.request.args.get("agg")
+    if aggregation == "none":
+        aggregation = None
+    bucket_width_value = flask.request.args.get("bucket_width_value")
+    bucket_width_unit = flask.request.args.get("bucket_width_unit")
+
+    tz = zoneinfo.ZoneInfo(tz_name)
+    try:
+        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        flask.abort(422, description="Invalid end datetime!")
+
+    if period == "custom":
+        start_date = flask.request.args["start_date"]
+        start_time = flask.request.args.get("start_time", "00:00") or "00:00"
+        try:
+            dt_start = convert_html_form_datetime(start_date, start_time, tz=tz)
+        except BEMServerUICommonInvalidDatetimeError:
+            flask.abort(422, description="Invalid start datetime!")
+    else:
+        if period == "last-24-hours":
+            dt_start = dt_end - dt.timedelta(hours=24)
+        elif period == "last-7-days":
+            dt_start = dt_end - dt.timedelta(days=7)
+        elif period == "last-30-days":
+            dt_start = dt_end - dt.timedelta(days=30)
+        elif period == "last-12-months":
+            dt_start = add_time(dt_end, years=-1)
+
+    if (
+        aggregation is not None
+        and bucket_width_value is not None
+        and bucket_width_unit is not None
+    ):
+        ts_data_resp = flask.g.api_client.timeseries_data.download_aggregate(
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            ts_ids,
+            timezone=tz_name,
+            aggregation=Aggregation(aggregation),
+            bucket_width_value=bucket_width_value,
+            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
+        )
+    else:
+        ts_data_resp = flask.g.api_client.timeseries_data.download(
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            ts_ids,
+            timezone=tz_name,
+        )
+
+    return flask.jsonify(ts_data_resp.data)
 
 
 @blp.route("/delete_data", methods=["POST"])

@@ -1,9 +1,10 @@
-import { Parser } from "../../tools/parser.js";
-import { TimezoneTool } from "../../tools/timezones.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { TimezoneTool } from "/static/scripts/modules/tools/timezones.js";
 
 
 export class DatetimePicker extends HTMLDivElement {
 
+    #initOptions = {};
     #tzTool = null;
 
     #titleSpanElmt = null;
@@ -29,10 +30,15 @@ export class DatetimePicker extends HTMLDivElement {
     constructor(options = {}) {
         super();
 
+        this.#initOptions = options;
         this.#tzTool = new TimezoneTool();
 
         this.#loadOptions(options);
         this.#cacheDOM();
+    }
+
+    static get observedAttributes() {
+        return ["disabled", "required"];
     }
 
     get date() {
@@ -181,7 +187,19 @@ export class DatetimePicker extends HTMLDivElement {
 
     #updateTzInfo() {
         let tzInfo = this.#tzTool.getTzInfo(this.#tzName);
-        this.#tzInfoElmt.setAttribute("title", `<div class="d-grid"><span class="fw-bold">${tzInfo["area"]["label"]}</span><span class="fst-italic">${tzInfo["label"]}</span></div>`);
+
+        let tzInfoTitleContentElmt = document.createElement("div");
+        tzInfoTitleContentElmt.classList.add("d-grid");
+        let tzInfoAreaLabelElmt = document.createElement("span");
+        tzInfoAreaLabelElmt.classList.add("fw-bold");
+        tzInfoAreaLabelElmt.innerText = tzInfo["area"]["label"];
+        tzInfoTitleContentElmt.appendChild(tzInfoAreaLabelElmt);
+        let tzInfoLabelElmt = document.createElement("span");
+        tzInfoLabelElmt.classList.add("fst-italic");
+        tzInfoLabelElmt.innerText = tzInfo["label"];
+        tzInfoTitleContentElmt.appendChild(tzInfoLabelElmt);
+
+        this.#tzInfoElmt.setAttribute("title", tzInfoTitleContentElmt.outerHTML);
         this.#enableOrRefreshTooltips();
     }
 
@@ -194,8 +212,11 @@ export class DatetimePicker extends HTMLDivElement {
     }
 
     connectedCallback() {
+        this.#loadOptions(this.#initOptions);
+
         this.innerHTML = "";
         this.classList.add("input-group", "input-group-sm");
+        this.style.minWidth = "230px";
 
         if (this.#title != null) {
             this.#titleSpanElmt = document.createElement("span");
@@ -207,21 +228,30 @@ export class DatetimePicker extends HTMLDivElement {
         this.#dateInputElmt = document.createElement("input");
         this.#dateInputElmt.classList.add("form-control");
         this.#dateInputElmt.type = "date";
-        if (this.#isRequired) {
-            this.#dateInputElmt.setAttribute("required", true);
-        }
         if (this.#hasAutofocus) {
             this.#dateInputElmt.setAttribute("autofocus", true);
         }
+        if (this.#dateMin != null) {
+            this.#dateInputElmt.setAttribute("min", this.#dateMin);
+        }
+        if (this.#dateMax != null) {
+            this.#dateInputElmt.setAttribute("max", this.#dateMax);
+        }
+        this.#dateInputElmt.style.minWidth = "125px";
         this.appendChild(this.#dateInputElmt);
 
         this.#timeInputElmt = document.createElement("input");
         this.#timeInputElmt.classList.add("form-control");
         this.#timeInputElmt.type = "time";
-        if (this.#isRequired) {
-            this.#timeInputElmt.setAttribute("required", true);
-        }
+        this.#timeInputElmt.style.minWidth = "75px";
         this.appendChild(this.#timeInputElmt);
+
+        if (this.#isRequired) {
+            this.setRequired();
+        }
+        else {
+            this.setOptional();
+        }
 
         this.#tzInfoElmt = document.createElement("i");
         this.#tzInfoElmt.classList.add("input-group-text", "bi", "bi-watch");
@@ -235,6 +265,45 @@ export class DatetimePicker extends HTMLDivElement {
         this.#updateStyle();
 
         this.#initEventListeners();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue != newValue) {
+            if (name == "disabled") {
+                if (newValue) {
+                    this.setDisabled();
+                }
+                else {
+                    this.setEnabled();
+                }
+            }
+            else if (name == "required") {
+                if (newValue) {
+                    this.setRequired();
+                }
+                else {
+                    this.setOptional();
+                }
+            }
+        }
+    }
+
+    setEnabled() {
+        this.#dateInputElmt.removeAttribute("disabled");
+        this.#timeInputElmt.removeAttribute("disabled");
+    }
+    setDisabled() {
+        this.#dateInputElmt.setAttribute("disabled", true);
+        this.#timeInputElmt.setAttribute("disabled", true);
+    }
+
+    setRequired() {
+        this.#dateInputElmt.setAttribute("required", true);
+        this.#timeInputElmt.setAttribute("required", true);
+    }
+    setOptional() {
+        this.#dateInputElmt.removeAttribute("required");
+        this.#timeInputElmt.removeAttribute("required");
     }
 
     focus(options = { focusOnTime: false }) {

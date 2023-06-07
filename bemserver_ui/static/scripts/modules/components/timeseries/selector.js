@@ -454,6 +454,10 @@ export class TimeseriesSelector extends HTMLElement {
                 this.refresh();
             }
         });
+
+        this.#dropdownSearchPanelElmt.addEventListener("shown.bs.dropdown", () => {
+            this.#fixDropdownSearchPanelPosition();
+        });
     }
 
     #updateSearchInput() {
@@ -696,14 +700,18 @@ export class TimeseriesSelector extends HTMLElement {
         searchResultItem.addEventListener("toggle", (event) => {
             event.preventDefault();
 
-            // Update dropdown-menu position, taking in account selected items container height.
-            this.#dropdownSearchPanelElmt.style.transform = `translate(0px, ${this.#selectedItemsContainerElmt.offsetHeight + this.#bsDropdownSearchPanel._config.offset[1]}px)`;
+            this.#fixDropdownSearchPanelPosition();
 
             let toggleEvent = new CustomEvent("toggleItem", { detail: event.detail, bubbles: true});
             this.dispatchEvent(toggleEvent);
         });
 
         return searchResultItem;
+    }
+
+    #fixDropdownSearchPanelPosition() {
+        // Update dropdown-menu position, taking in account selected items container height.
+        this.#dropdownSearchPanelElmt.style.transform = `translate(0px, ${this.#selectedItemsContainerElmt.offsetHeight + this.#bsDropdownSearchPanel._config.offset[1]}px)`;
     }
 
     connectedCallback() {
@@ -791,6 +799,14 @@ export class TimeseriesSelector extends HTMLElement {
             this.#searchResultsPaginationElmt.page = 1;
             this.refresh();
         }
+    }
+
+    open() {
+        this.#bsDropdownSearchPanel.show();
+    }
+
+    close() {
+        this.#bsDropdownSearchPanel.hide();
     }
 
     refresh() {

@@ -1,7 +1,7 @@
-import { Parser } from "../../tools/parser.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-const DURATIONS = {
+const DURATIONS = Object.freeze({
     "year": [1],
     "month": [1],
     "week": [1],
@@ -9,7 +9,7 @@ const DURATIONS = {
     "hour": [1, 2, 3, 4, 6, 8, 12],
     "minute": [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30],
     "second": [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30],
-};
+});
 
 
 export class TimeseriesBucketWidth extends HTMLDivElement {
@@ -27,8 +27,24 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
     get bucketWidthUnit() {
         return this.#widthUnit;
     }
+    set bucketWidthUnit(value) {
+        if (value != this.#widthUnit && Object.keys(DURATIONS).includes(value)) {
+            this.#widthUnit = value;
+            if (!DURATIONS[this.#widthUnit].includes(this.#widthValue)) {
+                this.#widthValue = DURATIONS[this.#widthUnit][0];
+            }
+            this.#selectElmt.value = `${this.#widthValue}_${this.#widthUnit}`;
+        }
+    }
+
     get bucketWidthValue() {
         return this.#widthValue;
+    }
+    set bucketWidthValue(value) {
+        if (value != this.#widthValue && DURATIONS[this.#widthUnit].includes(value)) {
+            this.#widthValue = value;
+            this.#selectElmt.value = `${this.#widthValue}_${this.#widthUnit}`;
+        }
     }
 
     static get observedAttributes() {
@@ -123,6 +139,6 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-ts-bucket-width") == null) {
-    customElements.define("app-ts-bucket-width", TimeseriesBucketWidth, { extends: "div" });
+if (window.customElements.get("app-ts-bucket-width") == null) {
+    window.customElements.define("app-ts-bucket-width", TimeseriesBucketWidth, { extends: "div" });
 }

@@ -1,6 +1,31 @@
 import { ModalConfirm } from "./components/modalConfirm.js";
 
 
+const requiredInputs = [
+    `form input:required`,
+    `form select:required`,
+    `form div[is^="app-"][required]`,
+    `input[form]:required`,
+    `select[form]:required`,
+    `div[is^="app-"][form][required]`,
+];
+
+const minMaxInputs = [
+    `form input[minlength]`,
+    `form input[maxlength]`,
+    `form textarea[minlength]`,
+    `form textarea[maxlength]`,
+    `form input[min]`,
+    `form input[max]`,
+    `input[form][minlength]`,
+    `input[form][maxlength]`,
+    `textarea[form][minlength]`,
+    `textarea[form][maxlength]`,
+    `input[form][min]`,
+    `input[form][max]`,
+];
+
+
 export class FormController {
 
     #confirmFormElmts = null;
@@ -13,8 +38,8 @@ export class FormController {
 
     #cacheDOM() {
         this.#confirmFormElmts = [].slice.call(document.querySelectorAll(`form[data-modal-confirm-message]`));
-        this.#requiredInputElmts = [].slice.call(document.querySelectorAll(`input:required, select:required, div[is^="app-"][required]`));
-        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll(`input[minlength], input[maxlength], textarea[minlength], textarea[maxlength], input[min], input[max]`));
+        this.#requiredInputElmts = [].slice.call(document.querySelectorAll(requiredInputs.join(", ")));
+        this.#minMaxInputElmts = [].slice.call(document.querySelectorAll(minMaxInputs.join(", ")));
     }
 
     #getRequiredLabelElmt() {
