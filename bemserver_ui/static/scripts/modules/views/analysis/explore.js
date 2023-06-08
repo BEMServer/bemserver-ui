@@ -2,11 +2,12 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { TimeseriesChartExplore } from "/static/scripts/modules/components/charts/tsChartExplore.js";
 import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/components/charts/tsChartEnergyConsumption.js";
 import "/static/scripts/modules/components/tree.js";
 
 
-export class EnergyConsumptionExploreView {
+export class WeatherExploreView {
 
     #internalAPIRequester = null;
     #retrieveDataReqID = null;
@@ -165,12 +166,13 @@ export class EnergyConsumptionExploreView {
                 this.#internalAPIRequester.abort(this.#retrieveDataReqID);
                 this.#retrieveDataReqID = null;
             }
+
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(
-                    `api.analysis.energy_consumption.retrieve_breakdown`,
+                    `api.analysis.weather.retrieve`,
                     {
                         structural_element_type: this.#structuralElementType,
-                        structural_element_id: this.#structuralElementId,
+                        site_id: this.#structuralElementId,
                         period_type: this.#periodTypeSelectElmt.value,
                         period_month: this.#periodMonthSelectElmt.value,
                         period_year: this.#periodYearSelectElmt.value,
@@ -220,13 +222,20 @@ export class EnergyConsumptionExploreView {
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
                             let parameters = {
-                                title : "Energy consumption",
-                                type : "bar",
-                                unit : ["Wh"],
+                                title : "Weather data",
+                                type : "line",
+                            }
+
+                            if (energy == "Outdoor conditions") {
+                                parameters["unit"] = ["°C", "%"];
+                            }
+                            else if (energy == "Solar radiation") {
+                                parameters["unit"] = ["W/m²"];
                             }
 
                             energyChart.showLoading();
                             energyChart.load(data["timestamps"], energy, energyUses, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], parameters);
+                            
                         }
                     }
                 },
@@ -252,12 +261,14 @@ export class EnergyConsumptionExploreView {
             flaskES6.urlFor(
                 `api.structural_elements.retrieve_tree_sites`,
                 {
-                    types: ["site", "building"],
+                    types: ["site"],
                 }
             ),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
+
+                this.#sitesTreeElmt.select("site-1");
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});

@@ -2,6 +2,7 @@
 import datetime as dt
 import zoneinfo as zi
 from string import Formatter
+import calendar
 
 from .exceptions import BEMServerUICommonInvalidDatetimeError
 
@@ -131,13 +132,40 @@ def add_time(dt_ref, years=0, months=0):
         If negative value, months are subtracted.
     :return `datetime.datetime`: A timezone aware datetime instance updated.
     """
-    month_factor = 1 if months >= 0 else -1
-    _months = int(abs(months) % 12)
-    _years = years + int((abs(months) - _months) / 12) * month_factor
+    min_month = 1
+    max_month = 12
+
+    # First compute total offset years.
+    extra_years, left_months = divmod(months, max_month)
+    offset_years = years + extra_years
+
+    # Then compute target month, based on left months (months without extra years).
+    target_month = dt_ref.month + left_months
+
+    # Adjust target month and offset years, if target months overflows.
+    if target_month == 0:
+        target_month = max_month
+        offset_years -= 1
+    elif target_month < min_month:
+        target_month = max_month + target_month
+        offset_years -= 1
+    elif target_month > max_month:
+        target_month -= max_month
+        offset_years += 1
+
+    # Set target year, based on reference year offseted.
+    target_year = dt_ref.year + offset_years
+
+    # Adjust target day, taking in account end of months and leap years.
+    _, maxdays_in_refmonth = calendar.monthrange(dt_ref.year, dt_ref.month)
+    _, maxdays_in_targetmonth = calendar.monthrange(target_year, target_month)
+    is_maxdays_in_ref = dt_ref.day == maxdays_in_refmonth
+    target_day = maxdays_in_targetmonth if is_maxdays_in_ref else dt_ref.day
+
     return dt.datetime(
-        dt_ref.year + _years,
-        dt_ref.month + _months * month_factor,
-        dt_ref.day,
+        target_year,
+        target_month,
+        target_day,
         dt_ref.hour,
         dt_ref.minute,
         dt_ref.second,
