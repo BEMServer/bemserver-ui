@@ -48,10 +48,6 @@ export class WeatherExploreView {
         "Last-Year": "{dd} {MMMM} {yyyy}",
     };
 
-    #monthNames = [
-        "January", "February", "March", "April", "May", "June", "July", "August", "September", "Octobre", "November", "December"
-    ]
-
     constructor(tzName = "UTC", year = null, month = null) {
         this.#tzName = tzName || "UTC";
 
@@ -127,6 +123,13 @@ export class WeatherExploreView {
         });
     }
 
+    #getMonthName(month) {
+        const date = new Date();
+        date.setMonth(month - 1);
+
+        return date.toLocaleString([], { month: "long" });
+    }
+
     #updatePeriodSelect() {
         if (this.#previousPeriodType == null) {
             this.#periodYearSelectElmt.innerHTML = "";
@@ -141,7 +144,7 @@ export class WeatherExploreView {
             for (let month = 1; month <= 12; month++) {
                 let option = document.createElement("option");
                 option.value = month;
-                option.textContent = this.#monthNames[month - 1];
+                option.textContent = this.#getMonthName(month);
                 if(month == this.#monthRef){
                     option.selected = true;
                 }
@@ -209,6 +212,68 @@ export class WeatherExploreView {
                 option.selected = true;
             }
             this.#periodDaySelectElmt.appendChild(option);
+        }
+    }
+
+    #updateTsInfoModal(dataset, forecast, is_admin) {
+        let tsInfoModal = new bootstrap.Modal(document.getElementById("tsInfoModal"));
+        tsInfoModal.show();
+
+        let types = ["current", "forecast"];
+
+        let forecastTab = document.getElementById("forecast-tab");
+        if (!forecast) {
+            types = ["current"];
+            forecastTab.classList.add("disabled");
+        }
+        else {
+            forecastTab.classList.remove("disabled");
+        }
+
+        for (let type of types) {
+            let tabContent = document.getElementById(type);
+            tabContent.innerHTML = "";
+
+            for (let [_key, value] of Object.entries(dataset)) {
+                let tsName = document.createElement("h5");
+                tsName.classList.add("fw-bold", "mt-3");
+                tsName.textContent = value[type].name;
+                tabContent.appendChild(tsName);
+
+                let tsDescription = document.createElement("p");
+                tsDescription.classList.add("fw-small");
+                tsDescription.textContent = value[type].timeseries.description;
+                tabContent.appendChild(tsDescription);
+
+                let row = document.createElement("div");
+                row.classList.add("row");
+
+                let col1 = document.createElement("div");
+                col1.classList.add("col");
+
+                let periodValue = document.createElement("span");
+                periodValue.classList.add("fw-normal");
+                periodValue.textContent = value[type].timeseries.name + " [" + value[type].timeseries.unit_symbol + "]";
+                col1.appendChild(periodValue);
+                row.appendChild(col1);
+
+                if (is_admin) {
+                    let col2 = document.createElement("div");
+                    col2.classList.add("col");
+
+                    let id = document.createElement("p");
+                    id.textContent = "ID: ";
+                    id.classList.add("fw-bold");
+
+                    let idValue = document.createElement("span");
+                    idValue.classList.add("fw-normal");
+                    idValue.textContent = value[type].timeseries.id;
+                    id.appendChild(idValue);
+                    col2.appendChild(id);
+                    row.appendChild(col2);
+                }
+                tabContent.appendChild(row);
+            }
         }
     }
 
@@ -282,7 +347,7 @@ export class WeatherExploreView {
                             this.#mainChartContainerElmt.appendChild(colElmt);
 
                             weatherChart.showLoading();
-                            weatherChart.load(name, dataset, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                            weatherChart.load(name, dataset, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], () => { this.#updateTsInfoModal(dataset, this.#forecast.checked, signedUser.is_admin)});
                         }
                     }
                 },

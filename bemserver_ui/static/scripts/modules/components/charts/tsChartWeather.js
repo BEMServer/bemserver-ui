@@ -25,6 +25,14 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         },
         toolbox: {
             feature: {
+                myTSInfo: {
+                    show: true,
+                    title: "Weather parameters timeseries",
+                    icon: "path://M 12 2 C 6.4771525 2 2 6.4771525 2 12 C 2 17.522847 6.4771525 22 12 22 C 17.522847 22 22 17.522847 22 12 C 22 6.4771525 17.522847 2 12 2 z M 12 4 C 16.418278 4 20 7.581722 20 12 C 20 16.418278 16.418278 20 12 20 C 7.581722 20 4 16.418278 4 12 C 4 7.581722 7.581722 4 12 4 z M 11 6 L 11 8 L 13 8 L 13 6 L 11 6 z M 11 9 L 11 17 L 13 17 L 13 9 L 11 9 z",
+                    onclick: function () {
+                        this.#showTSInfo();
+                    },
+                },
                 dataZoom: {
                     yAxisIndex: "none",
                 },
@@ -112,6 +120,10 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         window.addEventListener("unload", (event) => {
             this.dispose();
         });
+    }
+
+    #showTSInfo(tsInfoCallback = null) {
+        tsInfoCallback?.();
     }
 
     #optionToContent(opt, dataset, timeFormat) {
@@ -243,7 +255,7 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         this.#chart.hideLoading();
     }
 
-    load(name, dataset, timeFormat) {
+    load(name, dataset, timeFormat, tsInfoCallback = null) {
         this.hideLoading();
 
         let options = this.#chart.getOption();
@@ -255,6 +267,8 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         options.title[0].text = `${name}`;
         
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, dataset, timeFormat); };
+
+        options.toolbox[0].feature.myTSInfo.onclick = () => { this.#showTSInfo(tsInfoCallback); };
 
         options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, dataset, timeFormat); };
 

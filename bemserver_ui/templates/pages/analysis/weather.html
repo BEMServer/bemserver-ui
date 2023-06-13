@@ -65,6 +65,35 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="tsInfoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="tsInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content placeholder-glow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tsInfoModalLabel">Weather parameters timeseries</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="tsInfoModalBody">
+                <div class="tab-content">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a href="#current" class="nav-link active" id="current-tab" data-bs-toggle="tab" role="tab" aria-controls="current" aria-selected="true">Current</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a href="#forecast" class="nav-link" id="forecast-tab" data-bs-toggle="tab" role="tab" aria-controls="forecast" aria-selected="false">Forecast</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab"></div>
+                    <div class="tab-pane fade" id="forecast" role="tabpanel" aria-labelledby="forecast-tab"></div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock main_content %}
 
 {% block body_scripts %}
