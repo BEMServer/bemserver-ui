@@ -13,6 +13,7 @@
                     {% if g.campaign_ctxt.has_campaign %}
                     {{- mac_sidebar.render_nav_item("Energy consumption", url_for("analysis.energy_consumption.explore"), "Energy consumption", ["bi", "bi-fire"]) -}}
                     {{- mac_sidebar.render_nav_item("Degree days", url_for("analysis.degree_days.explore"), "Degree days", ["bi", "bi-thermometer-half"]) -}}
+                    {{- mac_sidebar.render_nav_item("Weather data", url_for("analysis.weather.explore"), "Weather data", ["bi", "bi-cloud-sun"]) -}}
                     {% endif %}
                     {% for sidebar_section_plugin in sidebar_section_plugins %}
                     {{- mac_sidebar.render_nav_item_from_plugin(sidebar_section_plugin) -}}
