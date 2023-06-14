@@ -1,18 +1,24 @@
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+
+
 export class Spinner extends HTMLDivElement {
 
     #useSmallSize = false;
     #useSecondaryColor = false;
 
-    constructor(options = { useSmallSize: false, useSecondaryColor: false }) {
+    constructor(options = {}) {
         super();
 
-        this.#useSmallSize = options.useSmallSize;
-        this.#useSecondaryColor = options.useSecondaryColor;
+        this.#loadOptions(options);
+    }
+
+    #loadOptions(options = {}) {
+        this.#useSmallSize = Parser.parseBoolOrDefault(options.useSmallSize || this.getAttribute("small-size"), this.#useSmallSize);
+        this.#useSecondaryColor = Parser.parseBoolOrDefault(options.useSecondaryColor || this.getAttribute("secondary-color"), this.#useSecondaryColor);
     }
 
     connectedCallback() {
         this.innerHTML = "";
-
         this.classList.add("d-flex", "justify-content-center");
 
         let spinnerElmt = document.createElement("div");
@@ -32,6 +38,6 @@ export class Spinner extends HTMLDivElement {
 }
 
 
-if (customElements.get("app-spinner") == null) {
-    customElements.define("app-spinner", Spinner, { extends: "div" });
+if (window.customElements.get("app-spinner") == null) {
+    window.customElements.define("app-spinner", Spinner, { extends: "div" });
 }
