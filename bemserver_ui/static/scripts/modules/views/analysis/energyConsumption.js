@@ -18,6 +18,7 @@ export class EnergyConsumptionExploreView {
     #periodMonthSelectElmt = null;
     #periodYearSelectElmt = null;
     #sitesTreeElmt = null;
+    #ratioSwitch = null;
 
     #tzName = "UTC";
     #yearRef = null;
@@ -61,6 +62,7 @@ export class EnergyConsumptionExploreView {
         this.#periodTypeSelectElmt = document.getElementById("periodType");
         this.#periodMonthSelectElmt = document.getElementById("periodMonth");
         this.#periodYearSelectElmt = document.getElementById("periodYear");
+        this.#ratioSwitch = document.getElementById("ratioSwitch");
     }
 
     #initEventListeners() {
@@ -88,6 +90,13 @@ export class EnergyConsumptionExploreView {
             event.preventDefault();
 
             this.#updatePreviousYearSelected();
+            this.#generateCharts();
+        });
+
+        this.#ratioSwitch.addEventListener("change", (event) => {
+            event.preventDefault();
+
+            this.#updateRatioFilter();
             this.#generateCharts();
         });
     }
@@ -148,6 +157,58 @@ export class EnergyConsumptionExploreView {
     #updatePreviousYearSelected() {
         if (this.#periodTypeSelectElmt.value != "Yearly") {
             this.#previousYearSelected = this.#periodYearSelectElmt.value;
+        }
+    }
+
+    #updateRatioFilter() {
+        let filterRatio = document.getElementById("ratioSelect");
+
+        if (this.#ratioSwitch.checked) {
+            filterRatio.classList.remove("d-none", "invisible");
+
+            let options = ["None"];
+
+            // Aller chercher dans l'api pour un site ou un building donné les ratios disponibles
+            // Normalement 2 appels à passer en parallèle
+            // Garder seulement les ratios de type 'float' ou 'integer'
+            // Ajouter les ratios dans la liste options
+
+
+            if (this.#retrieveDataReqID != null) {
+                this.#internalAPIRequester.abort(this.#retrieveDataReqID);
+                this.#retrieveDataReqID = null;
+            }
+
+            this.#retrieveDataReqID = this.#internalAPIRequester.get(
+                `/api/structural-elements/`,
+                {
+                    type: this.#structuralElementType,
+                    id: this.#structuralElementId,
+                },
+                (response) => {
+                    console.log("Réponse de l'API")
+                    console.log(response);
+                },
+                (error) => {
+                    console.log("Erreur de l'API")
+                    console.log(error);
+                }
+            );
+
+            /* --------------------------------------------- -- --------------------------------------------- */
+
+            for (let opt of options) {
+                let ratioOptions = document.createElement("option");
+                ratioOptions.value = opt;
+                ratioOptions.innerText = opt;
+                filterRatio.appendChild(ratioOptions);
+            }
+        }
+        else {
+            filterRatio.classList.add("d-none", "invisible");
+            while (filterRatio.firstChild) {
+                filterRatio.removeChild(filterRatio.firstChild);
+            }
         }
     }
 
