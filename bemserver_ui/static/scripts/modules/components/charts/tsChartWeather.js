@@ -82,12 +82,14 @@ export class TimeseriesChartWeather extends HTMLDivElement {
                 nameLocation: "middle",
                 axisLabel: {},
                 position: "left",
+                scale: true,
             },
             {
                 type: "value",
                 nameLocation: "middle",
                 axisLabel: {},
                 position: "right",
+                scale: true,
             },
         ],
         series: [],
@@ -295,6 +297,8 @@ export class TimeseriesChartWeather extends HTMLDivElement {
                         },
                         yAxisIndex: value.yAxis,
                         unit: value.timeseries.unit_symbol,
+                        symbol: "path://",
+                        connectNulls: true,
                     };
                     series.push(serie);
                     if (!listUnit[value.yAxis].includes(serie.unit))
