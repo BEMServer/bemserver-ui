@@ -1,6 +1,33 @@
 Changelog
 ---------
 
+0.5.3 (2023-06-16)
+++++++++++++++++++
+
+Features:
+
+- Timeseries:
+
+  - Rework timeseries data explore page
+
+- Analysis:
+
+  - Add weather data analysis page
+
+- User menu:
+
+  - Add settings entry (with notifications settings)
+
+Fixes:
+
+- Fix weather data service management page (forecast)
+
+Other changes:
+
+- Require bemserver-api-client >=0.20.0 and <0.21.0
+- Require bemserver-api 0.21.0
+- Require bemserver-core 0.16.0
+
 0.5.2 (2023-05-25)
 ++++++++++++++++++
 
