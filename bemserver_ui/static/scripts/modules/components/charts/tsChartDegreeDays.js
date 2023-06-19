@@ -22,16 +22,13 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
             },
         },
         grid: {
-            left: "3%",
-            right: "5%",
+            left: 20,
+            right: 20,
             bottom: 90,
             containLabel: true,
         },
         toolbox: {
             feature: {
-                dataZoom: {
-                    yAxisIndex: "none",
-                },
                 dataView: {
                     readOnly: true,
                     buttonColor: "#95c11a",
@@ -47,12 +44,15 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
         },
         legend: {
             type: "scroll",
-            bottom: 10,
+            bottom: 0,
         },
         dataZoom: [
             {
                 type: "slider",
                 bottom: 50,
+            },
+            {
+                type: "inside",
             },
         ],
         xAxis: [
@@ -63,8 +63,6 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
         yAxis: [
             {
                 type: "value",
-                nameLocation: "middle",
-                axisLabel: {},
             },
         ],
         series: [],
@@ -248,6 +246,8 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
         options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
         options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
 
+        options.yAxis[0].name = unit;
+
         options.series.length = 0;
         if (!this.#compareMode) {
             options.series.push({
@@ -282,11 +282,6 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
                 };
             });
         }
-
-        options.yAxis[0].data = options.series.map((serie) => {
-            return serie.name;
-        });
-        options.yAxis[0].axisLabel.formatter = `{value} ${unit}`;
 
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
