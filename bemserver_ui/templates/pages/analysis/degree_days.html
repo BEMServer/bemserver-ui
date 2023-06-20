@@ -81,11 +81,24 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mb-3">
         <div class="col" id="chartContainer">
             <div class="alert alert-info mb-0 pb-0 w-50 mx-auto" role="alert">
                 <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
                 <p>To see the degree days, <span class="fw-bold">select a site</span> in the tree and <span class="fw-bold">choose a period</span>.</p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <h5><i class="bi bi-info-square"></i> How degree days are computed?</h5>
+                <div><span class="fw-bold">Heating Degree Days</span> (<var>HDD</var>) and <span class="fw-bold">Cooling Degree Days</span> (<var>CDD</var>) are computed with the <span class="fst-italic">mean temperature method</span>.</div>
+                <div class="mb-1">Each day, the average outside air temperature of the day is computed as the mean of min and max temperature (<var>Tmin</var> and <var>Tmax</var>). Then the degree days for that day are computed as the difference between that average temperature and the chosen base temperature (<var>Tbase</var>), taking 0 if negative.</div>
+                <div class="ms-2">
+                    <div><var class="fw-bold">HDD</var> = Max(0, <var>Tbase</var> - (<var>Tmax</var> - <var>Tmin</var>) / 2)</div>
+                    <div><var class="fw-bold">CDD</var> = Max(0, (<var>Tmax</var> - <var>Tmin</var>) / 2 - <var>Tbase</var>)</div>
+                </div>
             </div>
         </div>
     </div>
