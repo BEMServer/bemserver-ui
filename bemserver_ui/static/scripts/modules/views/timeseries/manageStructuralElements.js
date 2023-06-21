@@ -1,14 +1,14 @@
-import "../../components/itemsCount.js";
-import { Pagination, PageSizeSelector } from "../../components/pagination.js";
-import { AccordionList } from "../../components/accordionList.js";
-import { DropZone } from "../../components/dropZone.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../../components/spinner.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { Parser } from "../../tools/parser.js";
-import { flaskES6 } from "../../../app.js";
-import "../../components/tree.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import { Pagination, PageSizeSelector } from "/static/scripts/modules/components/pagination.js";
+import { AccordionList } from "/static/scripts/modules/components/accordionList.js";
+import { DropZone } from "/static/scripts/modules/components/dropZone.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { flaskES6 } from "/static/scripts/app.js";
+import "/static/scripts/modules/components/tree.js";
 
 
 export class TimeseriesManageStructuralElementsView {
@@ -48,6 +48,7 @@ export class TimeseriesManageStructuralElementsView {
         this.#tsListContainerElmt.innerHTML = "";
         this.#tsListContainerElmt.appendChild(this.#tsListElmt);
 
+        this.#enableOrRefreshTooltips();
         this.#initEventListeners();
     }
 
@@ -82,16 +83,12 @@ export class TimeseriesManageStructuralElementsView {
             this.#update({"page": event.detail.page});
         });
 
-        this.#searchElmt.addEventListener("input", (event) => {
+        // "input" event is fired each time the input text is updated (key pressed...)
+        // "change" event is only fired when losing focus or hitting enter key
+        this.#searchElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            if (event.target.value != "") {
-                this.#clearSearchBtnElmt.classList.remove("d-none", "invisible");
-            }
-            else {
-                this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
-            }
-
+            this.#updateSearchState();
             this.#update({"page_size": this.#tsPageSizeSelectorElmt.value, "search": event.target.value});
         });
 
@@ -99,8 +96,7 @@ export class TimeseriesManageStructuralElementsView {
             event.preventDefault();
 
             this.#searchElmt.value = "";
-            this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
-
+            this.#updateSearchState();
             this.#update({"page_size": this.#tsPageSizeSelectorElmt.value});
         });
 
@@ -241,6 +237,25 @@ export class TimeseriesManageStructuralElementsView {
                 );
             }
         });
+    }
+
+    #enableOrRefreshTooltips() {
+        // Enable (or refresh) Bootstrap tooltips.
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll(`[data-bs-toggle="tooltip"]`));
+        tooltipTriggerList.map((tooltipTriggerEl) => {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+
+    #updateSearchState() {
+        if (this.#searchElmt.value != "") {
+            this.#searchElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            this.#clearSearchBtnElmt.classList.remove("d-none", "invisible");
+        }
+        else {
+            this.#searchElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            this.#clearSearchBtnElmt.classList.add("d-none", "invisible");
+        }
     }
 
     #createDropedItemElement(id, icon, title, text, removeCallback) {
@@ -407,5 +422,11 @@ export class TimeseriesManageStructuralElementsView {
         this.#loadSitesTreeData();
         this.#loadZonesTreeData();
         this.#update(options);
+    }
+
+    mount() {
+        this.#searchElmt.value = "";
+        this.#updateSearchState();
+        this.refresh();
     }
 }
