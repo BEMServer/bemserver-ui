@@ -11,4 +11,7 @@ blp = flask.Blueprint("weather", __name__, url_prefix="/weather")
 @auth.signin_required
 @ensure_campaign_context
 def explore():
-    return flask.render_template("pages/analysis/weather.html")
+    return flask.render_template(
+        "pages/analysis/weather.html",
+        forecast_nbdays=5,
+    )
