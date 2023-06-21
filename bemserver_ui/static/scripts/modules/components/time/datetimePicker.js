@@ -44,9 +44,21 @@ export class DatetimePicker extends HTMLDivElement {
     get date() {
         return this.#date;
     }
+    set date(value) {
+        this.#date = value;
+        this.#dateInputElmt.value = this.#date;
+        this.#updateDateInputFormBind();
+        this.#updateStyle();
+    }
 
     get time() {
         return this.#time;
+    }
+    set time(value) {
+        this.#time = value;
+        this.#timeInputElmt.value = this.#time;
+        this.#updateTimeInputFormBind();
+        this.#updateStyle();
     }
 
     get dateMin() {
