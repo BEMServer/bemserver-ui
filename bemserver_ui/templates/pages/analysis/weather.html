@@ -41,7 +41,7 @@
                                         </div>
                                         <div class="form-check form-switch" id="forecastWrapper">
                                             <input class="form-check-input" type="checkbox" role="switch" id="forecastSwitch">
-                                            <label class="form-check-label text-nowrap" for="forecastSwitch">Show forecast</label>
+                                            <label class="form-check-label text-nowrap" for="forecastSwitch">Show forecast (+ {{ forecast_nbdays }} days)</label>
                                         </div>
                                     </div>
                                 </div>
@@ -67,25 +67,23 @@
 </div>
 <div class="modal fade" id="tsInfoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="tsInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content placeholder-glow">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="tsInfoModalLabel">Weather parameters timeseries</h5>
+                <h5 class="modal-title" id="tsInfoModalLabel">Weather parameters timeseries - <span id="tsInfoModalChartName"></span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="tsInfoModalBody">
-                <div class="tab-content">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <a href="#current" class="nav-link active" id="current-tab" data-bs-toggle="tab" role="tab" aria-controls="current" aria-selected="true">Current</a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a href="#forecast" class="nav-link" id="forecast-tab" data-bs-toggle="tab" role="tab" aria-controls="forecast" aria-selected="false">Forecast</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="current" role="tabpanel" aria-labelledby="current-tab"></div>
-                    <div class="tab-pane fade" id="forecast" role="tabpanel" aria-labelledby="forecast-tab"></div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs app-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="current-tab" type="button" data-bs-toggle="tab" data-bs-target="#current-tabcontent" role="tab" aria-controls="current-tabcontent" aria-selected="true">Current</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="forecast-tab" type="button" data-bs-toggle="tab" data-bs-target="#forecast-tabcontent" role="tab" aria-controls="forecast-tabcontent" aria-selected="false">Forecast</button>
+                    </li>
+                </ul>
+                <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white">
+                    <div class="tab-pane fade show active p-3" id="current-tabcontent" role="tabpanel" aria-labelledby="current-tab"></div>
+                    <div class="tab-pane fade p-3" id="forecast-tabcontent" role="tabpanel" aria-labelledby="forecast-tab"></div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-end gap-2">
@@ -105,7 +103,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        let weatherExploreView = new WeatherExploreView("{{ g.campaign_ctxt.tz_name }}");
+        let weatherExploreView = new WeatherExploreView("{{ g.campaign_ctxt.tz_name }}", {{ forecast_nbdays }});
         weatherExploreView.mount();
 
     });

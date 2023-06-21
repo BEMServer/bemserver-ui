@@ -18,8 +18,9 @@ export class TimeseriesChartWeather extends HTMLDivElement {
             text: "",
         },
         grid: {
-            left: "3%",
-            right: "5%",
+            left: 20,
+            right: 20,
+            top: 70,
             bottom: 90,
             containLabel: true,
         },
@@ -28,13 +29,10 @@ export class TimeseriesChartWeather extends HTMLDivElement {
                 myTSInfo: {
                     show: true,
                     title: "Weather parameters timeseries",
-                    icon: "path://M 12 2 C 6.4771525 2 2 6.4771525 2 12 C 2 17.522847 6.4771525 22 12 22 C 17.522847 22 22 17.522847 22 12 C 22 6.4771525 17.522847 2 12 2 z M 12 4 C 16.418278 4 20 7.581722 20 12 C 20 16.418278 16.418278 20 12 20 C 7.581722 20 4 16.418278 4 12 C 4 7.581722 7.581722 4 12 4 z M 11 6 L 11 8 L 13 8 L 13 6 L 11 6 z M 11 9 L 11 17 L 13 17 L 13 9 L 11 9 z",
-                    onclick: function () {
+                    icon: "path://m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z",
+                    onclick: () => {
                         this.#showTSInfo();
                     },
-                },
-                dataZoom: {
-                    yAxisIndex: "none",
                 },
                 dataView: {
                     readOnly: true,
@@ -46,7 +44,10 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         tooltip: {
             trigger: "axis",
             axisPointer: {
-                type: "shadow",
+                type: "cross",
+            },
+            valueFormatter: (value) => {
+                return Parser.parseFloatOrDefault(value, Number.NaN, 2);
             },
         },
         legend: [
@@ -70,6 +71,9 @@ export class TimeseriesChartWeather extends HTMLDivElement {
                 type: "slider",
                 bottom: 50,
             },
+            {
+                type: "inside",
+            },
         ],
         xAxis: [
             {
@@ -79,15 +83,13 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         yAxis: [
             {
                 type: "value",
-                nameLocation: "middle",
-                axisLabel: {},
                 position: "left",
+                scale: true,
             },
             {
                 type: "value",
-                nameLocation: "middle",
-                axisLabel: {},
                 position: "right",
+                scale: true,
             },
         ],
         series: [],
@@ -126,110 +128,72 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         tsInfoCallback?.();
     }
 
-    #optionToContent(opt, dataset, timeFormat) {
-        let timestamps = opt.series[0].data.map((serieData) => {
-            return echarts.time.format(serieData[0], timeFormat);
-        });
-
+    #optionToContent(opt, timeFormat) {
         let mainContainerElmt = document.createElement("div");
         mainContainerElmt.classList.add("m-2", "me-3");
 
-        let subtitleElmt = document.createElement("h5");
-        subtitleElmt.innerText = opt.title[0].subtext;
-        mainContainerElmt.appendChild(subtitleElmt);
+        if (opt.series.length > 0) {
+            let timestamps = opt.series[0].data.map((serieData) => {
+                return echarts.time.format(serieData[0], timeFormat);
+            });
 
-        let tableContainerElmt = document.createElement("div");
-        tableContainerElmt.classList.add("table-responsive");
+            let subtitleElmt = document.createElement("h5");
+            subtitleElmt.innerText = opt.title[0].subtext;
+            mainContainerElmt.appendChild(subtitleElmt);
 
-        let tableElmt = document.createElement("table");
-        tableElmt.classList.add("table", "table-sm", "table-hover", "table-bordered", "caption-top", "user-select-all");
-        let tableCaptionElmt = document.createElement("caption");
-        tableCaptionElmt.classList.add("fst-italic", "text-muted", "text-end");
-        tableCaptionElmt.innerText = `${timestamps.length.toString()} rows`;
-        tableElmt.appendChild(tableCaptionElmt);
-        let tableHeadElmt = document.createElement("thead");
-        let tableHeadTrElmt = document.createElement("tr");
-        tableHeadTrElmt.classList.add("align-middle");
-        let tableHeadTimestampElmt = document.createElement("th");
-        tableHeadTimestampElmt.setAttribute("scope", "col");
-        tableHeadTimestampElmt.innerText = "Timestamp";
-        tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-        for (let serie of opt.series) {
-            let tableHeadThElmt = document.createElement("th");
-            tableHeadThElmt.setAttribute("scope", "col");
-            tableHeadThElmt.innerText = serie.name + (serie.unit ? ` (${serie.unit})`: "");
-            tableHeadTrElmt.appendChild(tableHeadThElmt);
-        }
-        tableHeadElmt.appendChild(tableHeadTrElmt);
-        tableElmt.appendChild(tableHeadElmt);
-        let tableBodyElmt = document.createElement("tbody");
-        tableBodyElmt.classList.add("table-group-divider");
-        for (let [index, timestamp] of timestamps.entries()) {
-            let tableTrElmt = document.createElement("tr");
-            let tableCellTimestampElmt = document.createElement("td");
-            tableCellTimestampElmt.innerText = timestamp;
-            tableTrElmt.appendChild(tableCellTimestampElmt);
+            let tableContainerElmt = document.createElement("div");
+            tableContainerElmt.classList.add("table-responsive");
+
+            let tableElmt = document.createElement("table");
+            tableElmt.classList.add("table", "table-sm", "table-hover", "table-bordered", "caption-top", "user-select-all");
+            let tableCaptionElmt = document.createElement("caption");
+            tableCaptionElmt.classList.add("fst-italic", "text-muted", "text-end");
+            tableCaptionElmt.innerText = `${timestamps.length.toString()} rows`;
+            tableElmt.appendChild(tableCaptionElmt);
+            let tableHeadElmt = document.createElement("thead");
+            let tableHeadTrElmt = document.createElement("tr");
+            tableHeadTrElmt.classList.add("align-middle");
+            let tableHeadTimestampElmt = document.createElement("th");
+            tableHeadTimestampElmt.setAttribute("scope", "col");
+            tableHeadTimestampElmt.innerText = "Timestamp";
+            tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
             for (let serie of opt.series) {
-                if (serie.data && serie.data[index]) {
-                    let tableCellElmt = document.createElement("td");
-                    tableCellElmt.innerText = serie.data[index][1].toString();
-                    tableTrElmt.appendChild(tableCellElmt);
-                }
+                let tableHeadThElmt = document.createElement("th");
+                tableHeadThElmt.setAttribute("scope", "col");
+                tableHeadThElmt.innerText = serie.name;
+                tableHeadTrElmt.appendChild(tableHeadThElmt);
             }
-            tableBodyElmt.appendChild(tableTrElmt);
-        }
-        tableElmt.appendChild(tableBodyElmt);
-
-        tableContainerElmt.appendChild(tableElmt);
-        mainContainerElmt.appendChild(tableContainerElmt);
-        return mainContainerElmt;
-    }
-
-    #tooltipFormatter(params, dataset, timeFormat) {
-        let tooltipContainerElmt = document.createElement("div");
-
-        let ulElmt = document.createElement("ul");
-        ulElmt.classList.add("list-unstyled", "mx-2", "mt-2", "mb-0");
-
-        for (let [index, serieParams] of params.entries()) {
-            if (index == 0) {
-                let timeElmt = document.createElement("h6");
-                timeElmt.innerText = echarts.time.format(serieParams.value[0], timeFormat);
-                tooltipContainerElmt.appendChild(timeElmt);
-            }
-
-            let liElmt = document.createElement("li");
-            liElmt.classList.add("d-flex", "justify-content-between", "gap-4");
-            ulElmt.appendChild(liElmt);
-
-            let serieNameElmt = document.createElement("div");
-            serieNameElmt.classList.add("d-flex", "align-items-center", "gap-1");
-            serieNameElmt.innerHTML = `${serieParams.marker}<span>${serieParams.seriesName}</span>`;
-
-            let serieValueContainerElmt = document.createElement("div");
-            serieValueContainerElmt.classList.add("d-flex", "gap-1");
-
-            let serieValueElmt = document.createElement("span");
-            serieValueElmt.classList.add("fw-bold");
-            serieValueElmt.innerText = Parser.parseFloatOrDefault(serieParams.value[1], Number.NaN, 2).toString();
-            serieValueContainerElmt.appendChild(serieValueElmt);
-
-            let serieValueUnitElmt = document.createElement("small");
-            for (let [key, value] of Object.entries(dataset)) {
-                for (let [key2, value2] of Object.entries(value)) {
-                    if (value2.name == serieParams.seriesName) {
-                        serieValueUnitElmt.innerText = value2.timeseries.unit_symbol;
+            tableHeadElmt.appendChild(tableHeadTrElmt);
+            tableElmt.appendChild(tableHeadElmt);
+            let tableBodyElmt = document.createElement("tbody");
+            tableBodyElmt.classList.add("table-group-divider");
+            for (let [index, timestamp] of timestamps.entries()) {
+                let tableTrElmt = document.createElement("tr");
+                let tableCellTimestampElmt = document.createElement("td");
+                tableCellTimestampElmt.innerText = timestamp;
+                tableTrElmt.appendChild(tableCellTimestampElmt);
+                for (let serie of opt.series) {
+                    if (serie.data && serie.data[index]) {
+                        let tableCellElmt = document.createElement("td");
+                        tableCellElmt.innerText = serie.data[index][1].toString();
+                        tableTrElmt.appendChild(tableCellElmt);
                     }
                 }
+                tableBodyElmt.appendChild(tableTrElmt);
             }
-            serieValueContainerElmt.appendChild(serieValueUnitElmt);
+            tableElmt.appendChild(tableBodyElmt);
 
-            liElmt.appendChild(serieNameElmt);
-            liElmt.appendChild(serieValueContainerElmt);
+            tableContainerElmt.appendChild(tableElmt);
+            mainContainerElmt.appendChild(tableContainerElmt);
+        }
+        else {
+            let noDataElmt = document.createElement("p");
+            noDataElmt.classList.add("fst-italic", "text-center", "text-muted");
+            noDataElmt.innerText = "No data";
+            mainContainerElmt.appendChild(noDataElmt);
         }
 
-        tooltipContainerElmt.appendChild(ulElmt);
-        return tooltipContainerElmt;
+        return mainContainerElmt;
     }
 
     connectedCallback() {
@@ -259,74 +223,62 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         this.hideLoading();
 
         let options = this.#chart.getOption();
-        let listUnit = {0: [], 1: []};
 
         options.legend[0].data = [];
         options.legend[1].data = [];
 
-        options.title[0].text = `${name}`;
+        options.title[0].text = name;
         
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, dataset, timeFormat); };
-
+        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, timeFormat); };
+        options.toolbox[0].feature.myTSInfo.show = tsInfoCallback != null;
         options.toolbox[0].feature.myTSInfo.onclick = () => { this.#showTSInfo(tsInfoCallback); };
-
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, dataset, timeFormat); };
 
         options.series.length = 0;
 
+        let listUnit = {0: [], 1: []};
         let series = [];
         for (let [_parameter, serieParams] of Object.entries(dataset)) {
             for (let [_settings, value] of Object.entries(serieParams)) {
-                let chartData = Object.entries(value.data).map(([date, value]) => [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)]);
-                if (chartData.length > 0) {
+                if (Object.values(value.data).length > 0) {
                     let serie = {
-                        name: value.name,
+                        name: `${value.name}${value.timeseries.unit_symbol != null ? ` [${value.timeseries.unit_symbol}]` : ""}`,
                         type: "line",
-                        data: Object.entries(value.data).map(([date, value]) => [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)]),
+                        data: Object.entries(value.data).map(([date, value]) => {
+                            return [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
+                        }),
                         emphasis: {
-                            focus: "series"
+                            focus: "series",
                         },
                         itemStyle: {
-                            color: this.#energyUseColors[value.name]
+                            color: this.#energyUseColors[value.name],
                         },
                         lineStyle: {
-                            width: 2,
                             type: value.name.includes("forecast") ? "dashed" : "solid",
                         },
                         yAxisIndex: value.yAxis,
-                        unit: value.timeseries.unit_symbol,
+                        symbol: "path://",
+                        connectNulls: true,
                     };
                     series.push(serie);
-                    if (!listUnit[value.yAxis].includes(serie.unit))
-                        listUnit[value.yAxis].push(serie.unit);
 
-                    options.legend[value.yAxis].data.push(value.name);
+                    if (value.timeseries.unit_symbol != null && !listUnit[value.yAxis].includes(value.timeseries.unit_symbol)) {
+                        listUnit[value.yAxis].push(value.timeseries.unit_symbol);
+                    }
+
+                    options.legend[value.yAxis].data.push(serie.name);
                 }
             }
         }
         options.series = series;
 
-        options.yAxis[0].data = options.series.map((serie) => serie.name);
-        options.yAxis[0].axisLabel.formatter = (value, index) => { return `${value} (${listUnit[0]})`; };
-
-        options.yAxis[1].data = options.series.map((serie) => serie.name);
-        options.yAxis[1].axisLabel.formatter = (value, index) => { return `${value} (${listUnit[1]})`; };
+        options.yAxis[0].name = listUnit[0].join(", ");
+        options.yAxis[1].name = listUnit[1].join(", ");
 
         if (options.legend[1].data.length == 0) {
             options.legend[0].left = "center";
             options.legend[0].width = "auto";
         };
 
-        options.legend[0].formatter = (name) => {
-            let serie = options.series.find((serie) => serie.name == name);
-            return `${name} (${serie.unit})`;
-        };
-
-        options.legend[1].formatter = (name) => {
-            let serie = options.series.find((serie) => serie.name == name);
-            return `${name} (${serie.unit})`;
-        };
-        
         // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
         this.#chart.clear();
 
