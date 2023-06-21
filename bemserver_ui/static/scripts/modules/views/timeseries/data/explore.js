@@ -163,6 +163,8 @@ class TimeseriesDataExploreView {
     #selectTimeseriesSeriesTypeContainerElmt = null;
     #selectedTimeseriesSaveBtnElmt = null;
 
+    #defaultEndDate = null;
+    #defaultEndTime = null;
     #defaultTsDataState = "Clean";
     #defaultPeriodType = "last-24-hours";
     #defaultAggregationOperator = "avg";
@@ -232,6 +234,9 @@ class TimeseriesDataExploreView {
                 this.#periodCustomElmt.classList.add("d-none", "invisible");
                 this.#periodStartDatetimeElmt.removeAttribute("required");
                 this.#periodEndDatetimeElmt.removeAttribute("required");
+
+                this.#periodEndDatetimeElmt.date = this.#defaultEndDate;
+                this.#periodEndDatetimeElmt.time = this.#defaultEndTime;
 
                 if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
                     this.#loadChartSeries();
@@ -736,6 +741,9 @@ class TimeseriesDataExploreView {
     }
 
     mount() {
+        this.#defaultEndDate = this.#periodEndDatetimeElmt.date;
+        this.#defaultEndTime = this.#periodEndDatetimeElmt.time;
+
         this.#loadDataStates();
 
         this.#chartExplore = new TimeseriesChartExplore({ height: 600, width: "auto" });
