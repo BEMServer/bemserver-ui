@@ -325,6 +325,9 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     #setChartOptions() {
         // TODO: keep dataZoom values?
 
+        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
+        this.#chart.clear();
+
         this.#chart.setOption(this.#chartOpts);
     }
 
@@ -448,9 +451,6 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
     removeSeries(id) {
         if (this.#hasSeries(id)) {
-            // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-            this.#chart.clear();
-
             let seriesIndex = this.#getSeriesIndex(id);
             let series = this.#chartOpts.series[seriesIndex];
             if (this.#chartOpts.legend[series.yAxisIndex].selected) {
@@ -472,7 +472,6 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     }
 
     clear() {
-        this.#chart.clear();
         this.#chartOpts.series = [];
         for (let leg of this.#chartOpts.legend) {
             leg.data = [];
