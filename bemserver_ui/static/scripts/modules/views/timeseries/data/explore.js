@@ -716,7 +716,12 @@ class TimeseriesDataExploreView {
             this.#tsDataGetReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data_json`, urlParams),
                 (data) => {
-                    for (let [tsID, tsData] of Object.entries(data)) {
+                    // Iterate over each requested timeseries ID (instead of data from internal API response).
+                    // The main reason is that, in some cases (and especially with no aggregation requested), data can be empty and therefore chart series are not updated.
+                    for (let tsID of tsIDs) {
+                        // Get timeseries data or empty structure if not in data from internal API response.
+                        let tsData = data[tsID.toString()] || {};
+                        // Update timeseries chart series.
                         this.#chartExplore.updateSeriesData(tsID, tsData, { aggregation: aggregation });
                     }
                     this.#periodTypeLoaded = this.#periodTypeElmt.value;

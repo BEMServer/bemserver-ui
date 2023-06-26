@@ -237,7 +237,13 @@ def retrieve_multiple_data_json():
             timezone=tz_name,
         )
 
-    return flask.jsonify(ts_data_resp.data)
+    ts_data = ts_data_resp.data
+    # Ensure each timeseries is in returned result, especially when not aggregated.
+    for ts_id in ts_ids:
+        if str(ts_id) not in ts_data:
+            ts_data[str(ts_id)] = {}
+
+    return flask.jsonify(ts_data)
 
 
 @blp.route("/delete_data", methods=["POST"])
