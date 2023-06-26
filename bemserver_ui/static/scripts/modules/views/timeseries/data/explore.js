@@ -136,6 +136,8 @@ class TimeseriesDataExploreView {
     #tsDataStatesReqID = null;
     #tsDataGetReqID = null;
 
+    #updateChartTimeoutID = null;
+
     #messagesElmt = null;
 
     #chartContainerElmt = null;
@@ -244,14 +246,22 @@ class TimeseriesDataExploreView {
             }
         });
 
-        this.#periodStartDatetimeElmt.addEventListener("dateChange", () => {
+        this.#periodStartDatetimeElmt.addEventListener("datetimeChange", () => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
-            this.#loadChartSeries();
+
+            this.#cancelUpdateChart();
+            this.#updateChartTimeoutID = window.setTimeout(() => {
+                this.#loadChartSeries();
+            }, 1000);
         });
 
-        this.#periodEndDatetimeElmt.addEventListener("dateChange", () => {
+        this.#periodEndDatetimeElmt.addEventListener("datetimeChange", () => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
-            this.#loadChartSeries();
+
+            this.#cancelUpdateChart();
+            this.#updateChartTimeoutID = window.setTimeout(() => {
+                this.#loadChartSeries();
+            }, 1000);
         });
 
         this.#aggInputElmt.addEventListener("change", () => {
@@ -738,6 +748,13 @@ class TimeseriesDataExploreView {
         }
 
         this.#chartExplore.hideLoading();
+    }
+
+    #cancelUpdateChart() {
+        if (this.#updateChartTimeoutID != null) {
+            window.clearTimeout(this.#updateChartTimeoutID);
+            this.#updateChartTimeoutID = null;
+        }
     }
 
     mount() {
