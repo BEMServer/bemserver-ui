@@ -1,15 +1,15 @@
-import { flaskES6 } from "../../../app.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../../components/spinner.js";
-import "../../components/itemsCount.js";
-import "../../components/pagination.js";
-import "../../components/time/datetimePicker.js";
-import { FilterSelect } from "../../components/filterSelect.js";
-import { TimeDisplay } from "../../tools/time.js";
-import { Parser } from "../../tools/parser.js";
-import { EventLevelBadge } from "../../components/eventLevel.js";
-import { StructuralElementSelector } from "../../components/structuralElements/selector.js";
+import { flaskES6 } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import "/static/scripts/modules/components/pagination.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
+import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
+import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
+import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 
 
 export class EventListView {
@@ -26,6 +26,8 @@ export class EventListView {
     #loadEventInfoTabReqPageIDs = {};
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
+
+    #delayedUpdateTimeoutID = null;
 
     #messagesElmt = null;
 
@@ -233,24 +235,36 @@ export class EventListView {
             event.preventDefault();
 
             this.#timestampMaxSearchFilterElmt.dateMin = this.#timestampMinSearchFilterElmt.date;
-            this.#paginationElmt.page = 1;
-            this.refresh();
+
+            this.#cancelDelayedUpdate();
+            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
+                this.#paginationElmt.page = 1;
+                this.refresh();
+            }, 1000);
         });
 
         this.#timestampMaxSearchFilterElmt.addEventListener("datetimeChange", (event) => {
             event.preventDefault();
 
             this.#timestampMinSearchFilterElmt.dateMax = this.#timestampMaxSearchFilterElmt.date;
-            this.#paginationElmt.page = 1;
-            this.refresh();
+
+            this.#cancelDelayedUpdate();
+            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
+                this.#paginationElmt.page = 1;
+                this.refresh();
+            }, 1000);
         });
 
         this.#sourceSearchFilterElmt.addEventListener("input", (event) => {
             event.preventDefault();
 
             this.#updateSourceSearch();
-            this.#paginationElmt.page = 1;
-            this.refresh();
+
+            this.#cancelDelayedUpdate();
+            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
+                this.#paginationElmt.page = 1;
+                this.refresh();
+            }, 700);
         });
 
         this.#btnRemoveFiltersElmt.addEventListener("click", (event) => {
@@ -889,7 +903,16 @@ export class EventListView {
         );
     }
 
+    #cancelDelayedUpdate() {
+        if (this.#delayedUpdateTimeoutID != null) {
+            window.clearTimeout(this.#delayedUpdateTimeoutID);
+            this.#delayedUpdateTimeoutID = null;
+        }
+    }
+
     refresh(afterResfreshCallback = null) {
+        this.#cancelDelayedUpdate();
+
         if (this.#searchReqID != null) {
             this.#internalAPIRequester.abort(this.#searchReqID);
             this.#searchReqID = null;
