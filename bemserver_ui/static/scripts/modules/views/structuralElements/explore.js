@@ -1,12 +1,12 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6, signedUser } from "../../../app.js";
-import { Spinner } from "../../components/spinner.js";
-import "../../components/itemsCount.js";
-import "../../components/pagination.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { TimeDisplay } from "../../tools/time.js";
-import { EventLevelBadge } from "../../components/eventLevel.js";
-import "../../components/tree.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import "/static/scripts/modules/components/pagination.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
+import "/static/scripts/modules/components/tree.js";
 
 
 export class StructuralElementsExploreView {
@@ -22,10 +22,13 @@ export class StructuralElementsExploreView {
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
+    #tabDataElmt = null;
+    #tabDataContentElmt = null;
     #tabSitesElmts = null;
-    #tabPropertiesElmts = null;
+    #tabDataItemElmts = null;
     #generalTabContentElmt = null;
     #propertiesTabContentElmt = null;
+    #alertInfoDataElmt = null;
 
     #tsSearchElmt = null;
     #tsClearSearchBtnElmt = null;
@@ -44,7 +47,7 @@ export class StructuralElementsExploreView {
     #eventsListElmt = null;
 
     #tabSitesSelected = null;
-    #tabPropertiesSelected = null;
+    #tabDataSelected = null;
 
     #selectedItemsPerTab = {};
     #renderPerTab = {
@@ -77,9 +80,13 @@ export class StructuralElementsExploreView {
         this.#messagesElmt = document.getElementById("messages");
 
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
-        this.#tabPropertiesElmts = [].slice.call(document.querySelectorAll("#tabProperties button[data-bs-toggle='tab']"));
+        this.#tabDataElmt = document.getElementById("tabData");
+        this.#tabDataContentElmt = document.getElementById("tabDataContent");
+        this.#tabDataItemElmts = [].slice.call(document.querySelectorAll("#tabData button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
         this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
+
+        this.#alertInfoDataElmt = document.getElementById("alertInfoData");
 
         this.#tsSearchElmt = document.getElementById("tsSearch");
         this.#tsClearSearchBtnElmt = document.getElementById("tsClear");
@@ -110,21 +117,21 @@ export class StructuralElementsExploreView {
             tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
                 this.#tabSitesSelected = event.target;
-                for (let tabPropertyElmt of this.#tabPropertiesElmts) {
-                    this.#alreadyLoadedPerTab[tabPropertyElmt.id] = false;
+                for (let tabDataItemElmt of this.#tabDataItemElmts) {
+                    this.#alreadyLoadedPerTab[tabDataItemElmt.id] = false;
                 }
                 this.#refreshTabs();
             });
         }
 
-        for (let tabElmt of this.#tabPropertiesElmts) {
+        for (let tabElmt of this.#tabDataItemElmts) {
             if (tabElmt.classList.contains("active")) {
-                this.#tabPropertiesSelected = tabElmt;
+                this.#tabDataSelected = tabElmt;
             }
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
             tabElmt.addEventListener("shown.bs.tab", (event) => {
                 // newly activated tab is `event.target` ; previous active tab is `event.relatedTarget`
-                this.#tabPropertiesSelected = event.target;
+                this.#tabDataSelected = event.target;
                 this.#refreshTabs();
             });
         }
@@ -134,7 +141,7 @@ export class StructuralElementsExploreView {
 
             this.#updateTsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#tsPaginationElmt.page = 1;
             this.#refreshTabs();
         });
@@ -145,14 +152,14 @@ export class StructuralElementsExploreView {
             this.#tsSearchElmt.value = "";
             this.#updateTsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
         this.#tsRecurseSwitchElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
@@ -160,7 +167,7 @@ export class StructuralElementsExploreView {
             event.preventDefault();
 
             if (event.detail.newValue != event.detail.oldValue) {
-                this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
                 this.#tsPaginationElmt.page = 1;
                 this.#refreshTabs();
             }
@@ -169,7 +176,7 @@ export class StructuralElementsExploreView {
         this.#tsPaginationElmt.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
@@ -178,7 +185,7 @@ export class StructuralElementsExploreView {
 
             this.#updateEventsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#eventsPaginationElmt.page = 1;
             this.#refreshTabs();
         });
@@ -189,14 +196,14 @@ export class StructuralElementsExploreView {
             this.#eventsSearchElmt.value = "";
             this.#updateEventsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
         this.#eventsRecurseSwitchElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
@@ -204,7 +211,7 @@ export class StructuralElementsExploreView {
             event.preventDefault();
 
             if (event.detail.newValue != event.detail.oldValue) {
-                this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
                 this.#eventsPaginationElmt.page = 1;
                 this.#refreshTabs();
             }
@@ -213,16 +220,16 @@ export class StructuralElementsExploreView {
         this.#eventsPaginationElmt.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
-            this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = false;
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#refreshTabs();
         });
 
         this.#sitesTreeElmt.addEventListener("treeNodeSelect", (event) => {
-            this.render(event.detail.id, event.detail.type, event.detail.path);
+            this.#render(event.detail.id, event.detail.type, event.detail.path);
         });
 
         this.#zonesTreeElmt.addEventListener("treeNodeSelect", (event) => {
-            this.render(event.detail.id, event.detail.type, event.detail.path);
+            this.#render(event.detail.id, event.detail.type, event.detail.path);
         });
     }
 
@@ -248,97 +255,190 @@ export class StructuralElementsExploreView {
         }
     }
 
-    #getEditBtnHTML(type, id, tab=null) {
-        if (signedUser.is_admin) {
-            let editUrlParams = {type: type, id: id};
-            if (tab != null) {
-                editUrlParams["tab"] = tab;
-            }
-            try {
-                let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
-                return `<a class="btn btn-sm btn-outline-primary text-nowrap" href="${editUrl}" role="button" title="Edit ${type}"><i class="bi bi-pencil"></i> Edit</a>`;
-            }
-            catch (error) {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
-            }
+    #createEditBtnElement(type, id, tab=null) {
+        let editUrlParams = {type: type, id: id};
+        if (tab != null) {
+            editUrlParams["tab"] = tab;
         }
-        return ``;
+
+        try {
+            let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
+
+            let elmt = document.createElement("a");
+            elmt.classList.add("btn", "btn-sm", "btn-outline-primary", "text-nowrap");
+            elmt.href = editUrl;
+            elmt.setAttribute("role", "button");
+            elmt.title = `Edit ${type}`;
+
+            let iconElmt = document.createElement("i");
+            iconElmt.classList.add("bi", "bi-pencil", "me-1");
+            elmt.appendChild(iconElmt);
+
+            let textElmt = document.createElement("span");
+            textElmt.textContent = "Edit";
+            elmt.appendChild(textElmt);
+
+            return elmt;
+        }
+        catch (error) {
+            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+            this.#messagesElmt.appendChild(flashMsgElmt);
+        }
+
+        return null;
+
     }
 
-    #getGeneralHTML(data, path) {
-        let htmlContent = `<div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-    <div>
-        <h5 class="text-break">${data.structural_element.name}</h5>
-        <h6 class="text-break">${path}</h6>
-    </div>
-    ${this.#getEditBtnHTML(data.type, data.structural_element.id)}
-</div>
-<p class="fst-italic text-muted text-break">${data.structural_element.description}</p>
-<div class="row">
-    <dl class="col">
-        <dt>IFC ID</dt>
-        <dd>${(data.structural_element.ifc_id != null && data.structural_element.ifc_id != "") ? data.structural_element.ifc_id : "-"}</dd>
-    </dl>
-</div>`;
+    #populateGeneral(data, path) {
+        this.#generalTabContentElmt.innerHTML = "";
+
+        let mainContainerElmt = document.createElement("div");
+        mainContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-3");
+        this.#generalTabContentElmt.appendChild(mainContainerElmt);
+
+        let titleContainerElmt = document.createElement("div");
+        mainContainerElmt.appendChild(titleContainerElmt);
+
+        if (path) {
+            let structPathElmt = document.createElement("h6");
+            structPathElmt.classList.add("text-muted", "text-break");
+            structPathElmt.textContent = path;
+            titleContainerElmt.appendChild(structPathElmt);
+        }
+
+        let structNameElmt = document.createElement("h5");
+        structNameElmt.classList.add("text-break");
+        structNameElmt.textContent = data.structural_element.name;
+        titleContainerElmt.appendChild(structNameElmt);
+
+        if (signedUser.is_admin) {
+            let editBtnElmt = this.#createEditBtnElement(data.type, data.structural_element.id, "general");
+            if (editBtnElmt != null) {
+                mainContainerElmt.appendChild(editBtnElmt);
+            }
+        }
+
+        let descElmt = document.createElement("small");
+        descElmt.classList.add("fst-italic", "text-muted", "text-break");
+        descElmt.textContent = data.structural_element.description;
+        this.#generalTabContentElmt.appendChild(descElmt);
+
+        let ifcContainerElmt = document.createElement("div");
+        ifcContainerElmt.classList.add("row");
+        this.#generalTabContentElmt.appendChild(ifcContainerElmt);
+        let ifcIDContainerElmt = document.createElement("dl");
+        ifcIDContainerElmt.classList.add("col");
+        ifcContainerElmt.appendChild(ifcIDContainerElmt);
+        let ifcIDTitleElmt = document.createElement("dt");
+        ifcIDTitleElmt.textContent = "IFC ID";
+        ifcContainerElmt.appendChild(ifcIDTitleElmt);
+        let ifcIDValueElmt = document.createElement("dd");
+        ifcIDValueElmt.textContent = data.structural_element.ifc_id?.length > 0 ? data.structural_element.ifc_id : "-";
+        ifcContainerElmt.appendChild(ifcIDValueElmt);
 
         if (data.type == "site") {
-            htmlContent += `<div class="row">
-    <dl class="col">
-        <dt>Latitude <small class="text-muted">[°]</small></dt>
-        <dd>${data.structural_element.latitude != null ? data.structural_element.latitude : "-"}</dd>
-    </dl>
-    <dl class="col">
-        <dt>Longitude <small class="text-muted">[°]</small></dt>
-        <dd>${data.structural_element.longitude != null ? data.structural_element.longitude : "-"}</dd>
-    </dl>
-</div>`;
-        }
+            let geoLocationContainerElmt = document.createElement("div");
+            geoLocationContainerElmt.classList.add("row");
+            this.#generalTabContentElmt.appendChild(geoLocationContainerElmt);
 
-        return htmlContent;
+            let latContainerElmt = document.createElement("dl");
+            latContainerElmt.classList.add("col");
+            geoLocationContainerElmt.appendChild(latContainerElmt);
+            let latTitleContainerElmt = document.createElement("dt");
+            latContainerElmt.appendChild(latTitleContainerElmt);
+            let latTitleNameElmt = document.createElement("span");
+            latTitleNameElmt.textContent = "Latitude";
+            latTitleContainerElmt.appendChild(latTitleNameElmt);
+            let latTitleUnitElmt = document.createElement("small");
+            latTitleUnitElmt.classList.add("text-muted", "ms-1");
+            latTitleUnitElmt.textContent = "[°]";
+            latTitleContainerElmt.appendChild(latTitleUnitElmt);
+            let latValueElmt = document.createElement("dd");
+            latValueElmt.textContent = data.structural_element.latitude != null ? data.structural_element.latitude : "-";
+            latContainerElmt.appendChild(latValueElmt);
+
+            let longContainerElmt = document.createElement("dl");
+            longContainerElmt.classList.add("col");
+            geoLocationContainerElmt.appendChild(longContainerElmt);
+            let longTitleContainerElmt = document.createElement("dt");
+            longContainerElmt.appendChild(longTitleContainerElmt);
+            let longTitleNameElmt = document.createElement("span");
+            longTitleNameElmt.textContent = "Longitude";
+            longTitleContainerElmt.appendChild(longTitleNameElmt);
+            let longTitleUnitElmt = document.createElement("small");
+            longTitleUnitElmt.classList.add("text-muted", "ms-1");
+            longTitleUnitElmt.textContent = "[°]";
+            longTitleContainerElmt.appendChild(longTitleUnitElmt);
+            let longValueElmt = document.createElement("dd");
+            longValueElmt.textContent = data.structural_element.longitude != null ? data.structural_element.longitude : "-";
+            longContainerElmt.appendChild(longValueElmt);
+        }
     }
 
-    #getItemHelpHTML(itemDescription, withSpace = true) {
-        let ret = ``;
-        if (itemDescription?.length > 0) {
-            let abbrElmt = document.createElement("abbr");
-            abbrElmt.title = itemDescription != null ? itemDescription : "";
-            let abbrContentElmt = document.createElement("i");
-            abbrContentElmt.classList.add("bi", "bi-question-diamond");
-            abbrElmt.appendChild(abbrContentElmt);
-            ret = `<sup${withSpace ? ` class="ms-1"`: ``}>${abbrElmt.outerHTML}</sup>`;
-        }
-        return ret;
-    }
+    #populateProperties(data, id) {
+        this.#propertiesTabContentElmt.innerHTML = "";
 
-    #getPropertiesHTML(data, id) {
-        let propertyDataHTML = ``;
+        let mainContainerElmt = document.createElement("div");
+        mainContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-3");
+        this.#propertiesTabContentElmt.appendChild(mainContainerElmt);
+
+        let propContainerElmt = document.createElement("div");
+        propContainerElmt.classList.add("d-flex", "gap-4");
+        mainContainerElmt.appendChild(propContainerElmt);
+
+        if (signedUser.is_admin) {
+            let editBtnElmt = this.#createEditBtnElement(data.type, id, "properties");
+            if (editBtnElmt != null) {
+                mainContainerElmt.appendChild(editBtnElmt);
+            }
+        }
+
         if (data.properties.length > 0) {
             for (let property of data.properties) {
-                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<small class="text-muted ms-1">[${property.unit_symbol}]</small>` : ``;
-                propertyDataHTML += `<dl>
-    <dt>${property.name}${unitSymbol}${this.#getItemHelpHTML(property.description)}</dt>
-    <dd>${(property.value !== "" && property.value != null) ? property.value : "-"}</dd>
-</dl>`;
+                let propItemContainerElmt = document.createElement("div");
+                propItemContainerElmt.classList.add("row");
+                propContainerElmt.appendChild(propItemContainerElmt);
+
+                let propItemElmt = document.createElement("dl");
+                propItemElmt.classList.add("col");
+                propItemContainerElmt.appendChild(propItemElmt);
+
+                let propTitleElmt = document.createElement("dt");
+                propItemElmt.appendChild(propTitleElmt);
+
+                let propNameElmt = document.createElement("span");
+                propNameElmt.textContent = property.name;
+                propTitleElmt.appendChild(propNameElmt);
+
+                if (property.unit_symbol?.length > 0) {
+                    let propUnitElmt = document.createElement("small");
+                    propUnitElmt.classList.add("text-muted", "ms-1");
+                    propUnitElmt.textContent = `[${property.unit_symbol}]`;
+                    propTitleElmt.appendChild(propUnitElmt);
+                }
+
+                if (property.description?.length > 0) {
+                    let abbrContainerElmt = document.createElement("sup");
+                    abbrContainerElmt.classList.add("ms-1");
+                    propTitleElmt.appendChild(abbrContainerElmt);
+
+                    let abbrElmt = document.createElement("abbr");
+                    abbrElmt.title = property.description != null ? property.description : "";
+                    abbrContainerElmt.appendChild(abbrElmt);
+
+                    let abbrIconElmt = document.createElement("i");
+                    abbrIconElmt.classList.add("bi", "bi-question-diamond");
+                    abbrElmt.appendChild(abbrIconElmt);
+                }
+
+                let propValueElmt = document.createElement("dd");
+                propValueElmt.textContent = property.value?.length > 0 ? property.value : "-";
+                propItemElmt.appendChild(propValueElmt);
             }
         }
         else {
-            propertyDataHTML = `<p class="fst-italic">No data</p>`;
+            propContainerElmt.appendChild(this.#createNoDataElement("No properties"));
         }
-
-        return `<div class="d-flex justify-content-between align-items-start mb-3">
-    <div class="d-flex gap-4">
-        ${propertyDataHTML}
-    </div>
-    ${this.#getEditBtnHTML(data.type, id, "properties")}
-</div>`;
-    }
-
-    #getErrorHTML(error) {
-        return `<div class="alert alert-danger" role="alert">
-    <i class="bi bi-x-octagon me-2"></i>
-    ${error}
-</div>`;
     }
 
     #renderGeneral(id, type, path) {
@@ -352,10 +452,11 @@ export class StructuralElementsExploreView {
         this.#generalReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id}),
             (data) => {
-                this.#generalTabContentElmt.innerHTML = this.#getGeneralHTML(data, path);
+                this.#populateGeneral(data, path);
             },
             (error) => {
-                this.#generalTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
     }
@@ -371,12 +472,20 @@ export class StructuralElementsExploreView {
         this.#propertiesReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id}),
             (data) => {
-                this.#propertiesTabContentElmt.innerHTML = this.#getPropertiesHTML(data, id);
+                this.#populateProperties(data, id);
             },
             (error) => {
-                this.#propertiesTabContentElmt.innerHTML = this.#getErrorHTML(error.message);
+                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
+                this.#messagesElmt.appendChild(flashMsgElmt);
             },
         );
+    }
+
+    #createNoDataElement(text = "No data") {
+        let elmt = document.createElement("span");
+        elmt.classList.add("fst-italic", "text-muted", "text-center");
+        elmt.textContent = text;
+        return elmt;
     }
 
     #populateTimeseriesList(tsList) {
@@ -416,10 +525,7 @@ export class StructuralElementsExploreView {
             }
         }
         else {
-            let nodataSpanElmt = document.createElement("span");
-            nodataSpanElmt.classList.add("fst-italic", "text-muted", "text-center");
-            nodataSpanElmt.innerText = "No data";
-            this.#tsListElmt.appendChild(nodataSpanElmt);
+            this.#tsListElmt.appendChild(this.#createNoDataElement());
         }
     }
 
@@ -469,10 +575,7 @@ export class StructuralElementsExploreView {
             }
         }
         else {
-            let nodataSpanElmt = document.createElement("span");
-            nodataSpanElmt.classList.add("fst-italic", "text-muted", "text-center");
-            nodataSpanElmt.innerText = "No data";
-            this.#eventsListElmt.appendChild(nodataSpanElmt);
+            this.#eventsListElmt.appendChild(this.#createNoDataElement());
         }
     }
 
@@ -622,56 +725,49 @@ export class StructuralElementsExploreView {
         );
     }
 
-    #generateHelpElement(helpContext) {
-        let helpContainerElmt = document.createElement("div");
-        helpContainerElmt.classList.add("alert", "alert-info", "mb-0", "pb-0");
-
-        let helpIconElmt = document.createElement("i");
-        helpIconElmt.classList.add("bi", "bi-question-diamond", "me-2");
-        helpContainerElmt.appendChild(helpIconElmt);
-
-        let helpTitleElmt = document.createElement("span");
-        helpTitleElmt.classList.add("fw-bold");
-        helpTitleElmt.innerText = "Help";
-        helpContainerElmt.appendChild(helpTitleElmt);
-
-        let helpTextElmt = document.createElement("p");
-        helpTextElmt.innerHTML = `Select a <span class="fw-bold">location (site, building...)</span> in the tree to see its <span class="fw-bold">${helpContext}</span>.`;
-        helpContainerElmt.appendChild(helpTextElmt);
-
-        return helpContainerElmt;
+    #createNoSelectionElement() {
+        let elmt = document.createElement("span");
+        elmt.classList.add("fst-italic", "text-muted");
+        elmt.textContent = "no location selected";
+        return elmt;
     }
 
     #refreshTabs() {
         let selectedItemData = this.#selectedItemsPerTab[this.#tabSitesSelected.id];
         if (selectedItemData != null) {
-            if (!this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id]) {
-                this.#renderPerTab[this.#tabPropertiesSelected.id]?.call(this, selectedItemData.id, selectedItemData.type, selectedItemData.path);
-                this.#alreadyLoadedPerTab[this.#tabPropertiesSelected.id] = true;
+            this.#alertInfoDataElmt.classList.add("d-none", "invisible");
+            this.#tabDataElmt.classList.remove("d-none", "invisible");
+            this.#tabDataContentElmt.classList.remove("d-none", "invisible");
+
+            if (!this.#alreadyLoadedPerTab[this.#tabDataSelected.id]) {
+                this.#renderPerTab[this.#tabDataSelected.id]?.call(this, selectedItemData.id, selectedItemData.type, selectedItemData.path);
+                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = true;
             }
         }
         else {
             this.#generalTabContentElmt.innerHTML = "";
-            this.#generalTabContentElmt.appendChild(this.#generateHelpElement("description"));
+            this.#generalTabContentElmt.appendChild(this.#createNoSelectionElement());
             this.#propertiesTabContentElmt.innerHTML = "";
-            this.#propertiesTabContentElmt.appendChild(this.#generateHelpElement("properties"));
-            this.#tsListElmt.innerHTML = "";
-            this.#tsListElmt.appendChild(this.#generateHelpElement("related timeseries"));
-            this.#eventsListElmt.innerHTML = "";
-            this.#eventsListElmt.appendChild(this.#generateHelpElement("related events"));
+            this.#propertiesTabContentElmt.appendChild(this.#createNoSelectionElement());
+            this.#populateTimeseriesList([]);
+            this.#populateEventList([]);
+
+            this.#alertInfoDataElmt.classList.remove("d-none", "invisible");
+            this.#tabDataElmt.classList.add("d-none", "invisible");
+            this.#tabDataContentElmt.classList.add("d-none", "invisible");
         }
     }
 
-    render(id, type, path) {
+    #render(id, type, path) {
         this.#selectedItemsPerTab[this.#tabSitesSelected.id] = {id: id, type: type, path: path};
-        for (let tabElmt of this.#tabPropertiesElmts) {
+        for (let tabElmt of this.#tabDataItemElmts) {
             this.#alreadyLoadedPerTab[tabElmt.id] = false;
         }
         this.#tsPaginationElmt.reload();
         this.#refreshTabs();
     }
 
-    refresh() {
+    mount() {
         this.#loadSitesTreeData();
         this.#loadZonesTreeData();
         this.#refreshTabs();
