@@ -22,6 +22,9 @@ export class StructuralElementsExploreView {
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
+    #tsSearchTimeoutID = null;
+    #eventsSearchTimeoutID = null;
+
     #tabDataElmt = null;
     #tabDataContentElmt = null;
     #tabSitesElmts = null;
@@ -141,9 +144,15 @@ export class StructuralElementsExploreView {
 
             this.#updateTsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
-            this.#tsPaginationElmt.page = 1;
-            this.#refreshTabs();
+            if (this.#tsSearchTimeoutID != null) {
+                window.clearTimeout(this.#tsSearchTimeoutID);
+                this.#tsSearchTimeoutID = null;
+            }
+            this.#tsSearchTimeoutID = window.setTimeout(() => {
+                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
+                this.#tsPaginationElmt.page = 1;
+                this.#refreshTabs();    
+            }, 700);
         });
 
         this.#tsClearSearchBtnElmt.addEventListener("click", (event) => {
@@ -185,9 +194,15 @@ export class StructuralElementsExploreView {
 
             this.#updateEventsSearchState();
 
-            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
-            this.#eventsPaginationElmt.page = 1;
-            this.#refreshTabs();
+            if (this.#eventsSearchTimeoutID != null) {
+                window.clearTimeout(this.#eventsSearchTimeoutID);
+                this.#eventsSearchTimeoutID = null;
+            }
+            this.#eventsSearchTimeoutID = window.setTimeout(() => {
+                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
+                this.#eventsPaginationElmt.page = 1;
+                this.#refreshTabs();
+            }, 700);
         });
 
         this.#eventsClearSearchBtnElmt.addEventListener("click", (event) => {
