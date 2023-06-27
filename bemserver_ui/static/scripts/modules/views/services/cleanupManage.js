@@ -1,7 +1,7 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import "../../components/itemsCount.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6 } from "/static/scripts/app.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import "/static/scripts/modules/components/itemsCount.js";
 
 
 class ServiceCleanuManageView {
@@ -113,11 +113,16 @@ class ServiceCleanuManageView {
             );
         }
     }
+
+    mount() {
+
+    }
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
 
     let svcCleanupManageView = new ServiceCleanuManageView();
+    svcCleanupManageView.mount();
 
 });

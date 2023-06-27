@@ -1,20 +1,24 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Cleanup service" %}
+{% if signed_user.is_admin %}
+{% set title = "Manage cleanup data service" %}
+{% else %}
+{% set title = "Cleanup data service" %}
+{% endif %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row g-5 mb-3">
         <div class="col">
-            <div class="d-flex align-items-start gap-3">
-                <h5>Campaign</h5>
+            <h5>Campaign</h5>
+            <div class="hstack gap-2">
                 <span class="fw-bold text-{% if cleanup_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ cleanup_campaign.campaign_state | upper }}]</span>
+                <span class="text-break">{{ cleanup_campaign.campaign_name }}</span>
             </div>
-            <p class="text-break">{{ cleanup_campaign.campaign_name }}</p>
         </div>
         <div class="col">
-            <h5>Service state</h5>
+            <h5>Service state (on server)</h5>
             {% if signed_user.is_admin %}
             <input type="radio" class="btn-check" name="svc_state" id="svc_state_on" autocomplete="off"{% if cleanup_campaign.is_enabled %} checked{% endif %}>
             <label class="btn btn-outline-success" for="svc_state_on">ON</label>
@@ -35,9 +39,9 @@
     <div class="row mb-3">
         <div class="col"> 
             <div class="d-flex justify-content-between align-items-center">
-                <form id="formFiltersElmt" class="d-lg-flex d-grid gap-2" action="{{ url_for(request.endpoint, **request.view_args) }}" method="POST">
+                <form id="formFiltersElmt" class="d-lg-flex d-grid align-items-center gap-2" action="{{ url_for(request.endpoint, **request.view_args) }}" method="POST">
                     <input type="hidden" name="sort" id="sort" value="{{ sort }}">
-                    <label class="form-label text-nowrap text-muted mb-0" for="sort">Sort by</label>
+                    <label class="form-label text-nowrap text-muted mb-0" for="sort"><small>Sort by</small></label>
                     <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-asc" autocomplete="off" {% if sort == "+timeseries_name" %} checked{% endif %}>
                     <label class="btn btn-sm btn-outline-info" for="sort-timeseries_name-asc" title="Name alphabetical order"><i class="bi bi-sort-alpha-down"></i> Name</label>
                     <input type="radio" class="btn-check" name="sort" id="sort-timeseries_name-desc" autocomplete="off" {% if sort == "-timeseries_name" %} checked{% endif %}>
