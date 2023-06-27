@@ -76,7 +76,7 @@
                 <div class="accordion-body px-0 py-2">
                     <ul class="nav nav-pills flex-column gap-1">
                         {% filter indent(width=24, first=True) %}
-                        {{- mac_sidebar.render_nav_item("Cleanup", url_for("services.cleanup.list"), "Manage cleanup service", ["bi", "bi-magic"]) -}}
+                        {{- mac_sidebar.render_nav_item("Cleanup data", url_for("services.cleanup.list"), "Manage cleanup data service", ["bi", "bi-magic"]) -}}
                         {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.list"), "Manage missing data service", ["bi", "bi-journal-x"]) -}}
                         {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.list"), "Manage check outlier data service", ["bi", "bi-layout-wtf"]) -}}
                         {% endfilter %}
