@@ -221,6 +221,8 @@ export class TimeseriesSelector extends HTMLElement {
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
+    #searchNameTimeoutID = null;
+
     #messagesElmt = null;
 
     #selectedItemsContainerElmt = null;
@@ -329,8 +331,15 @@ export class TimeseriesSelector extends HTMLElement {
             event.preventDefault();
 
             this.#updateSearchInput();
-            this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+
+            if (this.#searchNameTimeoutID != null) {
+                window.clearTimeout(this.#searchNameTimeoutID);
+                this.#searchNameTimeoutID = null;
+            }
+            this.#searchNameTimeoutID = window.setTimeout(() => {
+                this.#searchResultsPaginationElmt.page = 1;
+                this.refresh();
+            }, 700);
         });
 
         this.#filtersRemoveBtnElmt.addEventListener("click", (event) => {

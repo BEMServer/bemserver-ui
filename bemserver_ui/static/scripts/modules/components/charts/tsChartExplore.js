@@ -219,7 +219,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     }
 
     #prepareSeriesData(data) {
-        return Object.entries(data).map(([timestamp, value]) => {
+        return Object.entries(data || {}).map(([timestamp, value]) => {
             return [timestamp, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
         });
     }
@@ -325,17 +325,12 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     #setChartOptions() {
         // TODO: keep dataZoom values?
 
-        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-        this.#chart.clear();
-
         this.#chart.setOption(this.#chartOpts);
     }
 
     addSeries(seriesParams, data = null) {
         if (!this.#hasSeries(seriesParams.id)) {
-            if (data != null) {
-                seriesParams.data = this.#prepareSeriesData(data);
-            }
+            seriesParams.data = this.#prepareSeriesData(data);
             this.#chartOpts.legend[seriesParams.yAxisIndex].data.push(seriesParams.name);
             this.#chartOpts.series.push(seriesParams);
 
@@ -426,10 +421,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     updateSeriesData(id, data, options = { aggregation: null }) {
         let seriesIndex = this.#getSeriesIndex(id);
         if (seriesIndex != -1) {
-            if (data != null) {
-                this.#chartOpts.series[seriesIndex].data = this.#prepareSeriesData(data);
-            }
-            this.#chartOpts.series[seriesIndex].visible = true;
+            this.#chartOpts.series[seriesIndex].data = this.#prepareSeriesData(data);
             this.#chartOpts.series[seriesIndex].aggregation = options.aggregation;
 
             this.#setChartOptions();
@@ -451,6 +443,9 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
     removeSeries(id) {
         if (this.#hasSeries(id)) {
+            // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
+            this.#chart.clear();
+
             let seriesIndex = this.#getSeriesIndex(id);
             let series = this.#chartOpts.series[seriesIndex];
             if (this.#chartOpts.legend[series.yAxisIndex].selected) {
@@ -472,6 +467,9 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     }
 
     clear() {
+        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
+        this.#chart.clear();
+
         this.#chartOpts.series = [];
         for (let leg of this.#chartOpts.legend) {
             leg.data = [];

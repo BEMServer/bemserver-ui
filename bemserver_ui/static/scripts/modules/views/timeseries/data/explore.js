@@ -136,6 +136,8 @@ class TimeseriesDataExploreView {
     #tsDataStatesReqID = null;
     #tsDataGetReqID = null;
 
+    #updateChartTimeoutID = null;
+
     #messagesElmt = null;
 
     #chartContainerElmt = null;
@@ -244,14 +246,22 @@ class TimeseriesDataExploreView {
             }
         });
 
-        this.#periodStartDatetimeElmt.addEventListener("dateChange", () => {
+        this.#periodStartDatetimeElmt.addEventListener("datetimeChange", () => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
-            this.#loadChartSeries();
+
+            this.#cancelUpdateChart();
+            this.#updateChartTimeoutID = window.setTimeout(() => {
+                this.#loadChartSeries();
+            }, 1000);
         });
 
-        this.#periodEndDatetimeElmt.addEventListener("dateChange", () => {
+        this.#periodEndDatetimeElmt.addEventListener("datetimeChange", () => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
-            this.#loadChartSeries();
+
+            this.#cancelUpdateChart();
+            this.#updateChartTimeoutID = window.setTimeout(() => {
+                this.#loadChartSeries();
+            }, 1000);
         });
 
         this.#aggInputElmt.addEventListener("change", () => {
@@ -706,7 +716,12 @@ class TimeseriesDataExploreView {
             this.#tsDataGetReqID = this.#internalAPIRequester.get(
                 flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data_json`, urlParams),
                 (data) => {
-                    for (let [tsID, tsData] of Object.entries(data)) {
+                    // Iterate over each requested timeseries ID (instead of data from internal API response).
+                    // The main reason is that, in some cases (and especially with no aggregation requested), data can be empty and therefore chart series are not updated.
+                    for (let tsID of tsIDs) {
+                        // Get timeseries data or empty structure if not in data from internal API response.
+                        let tsData = data[tsID.toString()] || {};
+                        // Update timeseries chart series.
                         this.#chartExplore.updateSeriesData(tsID, tsData, { aggregation: aggregation });
                     }
                     this.#periodTypeLoaded = this.#periodTypeElmt.value;
@@ -738,6 +753,13 @@ class TimeseriesDataExploreView {
         }
 
         this.#chartExplore.hideLoading();
+    }
+
+    #cancelUpdateChart() {
+        if (this.#updateChartTimeoutID != null) {
+            window.clearTimeout(this.#updateChartTimeoutID);
+            this.#updateChartTimeoutID = null;
+        }
     }
 
     mount() {

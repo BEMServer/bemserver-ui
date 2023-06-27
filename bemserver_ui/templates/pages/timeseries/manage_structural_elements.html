@@ -8,11 +8,10 @@
 <div class="container-fluid">
     <div class="row h-100">
         <div class="col-12 col-xl-6 pb-3 pb-xl-0">
-            <h5>Timeseries</h5>
             <div class="row mb-3">
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label m-0" for="search">Search</label>
-                    <input type="text" class="form-control" id="search" name="search" autofocus>
+                    <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Name..." data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Hit <b>enter</b> to filter timeseries" autofocus></input>
                     <a id="clear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
                 </div>
             </div>
@@ -32,15 +31,11 @@
             </div>
         </div>
         <div class="col">
-            <h5>
-                Locations available
-                <sup><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#helpLocations" aria-expanded="false" aria-controls="helpLocations"><i class="bi bi-question-diamond"></i></a></sup>
-            </h5>
-            <div class="collapse mb-3" id="helpLocations">
-                <div class="alert alert-info pb-0" role="alert">
-                    <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
-                    <p class="ms-3">Click on a node in sites or zones tree to <span class="fw-bold fst-italic">drag and drop it over a timeseries</span> you want to locate.</p>
-                </div>
+            <h5 class="text-secondary">Locations available</h5>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="bi bi-info-square float-start me-2"></i>
+                <span>Open a timeseries accordion panel to <span class="fw-bold fst-italic">drag and drop</span> locations over it.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -74,7 +69,7 @@
     document.addEventListener("DOMContentLoaded", () => {
 
         let tsManageStructuralElementsView = new TimeseriesManageStructuralElementsView();
-        tsManageStructuralElementsView.refresh();
+        tsManageStructuralElementsView.mount();
 
 });
 </script>
