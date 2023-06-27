@@ -8,7 +8,10 @@
     <div class="row mb-3">
         <div class="col">
             <h5>Campaign</h5>
-            <p class="text-break">{{ g.campaign_ctxt.name }}</p>
+            <div class="hstack align-items-center gap-2">
+                <span class="fw-bold text-{% if g.campaign_ctxt.campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ g.campaign_ctxt.campaign.state | upper }}]</span>
+                <span class="text-break">{{ g.campaign_ctxt.name }}</span>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -24,7 +27,7 @@
                     {% endfor %}
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ url_for('main.index') }}" class="btn btn-sm btn-outline-secondary" title="Cancel">Cancel</a>
-                        <button type="submit" class="btn btn-sm btn-primary" title="Upload file"><i class="bi bi-upload"></i> Upload</button>
+                        <button type="submit" class="btn btn-sm btn-primary" title="Upload file"><i class="bi bi-upload me-1"></i>Upload</button>
                     </div>
                 </fieldset>
             </form>

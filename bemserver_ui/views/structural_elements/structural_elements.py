@@ -55,6 +55,7 @@ def create(type):
             )
         )
 
+    # TODO: improve get parent list, build paths.
     # Get parent type and list.
     parent_type = None
     parents = []
