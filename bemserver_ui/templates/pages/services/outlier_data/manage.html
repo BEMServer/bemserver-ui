@@ -1,20 +1,24 @@
 {% extends "pages/base.html" %}
 
+{% if signed_user.is_admin %}
+{% set title = "Manage check outlier data service" %}
+{% else %}
 {% set title = "Check outlier data service" %}
+{% endif %}
 
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
     <div class="row g-5">
         <div class="col">
-            <div class="d-flex align-items-start gap-3">
-                <h5>Campaign</h5>
+            <h5>Campaign</h5>
+            <div class="hstack gap-2">
+                <span class="text-break">{{ outlier_data_campaign.campaign_name }}</span>
                 <span class="fw-bold text-{% if outlier_data_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ outlier_data_campaign.campaign_state | upper }}]</span>
             </div>
-            <p class="text-break">{{ outlier_data_campaign.campaign_name }}</p>
         </div>
         <div class="col">
-            <h5>Service state</h5>
+            <h5>Service state (on server)</h5>
             {% if signed_user.is_admin %}
             <input type="radio" class="btn-check" name="svc_state" id="svc_state_on" autocomplete="off"{% if outlier_data_campaign.is_enabled %} checked{% endif %}>
             <label class="btn btn-outline-success" for="svc_state_on">ON</label>
