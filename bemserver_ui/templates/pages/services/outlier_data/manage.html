@@ -41,9 +41,7 @@
 
 {% block body_scripts %}
 {{ super() -}}
-{% if signed_user.is_admin %}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/outlierData/manage.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/outlierData/manage.js') }}" defer></script>
 {% endfilter %}
-{% endif %}
 {% endblock body_scripts %}
