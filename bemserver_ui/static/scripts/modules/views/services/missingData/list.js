@@ -1,9 +1,9 @@
-import { flaskES6 } from "../../../../app.js";
-import { InternalAPIRequest } from "../../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
-import { Spinner } from "../../../components/spinner.js";
-import "../../../components/itemsCount.js";
-import { Parser } from "../../../tools/parser.js";
+import { flaskES6 } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
 class CheckMissingDataServiceListView {
