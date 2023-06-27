@@ -1,6 +1,10 @@
 {% extends "pages/base.html" %}
 
+{% if signed_user.is_admin %}
+{% set title = "Manage weather data service" %}
+{% else %}
 {% set title = "Weather data service" %}
+{% endif %}
 
 {% if not tab %}
     {% set tab = "weather" %}
@@ -11,11 +15,11 @@
 <div class="container-fluid">
     <div class="row g-5 mb-3">
         <div class="col-auto">
-            <div class="d-flex align-items-start gap-3">
-                <h5>Campaign</h5>
+            <h5>Campaign</h5>
+            <div class="hstack gap-2">
                 <span class="fw-bold text-{% if g.campaign_ctxt.campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ g.campaign_ctxt.campaign.state | upper }}]</span>
+                <span class="text-break">{{ g.campaign_ctxt.name }}</span>
             </div>
-            <p class="text-break">{{ g.campaign_ctxt.name }}</p>
         </div>
         <div class="col">
             <div class="alert alert-info border border-info mb-0" role="alert">
@@ -68,7 +72,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Site</th>
-                                    <th scope="col">State</th>
+                                    <th scope="col">Service state (on server)</th>
                                     {% if signed_user.is_admin %}
                                     <th scope="col">Fetch data</th>
                                     {% endif %}
@@ -88,7 +92,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col">Site</th>
-                                    <th scope="col">State</th>
+                                    <th scope="col">Service state (on server)</th>
                                 </tr>
                             </thead>
                             <tbody class="table-group-divider" id="weatherForecastServiceStatesContainer">
