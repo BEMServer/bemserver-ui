@@ -153,10 +153,10 @@ def edit(type, id):
                 )
             except bac_exc.BEMServerAPIValidationError:
                 flask.flash(
-                    f"Error while setting {prop_data['name']} property!", "warning"
+                    f"Error while setting {prop_data['name']} attribute!", "warning"
                 )
             else:
-                flask.flash(f"{prop_data['name']} property updated!", "success")
+                flask.flash(f"{prop_data['name']} attribute updated!", "success")
 
         return flask.redirect(flask.url_for("structural_elements.explore"))
 
@@ -200,7 +200,7 @@ def create_property(type, id):
     }
     api_resource = getattr(flask.g.api_client, f"{type}_property_data")
     api_resource.create(payload)
-    flask.flash("Property defined!", "success")
+    flask.flash("Attribute defined!", "success")
 
     return flask.redirect(
         flask.url_for("structural_elements.edit", type=type, id=id, tab="properties")
@@ -217,7 +217,7 @@ def delete_property(type, id, property_id):
     api_resource.delete(
         property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
     )
-    flask.flash("Property deleted!", "success")
+    flask.flash("Attribute deleted!", "success")
     return flask.redirect(
         flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
     )

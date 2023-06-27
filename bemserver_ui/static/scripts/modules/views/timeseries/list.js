@@ -1,13 +1,13 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6, signedUser } from "../../../app.js";
-import { Spinner } from "../../components/spinner.js";
-import { Parser } from "../../tools/parser.js";
-import { TimeDisplay } from "../../tools/time.js";
-import { EventLevelBadge } from "../../components/eventLevel.js";
-import "../../components/itemsCount.js";
-import "../../components/pagination.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { StructuralElementSelector } from "../../components/structuralElements/selector.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import "/static/scripts/modules/components/pagination.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 
 
 export class TimeseriesListView {
@@ -204,14 +204,14 @@ export class TimeseriesListView {
             }
         }
         else {
-            propertyDataHTML = `<p class="fst-italic">No properties</p>`;
+            propertyDataHTML = `<p class="fst-italic">No attributes</p>`;
         }
 
         return `<div class="d-flex justify-content-between align-items-start mb-3">
     <div class="d-flex gap-4">
         ${propertyDataHTML}
     </div>
-    ${this.#getEditBtnHTML(tsId, "properties")}
+    ${this.#getEditBtnHTML(tsId, "attributes")}
 </div>`;
     }
 
@@ -363,7 +363,7 @@ export class TimeseriesListView {
     }
 
     #renderProperties(tsId) {
-        let timeseriesPropertiesElmt = document.getElementById(`timeseriesProperties-${tsId}`);
+        let timeseriesPropertiesElmt = document.getElementById(`timeseriesAttributes-${tsId}`);
         let tsAlreadyLoaded = JSON.parse(timeseriesPropertiesElmt.getAttribute("data-ts-loaded"));
         if (!tsAlreadyLoaded) {
             timeseriesPropertiesElmt.innerHTML = "";

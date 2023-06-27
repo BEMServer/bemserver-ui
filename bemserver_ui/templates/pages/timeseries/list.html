@@ -131,7 +131,7 @@
                                     <button class="nav-link active" id="general-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#general-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="general-tabcontent-{{ x.id }}" aria-selected="true">General</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="properties-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#properties-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="properties-tabcontent-{{ x.id }}">Properties</button>
+                                    <button class="nav-link" id="attributes-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#attributes-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="attributes-tabcontent-{{ x.id }}">Attributes</button>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="locations-tab-{{ x.id }}" data-bs-toggle="tab" data-bs-target="#locations-tabcontent-{{ x.id }}" type="button" role="tab" aria-controls="locations-tabcontent-{{ x.id }}">Locations</button>
@@ -152,8 +152,8 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <div class="tab-pane fade p-3" id="properties-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="properties-tab-{{ x.id }}">
-                                    <div id="timeseriesProperties-{{ x.id }}" data-ts-loaded="false"></div>
+                                <div class="tab-pane fade p-3" id="attributes-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="attributes-tab-{{ x.id }}">
+                                    <div id="timeseriesAttributes-{{ x.id }}" data-ts-loaded="false"></div>
                                 </div>
                                 <div class="tab-pane fade p-3" id="locations-tabcontent-{{ x.id }}" role="tabpanel" aria-labelledby="locations-tab-{{ x.id }}">
                                     <div id="timeseriesStructuralElements-{{ x.id }}" data-ts-loaded="false"></div>

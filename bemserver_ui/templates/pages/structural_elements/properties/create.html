@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Create a new property for sites" %}
+{% set title = "New sites attribute" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -9,7 +9,7 @@
         <div class="col">
             <form action="{{ url_for('structural_elements.properties.create', next=url_cancel) }}" method="POST">
                 <fieldset>
-                    <legend class="invisible d-none">Sites property information</legend>
+                    <legend class="invisible d-none">Sites attribute information</legend>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="name">Name</label>
@@ -39,7 +39,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <h5>Add this property for the following levels:</h5>
+                            <h5>Make this attribute available for the following levels:</h5>
                             <div class="d-flex flex-wrap gap-2">
                                 {% for x in structural_elements %}
                                 <div class="form-check form-switch me-4">

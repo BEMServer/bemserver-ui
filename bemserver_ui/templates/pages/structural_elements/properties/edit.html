@@ -1,14 +1,14 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Sites property" %}
+{% set title = "Sites attribute" %}
 {% set subtitle = "Edit" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<form id="delForm" action="{{ url_for('structural_elements.properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; property">
+<form id="delForm" action="{{ url_for('structural_elements.properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; attribute">
     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
-    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
+    <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash me-1"></i>Delete</button>
 </form>
 {% endfilter %}
 {% endblock main_toolbar %}
@@ -19,7 +19,7 @@
     <div class="row">
         <div class="col">
             <fieldset>
-                <legend class="invisible d-none">Sites property information</legend>
+                <legend class="invisible d-none">Sites attribute information</legend>
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="name">Name</label>
@@ -45,7 +45,7 @@
                 {% if structural_elements|length > 0 %}
                 <div class="row mb-3">
                     <div class="col">
-                        <h5>Add this property for the following levels:</h5>
+                        <h5>Make this attribute available for the following levels:</h5>
                         <div class="d-flex flex-wrap gap-2">
                             {% for struct_elmt in structural_elements %}
                             <div class="form-check form-switch me-4">
