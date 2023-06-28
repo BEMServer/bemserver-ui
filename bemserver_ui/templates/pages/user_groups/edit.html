@@ -1,13 +1,13 @@
 {% extends "pages/base.html" %}
 
-{% set title = "User group" %}
+{% set title = "Group" %}
 {% set subtitle = "Edit" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 {% if not self_edit %}
-<form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+<form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
     <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
 </form>
@@ -27,7 +27,7 @@
     <div class="row">
         <div class="col">
             <fieldset>
-                <legend class="invisible d-none">User group information</legend>
+                <legend class="invisible d-none">Group information</legend>
                 <div class="mb-3">
                     <label class="form-label" for="name">Name</label>
                     <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ user_group.name }}" minlength="1" maxlength="80" required autofocus>

@@ -114,14 +114,14 @@
                     <ul class="nav nav-pills flex-column gap-1">
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("User groups", url_for("user_groups.list"), "Manage user groups", ["bi", "bi-people-fill"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("user_groups.create"), "Add a new user group", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Users", url_for("users.list"), "Manage users", ["bi", "bi-person-lines-fill"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("users.create"), "Add a new user", ["bi", "bi-plus-circle"]) -}}
                             {% endfilter %}
                         </li>
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("Users", url_for("users.list"), "Manage users", ["bi", "bi-person-lines-fill"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("users.create"), "Add a new user", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Groups", url_for("user_groups.list"), "Manage groups", ["bi", "bi-people-fill"], extra_classes=["w-100"]) -}}
+                            {{- mac_sidebar.render_nav_link(none, url_for("user_groups.create"), "Add a new group", ["bi", "bi-plus-circle"]) -}}
                             {% endfilter %}
                         </li>
                     </ul>

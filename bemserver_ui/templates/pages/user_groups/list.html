@@ -1,11 +1,11 @@
 {% extends "pages/base.html" %}
 
-{% set title = "User groups" %}
+{% set title = "Groups" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('user_groups.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new user group"><i class="bi bi-plus-circle"></i> New user group</a>
+<a href="{{ url_for('user_groups.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new group"><i class="bi bi-plus-circle"></i> New group</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -21,7 +21,7 @@
         <div class="col">
             <div class="list-group">
                 {% for x in user_groups %}
-                <a class="list-group-item list-group-item-action d-flex gap-3 py-3" href="{{ url_for('user_groups.view', id=x.id) }}" title="View user group">
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3" href="{{ url_for('user_groups.view', id=x.id) }}" title="View group">
                     <i class="bi bi-person-rolodex"></i>
                     <div class="d-flex gap-2 w-100 justify-content-between">
                         <div>
