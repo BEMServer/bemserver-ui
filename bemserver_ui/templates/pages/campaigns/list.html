@@ -1,4 +1,5 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
 {% set title = "Campaigns" %}
 
@@ -61,10 +62,9 @@
                         <i class="bi bi-boxes"></i>
                         <div class="d-xl-flex d-grid justify-content-between gap-3 w-100">
                             <div class="d-grid gap-2">
-                                <div class="d-sm-flex d-grid align-items-center gap-1">
-                                    <small class="fw-bold text-{% if x.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ x.state | upper }}]</small>
-                                    <h6 class="fw-bold text-break ms-sm-2 mb-0">{{ x.name }}</h6>
-                                </div>
+                                <h6 class="fw-bold">
+                                    {{- mac_camp.render_campaign_info(x.name, x.state, render_style="bullet") }}
+                                </h6>
                                 {% if is_campaign_selected %}
                                 <div><small class="text-opacity-50 text-primary fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
                                 {% endif %}

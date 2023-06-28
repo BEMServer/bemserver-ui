@@ -1,4 +1,5 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
 {% set title = "Campaign scope" %}
 {% if tab is undefined %}
@@ -25,11 +26,8 @@
 <div class="container-fluid">
     <div class="row g-5 mb-3">
         <div class="col">
-            <div class="d-flex align-items-start gap-3">
-                <h5>Campaign</h5>
-                <span class="fw-bold text-{% if campaign_scope.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ campaign_scope.campaign_state | upper }}]</span>
-            </div>
-            <p class="text-break">{{ campaign_scope.campaign_name }}</p>
+            <h5>Campaign</h5>
+            {{- mac_camp.render_campaign_info(campaign_scope.campaign_name, campaign_scope.campaign_state, render_style="bullet") }}
         </div>
     </div>
     <div class="row">

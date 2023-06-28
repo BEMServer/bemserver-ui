@@ -200,6 +200,7 @@ def edit(id):
     campaign_resp = flask.g.api_client.campaigns.getone(id)
 
     campaign_data = campaign_resp.data
+    campaign_data["state"] = deduce_campaign_state(campaign_data)
     campaign_tz = zoneinfo.ZoneInfo(campaign_data["timezone"])
 
     try:

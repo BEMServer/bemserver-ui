@@ -1,9 +1,10 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
 {% if signed_user.is_admin %}
-{% set title = "Manage cleanup data service" %}
+    {% set title = "Manage cleanup data service" %}
 {% else %}
-{% set title = "Cleanup data service" %}
+    {% set title = "Cleanup data service" %}
 {% endif %}
 
 {% block main_content %}
@@ -12,10 +13,7 @@
     <div class="row g-5 mb-3">
         <div class="col">
             <h5>Campaign</h5>
-            <div class="hstack gap-2">
-                <span class="fw-bold text-{% if cleanup_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ cleanup_campaign.campaign_state | upper }}]</span>
-                <span class="text-break">{{ cleanup_campaign.campaign_name }}</span>
-            </div>
+            {{- mac_camp.render_campaign_info(cleanup_campaign.campaign_name, cleanup_campaign.campaign_state, render_style="bullet") }}
         </div>
         <div class="col">
             <h5>Service state (on server)</h5>

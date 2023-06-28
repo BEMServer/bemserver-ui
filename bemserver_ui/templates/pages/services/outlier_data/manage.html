@@ -1,9 +1,10 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
 {% if signed_user.is_admin %}
-{% set title = "Manage check outlier data service" %}
+    {% set title = "Manage check outlier data service" %}
 {% else %}
-{% set title = "Check outlier data service" %}
+    {% set title = "Check outlier data service" %}
 {% endif %}
 
 {% block main_content %}
@@ -12,10 +13,7 @@
     <div class="row g-5">
         <div class="col">
             <h5>Campaign</h5>
-            <div class="hstack gap-2">
-                <span class="text-break">{{ outlier_data_campaign.campaign_name }}</span>
-                <span class="fw-bold text-{% if outlier_data_campaign.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ outlier_data_campaign.campaign_state | upper }}]</span>
-            </div>
+            {{- mac_camp.render_campaign_info(outlier_data_campaign.campaign_name, outlier_data_campaign.campaign_state, render_style="bullet") }}
         </div>
         <div class="col">
             <h5>Service state (on server)</h5>

@@ -1,4 +1,5 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
 {% set title = "Upload sites" %}
 
@@ -8,10 +9,7 @@
     <div class="row mb-3">
         <div class="col">
             <h5>Campaign</h5>
-            <div class="hstack align-items-center gap-2">
-                <span class="fw-bold text-{% if g.campaign_ctxt.campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ g.campaign_ctxt.campaign.state | upper }}]</span>
-                <span class="text-break">{{ g.campaign_ctxt.name }}</span>
-            </div>
+            {{- mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet") }}
         </div>
     </div>
     <div class="row">
