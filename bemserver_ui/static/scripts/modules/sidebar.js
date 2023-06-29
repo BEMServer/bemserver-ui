@@ -66,13 +66,13 @@ export class Sidebar {
     }
 
     refresh() {
-        // Set active the nav link element that corresponds to the current page location.
+        // Set active the "nav-link" element that corresponds to the current page location.
         let currentUrl = window.location.pathname + window.location.search;
 
-        // First search in nav-links.
+        // First search in "nav-link" class elements.
         let elmt = document.querySelector(`.app-sidebar .nav-link[href="${currentUrl}"]:not(.disabled)`);
         if (elmt == null) {
-            // Then search in dropdwn items.
+            // Then search in dropdown items.
             elmt = document.querySelector(`div.dropdown ul.dropdown-menu a.dropdown-item[href="${currentUrl}"]:not(.disabled)`)
             if (elmt != null) {
                 let dropdownMenuId = elmt.parentElement.parentElement.getAttribute("aria-labelledby");
@@ -81,11 +81,18 @@ export class Sidebar {
             }
         }
         if (elmt == null) {
-            // And finally just search the best match in nav-links.
+            // And finally just search the best match in nav-link elements.
+            let elmtLocation = "";
             for (let navLinkElmt of this.#navLinkElmts) {
-                if (window.location.pathname.startsWith(navLinkElmt.getAttribute("href")?.split("?")[0])) {
-                    elmt = navLinkElmt;
-                    break;
+                let navLinkLocation = navLinkElmt.getAttribute("href")?.split("?")[0];
+                if (window.location.pathname.startsWith(navLinkLocation)) {
+                    // nav-link element location matches
+                    // 1. if first found, save it
+                    // 2. else verify that it is better than any other previous element found
+                    if (elmt == null || (elmt != null && navLinkLocation.length > elmtLocation.length)) {
+                        elmt = navLinkElmt;
+                        elmtLocation = navLinkLocation;
+                    }
                 }
             }
         }
