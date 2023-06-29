@@ -1,11 +1,11 @@
 {% macro render_campaign_info(campagin_name, campagin_state, render_style="text") %}
-<div class="hstack align-items-center gap-2">
+<div class="hstack align-items-center gap-2 w-100">
     {% if render_style == "text" %}
     {{- _render_campaign_state_text(campagin_state) }}
     {% elif render_style == "bullet" %}
     {{- _render_campaign_state_bullet(campagin_state) }}
     {% endif %}
-    <span class="text-break">{{ campagin_name }}</span>
+    <span class="text-truncate">{{ campagin_name }}</span>
 </div>
 {% endmacro %}
 

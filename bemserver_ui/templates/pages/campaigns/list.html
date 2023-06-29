@@ -57,7 +57,7 @@
             <div class="list-group">
                 {% for x in campaigns %}
                 {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == x.id|string %}
-                <div class="list-group-item d-flex justify-content-between gap-3 p-0{% if is_campaign_selected %} app-campaign-selected{% endif %}">
+                <div class="list-group-item d-flex justify-content-between gap-3 p-0{% if is_campaign_selected %} border-start border-5 border-top-0 border-end-0 border-bottom-0 app-campaign-selected{% endif %}">
                     <a class="list-group-item-action text-decoration-none d-flex gap-3 py-3 p-2 ps-3 w-100" href="{{ url_for('campaigns.view', id=x.id) }}" title="View details">
                         <i class="bi bi-boxes"></i>
                         <div class="d-xl-flex d-grid justify-content-between gap-3 w-100">

@@ -1,4 +1,4 @@
-import { Parser } from "./tools/parser.js"
+import { Parser } from "/static/scripts/modules/tools/parser.js"
 
 
 export class Sidebar {
@@ -6,8 +6,7 @@ export class Sidebar {
     #navLinkElmts = null;
 
     #sidebarMenuInnerElmt = null;
-    #campaignSelectorNavLinkElmt = null;
-    #campaignsNavLinkElmt = null;
+    #campaignSelectedNavLinkElmt = null;
 
     constructor() {
         this.#cacheDOM();
@@ -18,21 +17,22 @@ export class Sidebar {
         this.#navLinkElmts = [].slice.call(document.querySelectorAll(".app-sidebar .nav-link"));
 
         this.#sidebarMenuInnerElmt = document.querySelector("#sidebarMenu div.position-sticky");
-        this.#campaignSelectorNavLinkElmt = document.getElementById("campaignSelectorNavLink");
-        this.#campaignsNavLinkElmt = document.getElementById("campaignsNavLink");
+        this.#campaignSelectedNavLinkElmt = document.querySelector("#sidebarMenu #campaignSelectedNavItem > a.nav-link");
     }
 
     #initEventListeners() {
         window.addEventListener("resize", () => {
-            this.#updateCampaignSelectorWidth();
+            this.#updateCampaignSelectedWidth();
         });
     }
 
-    #updateCampaignSelectorWidth() {
-        let campaignNavStyle = window.getComputedStyle(this.#campaignSelectorNavLinkElmt.parentElement);
-        let remainingWidth = this.#sidebarMenuInnerElmt.clientWidth - this.#campaignsNavLinkElmt.clientWidth - Parser.parseFloatOrDefault(campaignNavStyle.gap);
-        if (Parser.parseFloatOrDefault(this.#campaignSelectorNavLinkElmt.style.maxWidth) != remainingWidth) {
-            this.#campaignSelectorNavLinkElmt.style.maxWidth = `${remainingWidth}px`;
+    #updateCampaignSelectedWidth() {
+        if (this.#campaignSelectedNavLinkElmt != null) {
+            let campaignNavStyle = window.getComputedStyle(this.#campaignSelectedNavLinkElmt.parentElement);
+            let remainingWidth = this.#sidebarMenuInnerElmt.clientWidth - Parser.parseFloatOrDefault(campaignNavStyle.gap);
+            if (Parser.parseFloatOrDefault(this.#campaignSelectedNavLinkElmt.style.maxWidth) != remainingWidth) {
+                this.#campaignSelectedNavLinkElmt.style.maxWidth = `${remainingWidth}px`;
+            }
         }
     }
 
@@ -91,6 +91,6 @@ export class Sidebar {
         }
         this.#setActive(elmt);
 
-        this.#updateCampaignSelectorWidth();
+        this.#updateCampaignSelectedWidth();
     }
 }

@@ -1,14 +1,15 @@
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <div class="d-flex justify-content-between align-items-center gap-1">
-            <a id="campaignSelectorNavLink" class="nav-link w-100 fw-bold text-center text-{% if g.campaign_ctxt.has_campaign %}truncate{% else %}break{% endif %} app-campaign-selected" role="button" title="{% if g.campaign_ctxt.has_campaign %}{{ g.campaign_ctxt.name }}{% else %}Select a campaign{% endif %}" data-bs-toggle="offcanvas" data-bs-target=".app-campaign-selector" aria-controls="app-campaign-selector">
-                {% if g.campaign_ctxt.has_campaign %}
-                {{ g.campaign_ctxt.name }}
-                {% else %}
-                <span class="fst-italic">Select a campaign</span>
-                {% endif %}
-            </a>
-            <a id="campaignsNavLink" class="nav-link" href="{{ url_for('campaigns.list') }}" title="Manage campaigns"><i class="bi bi-boxes"></i></a>
-        </div>
+{% import "macros/components/campaign.html" as mac_camp %}
+<ul class="nav nav-pills flex-column gap-1">
+    <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link("Campaigns", url_for("campaigns.list"), "Manage campaigns", ["bi", "bi-boxes"], extra_classes=["w-100"]) -}}
+        {% endfilter %}
     </li>
+    {% if g.campaign_ctxt.has_campaign %}
+    <li id="campaignSelectedNavItem" class="nav-item d-flex justify-content-between align-items-center">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link(mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet"), url_for("campaigns.view", id=g.campaign_ctxt.id), "Manage campaigns", [], extra_classes=["fw-bold", "text-center", "border", "border-5", "border-top-0", "border-bottom-0", "rounded-3", "app-campaign-selected", "shadow", "p-1", "w-100"]) -}}
+        {% endfilter %}
+    </li>
+    {% endif %}
 </ul>
