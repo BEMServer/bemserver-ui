@@ -53,8 +53,9 @@ export class Tree extends HTMLElement {
         this.#toolbarElmt.classList.add("d-flex", "flex-nowrap", "align-items-start", "gap-3", "ms-auto");
 
         this.#collapseAllBtnElmt = document.createElement("a");
-        this.#collapseAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap");
+        this.#collapseAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap", "hstack", "align-items-center");
         this.#collapseAllBtnElmt.setAttribute("role", "button");
+        this.#collapseAllBtnElmt.title = "Collapse all nodes";
         this.#toolbarElmt.appendChild(this.#collapseAllBtnElmt);
 
         let collapseIconElmt = document.createElement("i");
@@ -62,13 +63,14 @@ export class Tree extends HTMLElement {
         this.#collapseAllBtnElmt.appendChild(collapseIconElmt);
 
         let collapseTextElmt = document.createElement("small");
-        collapseTextElmt.classList.add("text-nowrap");
+        collapseTextElmt.classList.add("text-nowrap", "d-none", "d-sm-inline");
         collapseTextElmt.innerText = "collapse all";
         this.#collapseAllBtnElmt.appendChild(collapseTextElmt);
 
         this.#expandAllBtnElmt = document.createElement("a");
-        this.#expandAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap");
+        this.#expandAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap", "hstack", "align-items-center");
         this.#expandAllBtnElmt.setAttribute("role", "button");
+        this.#expandAllBtnElmt.title = "Expand all nodes";
         this.#toolbarElmt.appendChild(this.#expandAllBtnElmt);
 
         let expandIconElmt = document.createElement("i");
@@ -76,7 +78,7 @@ export class Tree extends HTMLElement {
         this.#expandAllBtnElmt.appendChild(expandIconElmt);
 
         let expandTextElmt = document.createElement("small");
-        expandTextElmt.classList.add("text-nowrap");
+        expandTextElmt.classList.add("text-nowrap", "d-none", "d-sm-inline");
         expandTextElmt.innerText = "expand all";
         this.#expandAllBtnElmt.appendChild(expandTextElmt);
     }
