@@ -1,5 +1,6 @@
-{% import "macros/components/ts_selector.html" as mac_ts_selector %}
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
 
 {% set title = "Delete timeseries data" %}
 
@@ -15,10 +16,10 @@
             </div>
         </div>
     </div>
-    <div class="row mb-3">
-        <div class="col">
+    <div class="row g-5 mb-3">
+        <div class="col-auto">
             <h5>Campaign</h5>
-            <p>{{ g.campaign_ctxt.name }}</p>
+            {{- mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet") }}
         </div>
     </div>
     <div class="row mb-3">
