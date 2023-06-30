@@ -6,7 +6,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event entry"><i class="bi bi-plus-circle"></i> New event</a>
+<a href="{{ url_for('events.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new event entry"><i class="bi bi-plus-circle"></i> Add</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 

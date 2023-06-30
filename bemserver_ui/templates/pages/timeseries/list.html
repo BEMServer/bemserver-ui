@@ -6,14 +6,27 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<div class="d-lg-flex d-grid gap-3">
-    {% if signed_user.is_admin %}
-    <a href="{{ url_for('timeseries.semantic_setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Semantic setup"><i class="bi bi-tags"></i> Semantic setup</a>
-    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage timeseries locations"><i class="bi bi-pin-map"></i> Manage locations</a>
-    <div class="vr d-none d-lg-block mx-2"></div>
-    {% endif %}
-    <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary text-nowrap ms-auto" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> New timeseries</a>
+{% if signed_user.is_admin %}
+<div class="d-none d-lg-flex gap-2">
+    <a href="{{ url_for('timeseries.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new timeseries"><i class="bi bi-plus-circle"></i> Add</a>
+    <div class="vr mx-1"></div>
+    <a href="{{ url_for('timeseries.upload') }}" class="btn btn-sm btn-outline-success text-nowrap" title="Import CSV file"><i class="bi bi-upload"></i> Import CSV</a>
+    <div class="vr mx-2"></div>
+    <a href="{{ url_for('timeseries.semantic_setup') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Set timeseries semantics"><i class="bi bi-tags"></i> Set semantics</a>
+    <a href="{{ url_for('timeseries.manage_structural_elements') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Set timeseries locations"><i class="bi bi-pin-map"></i> Set locations</a>
 </div>
+<div class="btn-group d-lg-none">
+    <button id="dropdownActions" type="button" class="btn btn-sm btn-outline-primary text-nowrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Manage timeseries"><i class="bi bi-three-dots-vertical"></i> Actions</button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownActions">
+        <li><a class="dropdown-item" href="{{ url_for('timeseries.create') }}" title="Add a new timeseries">Add timeseries</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('timeseries.upload') }}" title="Import CSV file">Import CSV</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{{ url_for('timeseries.semantic_setup') }}" title="Set timeseries semantics">Set semantics</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{{ url_for('timeseries.manage_structural_elements') }}" title="Set timeseries locations">Set locations</a></li>
+    </ul>
+</div>
+{% endif %}
 {% endfilter %}
 {% endblock main_toolbar %}
 
@@ -33,7 +46,7 @@
                         <div class="accordion-body">
                             <div class="row mb-3">
                                 <div class="col-12 col-xl-6">
-                                    <label for="siteSelector" class="form-label">Site/building... selection</label>
+                                    <label for="siteSelector" class="form-label">Sites selection</label>
                                     {% filter indent(width=12, first=False) %}
                                     {{ mac_struct_elmt_selector.render_site_selector(html_element_id="siteSelector", title=none) -}}
                                     {% endfilter %}

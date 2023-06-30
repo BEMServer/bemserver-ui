@@ -32,10 +32,8 @@
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <div class="d-flex justify-content-between">
                         <dl>
-                            {% if not self_view %}
                             <dt>Name</dt>
                             <dd class="text-break">{{ user.name }}</dd>
-                            {% endif %}
                             <dt>Email address</dt>
                             <dd>{{ user.email }}</dd>
                             {% if signed_user.is_admin %}

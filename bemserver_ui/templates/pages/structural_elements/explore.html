@@ -2,6 +2,41 @@
 
 {% set title = "Explore sites" %}
 
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+{% if signed_user.is_admin %}
+<div class="d-none d-sm-flex gap-2">
+    <div class="btn-group">
+        <button id="dropdownAddSites" type="button" class="btn btn-sm btn-outline-primary text-nowrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Add a new site/building/sotrey/space or zone"><i class="bi bi-plus-circle"></i> Add</button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownAddSites">
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">Site</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">Building</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">Storey</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">Space</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">Zone</a></li>
+        </ul>
+    </div>
+    <div class="vr mx-1"></div>
+    <a class="btn btn-sm btn-outline-success text-nowrap" href="{{ url_for('structural_elements.upload') }}" title="Import CSV files"><i class="bi bi-upload"></i> Import CSV</a>
+</div>
+<div class="btn-group d-sm-none">
+    <button id="dropdownActions" type="button" class="btn btn-sm btn-outline-primary text-nowrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Manage sites"><i class="bi bi-three-dots-vertical"></i> Actions</button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownActions">
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">New site</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">New building</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">New storey</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">New space</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">New zone</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.upload') }}" title="Import CSV files">Import CSV</a></li>
+    </ul>
+</div>
+{% endif %}
+{% endfilter %}
+{% endblock main_toolbar %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">

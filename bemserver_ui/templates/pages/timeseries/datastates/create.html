@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Create a timeseries data state" %}
+{% set title = "New timeseries data state" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -9,7 +9,7 @@
         <div class="col">
             <form action="{{ url_for('timeseries.datastates.create') }}" method="POST">
                 <fieldset>
-                    <legend class="invisible d-none">Timeseries data states informations</legend>
+                    <legend class="invisible d-none">Timeseries data state information</legend>
                     <div class="mb-3">
                         <label class="form-label" for="name">Name</label>
                         <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>

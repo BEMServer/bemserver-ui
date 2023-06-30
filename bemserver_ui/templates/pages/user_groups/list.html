@@ -5,7 +5,7 @@
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<a href="{{ url_for('user_groups.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new group"><i class="bi bi-plus-circle"></i> New group</a>
+<a href="{{ url_for('user_groups.create') }}" class="btn btn-sm btn-outline-primary text-nowrap" title="Add a new group"><i class="bi bi-plus-circle"></i> Add</a>
 {% endfilter %}
 {% endblock main_toolbar %}
 

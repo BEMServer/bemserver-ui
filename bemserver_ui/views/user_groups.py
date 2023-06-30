@@ -25,7 +25,7 @@ def list():
 @blp.route("/<int:id>")
 @auth.signin_required(roles=[Roles.admin])
 def view(id):
-    tab = flask.request.args.get("tab", "users")
+    tab = flask.request.args.get("tab", "general")
 
     user_group = flask.g.api_client.user_groups.getone(id)
 
