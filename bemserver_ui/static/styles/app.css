@@ -232,7 +232,6 @@ body,
 .app-campaign-selected {
     background-color: var(--app-blue-100) !important;
     border-color: var(--app-blue) !important;
-    color: var(--app-body-color) !important;
 }
 
 .app-tabs .nav-item .nav-link:not(.active):not(.disabled) {
