@@ -31,10 +31,9 @@ def index():
     )
 
 
-@blp.route("/home")
+@blp.route("/stats")
 @auth.signin_required
-def home():
-
+def stats():
     campaign_scopes_count_overall = 0
     cs_resp = flask.g.api_client.campaign_scopes.getall()
     campaign_scopes_count_overall = len(cs_resp.data)
@@ -71,7 +70,7 @@ def home():
             struct_elmt_count[struct_elmt_type] = len(struct_elmt_resp.data)
 
     return flask.render_template(
-        "pages/home.html",
+        "pages/stats.html",
         campaign_scopes_count_overall=campaign_scopes_count_overall,
         campaign_scopes_count=campaign_scopes_count,
         ts_count_overall=ts_count_overall,
