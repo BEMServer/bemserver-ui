@@ -8,7 +8,7 @@
     {% if g.campaign_ctxt.has_campaign %}
     <li id="campaignSelectedNavItem" class="nav-item d-flex justify-content-between align-items-center">
         {% filter indent(width=8, first=True) %}
-        {{- mac_sidebar.render_nav_link(mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet"), url_for("campaigns.view", id=g.campaign_ctxt.id), "Manage campaigns", [], extra_classes=["fw-bold", "text-center", "border", "border-5", "border-top-0", "border-bottom-0", "rounded-3", "app-campaign-selected", "shadow", "p-1", "w-100"]) -}}
+        {{- mac_sidebar.render_nav_link(mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet"), url_for("campaigns.view", id=g.campaign_ctxt.id), "Campaign info", [], extra_classes=["fw-bold", "text-center", "border", "border-5", "border-top-0", "border-bottom-0", "rounded-3", "app-campaign-selected", "shadow", "p-1", "w-100"]) -}}
         {% endfilter %}
     </li>
     {% endif %}
