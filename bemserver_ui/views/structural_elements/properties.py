@@ -4,6 +4,7 @@ import urllib.parse
 import flask
 
 import bemserver_api_client.exceptions as bac_exc
+from bemserver_api_client.enums import StructuralElementPropertyValueType
 
 from bemserver_ui.extensions import auth, Roles
 from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
@@ -114,6 +115,7 @@ def create():
         "pages/structural_elements/properties/create.html",
         structural_elements=FULL_STRUCTURAL_ELEMENT_TYPES,
         url_cancel=url_cancel,
+        property_value_types=StructuralElementPropertyValueType,
     )
 
 

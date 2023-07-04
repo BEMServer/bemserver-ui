@@ -2,6 +2,8 @@
 import urllib.parse
 import flask
 
+from bemserver_api_client.enums import StructuralElementPropertyValueType
+
 from bemserver_ui.extensions import auth, Roles
 
 
@@ -41,7 +43,9 @@ def create():
     )
 
     return flask.render_template(
-        "pages/timeseries/properties/create.html", url_cancel=url_cancel
+        "pages/timeseries/properties/create.html",
+        url_cancel=url_cancel,
+        property_value_types=StructuralElementPropertyValueType,
     )
 
 
