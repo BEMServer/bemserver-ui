@@ -25,13 +25,13 @@ export class StructuralElementsExploreView {
     #tsSearchTimeoutID = null;
     #eventsSearchTimeoutID = null;
 
-    #tabDataElmt = null;
-    #tabDataContentElmt = null;
     #tabSitesElmts = null;
     #tabDataItemElmts = null;
     #generalTabContentElmt = null;
     #propertiesTabContentElmt = null;
     #alertInfoDataElmt = null;
+    #selectedStructutalElementInfoContainerElmt = null;
+    #selectedStructuralElementTypeElmt = null;
 
     #tsSearchElmt = null;
     #tsClearSearchBtnElmt = null;
@@ -83,13 +83,13 @@ export class StructuralElementsExploreView {
         this.#messagesElmt = document.getElementById("messages");
 
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
-        this.#tabDataElmt = document.getElementById("tabData");
-        this.#tabDataContentElmt = document.getElementById("tabDataContent");
         this.#tabDataItemElmts = [].slice.call(document.querySelectorAll("#tabData button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
         this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
 
         this.#alertInfoDataElmt = document.getElementById("alertInfoData");
+        this.#selectedStructutalElementInfoContainerElmt = document.getElementById("selectedStructutalElementInfoContainer");
+        this.#selectedStructuralElementTypeElmt = document.getElementById("selectedStructuralElementType");
 
         this.#tsSearchElmt = document.getElementById("tsSearch");
         this.#tsClearSearchBtnElmt = document.getElementById("tsClear");
@@ -339,17 +339,17 @@ export class StructuralElementsExploreView {
         this.#generalTabContentElmt.appendChild(descElmt);
 
         let ifcContainerElmt = document.createElement("div");
-        ifcContainerElmt.classList.add("row");
+        ifcContainerElmt.classList.add("row", "pt-2");
         this.#generalTabContentElmt.appendChild(ifcContainerElmt);
         let ifcIDContainerElmt = document.createElement("dl");
         ifcIDContainerElmt.classList.add("col");
         ifcContainerElmt.appendChild(ifcIDContainerElmt);
         let ifcIDTitleElmt = document.createElement("dt");
-        ifcIDTitleElmt.textContent = "IFC ID";
-        ifcContainerElmt.appendChild(ifcIDTitleElmt);
+        ifcIDTitleElmt.textContent = `IFC ID (${data.type})`;
+        ifcIDContainerElmt.appendChild(ifcIDTitleElmt);
         let ifcIDValueElmt = document.createElement("dd");
         ifcIDValueElmt.textContent = data.structural_element.ifc_id?.length > 0 ? data.structural_element.ifc_id : "-";
-        ifcContainerElmt.appendChild(ifcIDValueElmt);
+        ifcIDContainerElmt.appendChild(ifcIDValueElmt);
 
         if (data.type == "site") {
             let geoLocationContainerElmt = document.createElement("div");
@@ -750,9 +750,9 @@ export class StructuralElementsExploreView {
     #refreshTabs() {
         let selectedItemData = this.#selectedItemsPerTab[this.#tabSitesSelected.id];
         if (selectedItemData != null) {
+            this.#selectedStructuralElementTypeElmt.textContent = selectedItemData.type;
             this.#alertInfoDataElmt.classList.add("d-none", "invisible");
-            this.#tabDataElmt.classList.remove("d-none", "invisible");
-            this.#tabDataContentElmt.classList.remove("d-none", "invisible");
+            this.#selectedStructutalElementInfoContainerElmt.classList.remove("d-none", "invisible");
 
             if (!this.#alreadyLoadedPerTab[this.#tabDataSelected.id]) {
                 this.#renderPerTab[this.#tabDataSelected.id]?.call(this, selectedItemData.id, selectedItemData.type, selectedItemData.path);
@@ -767,9 +767,9 @@ export class StructuralElementsExploreView {
             this.#populateTimeseriesList([]);
             this.#populateEventList([]);
 
+            this.#selectedStructuralElementTypeElmt.textContent = "?";
             this.#alertInfoDataElmt.classList.remove("d-none", "invisible");
-            this.#tabDataElmt.classList.add("d-none", "invisible");
-            this.#tabDataContentElmt.classList.add("d-none", "invisible");
+            this.#selectedStructutalElementInfoContainerElmt.classList.add("d-none", "invisible");
         }
     }
 

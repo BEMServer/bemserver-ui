@@ -35,6 +35,11 @@ export class DatetimePicker extends HTMLDivElement {
 
         this.#loadOptions(options);
         this.#cacheDOM();
+
+        this.#dateInputElmt = document.createElement("input");
+        this.#dateInputElmt.type = "date";
+        this.#timeInputElmt = document.createElement("input");
+        this.#timeInputElmt.type = "time";
     }
 
     static get observedAttributes() {
@@ -92,8 +97,8 @@ export class DatetimePicker extends HTMLDivElement {
     #loadOptions(options = {}) {
         this.#dateInputFormBind = this.getAttribute("date-input-form-bind") || options.dateInputFormBind;
         this.#timeInputFormBind = this.getAttribute("time-input-form-bind") || options.timeInputFormBind;
-        this.#isRequired = options?.required == null ? this.hasAttribute("required") : options.required;
-        this.#hasAutofocus = options?.autofocus == null ? this.hasAttribute("autofocus") : options.autofocus;
+        this.#isRequired = options?.required == null ? this.hasAttribute("required") : Parser.parseBoolOrDefault(options.required, false);
+        this.#hasAutofocus = options?.autofocus == null ? this.hasAttribute("autofocus") : Parser.parseBoolOrDefault(options.autofocus, false);
         this.#title = this.getAttribute("title") || options.title;
         this.#tzName = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
         this.#dateMin = this.getAttribute("min") || options.dateMin;
@@ -237,9 +242,7 @@ export class DatetimePicker extends HTMLDivElement {
             this.appendChild(this.#titleSpanElmt);
         }
 
-        this.#dateInputElmt = document.createElement("input");
         this.#dateInputElmt.classList.add("form-control");
-        this.#dateInputElmt.type = "date";
         if (this.#hasAutofocus) {
             this.#dateInputElmt.setAttribute("autofocus", true);
         }
@@ -252,9 +255,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#dateInputElmt.style.minWidth = "125px";
         this.appendChild(this.#dateInputElmt);
 
-        this.#timeInputElmt = document.createElement("input");
         this.#timeInputElmt.classList.add("form-control");
-        this.#timeInputElmt.type = "time";
         this.#timeInputElmt.style.minWidth = "75px";
         this.appendChild(this.#timeInputElmt);
 
@@ -282,6 +283,9 @@ export class DatetimePicker extends HTMLDivElement {
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue != newValue) {
             if (name == "disabled") {
+                if (newValue == null || newValue == "") {
+                    newValue = true;
+                }
                 if (newValue) {
                     this.setDisabled();
                 }
@@ -290,6 +294,9 @@ export class DatetimePicker extends HTMLDivElement {
                 }
             }
             else if (name == "required") {
+                if (newValue == null || newValue == "") {
+                    newValue = true;
+                }
                 if (newValue) {
                     this.setRequired();
                 }

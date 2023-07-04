@@ -38,6 +38,8 @@ Flask custom var config available:
         Default application timezone name, when not overrided campaign timezone
     **BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY = 60000**
         Delay, in seconds, between each check of new notifications
+    **BEMSERVER_UI_USER_GUIDE_URL = https://bemserver-docs.readthedocs.io/en/latest/user_guide.html**
+        User guide URL
     *(optional)* **BEMSERVER_UI_PARTNERS_FILE = None**
         Absolute path of json file that describes the project's partners
 

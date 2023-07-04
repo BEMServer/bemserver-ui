@@ -32,10 +32,8 @@
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <div class="d-flex justify-content-between">
                         <dl>
-                            {% if not self_view %}
                             <dt>Name</dt>
                             <dd class="text-break">{{ user.name }}</dd>
-                            {% endif %}
                             <dt>Email address</dt>
                             <dd>{{ user.email }}</dd>
                             {% if signed_user.is_admin %}
@@ -99,7 +97,7 @@
             <div class="collapse collapse-horizontal app-panel-collapse" id="userGroupAvailableCollapsePanel">
                 <div class="app-panel-collapse-body">
                     <h5>
-                        Available user groups
+                        Available groups
                         <span class="badge bg-secondary" id="userGroupAvailableCount">0</span>
                         <sup><a id="userGroupAvailableHelpLnk" class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#userGroupAvailableHelpCollapsePanel" aria-expanded="false" aria-controls="userGroupAvailableHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
                     </h5>

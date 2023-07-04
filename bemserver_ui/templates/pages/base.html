@@ -18,7 +18,8 @@
         {% endfilter +%}
         <main class="col-md-9 ms-sm-auto col-xl-10 px-md-4 pb-4 app-content">
             {% block main_title %}
-            <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+            <div class="d-flex justify-content-start align-items-center gap-4 mb-2">
+                {% if title or subtitle %}
                 <div class="d-lg-flex d-grid gap-lg-3">
                     {% if title %}
                     <h1 class="text-nowrap">{{ title }}</h1>
@@ -27,7 +28,8 @@
                     <h2 class="align-self-end text-break">{{ subtitle }}</h2>
                     {% endif %}
                 </div>
-                <div class="my-2">
+                {% endif %}
+                <div>
                     {% block main_toolbar %}
                     {% endblock main_toolbar %}
                 </div>

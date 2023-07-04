@@ -224,7 +224,7 @@ def edit(id):
                 payload,
                 etag=flask.request.form[f"property-{prop_id}-etag"],
             )
-            flask.flash(f"{prop_data['name']} property updated!", "success")
+            flask.flash(f"{prop_data['name']} attribute updated!", "success")
 
         return flask.redirect(flask.url_for("timeseries.list"))
 
@@ -276,7 +276,7 @@ def create_property(id):
         "value": prop_value,
     }
     flask.g.api_client.timeseries_property_data.create(payload)
-    flask.flash("Property value defined!", "success")
+    flask.flash("Attribute value defined!", "success")
 
     return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
 
@@ -288,7 +288,7 @@ def delete_property(id, property_id):
     flask.g.api_client.timeseries_property_data.delete(
         property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
     )
-    flask.flash("Property value deleted!", "success")
+    flask.flash("Attribute value deleted!", "success")
     return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
 
 

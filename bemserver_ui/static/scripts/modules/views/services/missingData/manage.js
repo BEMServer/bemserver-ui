@@ -1,6 +1,6 @@
-import { InternalAPIRequest } from "../../../tools/fetcher.js";
-import { flaskES6 } from "../../../../app.js";
-import { FlashMessageTypes, FlashMessage } from "../../../components/flash.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 
 
 class CheckMissingDataServiceManageView {
@@ -15,7 +15,7 @@ class CheckMissingDataServiceManageView {
     #campaignServiceIDInputElmt = null;
     #campaignIDInputElmt = null;
     #etagInputElmt = null;
-    
+
     constructor() {
         this.#cacheDOM();
 
@@ -27,25 +27,29 @@ class CheckMissingDataServiceManageView {
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
 
-        this.#stateOnRadioElmt = document.getElementById("svc_state_on");
-        this.#stateOffRadioElmt = document.getElementById("svc_state_off");
-        this.#campaignServiceIDInputElmt = document.getElementById("campaign_service_id");
-        this.#campaignIDInputElmt = document.getElementById("campaign_id");
-        this.#etagInputElmt = document.getElementById("etag");
+        if (signedUser.is_admin) {
+            this.#stateOnRadioElmt = document.getElementById("svc_state_on");
+            this.#stateOffRadioElmt = document.getElementById("svc_state_off");
+            this.#campaignServiceIDInputElmt = document.getElementById("campaign_service_id");
+            this.#campaignIDInputElmt = document.getElementById("campaign_id");
+            this.#etagInputElmt = document.getElementById("etag");
+        }
     }
 
     #initEventListeners() {
-        this.#stateOnRadioElmt.addEventListener("change", () => {
-            if (this.#stateOnRadioElmt.checked) {
-                this.#updateServiceState(this.#stateOnRadioElmt.checked);
-            }
-        });
+        if (signedUser.is_admin) {
+            this.#stateOnRadioElmt.addEventListener("change", () => {
+                if (this.#stateOnRadioElmt.checked) {
+                    this.#updateServiceState(this.#stateOnRadioElmt.checked);
+                }
+            });
 
-        this.#stateOffRadioElmt.addEventListener("change", () => {
-            if (this.#stateOffRadioElmt.checked) {
-                this.#updateServiceState(this.#stateOnRadioElmt.checked);
-            }
-        });
+            this.#stateOffRadioElmt.addEventListener("change", () => {
+                if (this.#stateOffRadioElmt.checked) {
+                    this.#updateServiceState(this.#stateOnRadioElmt.checked);
+                }
+            });
+        }
     }
 
     #updateServiceState(isEnabled) {
@@ -93,11 +97,16 @@ class CheckMissingDataServiceManageView {
             );
         }
     }
+
+    mount() {
+
+    }
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
 
     let view = new CheckMissingDataServiceManageView();
+    view.mount();
 
 });

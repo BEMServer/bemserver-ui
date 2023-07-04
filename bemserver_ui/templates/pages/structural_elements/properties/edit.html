@@ -1,12 +1,12 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Structural element property" %}
+{% set title = "Sites attribute" %}
 {% set subtitle = "Edit" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
-<form id="delForm" action="{{ url_for('structural_elements.properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; property">
+<form id="delForm" action="{{ url_for('structural_elements.properties.delete', id=property.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property.name }}&lt;/mark&gt; attribute">
     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
     <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
 </form>
@@ -19,33 +19,41 @@
     <div class="row">
         <div class="col">
             <fieldset>
-                <legend class="invisible d-none">Structural element property informations</legend>
-                <div class="mb-3">
-                    <label class="form-label" for="name">Name</label>
-                    <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ property.name }}" minlength="1" maxlength="80" required autofocus>
+                <legend class="invisible d-none">Sites attribute information</legend>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ property.name }}" minlength="1" maxlength="80" required autofocus>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="value_type">Type</label>
-                    <input type="text" class="form-control" id="value_type" name="value_type" value="{{ property.value_type }}" readonly>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="value_type">Type</label>
+                        <input type="text" class="form-control" id="value_type" name="value_type" value="{{ property.value_type }}" readonly>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="unit_symbol">Unit symbol</label>
+                        <input form="editForm" type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20" value="{{ property.unit_symbol }}">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="unit_symbol">Unit symbol</label>
-                    <input form="editForm" type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20" value="{{ property.unit_symbol }}">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ property.description }}</textarea>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ property.description }}</textarea>
+                    </div>
                 </div>
                 {% if structural_elements|length > 0 %}
-                <div class="mb-3">
-                    <h5>Add this property for</h5>
-                    <div class="d-flex flex-wrap gap-2">
-                        {% for struct_elmt in structural_elements %}
-                        <div class="form-check form-switch me-4">
-                            <input class="form-check-input" type="checkbox" form="editForm" role="switch" id="{{ struct_elmt }}" name="{{ struct_elmt }}"{% if property.used_in[struct_elmt] %} checked{% endif %}>
-                            <label class="form-check-label" for="{{ struct_elmt }}">{{ struct_elmt | capitalize }}</label>
+                <div class="row mb-3">
+                    <div class="col">
+                        <h5>Make this attribute available for the following levels:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for struct_elmt in structural_elements %}
+                            <div class="form-check form-switch me-4">
+                                <input class="form-check-input" type="checkbox" form="editForm" role="switch" id="{{ struct_elmt }}" name="{{ struct_elmt }}"{% if property.used_in[struct_elmt] %} checked{% endif %}>
+                                <label class="form-check-label" for="{{ struct_elmt }}">{{ struct_elmt | capitalize }}</label>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
                 {% endif %}
@@ -54,7 +62,7 @@
                     <form id="editForm" action="{{ url_for('structural_elements.properties.edit', id=property.id) }}" method="POST">
                         <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                         <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
-                    </form>    
+                    </form>
                 </div>
             </fieldset>
         </div>

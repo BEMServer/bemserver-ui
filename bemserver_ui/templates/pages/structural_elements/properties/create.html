@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Create a new structural element property" %}
+{% set title = "New sites attribute" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -9,37 +9,45 @@
         <div class="col">
             <form action="{{ url_for('structural_elements.properties.create', next=url_cancel) }}" method="POST">
                 <fieldset>
-                    <legend class="invisible d-none">Structural element property informations</legend>
-                    <div class="mb-3">
-                        <label class="form-label" for="name">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
+                    <legend class="invisible d-none">Sites attribute information</legend>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="name">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" minlength="1" maxlength="80" required autofocus>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="value_type">Type</label>
-                        <select class="form-select" id="value_type" name="value_type" aria-label="Select a value" required>
-                            <option value="integer">integer</option>
-                            <option value="float">float</option>
-                            <option value="boolean">boolean</option>
-                            <option value="string">string</option>
-                        </select>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="value_type">Type</label>
+                            <select class="form-select" id="value_type" name="value_type" aria-label="Select a value" required>
+                                <option value="integer">integer</option>
+                                <option value="float">float</option>
+                                <option value="boolean">boolean</option>
+                                <option value="string">string</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="unit_symbol">Unit symbol</label>
+                            <input type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="unit_symbol">Unit symbol</label>
-                        <input type="text" class="form-control" id="unit_symbol" name="unit_symbol" minlength="1" maxlength="20">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="description">Description</label>
+                            <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="description">Description</label>
-                        <textarea class="form-control" id="description" name="description" maxlength="500" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <p>Add this property for</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for x in structural_elements %}
-                            <div class="form-check form-switch me-4">
-                                <input class="form-check-input" type="checkbox" role="switch" id="{{ x }}" name="{{ x }}">
-                                <label class="form-check-label" for="{{ x }}">{{ x | capitalize }}</label>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <h5>Make this attribute available for the following levels:</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for x in structural_elements %}
+                                <div class="form-check form-switch me-4">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="{{ x }}" name="{{ x }}">
+                                    <label class="form-check-label" for="{{ x }}">{{ x | capitalize }}</label>
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2">

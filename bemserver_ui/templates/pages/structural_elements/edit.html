@@ -3,6 +3,10 @@
 {% set title = type|capitalize %}
 {% set subtitle = "Edit" %}
 
+{% if tab is undefined %}
+    {% set tab = "general" %}
+{% endif %}
+
 {% set url_create_property = url_for('structural_elements.properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='properties')|urlencode) %}
 
 {% block main_toolbar %}
@@ -25,13 +29,13 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'properties' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'properties' %}true{% else %}false{% endif %}">Properties <span class="badge bg-secondary">{{ properties|length }}</span></button>
+                    <button class="nav-link{% if tab == 'attributes' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'attributes' %}true{% else %}false{% endif %}">Attributes <span class="badge bg-secondary">{{ properties|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
                 <div class="tab-pane fade{% if tab == 'general' %} show active{% endif %} p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab">
                     <fieldset>
-                        <legend class="invisible d-none">{{ type|capitalize }} general informations</legend>
+                        <legend class="invisible d-none">{{ type|capitalize }} general information</legend>
                         <div class="mb-3">
                             <label class="form-label" for="name">Name</label>
                             <input type="text" form="editForm" class="form-control" id="name" name="name" value="{{ structural_element.name }}" minlength="1" maxlength="80" required autofocus>
@@ -58,9 +62,9 @@
                         </div>
                     </fieldset>
                 </div>
-                <div class="tab-pane fade{% if tab == 'properties' %} show active{% endif %} p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab">
+                <div class="tab-pane fade{% if tab == 'attributes' %} show active{% endif %} p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab">
                     <fieldset>
-                        <legend class="invisible d-none">{{ type|capitalize }} properties</legend>
+                        <legend class="invisible d-none">{{ type|capitalize }} attributes</legend>
                         {% for property_id, property_data in properties.items() %}
                         <div class="mb-3">
                             <label class="form-label" for="property-{{ property_id }}">{{ property_data.name }}{% if property_data.unit_symbol %}<span class="fst-italic text-muted ms-1">[{{ property_data.unit_symbol }}]</span>{% endif %}</label>
@@ -76,9 +80,9 @@
                                     {% endif %}
                                     <small class="fst-italic text-muted">{{ [property_data.description, property_data.value_type] | select | join(", ") }}</small>
                                 </div>
-                                <form class="mt-1" id="delPropertyForm-{{ property_data.id }}" action="{{ url_for('structural_elements.delete_property', type=type, id=structural_element.id, property_id=property_data.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property_data.name }}&lt;/mark&gt; property">
+                                <form class="mt-1" id="delPropertyForm-{{ property_data.id }}" action="{{ url_for('structural_elements.delete_property', type=type, id=structural_element.id, property_id=property_data.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ property_data.name }}&lt;/mark&gt; attribute">
                                     <input type="hidden" form="delPropertyForm-{{ property_data.id }}" id="delPropertyEtag-{{ property_data.id }}" name="delPropertyEtag-{{ property_data.id }}" value="{{ property_data.etag }}">
-                                    <button type="submit" form="delPropertyForm-{{ property_data.id }}" class="btn btn-sm btn-outline-danger" title="Delete property"><i class="bi bi-trash"></i></button>
+                                    <button type="submit" form="delPropertyForm-{{ property_data.id }}" class="btn btn-sm btn-outline-danger" title="Delete attribute"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                         </div>
@@ -87,15 +91,15 @@
                             {% if available_properties|length > 0 %}
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="addPropertyBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-plus-circle"></i> Define a property
+                                    <i class="bi bi-plus-circle me-1"></i>Define an attribute
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="addPropertyBtn">
-                                    <li><a class="dropdown-item" role="button" data-bs-toggle="modal" data-bs-target="#addProperty">Choose from available properties ({{ available_properties|length }})</a></li>
-                                    <li><a class="dropdown-item" href="{{ url_create_property }}">Create a new property</a></li>
+                                    <li><a class="dropdown-item" role="button" data-bs-toggle="modal" data-bs-target="#addProperty">Choose from available attributes ({{ available_properties|length }})</a></li>
+                                    <li><a class="dropdown-item" href="{{ url_create_property }}">Create a new attribute</a></li>
                                 </ul>
                             </div>
                             {% else %}
-                            <a class="btn btn-sm btn-outline-primary" href="{{ url_create_property }}" title="Create a new property"><i class="bi bi-plus-circle"></i> Add a new property</a>
+                            <a class="btn btn-sm btn-outline-primary" href="{{ url_create_property }}" title="Create a new attribute"><i class="bi bi-plus-circle"></i> Add a new attribute</a>
                             {% endif %}
                         </div>
                     </fieldset>
@@ -105,7 +109,7 @@
                 <a href="{{ url_for('structural_elements.explore') }}" class="btn btn-sm btn-outline-secondary text-break" title="Cancel">Cancel</a>
                 <form id="editForm" action="{{ url_for('structural_elements.edit', type=type, id=structural_element.id) }}" method="POST">
                     <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
-                    <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
+                    <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save me-1"></i>Save</button>
                 </form>
             </div>
         </div>
@@ -115,14 +119,14 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addPropertyLabel">Define a property</h5>
+                <h5 class="modal-title" id="addPropertyLabel">Define an attribute</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="addPropertyForm" action="{{ url_for('structural_elements.create_property', type=type, id=structural_element.id) }}" method="POST">
                     <div class="mb-3">
-                        <label class="form-label" for="availableProperty">Available properties <span class="badge bg-secondary">{{ available_properties|length }}</span></label>
-                        <select form="addPropertyForm" class="form-select" id="availableProperty" name="availableProperty" aria-label="Select a property">
+                        <label class="form-label" for="availableProperty">Available attributes <span class="badge bg-secondary">{{ available_properties|length }}</span></label>
+                        <select form="addPropertyForm" class="form-select" id="availableProperty" name="availableProperty" aria-label="Select an attribute">
                             {% for property_id, property_data in available_properties.items() %}
                             <option value="{{ property_id }}" data-property-type="{{ property_data.value_type }}" data-property-description="{{ property_data.description }}"{% if loop.first %} selected{% endif %}>{{ property_data.name }}{% if property_data.unit_symbol %} [{{ property_data.unit_symbol }}]{% endif %}</option>
                             {% endfor %}
@@ -138,10 +142,10 @@
                 </form>
             </div>
             <div class="modal-footer d-flex justify-content-between">
-                <a class="btn btn-sm btn-outline-primary" href="{{ url_create_property }}" title="Create a new property"><i class="bi bi-plus-circle"></i> Add a new property</a>
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_create_property }}" title="Create a new attribute"><i class="bi bi-plus-circle me-1"></i>Add a new attribute</a>
                 <div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" form="addPropertyForm" class="btn btn-sm btn-primary"><i class="bi bi-save"></i> Save</button>
+                    <button type="submit" form="addPropertyForm" class="btn btn-sm btn-primary"><i class="bi bi-save me-1"></i>Save</button>
                 </div>
             </div>
         </div>
@@ -161,6 +165,7 @@
         let availablePropertyInputElmt = document.getElementById("availablePropertyValue");
         let availablePropertyValueTypeElmt = document.getElementById("availablePropertyValueType");
         let availablePropertyDescriptionElmt = document.getElementById("availablePropertyDescription");
+        let addPropertyModalElmt = document.getElementById("addProperty");
 
         function updatePropertyDescription() {
             if (availablePropertySelectElmt.selectedIndex != -1) {
@@ -200,6 +205,8 @@
                         break;
                 }
 
+                availablePropertyInputElmt.focus();
+
                 availablePropertyDescriptionElmt.innerHTML = [selectedProperty.getAttribute("data-property-description"), propertyType].filter(Boolean).join(", ");
             }
             else {
@@ -208,14 +215,17 @@
             }
         }
 
+        availablePropertySelectElmt.addEventListener("change", () => {
+            updatePropertyDescription();
+        });
+
+        addPropertyModalElmt.addEventListener("shown.bs.modal", () => {
+            availablePropertyInputElmt.focus();
+        });
+
         if (availablePropertySelectElmt.selectedIndex != -1) {
             updatePropertyDescription();
         }
-        availablePropertySelectElmt.addEventListener("change", (event) => {
-            event.preventDefault();
-
-            updatePropertyDescription();
-        });
 
     });
 </script>

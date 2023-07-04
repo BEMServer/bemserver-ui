@@ -24,17 +24,16 @@ def init_app(app):
 @blp.route("/index")
 @auth.signin_required
 def index():
-    if flask.g.campaign_ctxt.has_campaign:
-        return flask.redirect(flask.url_for("structural_elements.explore"))
-    return flask.redirect(
-        flask.url_for("campaigns.list", state=CampaignState.ongoing.value)
-    )
+    if not flask.g.campaign_ctxt.has_campaign:
+        return flask.render_template(
+            "pages/start.html", default_campaign_state=CampaignState.ongoing.value
+        )
+    return flask.redirect(flask.url_for("structural_elements.explore"))
 
 
-@blp.route("/home")
+@blp.route("/stats")
 @auth.signin_required
-def home():
-
+def stats():
     campaign_scopes_count_overall = 0
     cs_resp = flask.g.api_client.campaign_scopes.getall()
     campaign_scopes_count_overall = len(cs_resp.data)
@@ -71,7 +70,7 @@ def home():
             struct_elmt_count[struct_elmt_type] = len(struct_elmt_resp.data)
 
     return flask.render_template(
-        "pages/home.html",
+        "pages/stats.html",
         campaign_scopes_count_overall=campaign_scopes_count_overall,
         campaign_scopes_count=campaign_scopes_count,
         ts_count_overall=ts_count_overall,

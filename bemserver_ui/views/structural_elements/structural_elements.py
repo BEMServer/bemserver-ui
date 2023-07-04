@@ -4,7 +4,12 @@ import flask
 import bemserver_api_client.exceptions as bac_exc
 
 from bemserver_ui.extensions import auth, Roles, ensure_campaign_context
-from bemserver_ui.common.const import FULL_STRUCTURAL_ELEMENT_TYPES
+from bemserver_ui.common.const import (
+    STRUCTURAL_ELEMENT_TYPES,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+)
+from bemserver_ui.common.tree import _get_node_level_from_type
+from bemserver_ui.internal_api.structural_elements import _build_tree_sites
 
 
 blp = flask.Blueprint(
@@ -24,6 +29,8 @@ def explore():
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def create(type):
+    campaign_id = flask.g.campaign_ctxt.id
+
     if flask.request.method == "POST":
         payload = {
             "name": flask.request.form["name"],
@@ -35,7 +42,7 @@ def create(type):
             if type == "site":
                 payload["latitude"] = flask.request.form["latitude"]
                 payload["longitude"] = flask.request.form["longitude"]
-            payload["campaign_id"] = flask.g.campaign_ctxt.id
+            payload["campaign_id"] = campaign_id
         elif type == "building":
             payload["site_id"] = flask.request.form["site"]
         elif type == "storey":
@@ -56,20 +63,28 @@ def create(type):
         )
 
     # Get parent type and list.
+    type_level = _get_node_level_from_type(type)
     parent_type = None
+    if type_level > 0:
+        parent_type = STRUCTURAL_ELEMENT_TYPES[type_level - 1]
+
+    # Load all parent structural elements tree (to get their path).
+    tree_sites = _build_tree_sites(
+        campaign_id, structural_element_types=STRUCTURAL_ELEMENT_TYPES[:type_level]
+    )
+
+    def _filter_children(nodes, node_level):
+        filtered_nodes = []
+        for node in nodes:
+            if node["node_level"] < node_level:
+                filtered_nodes.extend(_filter_children(node["nodes"], node_level))
+            elif node["node_level"] == node_level:
+                filtered_nodes.append(node)
+        return filtered_nodes
+
     parents = []
-    if type not in ("site", "zone"):
-        if type == "building":
-            parent_type = "site"
-        elif type == "storey":
-            parent_type = "building"
-        elif type == "space":
-            parent_type = "storey"
-        parents = (
-            getattr(flask.g.api_client, f"{parent_type}s")
-            .getall(campaign_id=flask.g.campaign_ctxt.id, sort="+name")
-            .data
-        )
+    if type_level > 0:
+        parents = _filter_children(tree_sites, type_level - 1)
 
     return flask.render_template(
         "pages/structural_elements/create.html",
@@ -152,10 +167,10 @@ def edit(type, id):
                 )
             except bac_exc.BEMServerAPIValidationError:
                 flask.flash(
-                    f"Error while setting {prop_data['name']} property!", "warning"
+                    f"Error while setting {prop_data['name']} attribute!", "warning"
                 )
             else:
-                flask.flash(f"{prop_data['name']} property updated!", "success")
+                flask.flash(f"{prop_data['name']} attribute updated!", "success")
 
         return flask.redirect(flask.url_for("structural_elements.explore"))
 
@@ -199,7 +214,7 @@ def create_property(type, id):
     }
     api_resource = getattr(flask.g.api_client, f"{type}_property_data")
     api_resource.create(payload)
-    flask.flash("Property defined!", "success")
+    flask.flash("Attribute defined!", "success")
 
     return flask.redirect(
         flask.url_for("structural_elements.edit", type=type, id=id, tab="properties")
@@ -216,7 +231,7 @@ def delete_property(type, id, property_id):
     api_resource.delete(
         property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
     )
-    flask.flash("Property deleted!", "success")
+    flask.flash("Attribute deleted!", "success")
     return flask.redirect(
         flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
     )

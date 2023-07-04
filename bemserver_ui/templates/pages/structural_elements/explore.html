@@ -2,6 +2,41 @@
 
 {% set title = "Explore sites" %}
 
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+{% if signed_user.is_admin %}
+<div class="d-none d-sm-flex gap-2">
+    <div class="btn-group">
+        <button id="dropdownAddSites" type="button" class="btn btn-sm btn-outline-primary text-nowrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Add a new site/building/sotrey/space or zone"><i class="bi bi-plus-circle"></i> Add</button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownAddSites">
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">Site</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">Building</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">Storey</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">Space</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">Zone</a></li>
+        </ul>
+    </div>
+    <div class="vr mx-1"></div>
+    <a class="btn btn-sm btn-outline-success text-nowrap" href="{{ url_for('structural_elements.upload') }}" title="Import CSV files"><i class="bi bi-upload"></i> Import CSV</a>
+</div>
+<div class="btn-group d-sm-none">
+    <button id="dropdownActions" type="button" class="btn btn-sm btn-outline-primary text-nowrap dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Manage sites"><i class="bi bi-three-dots-vertical"></i> Actions</button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownActions">
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='site') }}" title="Add a new site">New site</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='building') }}" title="Add a new building">New building</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='storey') }}" title="Add a new storey">New storey</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='space') }}" title="Add a new space">New space</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.create', type='zone') }}" title="Add a new zone">New zone</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{{ url_for('structural_elements.upload') }}" title="Import CSV files">Import CSV</a></li>
+    </ul>
+</div>
+{% endif %}
+{% endfilter %}
+{% endblock main_toolbar %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -9,10 +44,10 @@
         <div class="col col-xl-6 pb-3 pb-xl-0">
             <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'sites' %} active{% endif %}" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="{% if tab == 'sites' %}true{% else %}false{% endif %}"><i class="bi bi-buildings"></i> Sites / Buildings...</button>
+                    <button class="nav-link{% if tab == 'sites' %} active{% endif %}" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="{% if tab == 'sites' %}true{% else %}false{% endif %}"><i class="bi bi-buildings me-1"></i>Sites</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'zones' %} active{% endif %}" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="{% if tab == 'zones' %}true{% else %}false{% endif %}"><i class="bi bi-bullseye"></i> Zones</button>
+                    <button class="nav-link{% if tab == 'zones' %} active{% endif %}" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="{% if tab == 'zones' %}true{% else %}false{% endif %}"><i class="bi bi-bullseye me-1"></i>Zones</button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
@@ -25,81 +60,83 @@
             </div>
         </div>
         <div class="col">
-            <h5 class="text-secondary">Information about selected location</h5>
             <div id="alertInfoData" class="alert alert-info" role="alert">
                 <i class="bi bi-info-square float-start me-2"></i>
-                <span>Select a <span class="fw-bold">location (site, building...)</span> in the tree to explore its data.</span>
+                <span>Select a <span class="fw-bold">site/building/storey/space or zone</span> in the tree to explore its data.</span>
             </div>
-            <ul class="nav nav-tabs app-tabs d-none invisible" id="tabData" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="true">General</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="false">Properties</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="timeseries-tab" data-bs-toggle="tab" data-bs-target="#timeseries-tabcontent" type="button" role="tab" aria-controls="timeseries-tabcontent" aria-selected="false">Timeseries</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-tabcontent" type="button" role="tab" aria-controls="events-tabcontent" aria-selected="false">Events</button>
-                </li>
-            </ul>
-            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white d-none invisible" id="tabDataContent">
-                <div class="tab-pane fade show active p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab"></div>
-                <div class="tab-pane fade p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab"></div>
-                <div class="tab-pane fade p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab">
-                    <div class="row mb-1">
-                        <div class="col">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="tsRecurseSwitch">
-                                <label class="form-check-label" for="tsRecurseSwitch">extend search to sub-locations</label>
+            <div id="selectedStructutalElementInfoContainer" class="d-none invisible">
+                <h5 class="text-secondary">Information about selected <span id="selectedStructuralElementType">element</span></h5>
+                <ul class="nav nav-tabs app-tabs" id="tabData" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="true">General</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="false">Attributes</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="timeseries-tab" data-bs-toggle="tab" data-bs-target="#timeseries-tabcontent" type="button" role="tab" aria-controls="timeseries-tabcontent" aria-selected="false">Timeseries</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events-tabcontent" type="button" role="tab" aria-controls="events-tabcontent" aria-selected="false">Events</button>
+                    </li>
+                </ul>
+                <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabDataContent">
+                    <div class="tab-pane fade show active p-3" id="general-tabcontent" role="tabpanel" aria-labelledby="general-tab"></div>
+                    <div class="tab-pane fade p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab"></div>
+                    <div class="tab-pane fade p-3" id="timeseries-tabcontent" role="tabpanel" aria-labelledby="timeseries-tab">
+                        <div class="row mb-1">
+                            <div class="col">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="tsRecurseSwitch">
+                                    <label class="form-check-label" for="tsRecurseSwitch">extend search to sub-locations</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label m-0" for="search">Search</label>
-                            <input type="text" class="form-control form-control-sm" id="tsSearch" name="tsSearch" placeholder="Name..." autofocus>
-                            <a id="tsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
-                        </div>
-                    </div>
-                    <nav class="row" aria-label="Timeseries pagination">
-                        <div class="col-auto align-self-center py-1">
-                            <div is="app-pagesize-selector" id="tsPageSize"></div>
-                        </div>
-                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
-                            <small class="text-nowrap text-muted"><app-items-count id="tsCount"></app-items-count></small>
-                            <ul is="app-pagination" id="tsPagination"></ul>
-                        </div>
-                    </nav>
-                    <div id="tsList" class="list-group py-2"></div>
-                </div>
-                <div class="tab-pane fade p-3" id="events-tabcontent" role="tabpanel" aria-labelledby="events-tab">
-                    <div class="row mb-1">
-                        <div class="col">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="eventsRecurseSwitch">
-                                <label class="form-check-label" for="eventsRecurseSwitch">extend search to sub-locations</label>
+                        <div class="row mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label m-0" for="search">Search</label>
+                                <input type="text" class="form-control form-control-sm" id="tsSearch" name="tsSearch" placeholder="Name..." autofocus>
+                                <a id="tsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
                             </div>
                         </div>
+                        <nav class="row" aria-label="Timeseries pagination">
+                            <div class="col-auto align-self-center py-1">
+                                <div is="app-pagesize-selector" id="tsPageSize"></div>
+                            </div>
+                            <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                <small class="text-nowrap text-muted"><app-items-count id="tsCount"></app-items-count></small>
+                                <ul is="app-pagination" id="tsPagination"></ul>
+                            </div>
+                        </nav>
+                        <div id="tsList" class="list-group py-2"></div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label m-0" for="search">Search</label>
-                            <input type="text" class="form-control form-control-sm" id="eventsSearch" name="eventsSearch" placeholder="Source..." autofocus>
-                            <a id="eventsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+                    <div class="tab-pane fade p-3" id="events-tabcontent" role="tabpanel" aria-labelledby="events-tab">
+                        <div class="row mb-1">
+                            <div class="col">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="eventsRecurseSwitch">
+                                    <label class="form-check-label" for="eventsRecurseSwitch">extend search to sub-locations</label>
+                                </div>
+                            </div>
                         </div>
+                        <div class="row mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label m-0" for="search">Search</label>
+                                <input type="text" class="form-control form-control-sm" id="eventsSearch" name="eventsSearch" placeholder="Source..." autofocus>
+                                <a id="eventsClear" role="button" class="link-danger text-decoration-none mx-1 d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
+                            </div>
+                        </div>
+                        <nav class="row" aria-label="Events pagination">
+                            <div class="col-auto align-self-center py-1">
+                                <div is="app-pagesize-selector" id="eventsPageSize"></div>
+                            </div>
+                            <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
+                                <small class="text-nowrap text-muted"><app-items-count id="eventsCount"></app-items-count></small>
+                                <ul is="app-pagination" id="eventsPagination"></ul>
+                            </div>
+                        </nav>
+                        <div id="eventsList" class="list-group py-2"></div>
                     </div>
-                    <nav class="row" aria-label="Events pagination">
-                        <div class="col-auto align-self-center py-1">
-                            <div is="app-pagesize-selector" id="eventsPageSize"></div>
-                        </div>
-                        <div class="col d-flex flex-wrap justify-content-end align-items-center gap-2">
-                            <small class="text-nowrap text-muted"><app-items-count id="eventsCount"></app-items-count></small>
-                            <ul is="app-pagination" id="eventsPagination"></ul>
-                        </div>
-                    </nav>
-                    <div id="eventsList" class="list-group py-2"></div>
                 </div>
             </div>
         </div>

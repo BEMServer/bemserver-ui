@@ -1,6 +1,7 @@
 {% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
 
-{% set title = "Cleanup service" %}
+{% set title = "Cleanup data service" %}
 
 {% block main_content %}
 {{ super() -}}
@@ -60,10 +61,9 @@
                     <i class="bi bi-puzzle"></i>
                     <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
-                            <div class="d-flex flex-wrap gap-1">
-                                <small class="fw-bold text-{% if x.campaign_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ x.campaign_state | upper }}]</small>
-                                <h6 class="fw-bold text-break ms-2 mb-0">{{ x.campaign_name }}</h6>
-                            </div>
+                            <h6 class="fw-bold">
+                                {{- mac_camp.render_campaign_info(x.campaign_name, x.campaign_state, render_style="bullet") }}
+                            </h6>
                             {% if is_campaign_selected %}
                             <div><small class="text-opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
                             {% endif %}

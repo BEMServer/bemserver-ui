@@ -1,17 +1,17 @@
 {% extends "pages/base.html" %}
 
-{% set title = "User group" %}
+{% set title = "Group" %}
 {% set subtitle = "Manage campaign scopes" %}
 
 {% block main_toolbar %}
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid gap-2">
-    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaign_scopes') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage user group"><i class="bi bi-arrow-return-left"></i> Back to user group</a>
+    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='campaign_scopes') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage group"><i class="bi bi-arrow-return-left"></i> Back to group view</a>
     <div class="vr d-none d-lg-block mx-2"></div>
     <div class="hstack gap-2 ms-auto">
         {% if signed_user.is_admin %}
-        <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; user group">
+        <form id="delForm" action="{{ url_for('user_groups.delete', id=user_group.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ user_group.name }}&lt;/mark&gt; group">
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
         </form>

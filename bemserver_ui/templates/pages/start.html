@@ -1,0 +1,45 @@
+{% extends "pages/base.html" %}
+
+{% set user_guide_url = config.get("BEMSERVER_UI_USER_GUIDE_URL") %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row row-cols-1 g-4">
+        <div class="col">
+            <div class="card border-light p-2">
+                <div class="row align-items-end g-2">
+                    <div class="col-auto d-none d-sm-block align-self-center">
+                        <img class="p-2" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer" style="height: 120px;">
+                    </div>
+                    <div class="col">
+                        <div class="card-body py-1">
+                            <h3 class="card-title visually-hidden">BEMServer</h3>
+                            <p class="card-text mb-1"><strong>BEMServer</strong> is a free open source Building Energy Management software platform.</p>
+                            <p class="card-text mb-0">Its purpose it to store data collected in buildings and produce useful information such as performance indicators or alerts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-light p-2">
+                <div class="card-body">
+                    <h4 class="alert-heading text-secondary">Basic concepts</h4>
+                    <p>The high-level entity for a project is the <strong>campaign</strong>. A campaign may span on several sites and buildings. It has beginning and end dates, although the end date may be left open to let the campaign last indefinitely.</p>
+                    <p><strong>Sites</strong> are described in a tree structure inspired from the IFC model: a site is a geographical unit containing buildings, which contain storeys, which contain spaces. Zone is an orthogonal concept: zones may span over multiple space parts.</p>
+                    <p>A campaign also contains <strong>timeseries data</strong> (sensors measurements, indicators, ...) and <strong>events</strong> (alerts, logbook, ...).</p>
+                    <hr>
+                    <ol{% if not user_guide_url %} class="mb-0"{% endif %}>
+                        <li>First, {% if signed_user.is_admin %}create a campaign or select an existing one{% else %}select a campaign{% endif %}, using <a class="link-secondary text-nowrap app-target-highlight p-2" href="{{ url_for('campaigns.list', state=default_campaign_state) }}" title="Manage campaigns"><i class="bi bi-boxes me-1"></i> campaigns</a> menu in the sidebar.</li>
+                        <li>Then explore all BEMServer features using the sidebar menu.</li>
+                    </ol>
+                    {% if signed_user.is_admin and user_guide_url %}
+                    <p class="text-muted mb-0">More details in the <a class="text-nowrap" href="{{ user_guide_url }}" target="_blank" title="User guide">user guide</a>.</p>
+                    {% endif %}    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}

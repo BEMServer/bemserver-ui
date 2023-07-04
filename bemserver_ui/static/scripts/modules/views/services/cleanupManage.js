@@ -1,7 +1,7 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import "../../components/itemsCount.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { flaskES6, signedUser } from "/static/scripts/app.js";
+import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
+import "/static/scripts/modules/components/itemsCount.js";
 
 
 class ServiceCleanuManageView {
@@ -32,11 +32,13 @@ class ServiceCleanuManageView {
     #cacheDOM() {
         this.#messagesElmt = document.getElementById("messages");
 
-        this.#stateOnRadioElmt = document.getElementById("svc_state_on");
-        this.#stateOffRadioElmt = document.getElementById("svc_state_off");
-        this.#cleanupIDInputElmt = document.getElementById("cleanup_id");
-        this.#campaignIDInputElmt = document.getElementById("campaign_id");
-        this.#etagInputElmt = document.getElementById("etag");
+        if (signedUser.is_admin) {
+            this.#stateOnRadioElmt = document.getElementById("svc_state_on");
+            this.#stateOffRadioElmt = document.getElementById("svc_state_off");
+            this.#cleanupIDInputElmt = document.getElementById("cleanup_id");
+            this.#campaignIDInputElmt = document.getElementById("campaign_id");
+            this.#etagInputElmt = document.getElementById("etag");
+        }
 
         this.#formFiltersElmt = document.getElementById("formFiltersElmt");
         this.#sortInputElmt = document.getElementById("sort");
@@ -44,17 +46,20 @@ class ServiceCleanuManageView {
     }
 
     #initEventListeners() {
-        this.#stateOnRadioElmt.addEventListener("change", () => {
-            if (this.#stateOnRadioElmt.checked) {
-                this.#updateServiceState(this.#stateOnRadioElmt.checked);
-            }
-        });
+        if (signedUser.is_admin) {
+            this.#stateOnRadioElmt.addEventListener("change", () => {
+                if (this.#stateOnRadioElmt.checked) {
+                    this.#updateServiceState(this.#stateOnRadioElmt.checked);
+                }
+            });
 
-        this.#stateOffRadioElmt.addEventListener("change", () => {
-            if (this.#stateOffRadioElmt.checked) {
-                this.#updateServiceState(this.#stateOnRadioElmt.checked);
-            }
-        });
+            this.#stateOffRadioElmt.addEventListener("change", () => {
+                if (this.#stateOffRadioElmt.checked) {
+                    this.#updateServiceState(this.#stateOnRadioElmt.checked);
+                }
+            });
+        }
+
         for (let sortRadioElmt of this.#sortRadioElmts) {
             sortRadioElmt.addEventListener("change", (event) => {
                 event.preventDefault();
@@ -113,11 +118,16 @@ class ServiceCleanuManageView {
             );
         }
     }
+
+    mount() {
+
+    }
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
 
     let svcCleanupManageView = new ServiceCleanuManageView();
+    svcCleanupManageView.mount();
 
 });

@@ -14,8 +14,7 @@
                     <ul class="nav nav-pills flex-column gap-1">
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("Properties", url_for("structural_elements.properties.list"), "Manage locations properties", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("structural_elements.properties.create"), "Add a new locations property", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Attributes", url_for("structural_elements.properties.list"), "Manage sites attributes", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
                             {% endfilter %}
                         </li>
                     </ul>
@@ -33,14 +32,12 @@
                     <ul class="nav nav-pills flex-column gap-1">
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("Properties", url_for("timeseries.properties.list"), "Manage timeseries properties", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("timeseries.properties.create"), "Add a new timeseries property", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Attributes", url_for("timeseries.properties.list"), "Manage timeseries attributes", ["bi", "bi-card-list"], extra_classes=["w-100"]) -}}
                             {% endfilter %}
                         </li>
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("Data states", url_for("timeseries.datastates.list"), "Manage timeseries data states", ["bi", "bi-inboxes"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("timeseries.datastates.create"), "Add a new timeseries data state", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Data states", url_for("timeseries.datastates.list"), "Manage timeseries data states", ["bi", "bi-tags"], extra_classes=["w-100"]) -}}
                             {% endfilter %}
                         </li>
                     </ul>
@@ -76,7 +73,7 @@
                 <div class="accordion-body px-0 py-2">
                     <ul class="nav nav-pills flex-column gap-1">
                         {% filter indent(width=24, first=True) %}
-                        {{- mac_sidebar.render_nav_item("Cleanup", url_for("services.cleanup.list"), "Manage cleanup service", ["bi", "bi-magic"]) -}}
+                        {{- mac_sidebar.render_nav_item("Cleanup data", url_for("services.cleanup.list"), "Manage cleanup data service", ["bi", "bi-magic"]) -}}
                         {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.list"), "Manage missing data service", ["bi", "bi-journal-x"]) -}}
                         {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.list"), "Manage check outlier data service", ["bi", "bi-layout-wtf"]) -}}
                         {% endfilter %}
@@ -96,7 +93,6 @@
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
                             {{- mac_sidebar.render_nav_link("Categories", url_for("events.categories.list"), "Manage events categories", ["bi", "bi-tags"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("events.categories.create"), "Add a new event category", ["bi", "bi-plus-circle"]) -}}
                             {% endfilter %}
                         </li>
                     </ul>
@@ -114,14 +110,12 @@
                     <ul class="nav nav-pills flex-column gap-1">
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("User groups", url_for("user_groups.list"), "Manage user groups", ["bi", "bi-people-fill"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("user_groups.create"), "Add a new user group", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Users", url_for("users.list"), "Manage users", ["bi", "bi-person-lines-fill"], extra_classes=["w-100"]) -}}
                             {% endfilter %}
                         </li>
                         <li class="nav-item d-flex justify-content-between align-items-center gap-1">
                             {% filter indent(width=28, first=True) %}
-                            {{- mac_sidebar.render_nav_link("Users", url_for("users.list"), "Manage users", ["bi", "bi-person-lines-fill"], extra_classes=["w-100"]) -}}
-                            {{- mac_sidebar.render_nav_link(none, url_for("users.create"), "Add a new user", ["bi", "bi-plus-circle"]) -}}
+                            {{- mac_sidebar.render_nav_link("Groups", url_for("user_groups.list"), "Manage groups", ["bi", "bi-people-fill"], extra_classes=["w-100"]) -}}
                             {% endfilter %}
                         </li>
                     </ul>

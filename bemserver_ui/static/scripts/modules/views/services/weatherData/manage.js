@@ -1,7 +1,7 @@
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
-import { Spinner } from "../../../components/spinner.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";

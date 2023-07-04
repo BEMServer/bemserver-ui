@@ -1,4 +1,4 @@
-import { Parser } from "./tools/parser.js"
+import { Parser } from "/static/scripts/modules/tools/parser.js"
 
 
 export class Sidebar {
@@ -6,8 +6,7 @@ export class Sidebar {
     #navLinkElmts = null;
 
     #sidebarMenuInnerElmt = null;
-    #campaignSelectorNavLinkElmt = null;
-    #campaignsNavLinkElmt = null;
+    #campaignSelectedNavLinkElmt = null;
 
     constructor() {
         this.#cacheDOM();
@@ -18,21 +17,22 @@ export class Sidebar {
         this.#navLinkElmts = [].slice.call(document.querySelectorAll(".app-sidebar .nav-link"));
 
         this.#sidebarMenuInnerElmt = document.querySelector("#sidebarMenu div.position-sticky");
-        this.#campaignSelectorNavLinkElmt = document.getElementById("campaignSelectorNavLink");
-        this.#campaignsNavLinkElmt = document.getElementById("campaignsNavLink");
+        this.#campaignSelectedNavLinkElmt = document.querySelector("#sidebarMenu #campaignSelectedNavItem > a.nav-link");
     }
 
     #initEventListeners() {
         window.addEventListener("resize", () => {
-            this.#updateCampaignSelectorWidth();
+            this.#updateCampaignSelectedWidth();
         });
     }
 
-    #updateCampaignSelectorWidth() {
-        let campaignNavStyle = window.getComputedStyle(this.#campaignSelectorNavLinkElmt.parentElement);
-        let remainingWidth = this.#sidebarMenuInnerElmt.clientWidth - this.#campaignsNavLinkElmt.clientWidth - Parser.parseFloatOrDefault(campaignNavStyle.gap);
-        if (Parser.parseFloatOrDefault(this.#campaignSelectorNavLinkElmt.style.maxWidth) != remainingWidth) {
-            this.#campaignSelectorNavLinkElmt.style.maxWidth = `${remainingWidth}px`;
+    #updateCampaignSelectedWidth() {
+        if (this.#campaignSelectedNavLinkElmt != null) {
+            let campaignNavStyle = window.getComputedStyle(this.#campaignSelectedNavLinkElmt.parentElement);
+            let remainingWidth = this.#sidebarMenuInnerElmt.clientWidth - Parser.parseFloatOrDefault(campaignNavStyle.gap);
+            if (Parser.parseFloatOrDefault(this.#campaignSelectedNavLinkElmt.style.maxWidth) != remainingWidth) {
+                this.#campaignSelectedNavLinkElmt.style.maxWidth = `${remainingWidth}px`;
+            }
         }
     }
 
@@ -66,13 +66,13 @@ export class Sidebar {
     }
 
     refresh() {
-        // Set active the nav link element that corresponds to the current page location.
+        // Set active the "nav-link" element that corresponds to the current page location.
         let currentUrl = window.location.pathname + window.location.search;
 
-        // First search in nav-links.
+        // First search in "nav-link" class elements.
         let elmt = document.querySelector(`.app-sidebar .nav-link[href="${currentUrl}"]:not(.disabled)`);
         if (elmt == null) {
-            // Then search in dropdwn items.
+            // Then search in dropdown items.
             elmt = document.querySelector(`div.dropdown ul.dropdown-menu a.dropdown-item[href="${currentUrl}"]:not(.disabled)`)
             if (elmt != null) {
                 let dropdownMenuId = elmt.parentElement.parentElement.getAttribute("aria-labelledby");
@@ -81,16 +81,23 @@ export class Sidebar {
             }
         }
         if (elmt == null) {
-            // And finally just search the best match in nav-links.
+            // And finally just search the best match in nav-link elements.
+            let elmtLocation = "";
             for (let navLinkElmt of this.#navLinkElmts) {
-                if (window.location.pathname.startsWith(navLinkElmt.getAttribute("href")?.split("?")[0])) {
-                    elmt = navLinkElmt;
-                    break;
+                let navLinkLocation = navLinkElmt.getAttribute("href")?.split("?")[0];
+                if (window.location.pathname.startsWith(navLinkLocation)) {
+                    // nav-link element location matches
+                    // 1. if first found, save it
+                    // 2. else verify that it is better than any other previous element found
+                    if (elmt == null || (elmt != null && navLinkLocation.length > elmtLocation.length)) {
+                        elmt = navLinkElmt;
+                        elmtLocation = navLinkLocation;
+                    }
                 }
             }
         }
         this.#setActive(elmt);
 
-        this.#updateCampaignSelectorWidth();
+        this.#updateCampaignSelectedWidth();
     }
 }

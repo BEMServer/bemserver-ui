@@ -83,7 +83,7 @@ def create():
         }
         ret_resp = flask.g.api_client.structural_element_properties.create(payload)
         prop_name = ret_resp.data["name"]
-        flask.flash(f"New property created: {prop_name}", "success")
+        flask.flash(f"New attribute created: {prop_name}", "success")
 
         payload = {"structural_element_property_id": ret_resp.data["id"]}
         for x in FULL_STRUCTURAL_ELEMENT_TYPES:
@@ -93,10 +93,10 @@ def create():
                     api_resource.create(payload)
                 except bac_exc.BEMServerAPIValidationError:
                     flask.flash(
-                        f"Error while adding {prop_name} property to {x}s!", "error"
+                        f"Error while adding {prop_name} attribute to {x}s!", "error"
                     )
                 else:
-                    flask.flash(f"{prop_name} property added to {x}s", "success")
+                    flask.flash(f"{prop_name} attribute added to {x}s", "success")
 
         url_next = urllib.parse.unquote(
             flask.request.args.get("next")
@@ -130,7 +130,7 @@ def edit(id):
             id, payload, etag=flask.request.form["editEtag"]
         )
         prop_name = prop_resp.data["name"]
-        flask.flash(f"{prop_name} property updated!", "success")
+        flask.flash(f"{prop_name} attribute updated!", "success")
 
         payload = {"structural_element_property_id": prop_resp.data["id"]}
         for x in FULL_STRUCTURAL_ELEMENT_TYPES:
@@ -146,11 +146,11 @@ def edit(id):
                         api_resource.create(payload)
                     except bac_exc.BEMServerAPIValidationError:
                         flask.flash(
-                            f"Error while adding {prop_name} property to {x}s!",
+                            f"Error while adding {prop_name} attribute to {x}s!",
                             "error",
                         )
                     else:
-                        flask.flash(f"{prop_name} property added to {x}s", "success")
+                        flask.flash(f"{prop_name} attribute added to {x}s", "success")
             # Property is NOT requested to be associated.
             # Is property currently attach to structural element?
             # 1. Yes, remove association.
@@ -160,11 +160,11 @@ def edit(id):
                     api_resource.delete(x_props.data[0]["id"])
                 except bac_exc.BEMServerAPINotFoundError:
                     flask.flash(
-                        f"{prop_name} property is already removed for {x}s!",
+                        f"{prop_name} attribute is already removed for {x}s!",
                         "warning",
                     )
                 else:
-                    flask.flash(f"{prop_name} property removed from {x}s", "success")
+                    flask.flash(f"{prop_name} attribute removed from {x}s", "success")
 
         return flask.redirect(flask.url_for("structural_elements.properties.list"))
 
@@ -186,5 +186,5 @@ def delete(id):
     flask.g.api_client.structural_element_properties.delete(
         id, etag=flask.request.form["delEtag"]
     )
-    flask.flash("Property deleted!", "success")
+    flask.flash("Attribute deleted!", "success")
     return flask.redirect(flask.url_for("structural_elements.properties.list"))

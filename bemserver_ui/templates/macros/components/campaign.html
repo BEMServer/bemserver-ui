@@ -1,0 +1,12 @@
+{% macro render_campaign_info(campagin_name, campagin_state, render_style="text") %}
+<div class="hstack align-items-center gap-2 w-100">
+    {% if render_style == "text" %}
+    <span class="fw-bold text-{% if campagin_state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">[{{ campagin_state | upper }}]</span>
+    {% elif render_style == "bullet" %}
+    <span class="bg-{% if campagin_state == 'ongoing' %}success{% else %}danger{% endif %} border border-light rounded-circle p-2" title="Campaign state: {{ campagin_state | upper }}">
+        <span class="visually-hidden">{{ campagin_state | upper }}</span>
+    </span>
+    {% endif %}
+    <span class="text-truncate">{{ campagin_name }}</span>
+</div>
+{% endmacro %}

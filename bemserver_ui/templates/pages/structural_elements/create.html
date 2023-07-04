@@ -1,6 +1,6 @@
 {% extends "pages/base.html" %}
 
-{% set title = "Create a new " + type %}
+{% set title = "New " + type %}
 {% set has_no_parents = parent_type is not none and parents|length <= 0 %}
 
 {% block main_content %}
@@ -27,7 +27,7 @@
                         <label class="form-label" for="{{ parent_type }}">{{ parent_type|capitalize }}</label>
                         <select class="form-select" id="{{ parent_type }}" name="{{ parent_type }}" aria-label="Select a {{ parent_type }}" required>
                             {% for x in parents %}
-                            <option value="{{ x.id }}">{{ x.name }}</option>
+                            <option value="{{ x.id }}">{{ x.full_path }}</option>
                             {% endfor %}
                         </select>
                     </div>
