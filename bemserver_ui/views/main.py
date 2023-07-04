@@ -24,11 +24,11 @@ def init_app(app):
 @blp.route("/index")
 @auth.signin_required
 def index():
-    if flask.g.campaign_ctxt.has_campaign:
-        return flask.redirect(flask.url_for("structural_elements.explore"))
-    return flask.redirect(
-        flask.url_for("campaigns.list", state=CampaignState.ongoing.value)
-    )
+    if not flask.g.campaign_ctxt.has_campaign:
+        return flask.render_template(
+            "pages/start.html", default_campaign_state=CampaignState.ongoing.value
+        )
+    return flask.redirect(flask.url_for("structural_elements.explore"))
 
 
 @blp.route("/stats")

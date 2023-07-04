@@ -336,3 +336,13 @@ body,
         width: 75% !important;
     }
 }
+
+@keyframes target-highlight {
+    0% { background-color: rgba(var(--app-green-rgb), .8); }
+    100% { background-color: rgba(var(--app-green-rgb), 0); }
+}
+
+.app-target-highlight {
+    border-radius: var(--bs-border-radius) !important;
+    animation: target-highlight 3s 1s ease-in-out infinite;
+}

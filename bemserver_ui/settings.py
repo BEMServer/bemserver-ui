@@ -17,3 +17,7 @@ class Config:
     BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY = 60000
 
     BEMSERVER_UI_PLUGINS = None
+
+    BEMSERVER_UI_USER_GUIDE_URL = (
+        "https://bemserver-docs.readthedocs.io/en/latest/user_guide.html"
+    )
