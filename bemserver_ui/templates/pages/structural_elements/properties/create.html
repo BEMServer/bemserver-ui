@@ -20,10 +20,9 @@
                         <div class="col">
                             <label class="form-label" for="value_type">Type</label>
                             <select class="form-select" id="value_type" name="value_type" aria-label="Select a value" required>
-                                <option value="integer">integer</option>
-                                <option value="float">float</option>
-                                <option value="boolean">boolean</option>
-                                <option value="string">string</option>
+                                {% for x in property_value_types %}
+                                <option value="{{ x.name }}">{{ x.value }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="col">
