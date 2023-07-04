@@ -1,6 +1,41 @@
 Changelog
 ---------
 
+0.6.0 (2023-07-04)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Rework to improve global UX (start page, remove campaign selector, rename some elements...)
+
+- Sites:
+
+  - Create page: show full path of parent locations
+
+- Timeseries:
+
+  - Improve chart in timeseries data explore page
+  - Improve search filter in timeseries list and set locations pages
+
+- Analysis:
+
+  - Improve degree days chart and add a note about calculation method
+  - Improve weather analysis page
+
+Fixes:
+
+- Fix building/storey/space/zone edition (400 error)
+- Fix timeseries data explore page (when timeseries has no data)
+- Fix manage cleanup service page
+
+Other changes:
+
+- Require bemserver-api-client >=0.20.1 and <0.21.0
+- Still require bemserver-api 0.21.0
+- Still require bemserver-core 0.16.0
+
 0.5.3 (2023-06-16)
 ++++++++++++++++++
 
