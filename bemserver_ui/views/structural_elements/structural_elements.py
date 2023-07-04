@@ -133,9 +133,10 @@ def edit(type, id):
             "name": flask.request.form["name"],
             "description": flask.request.form["description"],
             "ifc_id": flask.request.form["ifc_id"],
-            "latitude": flask.request.form["latitude"],
-            "longitude": flask.request.form["longitude"],
         }
+        if type == "site":
+            payload["latitude"] = flask.request.form["latitude"]
+            payload["longitude"] = flask.request.form["longitude"]
 
         ret_resp = api_resource.update(id, payload, etag=flask.request.form["editEtag"])
         flask.flash(f"{type} updated: {ret_resp.data['name']}", "success")
