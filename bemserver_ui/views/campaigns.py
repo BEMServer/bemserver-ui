@@ -8,6 +8,7 @@ from bemserver_ui.extensions import auth, Roles
 from bemserver_ui.extensions.campaign_context import (
     deduce_campaign_state,
     CAMPAIGN_STATE_OVERALL,
+    CampaignState,
 )
 from bemserver_ui.extensions.timezones import get_tz_info
 from bemserver_ui.common.time import convert_html_form_datetime, convert_from_iso
@@ -40,6 +41,9 @@ def list():
         if flask.request.form["in_name"] != "":
             ui_filters["in_name"] = flask.request.form["in_name"]
             api_filters["in_name"] = ui_filters["in_name"]
+
+    if ui_filters["state"] not in [x.name for x in CampaignState]:
+        ui_filters["state"] = CAMPAIGN_STATE_OVERALL
 
     is_filtered = ui_filters["state"] != CAMPAIGN_STATE_OVERALL or (
         ui_filters["in_name"] is not None and ui_filters["in_name"] != ""
