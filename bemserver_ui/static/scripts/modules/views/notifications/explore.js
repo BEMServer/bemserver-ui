@@ -476,12 +476,12 @@ export class NotificationExploreView {
                 notifRowElmt.notifData = data.data;
 
                 if (data.data.read) {
-                    notifRowElmt.classList.remove("bg-warning", "bg-opacity-10");
-                    notifTimestampElmt.classList.remove("border-start", "border-end-0", "border-5", "border-warning");
+                    notifRowElmt.classList.remove("table-warning");
+                    notifTimestampElmt.classList.remove("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-5", "border-warning", "text-warning-emphasis");
                 }
                 else {
-                    notifRowElmt.classList.add("bg-warning", "bg-opacity-10");
-                    notifTimestampElmt.classList.add("border-start", "border-end-0", "border-5", "border-warning");
+                    notifRowElmt.classList.add("table-warning");
+                    notifTimestampElmt.classList.add("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-5", "border-warning", "text-warning-emphasis");
                 }
 
                 afterUpdateCallback?.();
@@ -742,7 +742,7 @@ export class NotificationExploreView {
         timestampSortElmt.appendChild(timestampSortIconElmt);
 
         let tableHeaderEventColElmt = document.createElement("th");
-        tableHeaderEventColElmt.classList.add("border-start", "border-4");
+        tableHeaderEventColElmt.classList.add("border-start", "border-top-0", "border-bottom-0", "border-end-0", "border-4");
         tableHeaderEventColElmt.setAttribute("scope", "col");
         tableHeaderEventColElmt.setAttribute("colspan", 6);
         tableHeaderElmt.appendChild(tableHeaderEventColElmt);
@@ -770,7 +770,7 @@ export class NotificationExploreView {
         tableHeaderContainerElmt.appendChild(tableHeaderEventElmt);
 
         let tableHeaderEventTimestampColElmt = document.createElement("th");
-        tableHeaderEventTimestampColElmt.classList.add("border-start", "border-4");
+        tableHeaderEventTimestampColElmt.classList.add("border-start", "border-top-0", "border-bottom-0", "border-end-0", "border-4");
         tableHeaderEventTimestampColElmt.setAttribute("scope", "col");
         tableHeaderEventTimestampColElmt.innerText = "Timestamp";
         tableHeaderEventElmt.appendChild(tableHeaderEventTimestampColElmt);
@@ -832,7 +832,7 @@ export class NotificationExploreView {
         rowElmt.id = `notif-${notifData.id.toString()}-row`;
         rowElmt.classList.add("align-middle");
         if (!notifData.read) {
-            rowElmt.classList.add("bg-warning", "bg-opacity-10");
+            rowElmt.classList.add("table-warning");
         }
         rowElmt.setAttribute("role", "button");
         rowElmt.setAttribute("data-bs-toggle", "modal");
@@ -843,7 +843,7 @@ export class NotificationExploreView {
         let timestampElmt = document.createElement("th");
         timestampElmt.id = `notif-${notifData.id.toString()}-timestamp`;
         if (!notifData.read) {
-            timestampElmt.classList.add("border-start", "border-end-0", "border-5", "border-warning");
+            timestampElmt.classList.add("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-5", "border-warning", "text-warning-emphasis");
         }
         timestampElmt.setAttribute("scope", "row");
         timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(notifData.timestamp), {timezone: campaignData.timezone});
@@ -852,7 +852,7 @@ export class NotificationExploreView {
         let eventRowElmt = this.#createEventRowElement(notifData.event, campaignData);
         for (let [cellIndex, eventCellElmt] of Object.entries(eventRowElmt.cells)) {
             if (cellIndex == 0) {
-                eventCellElmt.classList.add("border-start", "border-4");
+                eventCellElmt.classList.add("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-4");
             }
             rowElmt.appendChild(eventCellElmt);
         }
