@@ -20,7 +20,7 @@
                 <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
                 <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
             </div>
-            <app-tree id="treeSelector" ignore-unselect="false" toolbar="{{ treeToolbar | tojson }}" {% if structural_element_types %} types={{ structural_element_types }}{% endif %}></app-tree>
+            <app-tree id="treeSelector" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" ignore-unselect="false" toolbar="{{ treeToolbar | tojson }}"{% if structural_element_types %} types={{ structural_element_types }}{% endif %}></app-tree>
         </div>
     </div>
 </app-structural-element-selector>
