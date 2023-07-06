@@ -1,6 +1,25 @@
 Changelog
 ---------
 
+0.6.1 (2023-07-06)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Change sites/zones tree view icons
+
+Fixes:
+
+- Fix notifications table display
+
+Other changes:
+
+- Still require bemserver-api-client >=0.20.1 and <0.21.0
+- Still require bemserver-api 0.21.0
+- Still require bemserver-core 0.16.0
+
 0.6.0 (2023-07-04)
 ++++++++++++++++++
 
