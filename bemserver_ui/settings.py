@@ -21,3 +21,6 @@ class Config:
     BEMSERVER_UI_USER_GUIDE_URL = (
         "https://bemserver-docs.readthedocs.io/en/latest/user_guide.html"
     )
+
+    # Profiling
+    PROFILE_DIR = ""

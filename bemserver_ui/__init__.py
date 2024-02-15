@@ -1,6 +1,7 @@
 """BEMServer UI"""
 
 import flask
+from werkzeug.middleware.profiler import ProfilerMiddleware
 
 from . import extensions
 from . import internal_api
@@ -23,5 +24,10 @@ def create_app(config_override=None):
     extensions.init_app(app)
     internal_api.init_app(app)
     views.init_app(app)
+
+    if profile_dir := app.config["PROFILE_DIR"]:
+        app.wsgi_app = ProfilerMiddleware(
+            app.wsgi_app, stream=None, profile_dir=profile_dir
+        )
 
     return app
