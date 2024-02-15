@@ -46,7 +46,7 @@ setup(
     ],
     python_requires=">=3.9",
     install_requires=[
-        "flask>=2.2.3,<3.0.0",
+        "flask>=3.0.2,<4.0.0",
         "python-dotenv>=1.0.0,<2.0.0",
         "bemserver-api-client>=0.20.1,<0.21.0",
     ],
