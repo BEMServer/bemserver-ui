@@ -5,6 +5,7 @@ At the same time:
   - verify if user's role has grant access
   - refresh user data in session
 """
+
 import enum
 import functools
 import json

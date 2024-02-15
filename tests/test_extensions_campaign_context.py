@@ -1,4 +1,5 @@
 """Extensions campaign context tests"""
+
 import datetime as dt
 import zoneinfo as zi
 import flask

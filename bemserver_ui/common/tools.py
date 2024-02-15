@@ -1,4 +1,5 @@
 """BEMServer UI common tools."""
+
 import os
 import importlib
 import sys

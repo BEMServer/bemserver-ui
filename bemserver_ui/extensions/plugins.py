@@ -3,6 +3,7 @@
 For a plugin example, see:
 https://github.com/BEMServer/bemserver-ui-plugin-example
 """
+
 import logging
 from pathlib import Path
 from packaging.version import Version, InvalidVersion

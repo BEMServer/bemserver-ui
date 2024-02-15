@@ -1,4 +1,5 @@
 """BEMServer UI"""
+
 import flask
 
 from . import extensions

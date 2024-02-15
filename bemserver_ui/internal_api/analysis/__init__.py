@@ -1,4 +1,5 @@
 """Services internal API"""
+
 import flask
 
 from . import completeness  # noqa

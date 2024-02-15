@@ -3,6 +3,7 @@
 It is a kind of proxy of BEMServer API.
 To be used in browser client code such as ES6 fetch.
 """
+
 import flask
 
 from . import structural_elements

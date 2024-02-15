@@ -1,6 +1,7 @@
 """
 Extension to get partners data from `BEMSERVER_UI_PARTNERS_FILE` extra config file.
 """
+
 import json
 from pathlib import Path
 

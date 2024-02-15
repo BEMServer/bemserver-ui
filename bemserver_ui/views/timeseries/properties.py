@@ -1,4 +1,5 @@
 """Timeseries properties views"""
+
 import urllib.parse
 import flask
 

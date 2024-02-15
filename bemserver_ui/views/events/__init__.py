@@ -1,4 +1,5 @@
 """All events views"""
+
 from . import events  # noqa
 from . import categories  # noqa
 

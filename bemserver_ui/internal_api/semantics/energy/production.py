@@ -1,4 +1,5 @@
 """Energy production semantics internal API"""
+
 import flask
 
 from bemserver_ui.extensions import auth, Roles

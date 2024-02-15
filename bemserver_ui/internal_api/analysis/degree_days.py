@@ -1,4 +1,5 @@
 """Analysis degree days internal API"""
+
 import datetime as dt
 import flask
 import zoneinfo

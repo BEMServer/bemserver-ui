@@ -1,4 +1,5 @@
 """Missing data service internal API"""
+
 import flask
 
 from bemserver_ui.extensions import auth

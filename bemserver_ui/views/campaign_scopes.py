@@ -1,4 +1,5 @@
 """Campaign scopes views"""
+
 import flask
 
 import bemserver_api_client.exceptions as bac_exc

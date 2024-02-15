@@ -1,4 +1,5 @@
 """Auth views (sign in/out)"""
+
 import flask
 
 from bemserver_ui.extensions import auth

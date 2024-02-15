@@ -1,4 +1,5 @@
 """Events internal API"""
+
 import zoneinfo
 import flask
 

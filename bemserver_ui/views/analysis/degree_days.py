@@ -1,4 +1,5 @@
 """Degree days analysis views"""
+
 import flask
 
 from bemserver_ui.extensions import auth, ensure_campaign_context

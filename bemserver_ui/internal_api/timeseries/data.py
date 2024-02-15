@@ -1,4 +1,5 @@
 """Timeseries data internal API"""
+
 from io import StringIO
 import csv
 import zoneinfo

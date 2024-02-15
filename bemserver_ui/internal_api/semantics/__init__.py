@@ -1,4 +1,5 @@
 """Semantics internal API"""
+
 import flask
 
 from . import weather  # noqa

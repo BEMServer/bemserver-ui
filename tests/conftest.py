@@ -1,4 +1,5 @@
 """Global conftest"""
+
 import pytest
 
 from bemserver_ui import create_app

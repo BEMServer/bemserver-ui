@@ -1,4 +1,5 @@
 """Campaigns views"""
+
 import zoneinfo
 import flask
 

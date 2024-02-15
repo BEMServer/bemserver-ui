@@ -1,4 +1,5 @@
 """Timeseries views"""
+
 from copy import deepcopy
 import flask
 
@@ -98,11 +99,13 @@ def list():
 
     is_filtered = filters["campaign_scope_id"] is not None or any(
         [
-            f"{recurse_prefix}{x}_id"
-            if x != "space"
-            else f"{x}_id" in filters
-            and filters[f"{recurse_prefix}{x}_id" if x != "space" else f"{x}_id"]
-            is not None
+            (
+                f"{recurse_prefix}{x}_id"
+                if x != "space"
+                else f"{x}_id" in filters
+                and filters[f"{recurse_prefix}{x}_id" if x != "space" else f"{x}_id"]
+                is not None
+            )
             for x in FULL_STRUCTURAL_ELEMENT_TYPES
         ]
     )

@@ -1,4 +1,5 @@
 """Structural elements internal API"""
+
 import zoneinfo
 import flask
 

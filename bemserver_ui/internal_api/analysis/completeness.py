@@ -1,4 +1,5 @@
 """Analysis completeness internal API"""
+
 import datetime as dt
 import zoneinfo
 import calendar

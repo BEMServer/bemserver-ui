@@ -1,4 +1,5 @@
 """Events views"""
+
 import zoneinfo
 import datetime as dt
 import flask

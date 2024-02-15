@@ -1,4 +1,5 @@
 """Extensions plugins tests"""
+
 from packaging.version import Version
 import re
 import pytest

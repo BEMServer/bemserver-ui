@@ -1,4 +1,5 @@
 """Timeseries data views"""
+
 import datetime as dt
 import zoneinfo
 import io
