@@ -1,4 +1,5 @@
 """BEMServer HTTP error handlers"""
+
 import flask
 import werkzeug.exceptions as wexc
 

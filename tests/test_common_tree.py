@@ -1,4 +1,5 @@
 """Common tree tools tests"""
+
 from bemserver_ui.common.tree import (
     PATH_SEPARATOR,
     build_tree,

@@ -1,4 +1,5 @@
 """Extensions timezones tests"""
+
 from bemserver_ui.extensions.timezones import TimezoneTool, get_tz_info
 
 

@@ -1,4 +1,5 @@
 """BEMServer UI application extensions"""
+
 from . import jinja_custom_filters
 from . import error_handlers
 from . import api_client

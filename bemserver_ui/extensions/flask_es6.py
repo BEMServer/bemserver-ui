@@ -2,6 +2,7 @@
 
 Inspired from https://github.com/stewartpark/Flask-JSGlue/blob/master/flask_jsglue.py
 """
+
 import flask
 import re
 import json

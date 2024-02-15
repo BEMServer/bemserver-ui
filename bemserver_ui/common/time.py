@@ -1,4 +1,5 @@
 """Time tools."""
+
 import datetime as dt
 import zoneinfo as zi
 from string import Formatter

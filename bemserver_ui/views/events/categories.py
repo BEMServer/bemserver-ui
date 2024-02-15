@@ -1,4 +1,5 @@
 """Event categories views"""
+
 import flask
 
 from bemserver_ui.extensions import auth, Roles

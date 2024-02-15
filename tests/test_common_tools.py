@@ -1,4 +1,5 @@
 """Common tools tests"""
+
 import io
 
 from bemserver_ui.common.tools import is_filestream_empty

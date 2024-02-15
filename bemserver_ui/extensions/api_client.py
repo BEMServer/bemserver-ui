@@ -2,6 +2,7 @@
 
 API client exceptions are automatically handled by flask's error_handlers.
 """
+
 import flask
 
 from bemserver_api_client import BEMServerApiClient

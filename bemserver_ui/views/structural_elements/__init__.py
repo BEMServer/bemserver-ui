@@ -1,4 +1,5 @@
 """All strucural elements views (sites, buildings...)"""
+
 from . import structural_elements  # noqa
 from . import properties  # noqa
 

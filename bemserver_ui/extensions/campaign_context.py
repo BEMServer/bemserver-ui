@@ -1,6 +1,7 @@
 """A bunch of functions that automatically inject current campaign data
 in urls and requests.
 """
+
 import functools
 import datetime as dt
 import zoneinfo

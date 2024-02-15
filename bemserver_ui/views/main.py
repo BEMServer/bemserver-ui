@@ -1,4 +1,5 @@
 """Index page"""
+
 import flask
 
 from bemserver_api_client import __version__ as api_client_version

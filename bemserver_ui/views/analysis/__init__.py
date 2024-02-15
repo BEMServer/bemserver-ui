@@ -1,4 +1,5 @@
 """All analysis views (energy consumption, ...)"""
+
 import flask
 
 from . import energy_consumption  # noqa

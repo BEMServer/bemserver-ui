@@ -1,4 +1,5 @@
 """Analysis weather data internal API"""
+
 import datetime as dt
 import zoneinfo
 import flask

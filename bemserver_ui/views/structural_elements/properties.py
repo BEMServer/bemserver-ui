@@ -1,4 +1,5 @@
 """Structural element properties views"""
+
 from copy import deepcopy
 import urllib.parse
 import flask
