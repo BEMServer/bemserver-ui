@@ -20,7 +20,7 @@ pytest==8.1.1
     # via
     #   -r requirements/tests.in
     #   pytest-cov
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via -r requirements/tests.in
 tomli==2.0.1
     # via
