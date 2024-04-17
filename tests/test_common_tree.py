@@ -1,18 +1,17 @@
 """Common tree tools tests"""
 
+from bemserver_ui.common.const import (
+    FULL_STRUCTURAL_ELEMENT_TYPES,
+    STRUCTURAL_ELEMENT_TYPES,
+)
 from bemserver_ui.common.tree import (
     PATH_SEPARATOR,
+    _get_node_level_from_type,
     build_tree,
     build_tree_node,
-    search_tree_node,
-    _get_node_level_from_type,
     build_tree_node_path,
+    search_tree_node,
 )
-from bemserver_ui.common.const import (
-    STRUCTURAL_ELEMENT_TYPES,
-    FULL_STRUCTURAL_ELEMENT_TYPES,
-)
-
 
 SITES_DATA = [
     {

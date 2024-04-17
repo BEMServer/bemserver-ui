@@ -2,20 +2,21 @@
 
 import datetime as dt
 import zoneinfo as zi
-import flask
+
 import pytest
 
-from bemserver_ui.extensions.campaign_context import (
-    deduce_campaign_state,
-    CampaignState,
-    url_for_campaign,
-    CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
-    IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
-    FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
-    CampaignContext,
-    CAMPAIGN_STATE_OVERALL,
-)
+import flask
 
+from bemserver_ui.extensions.campaign_context import (
+    CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+    CAMPAIGN_STATE_OVERALL,
+    FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+    IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
+    CampaignContext,
+    CampaignState,
+    deduce_campaign_state,
+    url_for_campaign,
+)
 
 CAMPAIGN_DATA_1 = {
     "description": "Nobatek buildings energy performance contracting",

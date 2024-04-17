@@ -1,26 +1,29 @@
+ci:
+  skip: [pip-compile]
+
 repos:
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.15.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.3.2
   hooks:
-  - id: pyupgrade
-    args: [--py37-plus]
-- repo: https://github.com/python/black
-  rev: 24.2.0
+    - id: ruff
+    - id: ruff-format
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.28.2
   hooks:
-  - id: black
-    language_version: python3
-- repo: https://github.com/pycqa/flake8
-  rev: 7.0.0
+    - id: check-github-workflows
+    - id: check-dependabot
+- repo: https://github.com/asottile/blacken-docs
+  rev: 1.16.0
   hooks:
-  - id: flake8
-    additional_dependencies: [flake8-bugbear>=24.2.6]
+  - id: blacken-docs
+    additional_dependencies: [black==23.12.1]
 - repo: https://github.com/jazzband/pip-tools
-  rev: 7.3.0
+  rev: 7.4.1
   hooks:
     - id: pip-compile
-      name: pip-compile setup.py
-      args: [setup.py, --resolver=backtracking, --output-file=requirements/install.txt]
-      files: ^(setup\.py|requirements\/install\.txt)$
+      name: pip-compile pyproject.toml
+      args: [pyproject.toml, --output-file=requirements/install.txt]
+      files: ^(pyproject\.toml|requirements\/install\.txt)$
     - id: pip-compile
       name: pip-compile requirements/dev.in
       args: [requirements/dev.in]
@@ -29,3 +32,7 @@ repos:
       name: pip-compile requirements/tests.in
       args: [requirements/tests.in]
       files: ^requirements\/tests\.(in|txt)$
+    - id: pip-compile
+      name: pip-compile requirements/install-min.in
+      args: [requirements/install-min.in]
+      files: ^requirements\/install-min\.(in|txt)$

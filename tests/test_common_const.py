@@ -1,10 +1,10 @@
 """Common const tests"""
 
 from bemserver_ui.common.const import (
-    STRUCTURAL_ELEMENT_TYPES,
-    FULL_STRUCTURAL_ELEMENT_TYPES,
     BEMSERVER_APP_LABELS,
+    FULL_STRUCTURAL_ELEMENT_TYPES,
     SIDEBAR_SECTIONS,
+    STRUCTURAL_ELEMENT_TYPES,
 )
 
 

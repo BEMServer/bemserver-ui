@@ -12,4 +12,4 @@ def not_raises(expected_exceptions):
         try:
             yield
         except exc:
-            raise exc
+            raise exc from exc

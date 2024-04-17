@@ -1,16 +1,17 @@
 """Extensions plugins tests"""
 
 import importlib.metadata
-from packaging.version import Version
 import re
+
 import pytest
 
-from tests.tools import not_raises
+from packaging.version import Version
 
 from bemserver_ui.extensions.plugins import (
-    _check_required_ui_version,
     BEMServerUIVersionError,
+    _check_required_ui_version,
 )
+from tests.tools import not_raises
 
 
 class TestExtensionPlugins:

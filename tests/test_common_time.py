@@ -2,15 +2,16 @@
 
 import datetime as dt
 from zoneinfo import ZoneInfo
+
 import pytest
 
-from bemserver_ui.common.time import (
-    convert_html_form_datetime,
-    convert_from_iso,
-    strfdelta,
-    add_time,
-)
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
+from bemserver_ui.common.time import (
+    add_time,
+    convert_from_iso,
+    convert_html_form_datetime,
+    strfdelta,
+)
 
 
 class TestCommonTime:
