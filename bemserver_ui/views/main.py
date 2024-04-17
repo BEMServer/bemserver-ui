@@ -1,10 +1,8 @@
 """Index page"""
 
+import importlib.metadata
 import flask
 
-from bemserver_api_client import __version__ as api_client_version
-
-import bemserver_ui
 from bemserver_ui.extensions import auth
 from bemserver_ui.extensions.campaign_context import CampaignState
 from bemserver_ui.extensions.plugins import PLUGINS_LOADED
@@ -90,8 +88,8 @@ def about():
     about_versions = {}
     for app_name, app_version in about_resp.data["versions"].items():
         about_versions[BEMSERVER_APP_LABELS[app_name]] = app_version
-    about_versions["API client"] = api_client_version
-    about_versions["UI"] = bemserver_ui.__version__
+    about_versions["API client"] = importlib.metadata.version("bemserver-api-client")
+    about_versions["UI"] = importlib.metadata.version("bemserver-ui")
 
     plugin_infos = {}
     for plugin_module in PLUGINS_LOADED:

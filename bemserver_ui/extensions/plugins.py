@@ -4,11 +4,10 @@ For a plugin example, see:
 https://github.com/BEMServer/bemserver-ui-plugin-example
 """
 
+import importlib.metadata
 import logging
 from pathlib import Path
 from packaging.version import Version, InvalidVersion
-
-import bemserver_ui
 
 from ..common.const import SIDEBAR_SECTIONS
 from ..common.tools import import_module
@@ -75,7 +74,7 @@ def _load_and_init_plugin_module(plugin_path, app):
 
 def _check_required_ui_version(plugin_req_ui_version):
     try:
-        version_ui = Version(bemserver_ui.__version__)
+        version_ui = Version(importlib.metadata.version("bemserver-ui"))
     except (
         TypeError,
         InvalidVersion,
