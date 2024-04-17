@@ -1,0 +1,78 @@
+[project]
+name = "bemserver-ui"
+version = "0.6.2"
+description = "BEMServer web interface"
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.inef4.com" },
+  { name = "David Frédérique", email = "dfrederique@nobatek.inef4.com" },
+]
+maintainers = [
+  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.inef4.com" },
+  { name = "David Frédérique", email = "dfrederique@nobatek.inef4.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Scientific/Engineering",
+  "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.9"
+dependencies = [
+  "flask>=3.0.2,<4.0.0",
+  "python-dotenv>=1.0.0,<2.0.0",
+  "bemserver-api-client>=0.20.1,<0.21.0",
+]
+
+[project.urls]
+Issues = "https://github.com/bemserver/bemserver-ui/issues"
+Source = "https://github.com/bemserver/bemserver-ui"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = [
+  "docs/",
+  "tests/",
+  "CHANGELOG.rst",
+  "tox.ini",
+]
+
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+output-format = "full"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+  "B",  # flake8-bugbear
+  "E",  # pycodestyle error
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+  "W",  # pycodestyle warning
+]
+
+[tool.ruff.lint.isort]
+section-order = ["future", "standard-library", "testing", "third-party", "core", "api", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+testing = ["pytest"]
+core = ["bemserver_core"]
+api = ["bemserver_api", "bemserver_api_client"]
+
+[tool.pytest.ini_options]
+norecursedirs = ".git .tox docs env venv"
+addopts = "-v --tb=short"

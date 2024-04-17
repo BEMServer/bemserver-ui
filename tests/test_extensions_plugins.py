@@ -1,40 +1,38 @@
 """Extensions plugins tests"""
 
-from packaging.version import Version
+import importlib.metadata
 import re
+
 import pytest
 
-from tests.tools import not_raises
+from packaging.version import Version
 
-import bemserver_ui
 from bemserver_ui.extensions.plugins import (
-    _check_required_ui_version,
     BEMServerUIVersionError,
+    _check_required_ui_version,
 )
+from tests.tools import not_raises
 
 
 class TestExtensionPlugins:
     def test_check_required_ui_version(self):
-        bemserver_ui.__version__ = "1.0.0"
+        ui_version = Version(importlib.metadata.version("bemserver-ui"))
 
         with not_raises(BEMServerUIVersionError):
             _check_required_ui_version(
-                {"min": Version("1.0.0"), "max": Version("2.0.0")}
+                {"min": ui_version, "max": Version(f"{ui_version.major + 1}.0.0")}
             )
 
+        exp_version_bounds = {
+            "min": Version(f"{ui_version.major + 1}.0.0"),
+            "max": Version(f"{ui_version.major + 2}.0.0"),
+        }
         with pytest.raises(
             BEMServerUIVersionError,
             match=re.escape(
-                "UI version (1.0.0) not supported! (expected: >=4.0.0,<5.0.0)"
+                f"UI version ({ui_version.public}) not supported!"
+                f" (expected: >={exp_version_bounds['min'].public}"
+                f",<{exp_version_bounds['max'].public})"
             ),
         ):
-            _check_required_ui_version(
-                {"min": Version("4.0.0"), "max": Version("5.0.0")}
-            )
-
-        for bad_version in [None, "bad", 666]:
-            bemserver_ui.__version__ = bad_version
-            with pytest.raises(BEMServerUIVersionError, match="Invalid UI version:"):
-                assert _check_required_ui_version(
-                    {"min": Version("1.0.0"), "max": Version("2.0.0")}
-                )
+            _check_required_ui_version(exp_version_bounds)
