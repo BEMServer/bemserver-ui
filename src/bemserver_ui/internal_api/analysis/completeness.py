@@ -1,6 +1,5 @@
 """Analysis completeness internal API"""
 
-import calendar
 import datetime as dt
 import zoneinfo
 
@@ -21,33 +20,57 @@ blp = flask.Blueprint("completeness", __name__, url_prefix="/completeness")
 def retrieve_completeness():
     timeseries_ids = [int(i) for i in flask.request.args["timeseries"].split(",")]
     data_state_id = flask.request.args["data_state"]
-    tz_name = flask.request.args["timezone"]
-    end_date = flask.request.args["end_date"]
-    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
-    bucket_width_value = flask.request.args.get("bucket_width_value")
-    bucket_width_unit = flask.request.args.get("bucket_width_unit")
-    period = flask.request.args.get("period")
+    period_type = flask.request.args["period_type"]
+    period_year = int(flask.request.args["period_year"])
+    period_month = int(flask.request.args["period_month"])
+    period_week = flask.request.args["period_week"]
+    period_day = flask.request.args["period_day"]
 
+    bucket_width_value = 1
+    bucket_width_unit = BucketWidthUnit.day
+
+    # Available period types:
+    #     Year-Monthly
+    #     Year-Daily
+    #     Month-Daily
+    #     Week-Daily
+    #     Week-Hourly
+    #     Day-Hourly
+    if period_type.endswith("-Monthly"):
+        bucket_width_unit = BucketWidthUnit.month
+    elif period_type.endswith("-Daily"):
+        bucket_width_unit = BucketWidthUnit.day
+    elif period_type.endswith("-Hourly"):
+        bucket_width_unit = BucketWidthUnit.hour
+
+    tz_name = flask.g.campaign_ctxt.tz_name
     tz = zoneinfo.ZoneInfo(tz_name)
-    try:
-        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
-    except BEMServerUICommonInvalidDatetimeError:
-        flask.abort(422, description="Invalid end datetime!")
 
-    dt_period_delta = dt.timedelta(seconds=0.0)
-    if period.startswith("Day-"):
-        dt_period_delta = dt.timedelta(days=1.0)
-    elif period.startswith("Week-"):
-        dt_period_delta = dt.timedelta(days=7.0)
-    elif period.startswith("Month-"):
-        dt_period_delta = dt.timedelta(
-            days=float(calendar.monthrange(dt_end.year, dt_end.month)[1])
-        )
-    elif period.startswith("Year-"):
-        dt_period_delta = dt.timedelta(
-            days=366.0 if calendar.isleap(dt_end.year) else 365.0
-        )
-    dt_start = dt_end - dt_period_delta
+    if period_type.startswith("Year-"):
+        dt_start = dt.datetime(period_year, 1, 1, tzinfo=tz)
+        dt_end = dt.datetime(period_year + 1, 1, 1, tzinfo=tz)
+    elif period_type.startswith("Month-"):
+        dt_start = dt.datetime(period_year, period_month, 1, tzinfo=tz)
+        end_year = period_year + (period_month // 12)
+        end_month = (period_month % 12) + 1
+        dt_end = dt.datetime(end_year, end_month, 1, tzinfo=tz)
+    elif period_type.startswith("Week-"):
+        week_start, week_end = period_week.split("_")
+        try:
+            dt_start = convert_html_form_datetime(week_start, "00:00", tz=tz)
+        except BEMServerUICommonInvalidDatetimeError:
+            flask.abort(422, description="Invalid week start datetime!")
+        try:
+            dt_end = convert_html_form_datetime(week_end, "00:00", tz=tz)
+        except BEMServerUICommonInvalidDatetimeError:
+            flask.abort(422, description="Invalid week end datetime!")
+        dt_end += dt.timedelta(days=1.0)
+    elif period_type.startswith("Day-"):
+        try:
+            dt_start = convert_html_form_datetime(period_day, "00:00", tz=tz)
+        except BEMServerUICommonInvalidDatetimeError:
+            flask.abort(422, description="Invalid period datetime!")
+        dt_end = dt_start + dt.timedelta(days=1.0)
 
     # Get completeness data.
     analysis_resp = flask.g.api_client.analysis.get_completeness(
@@ -56,16 +79,8 @@ def retrieve_completeness():
         timeseries_ids,
         data_state_id,
         bucket_width_value,
-        BucketWidthUnit(bucket_width_unit),
+        bucket_width_unit,
         timezone=tz_name,
     )
 
-    ts_datastate_resp = flask.g.api_client.timeseries_datastates.getone(
-        id=data_state_id
-    )
-
-    completeness_data = analysis_resp.data
-    completeness_data["datastate_name"] = ts_datastate_resp.data["name"]
-    completeness_data["period"] = period
-
-    return flask.jsonify(completeness_data)
+    return flask.jsonify(analysis_resp.data)
