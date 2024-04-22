@@ -305,15 +305,15 @@ class DegreeDaysExploreView {
                         this.#showNoDataPanel();
                     }
                     else {
-                        this.#ddChart = new TimeseriesChartDegreeDays(null, null, this.#comparePeriodSwitchElmt.checked);
-
                         let chartContainerElmt = document.createElement("div");
                         chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
-                        chartContainerElmt.appendChild(this.#ddChart);
+                        chartContainerElmt.style.height = "500px";
                         this.#mainChartContainerElmt.appendChild(chartContainerElmt);
 
+                        this.#ddChart = new TimeseriesChartDegreeDays(chartContainerElmt);
                         this.#ddChart.showLoading();
-                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, this.#ddBaseUnitInputElmt.value, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, this.#ddBaseUnitInputElmt.value, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
+                        this.#ddChart.hideLoading();
                     }
                 },
                 (error) => {

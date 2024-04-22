@@ -21,8 +21,8 @@ export class ChartBase {
         grid: {
             top: 20,
             bottom: 30,
-            left: 10,
-            right: 10,
+            left: 20,
+            right: 20,
             containLabel: true,
         },
         tooltip: {
