@@ -310,9 +310,9 @@ class DegreeDaysExploreView {
                         chartContainerElmt.style.height = "500px";
                         this.#mainChartContainerElmt.appendChild(chartContainerElmt);
 
-                        this.#ddChart = new TimeseriesChartDegreeDays(chartContainerElmt, this.#comparePeriodSwitchElmt.checked);
+                        this.#ddChart = new TimeseriesChartDegreeDays(chartContainerElmt);
                         this.#ddChart.showLoading();
-                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, this.#ddBaseUnitInputElmt.value, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, this.#ddBaseUnitInputElmt.value, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
                         this.#ddChart.hideLoading();
                     }
                 },

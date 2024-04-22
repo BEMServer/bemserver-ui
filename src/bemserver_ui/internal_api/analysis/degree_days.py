@@ -68,16 +68,21 @@ def retrieve(site_id):
     dd_data = {
         "degree_days": {},
         "dd_unit": dd_unit,
+        "dd_categories": None,
     }
     if compare_year_period_offset is not None and period_type == "Year-Monthly":
+        dd_data["dd_categories"] = {}
         tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
         for k, v in analysis_resp.data["degree_days"].items():
             dt_row = convert_from_iso(k, tz=tz)
             if dt_row.year not in dd_data["degree_days"]:
                 dd_data["degree_days"][dt_row.year] = {}
-            month_name = calendar.month_abbr[dt_row.month]
-            if month_name not in dd_data["degree_days"][dt_row.year]:
-                dd_data["degree_days"][dt_row.year][month_name] = v
+            if dt_row.month not in dd_data["degree_days"][dt_row.year]:
+                dd_data["degree_days"][dt_row.year][dt_row.month] = v
+            if dt_row.month not in dd_data["dd_categories"]:
+                dd_data["dd_categories"][dt_row.month] = calendar.month_abbr[
+                    dt_row.month
+                ]
     else:
         dd_data["degree_days"] = analysis_resp.data["degree_days"]
 

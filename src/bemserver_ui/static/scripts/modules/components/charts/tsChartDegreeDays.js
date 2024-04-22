@@ -9,12 +9,9 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         "cooling": "#73c0de",
     };
 
-    #compareMode = false;
-
-    constructor(chartContainerElmt, compareMode = false, initOptions = null) {
+    constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
 
-        this.#compareMode = compareMode;
         this.#initChartOptions();
     }
 
@@ -33,7 +30,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
             },
             xAxis: [
                 {
-                    type: this.#compareMode ? "category" : "time",
+                    type: "time",
                 },
             ],
             yAxis: [
@@ -68,9 +65,9 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         });
     }
 
-    #optionToContent(opt, unit, timeFormat) {
+    #optionToContent(opt, unit, timeFormat, compareMode = false) {
         let timestamps = opt.series[0].data.map((serieData) => {
-            if (this.#compareMode) {
+            if (compareMode) {
                 return serieData[0];
             }
             else {
@@ -105,7 +102,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         for (let serie of opt.series) {
             let tableHeadThElmt = document.createElement("th");
             tableHeadThElmt.setAttribute("scope", "col");
-            if (this.#compareMode) {
+            if (compareMode) {
                 tableHeadThElmt.innerText = `${serie.name}${unit ? ` [${unit}]`: ""}`;
             }
             else {
@@ -136,7 +133,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat) {
+    #tooltipFormatter(params, unit, timeFormat, compareMode = false) {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -145,7 +142,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         for (let [index, serieParams] of params.entries()) {
             if (index == 0) {
                 let timeElmt = document.createElement("h6");
-                if (this.#compareMode) {
+                if (compareMode) {
                     timeElmt.innerText = serieParams.value[0];
                 }
                 else {
@@ -182,9 +179,9 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         return tooltipContainerElmt;
     }
 
-    load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, timeFormat) {
+    load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, timeFormat, compareMode = false, categories = null) {
         let dataSeries = [];
-        if (!this.#compareMode) {
+        if (!compareMode) {
             dataSeries.push({
                 id: `${degreeDaysType}-${degreeDaysBase}`,
                 name: `${degreeDaysType} degree days (base ${degreeDaysBase.toString()}${degreeDaysBaseUnit ? ` ${degreeDaysBaseUnit}`: ""})`,
@@ -207,7 +204,8 @@ export class TimeseriesChartDegreeDays extends ChartBase {
                     name: time.toString(),
                     type: "bar",
                     data: Object.entries(periodData).map(([period, value]) => {
-                        return [period, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
+                        let category = categories != null ? categories[period] : period;
+                        return [category, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
                     }),
                     emphasis: {
                         focus: "series",
@@ -216,7 +214,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
             });
         }
 
-        let chartTitle = `${this.#compareMode ? "compare " : ""}${degreeDaysType} degree days (${unit})`;
+        let chartTitle = `${compareMode ? "compare " : ""}${degreeDaysType} degree days (${unit})`;
 
         let options = {
             title: {
@@ -226,13 +224,17 @@ export class TimeseriesChartDegreeDays extends ChartBase {
             toolbox: {
                 feature: {
                     dataView: {
-                        lang: chartTitle,
-                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat); },
+                        lang: [
+                            chartTitle,
+                            "Close",
+                            "Refresh",
+                        ],
+                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat, compareMode); },
                     },
                 },
             },
             tooltip: {
-                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat); },
+                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat, compareMode); },
             },
             yAxis: {
                 name: unit,
@@ -240,12 +242,15 @@ export class TimeseriesChartDegreeDays extends ChartBase {
             series: dataSeries,
         };
 
-        if (this.#compareMode) {
-            options.xAxis = {
-                axisTick: {
-                    alignWithLabel: true,
+        if (compareMode) {
+            options.xAxis = [
+                {
+                    type: "category",
+                    axisTick: {
+                        alignWithLabel: true,
+                    },
                 },
-            };
+            ];
         }
 
         this.setOption(options);
