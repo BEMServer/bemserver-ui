@@ -23,7 +23,6 @@ export class TimeseriesChartCompleteness extends ChartBase {
             grid: {
                 top: 60,
                 bottom: 50,
-                left: 20,
                 right: 140,
             },
             xAxis: {

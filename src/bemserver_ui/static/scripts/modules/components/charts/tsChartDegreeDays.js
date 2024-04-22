@@ -1,73 +1,8 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js";
+import  { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class TimeseriesChartDegreeDays extends HTMLDivElement {
-
-    #chart = null;
-
-    #initOptions = {
-        height: 500,
-        width: "auto",
-    };
-    #theme = null;
-
-    #defaultTitle = "Degree days";
-    #defaultOptions = {
-        title: {
-            left: "center",
-            text: this.#defaultTitle,
-            subtextStyle: {
-                fontSize: 14,
-            },
-        },
-        grid: {
-            left: 20,
-            right: 20,
-            bottom: 90,
-            containLabel: true,
-        },
-        toolbox: {
-            feature: {
-                dataView: {
-                    readOnly: true,
-                    buttonColor: "#95c11a",
-                },
-                saveAsImage: {},
-            },
-        },
-        tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "shadow",
-            },
-        },
-        legend: {
-            type: "scroll",
-            bottom: 0,
-        },
-        dataZoom: [
-            {
-                type: "slider",
-                bottom: 50,
-            },
-            {
-                type: "inside",
-            },
-        ],
-        xAxis: [
-            {
-                type: "time",
-            },
-        ],
-        yAxis: [
-            {
-                type: "value",
-            },
-        ],
-        series: [],
-        useUTC: false,
-    };
+export class TimeseriesChartDegreeDays extends ChartBase {
 
     #degreeDayTypeColors = {
         "heating": "#ee6666",
@@ -76,25 +11,60 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
 
     #compareMode = false;
 
-    constructor(options = null, theme = null, compareMode = false) {
-        super();
+    constructor(chartContainerElmt, compareMode = false, initOptions = null) {
+        super(chartContainerElmt, initOptions);
 
-        this.#initOptions = options || this.#initOptions;
-        this.#theme = theme;
         this.#compareMode = compareMode;
-
-        if (this.#compareMode) {
-            this.#defaultOptions.xAxis[0].type = "category";
-        }
+        this.#initChartOptions();
     }
 
-    #initEventListeners() {
-        window.addEventListener("resize", () => {
-            this.resize();
-        });
-
-        window.addEventListener("unload", () => {
-            this.dispose();
+    #initChartOptions() {
+        this.setOption({
+            title: {
+                left: "center",
+                text: "Data completeness",
+                subtextStyle: {
+                    fontSize: 14,
+                },
+            },
+            grid: {
+                top: 60,
+                bottom: 90,
+            },
+            xAxis: [
+                {
+                    type: this.#compareMode ? "category" : "time",
+                },
+            ],
+            yAxis: [
+                {
+                    type: "value",
+                },
+            ],
+            legend: [
+                {
+                    type: "scroll",
+                    bottom: 0,
+                },
+            ],
+            toolbox: {
+                feature: {
+                    dataView: {
+                        readOnly: true,
+                        buttonColor: "#95c11a",
+                    },
+                    saveAsImage: {},
+                },
+            },
+            dataZoom: [
+                {
+                    type: "slider",
+                    bottom: 50,
+                },
+                {
+                    type: "inside",
+                },
+            ],
         });
     }
 
@@ -212,45 +182,10 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
         return tooltipContainerElmt;
     }
 
-    connectedCallback() {
-        this.#chart = echarts.init(this, this.#theme, this.#initOptions);
-        this.#chart.setOption(this.#defaultOptions);
-
-        this.#initEventListeners();
-    }
-
-    resize() {
-        this.#chart.resize();
-    }
-
-    dispose() {
-        this.#chart.dispose();
-    }
-
-    showLoading() {
-        this.#chart.showLoading();
-    }
-
-    hideLoading() {
-        this.#chart.hideLoading();
-    }
-
     load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, timeFormat) {
-        this.hideLoading();
-
-        let options = this.#chart.getOption();
-
-        options.title[0].text = `${this.#compareMode ? "compare " : ""}${degreeDaysType} degree days (${unit})`;
-        options.title[0].subtext = `base ${degreeDaysBase.toString()}${degreeDaysBaseUnit ? ` ${degreeDaysBaseUnit}`: ""}`;
-        options.toolbox[0].feature.dataView.lang[0] = options.title[0].text;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
-
-        options.yAxis[0].name = unit;
-
-        options.series.length = 0;
+        let dataSeries = [];
         if (!this.#compareMode) {
-            options.series.push({
+            dataSeries.push({
                 id: `${degreeDaysType}-${degreeDaysBase}`,
                 name: `${degreeDaysType} degree days (base ${degreeDaysBase.toString()}${degreeDaysBaseUnit ? ` ${degreeDaysBaseUnit}`: ""})`,
                 type: "bar",
@@ -266,9 +201,7 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
             });
         }
         else {
-            options.xAxis[0].axisTick.alignWithLabel = true;
-
-            options.series = Object.entries(degreeDaysData).map(([time, periodData]) => {
+            dataSeries = Object.entries(degreeDaysData).map(([time, periodData]) => {
                 return {
                     id: `${time}-${degreeDaysType}-${degreeDaysBase}`,
                     name: time.toString(),
@@ -283,14 +216,38 @@ export class TimeseriesChartDegreeDays extends HTMLDivElement {
             });
         }
 
-        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-        this.#chart.clear();
+        let chartTitle = `${this.#compareMode ? "compare " : ""}${degreeDaysType} degree days (${unit})`;
 
-        this.#chart.setOption(options);
+        let options = {
+            title: {
+                text: chartTitle,
+                subtext: `base ${degreeDaysBase.toString()}${degreeDaysBaseUnit ? ` ${degreeDaysBaseUnit}`: ""}`,
+            },
+            toolbox: {
+                feature: {
+                    dataView: {
+                        lang: chartTitle,
+                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat); },
+                    },
+                },
+            },
+            tooltip: {
+                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat); },
+            },
+            yAxis: {
+                name: unit,
+            },
+            series: dataSeries,
+        };
+
+        if (this.#compareMode) {
+            options.xAxis = {
+                axisTick: {
+                    alignWithLabel: true,
+                },
+            };
+        }
+
+        this.setOption(options);
     }
-}
-
-
-if (window.customElements.get("app-ts-chart-degree-days") == null) {
-    window.customElements.define("app-ts-chart-degree-days", TimeseriesChartDegreeDays, { extends: "div" });
 }
