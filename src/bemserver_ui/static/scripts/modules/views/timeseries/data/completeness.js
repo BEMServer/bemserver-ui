@@ -34,7 +34,7 @@ export class TimeSeriesDataCompletenessView {
 
     #tsSelector = null;
 
-    constructor(options = { height: 500 }) {
+    constructor() {
         let date = new Date();
         this.#yearRef = date.getUTCFullYear();
         this.#monthRef = date.getUTCMonth() + 1;
@@ -43,10 +43,6 @@ export class TimeSeriesDataCompletenessView {
 
         this.#cacheDOM();
         this.#initElements();
-
-        this.#chartCompleteness = new TimeseriesChartCompleteness(options);
-        this.#chartContainerElmt.innerHTML = "";
-        this.#chartContainerElmt.appendChild(this.#chartCompleteness);
 
         this.#internalAPIRequester = new InternalAPIRequest();
 
@@ -231,6 +227,10 @@ export class TimeSeriesDataCompletenessView {
     }
 
     refreshChart() {
+        if (this.#chartCompleteness == null) {
+            this.#chartCompleteness = new TimeseriesChartCompleteness(this.#chartContainerElmt);
+        }
+
         this.#chartCompleteness.showLoading();
 
         let loadBtnInnerBackup = this.#loadBtnElmt.innerHTML;
@@ -256,10 +256,18 @@ export class TimeSeriesDataCompletenessView {
         this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
             flaskES6.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
             (data) => {
+                let chartContainerHeight = (Object.entries(data["timeseries"]).length * 25) + 140;
+                if (chartContainerHeight < 400) {
+                    chartContainerHeight = 400;
+                }
+                this.#chartContainerElmt.style.height = `${chartContainerHeight}px`;
+
                 data.period = this.#periodTypeElmt.options[this.#periodTypeElmt.selectedIndex].text;
                 data.datastate_name = this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text;
                 let shouldDisplayTime = this.#periodTypeElmt.value.endsWith("-Hourly");
                 this.#chartCompleteness.load(data, shouldDisplayTime, this.#tzNameElmt.value);
+
+                this.#chartCompleteness.resize();
             },
             (error) => {
                 let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
@@ -269,6 +277,8 @@ export class TimeSeriesDataCompletenessView {
             () => {
                 this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;
                 this.#loadBtnElmt.removeAttribute("disabled");
+
+                this.#chartCompleteness.hideLoading();
             },
         );
     }
@@ -280,6 +290,6 @@ export class TimeSeriesDataCompletenessView {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-    let view = new TimeSeriesDataCompletenessView({height: 500});
+    let view = new TimeSeriesDataCompletenessView();
     view.mount();
 });
