@@ -1,5 +1,4 @@
 {% extends "pages/base.html" %}
-{% import "macros/components/campaign.html" as mac_camp %}
 
 {% set title = "Cleanup data service" %}
 
@@ -62,14 +61,14 @@
                     <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
                             <h6 class="fw-bold">
-                                {{- mac_camp.render_campaign_info(x.campaign_name, x.campaign_state, render_style="bullet") }}
+                                <div is="app-campaign-status-info" render-style="bullet" status="{{ x.campaign_state }}" label="{{ x.campaign_name }}"></div>
                             </h6>
                             {% if is_campaign_selected %}
                             <div><small class="text-opacity-50 text-primary text-nowrap fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
                             {% endif %}
                         </div>
                         <div class="d-flex flex-sm-column gap-sm-0 gap-3">
-                            <span><small class="fw-bold text-nowrap">Cleanup state</small></span>
+                            <span><small class="fw-bold text-nowrap">Service state</small></span>
                             {% if x.is_enabled %}
                             <span class="fw-bold text-success text-opacity-75 text-sm-end">ON</span>
                             {% else %}
@@ -89,5 +88,6 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/components/campaigns/statusInfo.js') }}"></script>
 {% endfilter %}
 {% endblock body_scripts %}

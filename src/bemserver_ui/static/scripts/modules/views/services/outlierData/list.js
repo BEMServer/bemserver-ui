@@ -4,6 +4,7 @@ import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/compone
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { CampaignStatusInfoElement } from "/static/scripts/modules/components/campaigns/statusInfo.js";
 
 
 class CheckOutlierDataServiceListView {
@@ -139,23 +140,13 @@ class CheckOutlierDataServiceListView {
         let entryInfoContainerElmt = document.createElement("div");
         entryInfoContainerElmt.classList.add("d-grid", "gap-2");
         entryContainerElmt.appendChild(entryInfoContainerElmt);
-        let entryInfoCampaignStateContainerElmt = document.createElement("div");
-        entryInfoCampaignStateContainerElmt.classList.add("d-flex", "flex-wrap", "gap-1");
-        entryInfoContainerElmt.appendChild(entryInfoCampaignStateContainerElmt);
-        let entryInfoCampaignStateElmt = document.createElement("small");
-        entryInfoCampaignStateElmt.classList.add("fw-bold", "text-opacity-75");
-        if (entryData["campaign_state"] == "ongoing") {
-            entryInfoCampaignStateElmt.classList.add("text-success");
-        }
-        else if (entryData["campaign_state"] == "closed") {
-            entryInfoCampaignStateElmt.classList.add("text-danger");
-        }
-        entryInfoCampaignStateElmt.innerText = `[${entryData["campaign_state"].toUpperCase()}]`;
-        entryInfoCampaignStateContainerElmt.appendChild(entryInfoCampaignStateElmt);
-        let entryInfoCampaignNameElmt = document.createElement("h6");
-        entryInfoCampaignNameElmt.classList.add("fw-bold", "text-break", "ms-2", "mb-0");
-        entryInfoCampaignNameElmt.innerText = entryData["campaign_name"];
-        entryInfoCampaignStateContainerElmt.appendChild(entryInfoCampaignNameElmt);
+
+        let campaignStatusInfoContainerElmt = document.createElement("h6");
+        campaignStatusInfoContainerElmt.classList.add("fw-bold");
+        entryInfoContainerElmt.appendChild(campaignStatusInfoContainerElmt);
+        let campaignStatusInfoElmt = new CampaignStatusInfoElement({ renderStyle: "bullet", status: entryData["campaign_state"], label: entryData["campaign_name"] });
+        campaignStatusInfoContainerElmt.appendChild(campaignStatusInfoElmt);
+
         if (isSelected) {
             let entryIsSelectedContainerElmt = document.createElement("div");
             entryInfoContainerElmt.appendChild(entryIsSelectedContainerElmt);
