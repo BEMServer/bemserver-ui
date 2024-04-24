@@ -1,4 +1,3 @@
-
 export class CampaignStatusInfoElement extends HTMLDivElement {
 
     #availableRenderStyles = ["text", "bullet"];

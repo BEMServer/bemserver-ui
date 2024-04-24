@@ -1,5 +1,5 @@
-import "../tree.js";
-import { filter } from "../../tools/array.js";
+import "/static/scripts/modules/components/tree.js";
+import { filter } from "/static/scripts/modules/tools/array.js";
 
 
 export class StructuralElementSelector extends HTMLElement {

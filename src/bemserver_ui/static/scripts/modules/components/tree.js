@@ -1,5 +1,5 @@
-import { Parser } from "../tools/parser.js";
-import { Spinner } from "./spinner.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
 
 
 // TODO: TreeNode class? (extends from HTMLLIElement)
