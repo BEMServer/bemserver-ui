@@ -121,15 +121,11 @@
 <script type="module">
     import { UserManageGroupsView } from "{{ url_for('static', filename='scripts/modules/views/users/manageGroups.js') }}";
 
-
-    const editedUser = {{ user | tojson }};
-
-
     document.addEventListener("DOMContentLoaded", () => {
+        let editedUser = {{ user | tojson }};
 
-        let userManageGroupsView = new UserManageGroupsView(editedUser);
-        userManageGroupsView.refresh();
-
+        let view = new UserManageGroupsView(editedUser);
+        view.mount();
     });
 </script>
 {% endfilter %}

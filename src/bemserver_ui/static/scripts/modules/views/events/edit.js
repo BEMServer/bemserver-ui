@@ -1,13 +1,12 @@
-import { flaskES6 } from "../../../app.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../../components/spinner.js";
-import "../../components/itemsCount.js";
-import "../../components/pagination.js";
-import "../../components/time/datetimePicker.js";
-import { StructuralElementSelector } from "../../components/structuralElements/selector.js";
-import { TimeseriesSelector } from  "../../components/timeseries/selector.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import "/static/scripts/modules/components/pagination.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
+import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
+import { TimeseriesSelector } from  "/static/scripts/modules/components/timeseries/selector.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
 
 
 export class EventEditView {
@@ -15,7 +14,6 @@ export class EventEditView {
     #eventData = {};
     #structuralElementTypes = []
 
-    #messagesElmt = null;
     #internalAPIRequester = null;
     #tsListReqID = null;
     #sitesTreeReqID = null;
@@ -77,8 +75,6 @@ export class EventEditView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#sourceInputElmt = document.getElementById("source");
         this.#sourceEditBtnElmt = document.getElementById("btnEditSource");
 
@@ -493,7 +489,7 @@ export class EventEditView {
         };
 
         this.#tsListReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_timeseries_links`, reqOpts),
+            app.urlFor(`api.events.retrieve_timeseries_links`, reqOpts),
             (data) => {
                 this.#tsContainerElmt.innerHTML = "";
 
@@ -530,8 +526,7 @@ export class EventEditView {
                 this.#tsLinkBtnElmt.removeAttribute("aria-disabled");
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
             () => {
                 this.#updateTimeseriesUnlinkTools();
@@ -544,22 +539,20 @@ export class EventEditView {
 
         for (let ts of this.#tsSelector.selectedItems) {
             await this.#internalAPIRequester.postAsync(
-                flaskES6.urlFor(`api.events.create_timeseries_link`, {id: this.#eventData.id, ts_id: ts.id}),
+                app.urlFor(`api.events.create_timeseries_link`, {id: this.#eventData.id, ts_id: ts.id}),
                 null,
                 (data) => {
                     linkedTsNames.push(data.timeseries.name);
                 },
                 (error) => {
                     let errorMsg = `<p class="mb-0">Failed to link <span class="fw-bold fst-italic">${ts.name}</span></p>${error}`;
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(errorMsg, "error");
                 },
             );
         }
 
         if (linkedTsNames.length > 0) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
+            app.flashMessage(`${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, "success");
         }
 
         this.#tsPaginationElmt.page = 1;
@@ -573,22 +566,20 @@ export class EventEditView {
 
         for (let [tsLinkId, tsLinkData] of Object.entries(this.#selectedTimeseriesLinks)) {
             await this.#internalAPIRequester.deleteAsync(
-                flaskES6.urlFor(`api.events.delete_timeseries_link`, {link_id: tsLinkId}),
+                app.urlFor(`api.events.delete_timeseries_link`, {link_id: tsLinkId}),
                 null,
                 () => {
                     unlinkedTsNames.push(tsLinkData.timeseries.name);
                 },
                 (error) => {
                     let errorMsg = `<p class="mb-0">Failed to unlink <span class="fw-bold fst-italic">${tsLinkData.timeseries.name}</span></p>${error}`;
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(errorMsg, "error");
                 },
             );
         }
 
         if (unlinkedTsNames.length > 0) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
+            app.flashMessage(`${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, "success");
         }
 
         this.#tsPaginationElmt.page = 1;
@@ -624,7 +615,7 @@ export class EventEditView {
         };
 
         this.#structElmtListReqIDs[structElmtType] = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_structural_elements_links`, reqOpts),
+            app.urlFor(`api.events.retrieve_structural_elements_links`, reqOpts),
             (data) => {
                 this.#locContainerElmts[structElmtType].innerHTML = "";
 
@@ -661,8 +652,7 @@ export class EventEditView {
                 this.#locLinkBtnElmts[structElmtType].removeAttribute("aria-disabled");
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
             () => {
                 this.#updateStructuralElementUnlinkTools(structElmtType);
@@ -734,17 +724,15 @@ export class EventEditView {
         };
 
         this.#internalAPIRequester.post(
-            flaskES6.urlFor(`api.events.create_structural_elements_link`, {id: this.#eventData.id, type: structElmtType, structural_element_id: structElmtSelector.selectedData.id}),
+            app.urlFor(`api.events.create_structural_elements_link`, {id: this.#eventData.id, type: structElmtType, structural_element_id: structElmtSelector.selectedData.id}),
             null,
             (data) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${structElmtType} linked to the event: ${getLocationLabel(data)}.`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(`${structElmtType} linked to the event: ${getLocationLabel(data)}.`, "success");
             },
             (error) => {
                 let details = `<ul class="mb-0"><li><span class="fw-bold fst-italic">${getLocationLabel(structElmtSelector.selectedData)}</span>: ${error}</li></ul>`;
                 let errorMsg = `<p class="mb-0">Failed to link ${structElmtType}:</p>${details}`;
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(errorMsg, "error");
             },
             () => {
                 this.#locPaginationElmts[structElmtType].page = 1;
@@ -761,22 +749,20 @@ export class EventEditView {
 
         for (let [index, locRelId] of Object.keys(this.#selectedLocations[structElmtType]).entries()) {
             await this.#internalAPIRequester.deleteAsync(
-                flaskES6.urlFor(`api.events.delete_structural_elements_link`, {type: structElmtType, link_id: locRelId}),
+                app.urlFor(`api.events.delete_structural_elements_link`, {type: structElmtType, link_id: locRelId}),
                 null,
                 () => {
                     unlinkedItems.push(selectedItems[index]);
                 },
                 (error) => {
                     let errorMsg = `<p class="mb-0">Failed to unlink <span class="fw-bold fst-italic">${selectedItems[index]}</span> ${structElmtType}</p>${error}`;
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: errorMsg, isDismissible: true, isTimed: false});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(errorMsg, "error");
                 },
             );
         }
 
         if (unlinkedItems.length > 0) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${unlinkedItems.length}/${selectedItems.length} ${structElmtType}${unlinkedItems.length > 1 ? "s" : ""} unlinked: ${unlinkedItems.join(", ")}.`, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
+            app.flashMessage(`${unlinkedItems.length}/${selectedItems.length} ${structElmtType}${unlinkedItems.length > 1 ? "s" : ""} unlinked: ${unlinkedItems.join(", ")}.`, "success");
         }
 
         this.#locPaginationElmts[structElmtType].page = 1;
@@ -794,13 +780,12 @@ export class EventEditView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
             (data) => {
                 this.#siteSelector.loadTree(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -814,13 +799,12 @@ export class EventEditView {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
             (data) => {
                 this.#zoneSelector.loadTree(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

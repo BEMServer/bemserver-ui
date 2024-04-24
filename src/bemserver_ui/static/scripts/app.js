@@ -1,53 +1,94 @@
-import { signedUser } from "./modules/signedUserData.js";
-import { FlaskES6 } from "./modules/tools/flaskES6.js";
-import { Sidebar } from "./modules/sidebar.js";
-import { FormController } from "./modules/formController.js";
-import { flaskEndpoints } from "./modules/flaskES6-endpoints.js";
-import { FlashTimer } from "./modules/flashTimer.js";
-import { NotificationUpdater } from "./modules/notifications.js";
+import { flaskEndpoints } from "/static/scripts/modules/flaskES6-endpoints.js";
+import { FlaskES6 } from "/static/scripts/modules/tools/flaskES6.js";
+import { Sidebar } from "/static/scripts/modules/sidebar.js";
+import { FormController } from "/static/scripts/modules/formController.js";
+import { NotificationUpdater } from "/static/scripts/modules/notifications.js";
+import { MessageManager } from "/static/scripts/managers/message.js";
 
 
-// TODO: how can app instance be accessible from any module?
-// TODO: when app instance is accessible by any other module, put flaskES6 instance inside
-// TODO: manage flash messages in through this app class?
 // TODO: campaignContext defined here is not used for now...
+// TODO: having signedUser here is not really great...
 
 
-const campaignContextQueryArgName = "campaign_ctxt";
-const flaskES6 = new FlaskES6(flaskEndpoints, campaignContextQueryArgName);
+class App {
+    #messageManager = null;
 
-
-export class App {
-
-    #notifUpdatedDelay = 60000;
+    #notifUpdaterDelay = 60000;
     #campaignContext = {};
+    #signedUser = null;
 
-    #sidebar = new Sidebar();
-    #formCtrl = new FormController();
-    #flashTimer = new FlashTimer();
+    #sidebar = null;
+    #formCtrl = null;
     #notifUpdater = null;
+    #flaskES6 = null;
+
+    get campaignContext() {
+        return this.#campaignContext;
+    }
+
+    get signedUser() {
+        return this.#signedUser;
+    }
+
+    get notifUpdater() {
+        return this.#notifUpdater;
+    }
 
     constructor(options = {}) {
         this.#loadOptions(options);
 
-        this.#sidebar = new Sidebar();
-        this.#formCtrl = new FormController();
-        this.#flashTimer = new FlashTimer();
-        this.#notifUpdater = new NotificationUpdater({delay: this.#notifUpdatedDelay});
+        this.#flaskES6 = new FlaskES6(flaskEndpoints);
     }
 
     #loadOptions(options = {}) {
-        this.#notifUpdatedDelay = options.notificationUpdaterDelay || 60000;
+        this.#signedUser = options.signedUser || {};
+        this.#notifUpdaterDelay = options.notificationUpdaterDelay || 60000;
         this.#campaignContext = options.campaignContext || {};
     }
 
-    mount() {
-        this.#sidebar.refresh();
-        this.#formCtrl.bind();
-        this.#flashTimer.bind();
-        this.#notifUpdater.refresh();
+    flashMessage(message, category="message", delay=null, dismiss=true) {
+        this.#messageManager.flash(message, category, delay, dismiss);
+    }
+
+    urlFor(endpoint, rule) {
+        return this.#flaskES6.urlFor(endpoint, rule);
+    }
+
+    // TODO pass manager to init as args.
+    mount(mountSidebar = true, mountNotifUpdater = true, mountFormController = true) {
+        if (this.#messageManager == null) {
+            this.#messageManager = new MessageManager();
+        }
+        this.#messageManager.mount();
+
+        if (mountFormController) {
+            if (this.#formCtrl == null) {
+                this.#formCtrl = new FormController();
+            }
+            this.#formCtrl.mount();
+        }
+
+        if (mountSidebar) {
+            if (this.#sidebar == null) {
+                this.#sidebar = new Sidebar();
+            }
+            this.#sidebar.mount();
+        }
+
+        if (mountNotifUpdater) {
+            if (this.#notifUpdater == null) {
+                this.#notifUpdater = new NotificationUpdater({delay: this.#notifUpdaterDelay});
+            }
+            this.#notifUpdater.mount();
+        }
     }
 }
 
 
-export { flaskES6, signedUser, campaignContextQueryArgName } ;
+export let app = null;
+
+
+export function createApp(options) {
+    app = new App(options);
+    return app;
+}

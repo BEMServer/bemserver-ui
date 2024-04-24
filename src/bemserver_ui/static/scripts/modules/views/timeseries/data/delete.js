@@ -1,15 +1,16 @@
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { TimeseriesSelector } from "../../components/timeseries/selector.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
+import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
+import "/static/scripts/modules/components/time/tzPicker.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
+import "/static/scripts/modules/components/spinner.js";
 
 
-export class TimeseriesDeleteView {
+class TimeseriesDeleteView {
 
     #internalAPIRequester = null;
     #getDataStatesReqID = null;
-    #messagesElmt = null;
 
     #delFormElmt = null;
     #dataStatesElmt = null;
@@ -23,7 +24,6 @@ export class TimeseriesDeleteView {
 
     constructor() {
         this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorDelete");
-
         this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
@@ -31,8 +31,6 @@ export class TimeseriesDeleteView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#delFormElmt = document.getElementById("delForm");
         this.#dataStatesElmt = document.getElementById("data_states");
         this.#tzPickerElmt = document.getElementById("timezonePicker");
@@ -92,8 +90,7 @@ export class TimeseriesDeleteView {
                         event.target.id,
                         `Remove data for <mark>${this.#tsSelector.selectedItems.length.toString()}</mark> timeseries between ${this.#startDatetimePickerElmt.date} and ${this.#endDatetimePickerElmt.date}`,
                         () => {
-                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.INFO, text: `Deleting timeseries data.`, isDismissible: true, isTimed: false});
-                            this.#messagesElmt.appendChild(flashMsgElmt);
+                            app.flashMessage(`Deleting timeseries data.`, "info");
 
                             let jsonData = {
                                 timezone: this.#tzPickerElmt.tzName,
@@ -106,30 +103,24 @@ export class TimeseriesDeleteView {
                             };
 
                             this.#internalAPIRequester.post(
-                                flaskES6.urlFor(`api.timeseries.data.delete_data`),
+                                app.urlFor(`api.timeseries.data.delete_data`),
                                 jsonData,
                                 (data) => {
-                                    let flashMsgElmt = null;
                                     if (data.success) {
-                                        flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `Timeseries data are now deleted!`, isDismissible: true, isTimed: false});
+                                        app.flashMessage(`Timeseries data are now deleted!`, "success");
                                     }
                                     else {
-                                        flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: `An error occured while deleting timeseries data!`, isDismissible: true, isTimed: false});
-                                    }
-                                    if (flashMsgElmt != null) {
-                                        this.#messagesElmt.appendChild(flashMsgElmt);
+                                        app.flashMessage(`An error occured while deleting timeseries data!`, "error");
                                     }
                                 },
                                 (error) => {
-                                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true, isTimed: false});
-                                    this.#messagesElmt.appendChild(flashMsgElmt);
+                                    app.flashMessage(error.toString(), "error");
                                 },
                             );
                         },
                         () => {
                             deleteModalConfirm.remove();
-                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.INFO, text: `Operation canceled.`, isDismissible: true, isTimed: false});
-                            this.#messagesElmt.appendChild(flashMsgElmt);
+                            app.flashMessage(`Operation canceled.`, "info");
                         },
                     );
                     document.body.appendChild(deleteModalConfirm);
@@ -141,20 +132,15 @@ export class TimeseriesDeleteView {
     }
 
     #updateDeleteBtnState() {
-        let disabled = true;
         if (this.#tsSelector.selectedItems.length > 0 && this.#startDatetimePickerElmt.hasDatetime && this.#endDatetimePickerElmt.hasDatetime) {
-            disabled = false;
-        }
-
-        if (disabled) {
-            this.#deleteBtnElmt.setAttribute("disabled", true);
+            this.#deleteBtnElmt.removeAttribute("disabled");
         }
         else {
-            this.#deleteBtnElmt.removeAttribute("disabled");
+            this.#deleteBtnElmt.setAttribute("disabled", true);
         }
     }
 
-    refresh() {
+    mount() {
         let optionLoadingElmt = document.createElement("option");
         optionLoadingElmt.value = "None";
         optionLoadingElmt.innerText = "loading...";
@@ -165,7 +151,7 @@ export class TimeseriesDeleteView {
             this.#getDataStatesReqID = null;
         }
         this.#getDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
+            app.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#dataStatesElmt.innerHTML = "";
                 for (let option of data.data) {
@@ -176,9 +162,14 @@ export class TimeseriesDeleteView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new TimeseriesDeleteView();
+    view.mount();
+});

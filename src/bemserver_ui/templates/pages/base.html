@@ -1,4 +1,3 @@
-{% import "macros/flash.html" as mac_flash %}
 {% extends "pages/skeleton.html" %}
 
 {% block head_styles %}
@@ -42,30 +41,26 @@
         </main>
     </div>
 </div>
-<div id="messages" class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3 app-messages">
-    {{- mac_flash.display_messages() }}
-</div>
 {% endblock body_content %}
 
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { App } from "{{ url_for('static', filename='scripts/app.js') }}";
+    import { signedUser } from "{{ url_for('static', filename='scripts/modules/signedUserData.js') }}";
+    import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 
+    let options = {
+        signedUser: signedUser,
+        campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
+        notificationUpdaterDelay: {{ config.BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY }},
+    };
+
+    let app = createApp(options);
 
     document.addEventListener("DOMContentLoaded", () => {
-
-        let options = {
-            campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
-            notificationUpdaterDelay: {{ config.BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY }},
-        };
-
-        let app = new App(options);
         app.mount();
-
     });
-
 </script>
 {% endfilter %}
 {% endblock body_scripts %}

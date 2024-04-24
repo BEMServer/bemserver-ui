@@ -1,11 +1,10 @@
 export class FlaskES6 {
 
-    #endpoints = null;
-    #campaignContextQueryArgName = null;
+    #endpoints = {};
+    #campaignContextQueryArgName = "campaign_ctxt";
 
-    constructor(flaskEndpoints, campaignContextQueryArgName) {
+    constructor(flaskEndpoints) {
         this.#endpoints = flaskEndpoints;
-        this.#campaignContextQueryArgName = campaignContextQueryArgName;
     }
 
     urlFor(endpoint, rule) {

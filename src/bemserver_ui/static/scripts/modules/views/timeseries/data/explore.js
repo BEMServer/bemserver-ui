@@ -1,12 +1,11 @@
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import "/static/scripts/modules/components/time/tzPicker.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import "/static/scripts/modules/components/timeseries/bucketWidth.js";
 import "/static/scripts/modules/components/spinner.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
 import { TimeseriesChartExplore } from "/static/scripts/modules/components/charts/tsChartExplore.js";
-import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6 } from "/static/scripts/app.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 
 
 // TODO: Maybe those const values could be structures as enums? and general app consts?
@@ -138,8 +137,6 @@ class TimeseriesDataExploreView {
 
     #updateChartTimeoutID = null;
 
-    #messagesElmt = null;
-
     #chartContainerElmt = null;
     #chartExplore = null;
 
@@ -188,8 +185,6 @@ class TimeseriesDataExploreView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#chartContainerElmt = document.getElementById("chartContainer");
         this.#chartExplore = document.getElementById("tsChartExplore");
 
@@ -437,7 +432,7 @@ class TimeseriesDataExploreView {
             this.#tsDataStatesReqID = null;
         }
         this.#tsDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
+            app.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {
@@ -451,8 +446,7 @@ class TimeseriesDataExploreView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -714,7 +708,7 @@ class TimeseriesDataExploreView {
             }
 
             this.#tsDataGetReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.timeseries.data.retrieve_multiple_data_json`, urlParams),
+                app.urlFor(`api.timeseries.data.retrieve_multiple_data_json`, urlParams),
                 (data) => {
                     // Iterate over each requested timeseries ID (instead of data from internal API response).
                     // The main reason is that, in some cases (and especially with no aggregation requested), data can be empty and therefore chart series are not updated.
@@ -729,8 +723,7 @@ class TimeseriesDataExploreView {
                     this.#chartExplore.hideLoading();
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
 
                     this.#chartExplore.hideLoading();
                 },
@@ -893,8 +886,6 @@ class TimeseriesChartSeriesOptions {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let view = new TimeseriesDataExploreView();
     view.mount();
-
 });

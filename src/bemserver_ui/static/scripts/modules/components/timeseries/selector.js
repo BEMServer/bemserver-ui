@@ -1,12 +1,11 @@
-import { FilterSelect } from "../filterSelect.js";
-import "../pagination.js";
-import "../itemsCount.js";
-import { FlashMessageTypes, FlashMessage } from "../flash.js";
-import { Spinner } from "../spinner.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { Parser } from "../../tools/parser.js";
-import { flaskES6 } from "../../../app.js";
-import { StructuralElementSelector } from "../structuralElements/selector.js";
+import { app } from "/static/scripts/app.js";
+import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
+import "/static/scripts/modules/components/pagination.js";
+import "/static/scripts/modules/components/itemsCount.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 
 
 class TimeseriesItem {
@@ -223,8 +222,6 @@ export class TimeseriesSelector extends HTMLElement {
 
     #searchNameTimeoutID = null;
 
-    #messagesElmt = null;
-
     #selectedItemsContainerElmt = null;
     #clearSelectionBtnElmt = null;
     #selectedItems = [];
@@ -290,8 +287,6 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#selectedItemsContainerElmt = document.getElementById("selectedItemsContainer");
         this.#clearSelectionBtnElmt = this.querySelector("#clearSelectionBtn");
         this.#dropdownSearchPanelElmt = document.getElementById("dropdownSearchPanel");
@@ -536,7 +531,7 @@ export class TimeseriesSelector extends HTMLElement {
         this.#searchSelectFilters = {
             "campaign_scope_id": {
                 "label": "campaign scopes",
-                "fetchUrl": flaskES6.urlFor(`api.campaign_scopes.retrieve_list`),
+                "fetchUrl": app.urlFor(`api.campaign_scopes.retrieve_list`),
                 "htmlElement": new FilterSelect(),
                 "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
             },
@@ -580,8 +575,7 @@ export class TimeseriesSelector extends HTMLElement {
                 this.refresh();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -611,7 +605,7 @@ export class TimeseriesSelector extends HTMLElement {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
             (data) => {
                 this.#siteSelector.loadTree(data.data);
 
@@ -623,8 +617,7 @@ export class TimeseriesSelector extends HTMLElement {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -638,7 +631,7 @@ export class TimeseriesSelector extends HTMLElement {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
             (data) => {
                 this.#zoneSelector.loadTree(data.data);
 
@@ -647,8 +640,7 @@ export class TimeseriesSelector extends HTMLElement {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -756,7 +748,7 @@ export class TimeseriesSelector extends HTMLElement {
                 }
 
                 this.#selectReqID = this.#internalAPIRequester.get(
-                    flaskES6.urlFor(`api.timeseries.retrieve_one`, {id: tsId}),
+                    app.urlFor(`api.timeseries.retrieve_one`, {id: tsId}),
                     (data) => {
                         let tsItem = new TimeseriesItem(data.data);
                         let selectedItem = this.#createSelectedItemElement(tsItem, afterSelectCallback);
@@ -768,8 +760,7 @@ export class TimeseriesSelector extends HTMLElement {
                         this.#selectedItems.push(selectedItem.timeseries);
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                     () => {
                         this.#update();
@@ -848,7 +839,7 @@ export class TimeseriesSelector extends HTMLElement {
         }
 
         this.#searchReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.retrieve_list`, searchOptions),
+            app.urlFor(`api.timeseries.retrieve_list`, searchOptions),
             (data) => {
                 this.#searchResultsContainerElmt.innerHTML = "";
 
@@ -880,8 +871,7 @@ export class TimeseriesSelector extends HTMLElement {
                 this.#update();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

@@ -18,6 +18,7 @@
     <body>
         {% filter indent(width=8, first=True) %}
         {% block body_content %}
+        {% include "components/flash_messages.html" +%}
         {% endblock body_content %}
         {% endfilter %}
         {% block body_scripts %}

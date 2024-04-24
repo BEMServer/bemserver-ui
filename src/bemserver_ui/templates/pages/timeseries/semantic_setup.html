@@ -222,9 +222,7 @@
 <script type="module">
     import { TimeseriesSemanticSetupView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/semanticSetup.js') }}";
 
-
     document.addEventListener("DOMContentLoaded", () => {
-
         let view = new TimeseriesSemanticSetupView(
             {{ energies | tojson }},
             {{ energy_end_uses | tojson }},
@@ -233,7 +231,6 @@
             {{ is_editable | tojson }},
         );
         view.mount();
-
     });
 </script>
 {% endfilter %}

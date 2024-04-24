@@ -65,7 +65,7 @@ export class Sidebar {
         }
     }
 
-    refresh() {
+    mount() {
         // Set active the "nav-link" element that corresponds to the current page location.
         let currentUrl = window.location.pathname + window.location.search;
 

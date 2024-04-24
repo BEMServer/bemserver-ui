@@ -1,3 +1,6 @@
+import "/static/scripts/modules/components/itemsCount.js";
+
+
 export class UsersListView {
 
     #formFiltersElmt = null;
@@ -32,6 +35,6 @@ export class UsersListView {
         }
     }
 
-    refresh() {
+    mount() {
     }
 }

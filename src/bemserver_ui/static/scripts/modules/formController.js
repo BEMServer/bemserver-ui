@@ -1,4 +1,4 @@
-import { ModalConfirm } from "./components/modalConfirm.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
 
 
 const requiredInputs = [
@@ -69,7 +69,7 @@ export class FormController {
         return minMaxLabelElmt;
     }
 
-    bind() {
+    mount() {
         // In current page, iterate through every form that contains a "data-modal-confirm-message" attribute.
         for (let confirmFormElmt of this.#confirmFormElmts) {
             // Add a modal confirm component for this form, defining an "ok" callback function.

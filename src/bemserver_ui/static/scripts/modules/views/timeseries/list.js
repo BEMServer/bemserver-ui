@@ -1,12 +1,11 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 
 
@@ -22,7 +21,6 @@ export class TimeseriesListView {
 
     #tzName = "UTC";
 
-    #messagesElmt = null;
     #formFiltersElmt = null;
     #campaignScopeElmt = null;
     #pageInputElmt = null;
@@ -50,7 +48,6 @@ export class TimeseriesListView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#formFiltersElmt = document.getElementById("formFilters");
         this.#campaignScopeElmt = document.getElementById("campaign_scope");
         this.#pageInputElmt = document.getElementById("page");
@@ -148,20 +145,15 @@ export class TimeseriesListView {
     }
 
     #getEditBtnHTML(id, tab=null) {
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             let editUrlParams = {id: id};
             let editLabel = ``;
             if (tab != null) {
                 editUrlParams["tab"] = tab;
                 editLabel = ` ${tab}`;
             }
-            try {
-                let editUrl = flaskES6.urlFor(`timeseries.edit`, editUrlParams);
-                return `<a class="btn btn-sm btn-outline-secondary ms-auto w-auto" href="${editUrl}" role="button" title="Edit${editLabel}"><i class="bi bi-pencil"></i> Edit${editLabel}</a>`;
-            }
-            catch (error) {
-                console.error(error);
-            }
+            let editUrl = app.urlFor(`timeseries.edit`, editUrlParams);
+            return `<a class="btn btn-sm btn-outline-secondary ms-auto w-auto" href="${editUrl}" role="button" title="Edit${editLabel}"><i class="bi bi-pencil"></i> Edit${editLabel}</a>`;
         }
         return ``;
     }
@@ -374,7 +366,7 @@ export class TimeseriesListView {
                 this.#getPropDataReqID = null;
             }
             this.#getPropDataReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId}),
+                app.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId}),
                 (data) => {
                     timeseriesPropertiesElmt.innerHTML = this.#getPropertiesHTML(data, tsId);
                     timeseriesPropertiesElmt.setAttribute("data-ts-loaded", true);
@@ -398,7 +390,7 @@ export class TimeseriesListView {
                 this.#getStructElmtsReqID = null;
             }
             this.#getStructElmtsReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
+                app.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
                 (data) => {
                     timeseriesStructuralElementsElmt.innerHTML = this.#getStructuralElementsHTML(data);
                     timeseriesStructuralElementsElmt.setAttribute("data-ts-loaded", true);
@@ -424,7 +416,7 @@ export class TimeseriesListView {
                     this.#getStatsReqID[tsId] = null;
                 }
                 this.#getStatsReqID[tsId] = this.#internalAPIRequester.get(
-                    flaskES6.urlFor(`api.timeseries.data.retrieve_stats`, {data_state: tsDataStatsStatesElmt.value, timeseries: [tsId]}),
+                    app.urlFor(`api.timeseries.data.retrieve_stats`, {data_state: tsDataStatsStatesElmt.value, timeseries: [tsId]}),
                     (data) => {
                         this.#populateStats(data[tsId.toString()], tsDataStatsContainerElmt);
                         tsDataStatsContainerElmt.setAttribute("data-ts-loaded", true);
@@ -478,7 +470,7 @@ export class TimeseriesListView {
                 "timeseries_id": tsId,
             };
             this.#getEventsReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
+                app.urlFor(`api.events.retrieve_list`, eventsOptions),
                 (data) => {
                     let eventsPaginationOpts = {
                         pageSize: tsEventsPageSizeElmt.current,
@@ -512,7 +504,7 @@ export class TimeseriesListView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
             (data) => {
                 this.#siteSelector.loadTree(data.data);
 
@@ -522,8 +514,7 @@ export class TimeseriesListView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -537,7 +528,7 @@ export class TimeseriesListView {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
             (data) => {
                 this.#zoneSelector.loadTree(data.data);
 
@@ -546,8 +537,7 @@ export class TimeseriesListView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

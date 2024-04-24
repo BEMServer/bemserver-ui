@@ -1,17 +1,13 @@
-import { flaskES6 } from "../../../app.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../../components/spinner.js";
-import "../../components/itemsCount.js";
-import "../../components/pagination.js";
-import "../../components/time/datetimePicker.js";
-import { FilterSelect } from "../../components/filterSelect.js";
-import { TimeDisplay } from "../../tools/time.js";
-import { Parser } from "../../tools/parser.js";
-import { EventLevelBadge } from "../../components/eventLevel.js";
-import { ItemsCount } from "../../components/itemsCount.js";
-import { Pagination, PageSizeSelector } from "../../components/pagination.js";
-import { NotificationUpdater } from "../../notifications.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
+import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
+import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
+import { ItemsCount } from "/static/scripts/modules/components/itemsCount.js";
+import { Pagination, PageSizeSelector } from "/static/scripts/modules/components/pagination.js";
 
 
 export class NotificationExploreView {
@@ -26,8 +22,6 @@ export class NotificationExploreView {
     #selectedCampaignIds = [];
     #campaignScopesByCampaign = {};
     #eventCategories = [];
-    #notifUpdater = null;
-    #messagesElmt = null;
     #internalAPIRequester = null;
     #countReqID = null;
     #searchReqIDs = {};
@@ -79,9 +73,6 @@ export class NotificationExploreView {
     constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
 
-        // TODO: find a better way (maybe using app instance)
-        this.#notifUpdater = new NotificationUpdater({ disableAutoRefresh: true });
-
         this.#loadOptions(options);
         this.#cacheDOM();
 
@@ -101,8 +92,6 @@ export class NotificationExploreView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#accordionFiltersCollapsibleElmt = new bootstrap.Collapse("#collapseFilters");
 
         this.#filtersContainerElmt = document.getElementById("filtersContainer");
@@ -152,25 +141,23 @@ export class NotificationExploreView {
 
     #initData() {
         this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_categories`),
+            app.urlFor(`api.events.retrieve_categories`),
             (data) => {
                 this.#eventCategories = data;
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
 
         for (let campaignData of this.#campaigns) {
             this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.campaign_scopes.retrieve_list`, {campaign_id: campaignData.id}),
+                app.urlFor(`api.campaign_scopes.retrieve_list`, {campaign_id: campaignData.id}),
                 (data) => {
                     this.#campaignScopesByCampaign[campaignData.id] = data.data;
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -465,7 +452,7 @@ export class NotificationExploreView {
         }
 
         this.#updateNotifStatusReqIDs[notifId] = this.#internalAPIRequester.put(
-            flaskES6.urlFor(`api.notifications.update`, {id: notifId}),
+            app.urlFor(`api.notifications.update`, {id: notifId}),
             {read: updateReadState},
             null,
             (data) => {
@@ -487,8 +474,7 @@ export class NotificationExploreView {
                 afterUpdateCallback?.();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -500,18 +486,17 @@ export class NotificationExploreView {
         }
 
         this.#markAllAsReadReqIDs[campaignData.id] = this.#internalAPIRequester.put(
-            flaskES6.urlFor(`api.notifications.mark_all_as_read`, {campaign_id: campaignData.id}),
+            app.urlFor(`api.notifications.mark_all_as_read`, {campaign_id: campaignData.id}),
             null,
             null,
             (data) => {
                 if (data.success) {
-                    this.#notifUpdater.refresh();
+                    app.notifUpdater.refresh();
                     this.#refreshNotifications(campaignData);
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -913,7 +898,7 @@ export class NotificationExploreView {
         }
 
         this.#searchReqIDs[campaignData.id] = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.notifications.retrieve_list`, searchOptions),
+            app.urlFor(`api.notifications.retrieve_list`, searchOptions),
             (data) => {
                 tableBodyContainerElmt.innerHTML = "";
 
@@ -949,8 +934,7 @@ export class NotificationExploreView {
                 afterResfreshCallback?.();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -972,7 +956,7 @@ export class NotificationExploreView {
                     statusValueElmt.innerText = "unread";
                 }
 
-                this.#notifUpdater.refresh();
+                app.notifUpdater.refresh();
             };
 
             if (!this.#currentNotifElmt.notifData.read) {
@@ -1127,7 +1111,7 @@ export class NotificationExploreView {
 
         // Execute web request and load data on tabs.
         this.#loadEventInfoTabReqIDs = this.#internalAPIRequester.gets(
-            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return flaskES6.urlFor(eventInfoTabReqOpts["fetchUrl"], eventInfoTabReqOpts["fetchUrlParams"]); }),
+            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return app.urlFor(eventInfoTabReqOpts["fetchUrl"], eventInfoTabReqOpts["fetchUrlParams"]); }),
             (data) => {
                 for (let [index, eventInfoTabData] of Object.entries(data)) {
                     let eventInfoTabDataPagination = eventInfoTabData.pagination;
@@ -1155,7 +1139,7 @@ export class NotificationExploreView {
                             eventInfoReqParams["page"] = event.detail.page;
 
                             this.#loadEventInfoTabReqPageIDs[eventInfoTabKey] = this.#internalAPIRequester.get(
-                                flaskES6.urlFor(eventInfoReqOpts["fetchUrl"], eventInfoReqParams),
+                                app.urlFor(eventInfoReqOpts["fetchUrl"], eventInfoReqParams),
                                 (dataTab) => {
                                     let dataTabPagination = dataTab.pagination;
                                     dataTab = dataTab.data != undefined ? dataTab.data : dataTab;
@@ -1163,8 +1147,7 @@ export class NotificationExploreView {
                                     this.#updateEventInfoTab(dataTab, dataTabPagination, eventInfoTabKey, eventInfoReqOpts);
                                 },
                                 (error) => {
-                                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                                    this.#messagesElmt.appendChild(flashMsgElmt);
+                                    app.flashMessage(error.toString(), "error");
                                 },
                             );
                         });
@@ -1192,8 +1175,7 @@ export class NotificationExploreView {
                 // Hide event info tabs spinner loader.
                 this.#eventInfoTabSpinnerElmt.classList.add("d-none", "invisible");
 
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
             () => {
                 // Show event info tabs and contents if at least one tab has been loaded.
@@ -1357,7 +1339,7 @@ export class NotificationExploreView {
         }
 
         this.#countReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.notifications.retrieve_count`, countOptions),
+            app.urlFor(`api.notifications.retrieve_count`, countOptions),
             (data) => {
                 let isCurrentCampaignLoaded = false;
 
@@ -1377,8 +1359,7 @@ export class NotificationExploreView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

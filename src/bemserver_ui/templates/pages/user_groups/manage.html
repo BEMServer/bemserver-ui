@@ -7,7 +7,7 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d-lg-flex d-grid gap-2">
-    <a href="{{ url_for('user_groups.view', id=user_group.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage group"><i class="bi bi-arrow-return-left"></i> Back to group view</a>
+    <a href="{{ url_for('user_groups.view', id=user_group.id, tab='users') }}" class="btn btn-sm btn-outline-secondary text-nowrap" title="Manage group"><i class="bi bi-arrow-return-left"></i> Back to group view</a>
     <div class="vr d-none d-lg-block mx-2"></div>
     <div class="hstack gap-2 ms-auto">
         {% if signed_user.is_admin %}

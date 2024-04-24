@@ -1,6 +1,5 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartDegreeDays } from "/static/scripts/modules/components/charts/tsChartDegreeDays.js";
 import "/static/scripts/modules/components/tree.js";
@@ -12,7 +11,6 @@ class DegreeDaysExploreView {
     #retrieveDataReqID = null;
     #sitesTreeReqID = null;
 
-    #messagesElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
     #periodMonthSelectElmt = null;
@@ -58,7 +56,6 @@ class DegreeDaysExploreView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
@@ -221,8 +218,7 @@ class DegreeDaysExploreView {
         }
     }
 
-    #showNoDataPanel()
-    {
+    #showNoDataPanel() {
         let colElmt = document.createElement("div");
         colElmt.classList.add("text-start", "text-muted", "w-50", "mx-auto");
 
@@ -235,7 +231,7 @@ class DegreeDaysExploreView {
         pHelpElmt.innerText = `Maybe the view is not configured for this ${this.#structuralElementType}.`;
         colElmt.appendChild(pHelpElmt);
 
-        if (!signedUser.is_admin) {
+        if (!app.signedUser.is_admin) {
             pHelpElmt.classList.add("mb-0");
 
             let pHelpNotAdminElmt = document.createElement("p");
@@ -284,7 +280,7 @@ class DegreeDaysExploreView {
                 compareOpts["compare_year_period"] = this.#comparePeriodSelectElmt.value;
             }
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(
+                app.urlFor(
                     `api.analysis.degree_days.retrieve`,
                     {
                         site_id: this.#structuralElementId,
@@ -320,8 +316,7 @@ class DegreeDaysExploreView {
                     this.#mainChartContainerElmt.innerHTML = "";
                     this.#showNoDataPanel();
 
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -335,14 +330,13 @@ class DegreeDaysExploreView {
             this.#sitesTreeReqID = null;
         }
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, { types: ["site"] }),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`, { types: ["site"] }),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -354,8 +348,6 @@ class DegreeDaysExploreView {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let view = new DegreeDaysExploreView();
     view.mount();
-
 });

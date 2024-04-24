@@ -1,6 +1,5 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import "/static/scripts/modules/components/itemsCount.js";
 
 
@@ -8,8 +7,6 @@ class ServiceCleanuManageView {
 
     #internalAPIRequester = null;
     #tsUpdateStateReqID = null;
-
-    #messagesElmt = null;
 
     #stateOnRadioElmt = null;
     #stateOffRadioElmt = null;
@@ -30,9 +27,7 @@ class ServiceCleanuManageView {
     }
     
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#stateOnRadioElmt = document.getElementById("svc_state_on");
             this.#stateOffRadioElmt = document.getElementById("svc_state_off");
             this.#cleanupIDInputElmt = document.getElementById("cleanup_id");
@@ -46,7 +41,7 @@ class ServiceCleanuManageView {
     }
 
     #initEventListeners() {
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#stateOnRadioElmt.addEventListener("change", () => {
                 if (this.#stateOnRadioElmt.checked) {
                     this.#updateServiceState(this.#stateOnRadioElmt.checked);
@@ -83,18 +78,16 @@ class ServiceCleanuManageView {
             if (isEnabled) {
                 // Enable service for campaign.
                 this.#tsUpdateStateReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.services.cleanup.enable`),
+                    app.urlFor(`api.services.cleanup.enable`),
                     { campaign_id: this.#campaignIDInputElmt.value, is_enabled: isEnabled },
                     (data) => {
                         this.#cleanupIDInputElmt.value = data.data.id;
                         this.#etagInputElmt.value = data.etag;
 
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: "Cleanup service enabled!", isDismissible: true });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage("Cleanup service enabled!", "info");
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }
@@ -102,18 +95,16 @@ class ServiceCleanuManageView {
         else {
             // Update cleanup service state.
             this.#tsUpdateStateReqID = this.#internalAPIRequester.put(
-                flaskES6.urlFor(`api.services.cleanup.update_state`, {id: this.#cleanupIDInputElmt.value}),
+                app.urlFor(`api.services.cleanup.update_state`, {id: this.#cleanupIDInputElmt.value}),
                 { is_enabled: isEnabled },
                 this.#etagInputElmt.value,
                 (data) => {
                     this.#etagInputElmt.value = data.etag;
 
-                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Cleanup service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(`Cleanup service ${isEnabled ? "en": "dis"}abled!`, "info");
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -126,8 +117,6 @@ class ServiceCleanuManageView {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let svcCleanupManageView = new ServiceCleanuManageView();
     svcCleanupManageView.mount();
-
 });

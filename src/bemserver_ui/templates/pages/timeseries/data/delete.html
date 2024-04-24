@@ -71,19 +71,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
-    import { TimeseriesDeleteView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/delete.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        let tsDeleteView = new TimeseriesDeleteView();
-        tsDeleteView.refresh();
-
-    });
-</script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/data/delete.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

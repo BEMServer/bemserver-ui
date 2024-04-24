@@ -1,8 +1,7 @@
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6 } from "../../../app.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { EventLevelBadge } from "../../components/eventLevel.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
+import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 
 
 export class NotificationSetupView {
@@ -11,8 +10,6 @@ export class NotificationSetupView {
     #postReqID = null;
     #putReqID = null;
     #deleteReqID = null;
-
-    #messagesElmt = null;
 
     #configTableElmt = null;
     #configTableBodyElmt = null;
@@ -44,8 +41,6 @@ export class NotificationSetupView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#configTableElmt = document.getElementById("configTable");
         this.#configTableBodyElmt = this.#configTableElmt.querySelector("tbody");
 
@@ -86,7 +81,7 @@ export class NotificationSetupView {
             if (eventCategoryConfigData.id == null) {
                 // Create (post).
                 this.#postReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.notifications.setup_create`),
+                    app.urlFor(`api.notifications.setup_create`),
                     payload,
                     (data) => {
                         eventCategoryConfigData.id = data.data.id;
@@ -100,21 +95,19 @@ export class NotificationSetupView {
                         this.#refreshConf(eventCategoryConfigData.category_id);
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                     () => {
                         this.#editConfigModal.hide();
 
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success");
                     },
                 );
             }
             else {
                 // Update (put).
                 this.#putReqID = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.notifications.setup_update`, {id: eventCategoryConfigData.id}),
+                    app.urlFor(`api.notifications.setup_update`, {id: eventCategoryConfigData.id}),
                     payload,
                     eventCategoryConfigData.etag,
                     (data) => {
@@ -129,14 +122,12 @@ export class NotificationSetupView {
                         this.#refreshConf(eventCategoryConfigData.category_id);
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                     () => {
                         this.#editConfigModal.hide();
 
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success");
                     },
                 );
             }
@@ -252,16 +243,14 @@ export class NotificationSetupView {
 
             // let energyConsTs = this.#getEnergyConsTs(energySourceConfigData.energy_source_id, configData.energy_use_id);
             this.#deleteReqID = this.#internalAPIRequester.delete(
-                flaskES6.urlFor(`api.notifications.setup_delete`, {id: eventCategoryConfigData.id}),
+                app.urlFor(`api.notifications.setup_delete`, {id: eventCategoryConfigData.id}),
                 eventCategoryConfigData.etag,
                 restoreEventCatMenuItemCallback,
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
                 () => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${eventCategoryConfigData.category_name} notification setup removed!`, isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(`${eventCategoryConfigData.category_name} notification setup removed!`, "success");
                 },
             );
         });
