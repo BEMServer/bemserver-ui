@@ -1,26 +1,44 @@
 import { flaskEndpoints } from "/static/scripts/modules/flaskES6-endpoints.js";
 import { FlaskES6 } from "/static/scripts/modules/tools/flaskES6.js";
-import { Sidebar } from "/static/scripts/modules/sidebar.js";
-import { FormController } from "/static/scripts/modules/formController.js";
-import { NotificationUpdater } from "/static/scripts/modules/notifications.js";
-import { MessageManager } from "/static/scripts/managers/message.js";
 
 
-// TODO: campaignContext defined here is not used for now...
-// TODO: having signedUser here is not really great...
+// TODO: campaignContext data property is not used for now...
+// TODO: having signedUser data here kinda sucks...
+
+
+const APP_MANAGERS = Object.freeze({
+    MESSAGE_MANAGER: {
+        name: "MessageManager",
+        module_path: "/static/scripts/managers/message.js",
+        options: {},
+    },
+    SIDEBAR: {
+        name: "SidebarManager",
+        module_path: "/static/scripts/managers/sidebar.js",
+        options: {},
+    },
+    FORM_CONTROLLER: {
+        name: "FormController",
+        module_path: "/static/scripts/managers/formController.js",
+        options: {},
+    },
+    NOTIF_UPDATER: {
+        name: "NotificationUpdater",
+        module_path: "/static/scripts/managers/notifications.js",
+        options: {
+            delay: 60000,
+        },
+    },
+});
 
 
 class App {
-    #messageManager = null;
 
-    #notifUpdaterDelay = 60000;
-    #campaignContext = {};
     #signedUser = null;
+    #campaignContext = {};
 
-    #sidebar = null;
-    #formCtrl = null;
-    #notifUpdater = null;
     #flaskES6 = null;
+    #managers = {};
 
     get campaignContext() {
         return this.#campaignContext;
@@ -28,10 +46,6 @@ class App {
 
     get signedUser() {
         return this.#signedUser;
-    }
-
-    get notifUpdater() {
-        return this.#notifUpdater;
     }
 
     constructor(options = {}) {
@@ -42,44 +56,42 @@ class App {
 
     #loadOptions(options = {}) {
         this.#signedUser = options.signedUser || {};
-        this.#notifUpdaterDelay = options.notificationUpdaterDelay || 60000;
         this.#campaignContext = options.campaignContext || {};
     }
 
+    async #initManager(managerName, options) {
+        if (Object.keys(APP_MANAGERS).includes(managerName)) {
+            let manager = APP_MANAGERS[managerName];
+            let { default: ManagerClass } = await import(manager.module_path);
+            if (!Object.keys(this.#managers).includes(manager.name)) {
+                let managerInstance = new ManagerClass({...manager.config, ...options});
+                managerInstance.mount();
+                this.#managers[manager.name] = managerInstance;
+            }
+            else {
+                console.warn(`${managerName} manager is already loaded!`);
+            }
+        }
+        else {
+            console.error(`Unknown ${managerName} manager, can not load!`);
+        }
+    }
+
     flashMessage(message, category="message", delay=null, dismiss=true) {
-        this.#messageManager.flash(message, category, delay, dismiss);
+        this.#managers[APP_MANAGERS.MESSAGE_MANAGER.name]?.flash(message, category, delay, dismiss);
     }
 
     urlFor(endpoint, rule) {
         return this.#flaskES6.urlFor(endpoint, rule);
     }
 
-    // TODO pass manager to init as args.
-    mount(mountSidebar = true, mountNotifUpdater = true, mountFormController = true) {
-        if (this.#messageManager == null) {
-            this.#messageManager = new MessageManager();
-        }
-        this.#messageManager.mount();
+    refreshNotifs() {
+        this.#managers[APP_MANAGERS.NOTIF_UPDATER.name]?.refresh();
+    }
 
-        if (mountFormController) {
-            if (this.#formCtrl == null) {
-                this.#formCtrl = new FormController();
-            }
-            this.#formCtrl.mount();
-        }
-
-        if (mountSidebar) {
-            if (this.#sidebar == null) {
-                this.#sidebar = new Sidebar();
-            }
-            this.#sidebar.mount();
-        }
-
-        if (mountNotifUpdater) {
-            if (this.#notifUpdater == null) {
-                this.#notifUpdater = new NotificationUpdater({delay: this.#notifUpdaterDelay});
-            }
-            this.#notifUpdater.mount();
+    mount(managers = {}) {
+        for (let [managerName, managerConfig] of Object.entries(managers)) {
+            this.#initManager(managerName, managerConfig);
         }
     }
 }

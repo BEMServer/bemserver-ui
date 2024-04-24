@@ -3,7 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class NotificationUpdater {
+export default class NotificationUpdater {
 
     #intervalDelay = 60000;
     #intervalID = null;

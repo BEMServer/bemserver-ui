@@ -53,13 +53,20 @@
     let options = {
         signedUser: signedUser,
         campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
-        notificationUpdaterDelay: {{ config.BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY }},
     };
 
     let app = createApp(options);
 
     document.addEventListener("DOMContentLoaded", () => {
-        app.mount();
+        let managers = {
+            "MESSAGE_MANAGER": {},
+            "SIDEBAR": {},
+            "FORM_CONTROLLER": {},
+            "NOTIF_UPDATER": {
+                delay: {{ config.BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY }},
+            },
+        };
+        app.mount(managers);
     });
 </script>
 {% endfilter %}

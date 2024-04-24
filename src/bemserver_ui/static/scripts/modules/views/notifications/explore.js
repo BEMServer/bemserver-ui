@@ -491,7 +491,7 @@ export class NotificationExploreView {
             null,
             (data) => {
                 if (data.success) {
-                    app.notifUpdater.refresh();
+                    app.refreshNotifs();
                     this.#refreshNotifications(campaignData);
                 }
             },
@@ -956,7 +956,7 @@ export class NotificationExploreView {
                     statusValueElmt.innerText = "unread";
                 }
 
-                app.notifUpdater.refresh();
+                app.refreshNotifs();
             };
 
             if (!this.#currentNotifElmt.notifData.read) {

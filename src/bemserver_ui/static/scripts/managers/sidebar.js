@@ -1,7 +1,7 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js"
 
 
-export class Sidebar {
+export default class SidebarManager {
 
     #navLinkElmts = null;
 

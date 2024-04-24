@@ -1,7 +1,7 @@
 import { FlashMessage } from "/static/scripts/modules/components/flashMessage.js"
 
 
-export class MessageManager {
+export default class MessageManager {
 
     #messageContainerElmt = null;
 

@@ -26,7 +26,7 @@ const minMaxInputs = [
 ];
 
 
-export class FormController {
+export default class FormController {
 
     #confirmFormElmts = null;
     #requiredInputElmts = null;

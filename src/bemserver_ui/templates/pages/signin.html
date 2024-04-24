@@ -48,9 +48,13 @@
 <script type="module">
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 
+    let app = createApp();
+
     document.addEventListener("DOMContentLoaded", () => {
-        let app = createApp();
-        app.mount(false, false, false);
+        let managers = {
+            "MESSAGE_MANAGER": {},
+        };
+        app.mount(managers);
     });
 </script>
 {% endfilter %}
