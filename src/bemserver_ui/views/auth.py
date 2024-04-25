@@ -38,7 +38,7 @@ def signin():
         user_json = user_resp.toJSON()
         user_json["data"] = user_json["data"][0]
         flask.session["user"] = user_json
-        flask.flash(f"Welcome back {user_json['data']['name']}!", "message")
+        flask.flash(f"Welcome back {user_json['data']['name']}!", "message", delay=5)
         url_redir = flask.url_for(
             "main.index",
             **{IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True},
@@ -55,6 +55,6 @@ def signout():
     # Clear session to forget user's credentials in order to "sign out".
     username = flask.session["user"]["data"]["name"]
     flask.session.clear()
-    flask.flash(f"You have signed out! Bye {username}", "message")
+    flask.flash(f"You have signed out! Bye {username}", "message", delay=5)
     # Redirect to sign in form.
     return flask.redirect(flask.url_for("auth.signin"))

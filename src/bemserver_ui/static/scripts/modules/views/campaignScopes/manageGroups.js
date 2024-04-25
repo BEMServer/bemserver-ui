@@ -111,7 +111,7 @@ export class CampaignScopeManageGroupsView {
 
                     this.#refreshCounters();
 
-                    app.flashMessage(`${groupName} added to ${this.#campaignScope.name}!`, "success", 4)
+                    app.flashMessage(`${groupName} added to ${this.#campaignScope.name}!`, "success", 5)
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");
@@ -142,7 +142,7 @@ export class CampaignScopeManageGroupsView {
 
                     this.#refreshCounters();
 
-                    app.flashMessage(`${groupName} removed from ${this.#campaignScope.name}!`, "success", 4);
+                    app.flashMessage(`${groupName} removed from ${this.#campaignScope.name}!`, "success", 5);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");

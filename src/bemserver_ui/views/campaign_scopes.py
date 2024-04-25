@@ -82,7 +82,9 @@ def create():
             "campaign_id": flask.request.form["campaign"],
         }
         cs_resp = flask.g.api_client.campaign_scopes.create(payload)
-        flask.flash(f"New campaign scope created: {cs_resp.data['name']}", "success")
+        flask.flash(
+            f"New campaign scope created: {cs_resp.data['name']}", "success", delay=5
+        )
         return flask.redirect(
             flask.url_for("campaign_scopes.view", id=cs_resp.data["id"])
         )
@@ -104,7 +106,7 @@ def edit(id):
         flask.g.api_client.campaign_scopes.update(
             id, payload, etag=flask.request.form["editEtag"]
         )
-        flask.flash("Campaign scope updated!", "success")
+        flask.flash("Campaign scope updated!", "success", delay=5)
         return flask.redirect(flask.url_for("campaign_scopes.view", id=id))
 
     campaign_scope_resp = flask.g.api_client.campaign_scopes.getone(id)
@@ -133,7 +135,7 @@ def edit(id):
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
     flask.g.api_client.campaign_scopes.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash("Campaign scope deleted!", "success")
+    flask.flash("Campaign scope deleted!", "success", delay=5)
     url_next = flask.request.args.get("next") or flask.url_for("campaigns.list")
     return flask.redirect(url_next)
 
@@ -143,5 +145,5 @@ def delete(id):
 def remove_user_group(id):
     rel_id = flask.request.args["rel_id"]
     flask.g.api_client.user_groups_by_campaign_scopes.delete(rel_id)
-    flask.flash("User group removed from campaign scope!", "success")
+    flask.flash("User group removed from campaign scope!", "success", delay=5)
     return flask.redirect(flask.request.args["next"])

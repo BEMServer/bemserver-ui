@@ -26,7 +26,9 @@ def create():
         }
         ts_datastates_resp = flask.g.api_client.timeseries_datastates.create(payload)
         ts_ds_name = ts_datastates_resp.data["name"]
-        flask.flash(f"New timeseries data state created: {ts_ds_name}", "success")
+        flask.flash(
+            f"New timeseries data state created: {ts_ds_name}", "success", delay=5
+        )
         return flask.redirect(flask.url_for("timeseries.datastates.list"))
 
     return flask.render_template("pages/timeseries/datastates/create.html")
@@ -43,7 +45,7 @@ def edit(id):
             id, payload, etag=flask.request.form["editEtag"]
         )
         ts_ds_name = ts_datastates_resp.data["name"]
-        flask.flash(f"{ts_ds_name} timeseries data state updated!", "success")
+        flask.flash(f"{ts_ds_name} timeseries data state updated!", "success", delay=5)
         return flask.redirect(flask.url_for("timeseries.datastates.list"))
 
     ts_datastates_resp = flask.g.api_client.timeseries_datastates.getone(id)
@@ -61,5 +63,5 @@ def delete(id):
     flask.g.api_client.timeseries_datastates.delete(
         id, etag=flask.request.form["delEtag"]
     )
-    flask.flash("Timeseries data state deleted!", "success")
+    flask.flash("Timeseries data state deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("timeseries.datastates.list"))

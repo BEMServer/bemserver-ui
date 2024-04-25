@@ -148,7 +148,7 @@ class WeatherDataServiceManageView {
                     },
                     null,
                     () => {
-                        app.flashMessage(`Weather data successfully fetched.`, "success");
+                        app.flashMessage(`Weather data successfully fetched.`, "success", 5);
 
                         this.#fetchDataModal.hide();
                     },
@@ -275,7 +275,7 @@ class WeatherDataServiceManageView {
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service enabled!`, "info");
+                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service enabled!`, "info", 5);
                             },
                             (error) => {
                                 app.flashMessage(error.toString(), "error");
@@ -298,7 +298,7 @@ class WeatherDataServiceManageView {
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service ${isEnabled ? "en": "dis"}abled!`, "info");
+                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service ${isEnabled ? "en": "dis"}abled!`, "info", 5);
                             },
                             (error) => {
                                 app.flashMessage(error.toString(), "error");

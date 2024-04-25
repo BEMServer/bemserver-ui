@@ -58,7 +58,7 @@ def create():
             payload["timestamp"] = timestamp.isoformat()
 
         flask.g.api_client.events.create(payload)
-        flask.flash("New event entry created!", "success")
+        flask.flash("New event entry created!", "success", delay=5)
         return flask.redirect(flask.url_for("events.list"))
 
     campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
@@ -93,7 +93,7 @@ def edit(id):
         flask.g.api_client.events.update(
             id, payload, etag=flask.request.form["editEtag"]
         )
-        flask.flash("Event updated!", "success")
+        flask.flash("Event updated!", "success", delay=5)
         return flask.redirect(flask.url_for("events.list"))
 
     # Get event data.
@@ -129,5 +129,5 @@ def edit(id):
 @ensure_campaign_context
 def delete(id):
     flask.g.api_client.events.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash("Event deleted!", "success")
+    flask.flash("Event deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("events.list"))

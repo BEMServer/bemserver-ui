@@ -111,7 +111,7 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    app.flashMessage(`User added to ${groupName} group!`, "success", 4);
+                    app.flashMessage(`User added to ${groupName} group!`, "success", 5);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");
@@ -142,7 +142,7 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    app.flashMessage(`User removed from ${groupName} group!`, "success", 4);
+                    app.flashMessage(`User removed from ${groupName} group!`, "success", 5);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");

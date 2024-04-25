@@ -32,9 +32,10 @@ def upload():
                 flask.flash(
                     f"Timeseries data uploaded from {up_filestream.filename}",
                     "success",
+                    delay=5,
                 )
             else:
-                flask.flash(f"{up_filename} is empty!", "warning")
+                flask.flash(f"{up_filename} is empty!", "warning", delay=10)
         return flask.redirect(
             flask.url_for(flask.request.args.get("next") or "main.index")
         )

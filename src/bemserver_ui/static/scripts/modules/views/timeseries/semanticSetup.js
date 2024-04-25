@@ -225,7 +225,7 @@ export class TimeseriesSemanticSetupView {
             };
             let updateSetupDoneCallback = () => {
                 let weatherData = this.#weatherSetupByParam[this.#weatherParamEdited];
-                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success");
+                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success", 5);
                 this.#selectTimeseriesModal.hide();
             };
 
@@ -273,7 +273,7 @@ export class TimeseriesSemanticSetupView {
             };
             let updateSetupDoneCallback = () => {
                 let weatherData = this.#forecastWeatherSetupByParam[this.#forecastWeatherParamEdited];
-                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success");
+                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success", 5);
                 this.#selectTimeseriesModal.hide();
             };
 
@@ -324,7 +324,7 @@ export class TimeseriesSemanticSetupView {
                 let energyName = this.#energies[energyProdData.energy_id];
                 let prodTechName = this.#energyProdTechs[energyProdData.prod_tech_id];
 
-                app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup saved!`, "success");
+                app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup saved!`, "success", 5);
 
                 this.#selectTimeseriesModal.hide();
             };
@@ -376,7 +376,7 @@ export class TimeseriesSemanticSetupView {
                 let energyName = this.#energies[energyConsData.energy_id];
                 let endUseName = this.#energyEndUses[energyConsData.end_use_id];
 
-                app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup saved!`, "success");
+                app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup saved!`, "success", 5);
 
                 this.#selectTimeseriesModal.hide();
             };
@@ -619,7 +619,7 @@ export class TimeseriesSemanticSetupView {
                     },
                     this.#internalApiErrorCallback,
                     () => {
-                        app.flashMessage(`${dataToDelete.parameter_label} weather parameter setup removed!`, "success");
+                        app.flashMessage(`${dataToDelete.parameter_label} weather parameter setup removed!`, "success", 5);
                     },
                 );
             },
@@ -906,7 +906,7 @@ export class TimeseriesSemanticSetupView {
                         },
                         this.#internalApiErrorCallback,
                         () => {
-                            app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup removed!`, "success");
+                            app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup removed!`, "success", 5);
                         },
                     );
                 },
@@ -1110,7 +1110,7 @@ export class TimeseriesSemanticSetupView {
                         },
                         this.#internalApiErrorCallback,
                         () => {
-                            app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup removed!`, "success");
+                            app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup removed!`, "success", 5);
                         },
                     );
                 },

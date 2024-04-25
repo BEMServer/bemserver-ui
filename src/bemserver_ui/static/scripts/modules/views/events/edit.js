@@ -552,7 +552,7 @@ export class EventEditView {
         }
 
         if (linkedTsNames.length > 0) {
-            app.flashMessage(`${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, "success");
+            app.flashMessage(`${linkedTsNames.length}/${this.#tsSelector.selectedItems.length} timeseries linked to the event: ${linkedTsNames.join(", ")}.`, "success", 5);
         }
 
         this.#tsPaginationElmt.page = 1;
@@ -579,7 +579,7 @@ export class EventEditView {
         }
 
         if (unlinkedTsNames.length > 0) {
-            app.flashMessage(`${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, "success");
+            app.flashMessage(`${unlinkedTsNames.length}/${Object.entries(this.#selectedTimeseriesLinks).length} timeseries unlinked: ${unlinkedTsNames.join(", ")}.`, "success", 5);
         }
 
         this.#tsPaginationElmt.page = 1;
@@ -727,7 +727,7 @@ export class EventEditView {
             app.urlFor(`api.events.create_structural_elements_link`, {id: this.#eventData.id, type: structElmtType, structural_element_id: structElmtSelector.selectedData.id}),
             null,
             (data) => {
-                app.flashMessage(`${structElmtType} linked to the event: ${getLocationLabel(data)}.`, "success");
+                app.flashMessage(`${structElmtType} linked to the event: ${getLocationLabel(data)}.`, "success", 5);
             },
             (error) => {
                 let details = `<ul class="mb-0"><li><span class="fw-bold fst-italic">${getLocationLabel(structElmtSelector.selectedData)}</span>: ${error}</li></ul>`;
@@ -762,7 +762,7 @@ export class EventEditView {
         }
 
         if (unlinkedItems.length > 0) {
-            app.flashMessage(`${unlinkedItems.length}/${selectedItems.length} ${structElmtType}${unlinkedItems.length > 1 ? "s" : ""} unlinked: ${unlinkedItems.join(", ")}.`, "success");
+            app.flashMessage(`${unlinkedItems.length}/${selectedItems.length} ${structElmtType}${unlinkedItems.length > 1 ? "s" : ""} unlinked: ${unlinkedItems.join(", ")}.`, "success", 5);
         }
 
         this.#locPaginationElmts[structElmtType].page = 1;

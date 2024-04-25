@@ -200,7 +200,7 @@ class TimeseriesManageStructuralElementsView {
             let dropedItemText = jsonData.sourceNodeData.path;
 
             if (event.detail.isDuplicate) {
-                app.flashMessage(`${tsTitle} timeseries is already located in ${dropedItemTitle}`, "warning");
+                app.flashMessage(`${tsTitle} timeseries is already located in ${dropedItemTitle}`, "warning", 10);
             }
             else {
                 this.#internalAPIRequester.post(

@@ -32,7 +32,9 @@ def create():
         }
         ts_prop_resp = flask.g.api_client.timeseries_properties.create(payload)
         prop_name = ts_prop_resp.data["name"]
-        flask.flash(f"New timeseries attribute created: {prop_name}", "success")
+        flask.flash(
+            f"New timeseries attribute created: {prop_name}", "success", delay=5
+        )
         url_next = urllib.parse.unquote(
             flask.request.args.get("next")
             or flask.url_for("timeseries_properties.list")
@@ -63,7 +65,7 @@ def edit(id):
             id, payload, etag=flask.request.form["editEtag"]
         )
         prop_name = prop_resp.data["name"]
-        flask.flash(f"{prop_name} timeseries attribute updated!", "success")
+        flask.flash(f"{prop_name} timeseries attribute updated!", "success", delay=5)
         return flask.redirect(flask.url_for("timeseries.properties.list"))
 
     ts_properties_resp = flask.g.api_client.timeseries_properties.getone(id)
@@ -81,5 +83,5 @@ def delete(id):
     flask.g.api_client.timeseries_properties.delete(
         id, etag=flask.request.form["delEtag"]
     )
-    flask.flash("Timeseries attribute deleted!", "success")
+    flask.flash("Timeseries attribute deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("timeseries.properties.list"))

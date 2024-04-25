@@ -62,7 +62,7 @@ class CheckMissingDataServiceManageView {
                         this.#campaignServiceIDInputElmt.value = data.data.id;
                         this.#etagInputElmt.value = data.etag;
 
-                        app.flashMessage("Check missing data service enabled!", "info");
+                        app.flashMessage("Check missing data service enabled!", "info", 5);
                     },
                     (error) => {
                         app.flashMessage(error.toString(), "error");
@@ -79,7 +79,7 @@ class CheckMissingDataServiceManageView {
                 (data) => {
                     this.#etagInputElmt.value = data.etag;
 
-                    app.flashMessage(`Check missing data service ${isEnabled ? "en": "dis"}abled!`, "info");
+                    app.flashMessage(`Check missing data service ${isEnabled ? "en": "dis"}abled!`, "info", 5);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");

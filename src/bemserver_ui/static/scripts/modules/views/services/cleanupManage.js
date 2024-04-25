@@ -84,7 +84,7 @@ class ServiceCleanuManageView {
                         this.#cleanupIDInputElmt.value = data.data.id;
                         this.#etagInputElmt.value = data.etag;
 
-                        app.flashMessage("Cleanup service enabled!", "info");
+                        app.flashMessage("Cleanup service enabled!", "info", 5);
                     },
                     (error) => {
                         app.flashMessage(error.toString(), "error");
@@ -101,7 +101,7 @@ class ServiceCleanuManageView {
                 (data) => {
                     this.#etagInputElmt.value = data.etag;
 
-                    app.flashMessage(`Cleanup service ${isEnabled ? "en": "dis"}abled!`, "info");
+                    app.flashMessage(`Cleanup service ${isEnabled ? "en": "dis"}abled!`, "info", 5);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");

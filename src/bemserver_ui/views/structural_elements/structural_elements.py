@@ -52,7 +52,7 @@ def create(type):
 
         api_resource = getattr(flask.g.api_client, f"{type}s")
         ret_resp = api_resource.create(payload)
-        flask.flash(f"New {type} created: {ret_resp.data['name']}", "success")
+        flask.flash(f"New {type} created: {ret_resp.data['name']}", "success", delay=5)
         return flask.redirect(
             flask.url_for(
                 "structural_elements.edit",
@@ -139,7 +139,7 @@ def edit(type, id):
             payload["longitude"] = flask.request.form["longitude"]
 
         ret_resp = api_resource.update(id, payload, etag=flask.request.form["editEtag"])
-        flask.flash(f"{type} updated: {ret_resp.data['name']}", "success")
+        flask.flash(f"{type} updated: {ret_resp.data['name']}", "success", delay=5)
 
         # Update property values, only if value has changed.
         for prop_id, prop_data in properties.items():
@@ -171,7 +171,9 @@ def edit(type, id):
                     f"Error while setting {prop_data['name']} attribute!", "warning"
                 )
             else:
-                flask.flash(f"{prop_data['name']} attribute updated!", "success")
+                flask.flash(
+                    f"{prop_data['name']} attribute updated!", "success", delay=5
+                )
 
         return flask.redirect(flask.url_for("structural_elements.explore"))
 
@@ -191,7 +193,7 @@ def edit(type, id):
 def delete(type, id):
     api_resource = getattr(flask.g.api_client, f"{type}s")
     api_resource.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash(f"{type} deleted!", "success")
+    flask.flash(f"{type} deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("structural_elements.explore"))
 
 
@@ -215,7 +217,7 @@ def create_property(type, id):
     }
     api_resource = getattr(flask.g.api_client, f"{type}_property_data")
     api_resource.create(payload)
-    flask.flash("Attribute defined!", "success")
+    flask.flash("Attribute defined!", "success", delay=5)
 
     return flask.redirect(
         flask.url_for("structural_elements.edit", type=type, id=id, tab="properties")
@@ -232,7 +234,7 @@ def delete_property(type, id, property_id):
     api_resource.delete(
         property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
     )
-    flask.flash("Attribute deleted!", "success")
+    flask.flash("Attribute deleted!", "success", delay=5)
     return flask.redirect(
         flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
     )
@@ -247,7 +249,7 @@ def upload():
             flask.g.campaign_ctxt.id,
             {k: v.stream for k, v in flask.request.files.items()},
         )
-        flask.flash("Sites data uploaded!", "success")
+        flask.flash("Sites data uploaded!", "success", delay=5)
         return flask.redirect(flask.url_for("structural_elements.explore"))
 
     return flask.render_template(

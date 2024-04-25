@@ -100,7 +100,7 @@ export class NotificationSetupView {
                     () => {
                         this.#editConfigModal.hide();
 
-                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success");
+                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success", 5);
                     },
                 );
             }
@@ -127,7 +127,7 @@ export class NotificationSetupView {
                     () => {
                         this.#editConfigModal.hide();
 
-                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success");
+                        app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success", 5);
                     },
                 );
             }
@@ -250,7 +250,7 @@ export class NotificationSetupView {
                     app.flashMessage(error.toString(), "error");
                 },
                 () => {
-                    app.flashMessage(`${eventCategoryConfigData.category_name} notification setup removed!`, "success");
+                    app.flashMessage(`${eventCategoryConfigData.category_name} notification setup removed!`, "success", 5);
                 },
             );
         });

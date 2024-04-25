@@ -90,7 +90,7 @@ class TimeseriesDeleteView {
                         event.target.id,
                         `Remove data for <mark>${this.#tsSelector.selectedItems.length.toString()}</mark> timeseries between ${this.#startDatetimePickerElmt.date} and ${this.#endDatetimePickerElmt.date}`,
                         () => {
-                            app.flashMessage(`Deleting timeseries data.`, "info");
+                            app.flashMessage(`Deleting timeseries data.`, "info", 5);
 
                             let jsonData = {
                                 timezone: this.#tzPickerElmt.tzName,
@@ -107,7 +107,7 @@ class TimeseriesDeleteView {
                                 jsonData,
                                 (data) => {
                                     if (data.success) {
-                                        app.flashMessage(`Timeseries data are now deleted!`, "success");
+                                        app.flashMessage(`Timeseries data are now deleted!`, "success", 5);
                                     }
                                     else {
                                         app.flashMessage(`An error occured while deleting timeseries data!`, "error");
@@ -120,7 +120,7 @@ class TimeseriesDeleteView {
                         },
                         () => {
                             deleteModalConfirm.remove();
-                            app.flashMessage(`Operation canceled.`, "info");
+                            app.flashMessage(`Operation canceled.`, "info", 5);
                         },
                     );
                     document.body.appendChild(deleteModalConfirm);

@@ -85,7 +85,7 @@ def create():
         }
         ret_resp = flask.g.api_client.structural_element_properties.create(payload)
         prop_name = ret_resp.data["name"]
-        flask.flash(f"New attribute created: {prop_name}", "success")
+        flask.flash(f"New attribute created: {prop_name}", "success", delay=5)
 
         payload = {"structural_element_property_id": ret_resp.data["id"]}
         for x in FULL_STRUCTURAL_ELEMENT_TYPES:
@@ -98,7 +98,9 @@ def create():
                         f"Error while adding {prop_name} attribute to {x}s!", "error"
                     )
                 else:
-                    flask.flash(f"{prop_name} attribute added to {x}s", "success")
+                    flask.flash(
+                        f"{prop_name} attribute added to {x}s", "success", delay=5
+                    )
 
         url_next = urllib.parse.unquote(
             flask.request.args.get("next")
@@ -133,7 +135,7 @@ def edit(id):
             id, payload, etag=flask.request.form["editEtag"]
         )
         prop_name = prop_resp.data["name"]
-        flask.flash(f"{prop_name} attribute updated!", "success")
+        flask.flash(f"{prop_name} attribute updated!", "success", delay=5)
 
         payload = {"structural_element_property_id": prop_resp.data["id"]}
         for x in FULL_STRUCTURAL_ELEMENT_TYPES:
@@ -153,7 +155,9 @@ def edit(id):
                             "error",
                         )
                     else:
-                        flask.flash(f"{prop_name} attribute added to {x}s", "success")
+                        flask.flash(
+                            f"{prop_name} attribute added to {x}s", "success", delay=5
+                        )
             # Property is NOT requested to be associated.
             # Is property currently attach to structural element?
             # 1. Yes, remove association.
@@ -165,9 +169,12 @@ def edit(id):
                     flask.flash(
                         f"{prop_name} attribute is already removed for {x}s!",
                         "warning",
+                        delay=10,
                     )
                 else:
-                    flask.flash(f"{prop_name} attribute removed from {x}s", "success")
+                    flask.flash(
+                        f"{prop_name} attribute removed from {x}s", "success", delay=5
+                    )
 
         return flask.redirect(flask.url_for("structural_elements.properties.list"))
 
@@ -189,5 +196,5 @@ def delete(id):
     flask.g.api_client.structural_element_properties.delete(
         id, etag=flask.request.form["delEtag"]
     )
-    flask.flash("Attribute deleted!", "success")
+    flask.flash("Attribute deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("structural_elements.properties.list"))

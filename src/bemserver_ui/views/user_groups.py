@@ -99,7 +99,7 @@ def create():
     if flask.request.method == "POST":
         user_group_name = flask.request.form["name"]
         flask.g.api_client.user_groups.create({"name": user_group_name})
-        flask.flash(f"New user group created: {user_group_name}", "success")
+        flask.flash(f"New user group created: {user_group_name}", "success", delay=5)
         return flask.redirect(flask.url_for("user_groups.list"))
 
     return flask.render_template("pages/user_groups/create.html")
@@ -118,7 +118,7 @@ def edit(id):
         user_group = flask.g.api_client.user_groups.update(
             id, payload, etag=flask.request.form["editEtag"]
         )
-        flask.flash("User group updated!", "success")
+        flask.flash("User group updated!", "success", delay=5)
         return flask.redirect(
             flask.url_for("user_groups.manage", id=user_group.data["id"])
         )
@@ -132,7 +132,7 @@ def edit(id):
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
     flask.g.api_client.user_groups.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash("User group deleted!", "success")
+    flask.flash("User group deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("user_groups.list"))
 
 
@@ -149,7 +149,7 @@ def manage(id):
                 }
             )
         if len(user_ids) > 0:
-            flask.flash("Selected user(s) added in group!", "success")
+            flask.flash("Selected user(s) added in group!", "success", delay=5)
 
     user_group = flask.g.api_client.user_groups.getone(id)
 
@@ -190,7 +190,7 @@ def manage(id):
 def remove_user(id):
     users_by_user_groups_id = flask.request.args["rel_id"]
     flask.g.api_client.user_by_user_groups.delete(users_by_user_groups_id)
-    flask.flash("User removed from group!", "success")
+    flask.flash("User removed from group!", "success", delay=5)
     return flask.redirect(flask.request.args["next"])
 
 
@@ -203,7 +203,9 @@ def manage_campaigns(id):
             payload = {"campaign_id": campaign_id, "user_group_id": id}
             flask.g.api_client.user_groups_by_campaigns.create(payload)
         if len(campaign_ids) > 0:
-            flask.flash("Selected campaign(s) added for user group!", "success")
+            flask.flash(
+                "Selected campaign(s) added for user group!", "success", delay=5
+            )
 
     user_group = flask.g.api_client.user_groups.getone(id)
 
@@ -253,7 +255,9 @@ def manage_campaign_scopes(id):
                 }
             )
         if len(campaign_scope_ids) > 0:
-            flask.flash("Selected campaign scope(s) added for user group!", "success")
+            flask.flash(
+                "Selected campaign scope(s) added for user group!", "success", delay=5
+            )
 
     user_group = flask.g.api_client.user_groups.getone(id)
 

@@ -381,7 +381,7 @@ export class WeatherExploreView {
                     this.#sitesTreeElmt.select(data.data[0].node_id);
                 }
                 else {
-                    app.flashMessage("No site available in this campaign", "warning");
+                    app.flashMessage("No site available in this campaign", "warning", 10);
 
                     this.#periodTypeSelectElmt.setAttribute("disabled", true);
                     this.#forecastSwitchElmt.setAttribute("disabled", true);

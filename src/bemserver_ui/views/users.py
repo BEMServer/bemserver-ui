@@ -75,7 +75,9 @@ def create():
                 "password": flask.request.form["password"],
             }
         )
-        flask.flash(f"New user account created: {user_resp.data['name']}", "success")
+        flask.flash(
+            f"New user account created: {user_resp.data['name']}", "success", delay=5
+        )
         return flask.redirect(flask.url_for("users.list"))
 
     return flask.render_template("pages/users/create.html")
@@ -104,7 +106,7 @@ def edit(id):
             }
             flask.session["user"] = user_resp.toJSON()
 
-        flask.flash("User account updated!", "success")
+        flask.flash("User account updated!", "success", delay=5)
         return flask.redirect(flask.url_for("users.view", id=user_resp.data["id"]))
 
     return flask.render_template(
@@ -116,7 +118,7 @@ def edit(id):
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
     flask.g.api_client.users.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash("User account deleted!", "success")
+    flask.flash("User account deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("users.list"))
 
 
@@ -128,7 +130,7 @@ def set_status(id):
         "status" in flask.request.form,
         etag=flask.request.form["setStatusEtag"],
     )
-    flask.flash("User account status updated!", "success")
+    flask.flash("User account status updated!", "success", delay=5)
     return flask.redirect(flask.url_for("users.view", id=id))
 
 
@@ -140,5 +142,5 @@ def set_role(id):
         "admin" in flask.request.form,
         etag=flask.request.form["setRoleEtag"],
     )
-    flask.flash("User account role updated!", "success")
+    flask.flash("User account role updated!", "success", delay=5)
     return flask.redirect(flask.url_for("users.view", id=id))

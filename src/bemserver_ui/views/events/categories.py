@@ -29,6 +29,7 @@ def create():
         flask.flash(
             f"New event category created: {event_category_resp.data['name']}",
             "success",
+            delay=5,
         )
         return flask.redirect(flask.url_for("events.categories.list"))
 
@@ -47,7 +48,9 @@ def edit(id):
             id, payload, etag=flask.request.form["editEtag"]
         )
         flask.flash(
-            f"{event_category_resp.data['name']} event category updated!", "success"
+            f"{event_category_resp.data['name']} event category updated!",
+            "success",
+            delay=5,
         )
         return flask.redirect(flask.url_for("events.categories.list"))
 
@@ -63,5 +66,5 @@ def edit(id):
 @auth.signin_required(roles=[Roles.admin])
 def delete(id):
     flask.g.api_client.event_categories.delete(id, etag=flask.request.form["delEtag"])
-    flask.flash("Event category deleted!", "success")
+    flask.flash("Event category deleted!", "success", delay=5)
     return flask.redirect(flask.url_for("events.categories.list"))
