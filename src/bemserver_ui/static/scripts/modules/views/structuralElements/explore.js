@@ -6,6 +6,7 @@ import "/static/scripts/modules/components/pagination.js";
 import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/tree.js";
+import { debounce } from "/static/scripts/modules/tools/utils.js";
 
 
 export class StructuralElementsExploreView {
@@ -19,9 +20,6 @@ export class StructuralElementsExploreView {
     #eventsReqID = null;
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
-
-    #tsSearchTimeoutID = null;
-    #eventsSearchTimeoutID = null;
 
     #tabSitesElmts = null;
     #tabDataItemElmts = null;
@@ -135,21 +133,15 @@ export class StructuralElementsExploreView {
             });
         }
 
-        this.#tsSearchElmt.addEventListener("input", (event) => {
+        this.#tsSearchElmt.addEventListener("input", debounce((event) => {
             event.preventDefault();
 
             this.#updateTsSearchState();
 
-            if (this.#tsSearchTimeoutID != null) {
-                window.clearTimeout(this.#tsSearchTimeoutID);
-                this.#tsSearchTimeoutID = null;
-            }
-            this.#tsSearchTimeoutID = window.setTimeout(() => {
-                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
-                this.#tsPaginationElmt.page = 1;
-                this.#refreshTabs();    
-            }, 700);
-        });
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
+            this.#tsPaginationElmt.page = 1;
+            this.#refreshTabs();    
+        }), 700);
 
         this.#tsClearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
@@ -185,21 +177,15 @@ export class StructuralElementsExploreView {
             this.#refreshTabs();
         });
 
-        this.#eventsSearchElmt.addEventListener("input", (event) => {
+        this.#eventsSearchElmt.addEventListener("input", debounce((event) => {
             event.preventDefault();
 
             this.#updateEventsSearchState();
 
-            if (this.#eventsSearchTimeoutID != null) {
-                window.clearTimeout(this.#eventsSearchTimeoutID);
-                this.#eventsSearchTimeoutID = null;
-            }
-            this.#eventsSearchTimeoutID = window.setTimeout(() => {
-                this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
-                this.#eventsPaginationElmt.page = 1;
-                this.#refreshTabs();
-            }, 700);
-        });
+            this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
+            this.#eventsPaginationElmt.page = 1;
+            this.#refreshTabs();
+        }), 700);
 
         this.#eventsClearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();

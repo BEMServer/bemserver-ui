@@ -6,6 +6,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
+import { debounce } from "/static/scripts/modules/tools/utils.js";
 
 
 class TimeseriesItem {
@@ -220,8 +221,6 @@ export class TimeseriesSelector extends HTMLElement {
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
-    #searchNameTimeoutID = null;
-
     #selectedItemsContainerElmt = null;
     #clearSelectionBtnElmt = null;
     #selectedItems = [];
@@ -322,20 +321,14 @@ export class TimeseriesSelector extends HTMLElement {
             this.clearAllSelection();
         });
 
-        this.#searchInputElmt.addEventListener("input", (event) => {
+        this.#searchInputElmt.addEventListener("input", debounce((event) => {
             event.preventDefault();
 
             this.#updateSearchInput();
 
-            if (this.#searchNameTimeoutID != null) {
-                window.clearTimeout(this.#searchNameTimeoutID);
-                this.#searchNameTimeoutID = null;
-            }
-            this.#searchNameTimeoutID = window.setTimeout(() => {
-                this.#searchResultsPaginationElmt.page = 1;
-                this.refresh();
-            }, 700);
-        });
+            this.#searchResultsPaginationElmt.page = 1;
+            this.refresh();
+        }), 700);
 
         this.#filtersRemoveBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();

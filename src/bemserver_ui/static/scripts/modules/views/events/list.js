@@ -9,6 +9,7 @@ import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
+import { debounce } from "/static/scripts/modules/tools/utils.js";
 
 
 export class EventListView {
@@ -25,8 +26,6 @@ export class EventListView {
     #loadEventInfoTabReqPageIDs = {};
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
-
-    #delayedUpdateTimeoutID = null;
 
     #filtersContainerElmt = null;
     #sourceSearchFilterElmt = null;
@@ -225,41 +224,32 @@ export class EventListView {
     }
 
     #initEventListeners() {
-        this.#timestampMinSearchFilterElmt.addEventListener("datetimeChange", (event) => {
+        this.#timestampMinSearchFilterElmt.addEventListener("datetimeChange", debounce((event) => {
             event.preventDefault();
 
             this.#timestampMaxSearchFilterElmt.dateMin = this.#timestampMinSearchFilterElmt.date;
 
-            this.#cancelDelayedUpdate();
-            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
-                this.#paginationElmt.page = 1;
-                this.refresh();
-            }, 1000);
-        });
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        }), 1000);
 
-        this.#timestampMaxSearchFilterElmt.addEventListener("datetimeChange", (event) => {
+        this.#timestampMaxSearchFilterElmt.addEventListener("datetimeChange", debounce((event) => {
             event.preventDefault();
 
             this.#timestampMinSearchFilterElmt.dateMax = this.#timestampMaxSearchFilterElmt.date;
 
-            this.#cancelDelayedUpdate();
-            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
-                this.#paginationElmt.page = 1;
-                this.refresh();
-            }, 1000);
-        });
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        }), 1000);
 
-        this.#sourceSearchFilterElmt.addEventListener("input", (event) => {
+        this.#sourceSearchFilterElmt.addEventListener("input", debounce((event) => {
             event.preventDefault();
 
             this.#updateSourceSearch();
 
-            this.#cancelDelayedUpdate();
-            this.#delayedUpdateTimeoutID = window.setTimeout(() => {
-                this.#paginationElmt.page = 1;
-                this.refresh();
-            }, 700);
-        });
+            this.#paginationElmt.page = 1;
+            this.refresh();
+        }), 700);
 
         this.#btnRemoveFiltersElmt.addEventListener("click", (event) => {
             event.preventDefault();
@@ -893,16 +883,7 @@ export class EventListView {
         );
     }
 
-    #cancelDelayedUpdate() {
-        if (this.#delayedUpdateTimeoutID != null) {
-            window.clearTimeout(this.#delayedUpdateTimeoutID);
-            this.#delayedUpdateTimeoutID = null;
-        }
-    }
-
     refresh(afterResfreshCallback = null) {
-        this.#cancelDelayedUpdate();
-
         if (this.#searchReqID != null) {
             this.#internalAPIRequester.abort(this.#searchReqID);
             this.#searchReqID = null;

@@ -1,4 +1,4 @@
-import { Parser } from "/static/scripts/modules/tools/parser.js"
+import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
 const FLASH_MESSAGE_DATA = {

@@ -6,6 +6,7 @@ import "/static/scripts/modules/components/timeseries/bucketWidth.js";
 import "/static/scripts/modules/components/spinner.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
 import { TimeseriesChartExplore } from "/static/scripts/modules/components/charts/tsChartExplore.js";
+import { debounce } from "/static/scripts/modules/tools/utils.js";
 
 
 // TODO: Maybe those const values could be structures as enums? and general app consts?
@@ -135,8 +136,6 @@ class TimeseriesDataExploreView {
     #tsDataStatesReqID = null;
     #tsDataGetReqID = null;
 
-    #updateChartTimeoutID = null;
-
     #chartContainerElmt = null;
     #chartExplore = null;
 
@@ -240,23 +239,15 @@ class TimeseriesDataExploreView {
             }
         });
 
-        this.#periodStartDatetimeElmt.addEventListener("datetimeChange", () => {
+        this.#periodStartDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
+            this.#loadChartSeries();
+        }), 1000);
 
-            this.#cancelUpdateChart();
-            this.#updateChartTimeoutID = window.setTimeout(() => {
-                this.#loadChartSeries();
-            }, 1000);
-        });
-
-        this.#periodEndDatetimeElmt.addEventListener("datetimeChange", () => {
+        this.#periodEndDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
-
-            this.#cancelUpdateChart();
-            this.#updateChartTimeoutID = window.setTimeout(() => {
-                this.#loadChartSeries();
-            }, 1000);
-        });
+            this.#loadChartSeries();
+        }), 1000);
 
         this.#aggInputElmt.addEventListener("change", () => {
             this.#updateAggregationBucketState();
@@ -745,13 +736,6 @@ class TimeseriesDataExploreView {
         }
 
         this.#chartExplore.hideLoading();
-    }
-
-    #cancelUpdateChart() {
-        if (this.#updateChartTimeoutID != null) {
-            window.clearTimeout(this.#updateChartTimeoutID);
-            this.#updateChartTimeoutID = null;
-        }
     }
 
     mount() {
