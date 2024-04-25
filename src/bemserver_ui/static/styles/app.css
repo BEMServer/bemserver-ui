@@ -115,13 +115,6 @@ body,
     min-width: var(--app-min-width);
 }
 
-.app-messages {
-    z-index: 1031;
-}
-.app-messages > .alert {
-    min-width: 40vw !important;
-}
-
 .app-header .app-logo,
 .app-header .app-logo-partner {
     max-height: 40px !important;

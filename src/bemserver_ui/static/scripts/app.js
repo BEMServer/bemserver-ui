@@ -1,53 +1,106 @@
-import { signedUser } from "./modules/signedUserData.js";
-import { FlaskES6 } from "./modules/tools/flaskES6.js";
-import { Sidebar } from "./modules/sidebar.js";
-import { FormController } from "./modules/formController.js";
-import { flaskEndpoints } from "./modules/flaskES6-endpoints.js";
-import { FlashTimer } from "./modules/flashTimer.js";
-import { NotificationUpdater } from "./modules/notifications.js";
+import { flaskEndpoints } from "/static/scripts/modules/flaskES6-endpoints.js";
+import { FlaskES6 } from "/static/scripts/modules/tools/flaskES6.js";
 
 
-// TODO: how can app instance be accessible from any module?
-// TODO: when app instance is accessible by any other module, put flaskES6 instance inside
-// TODO: manage flash messages in through this app class?
-// TODO: campaignContext defined here is not used for now...
+// TODO: campaignContext data property is not used for now...
+// TODO: having signedUser data here kinda sucks...
 
 
-const campaignContextQueryArgName = "campaign_ctxt";
-const flaskES6 = new FlaskES6(flaskEndpoints, campaignContextQueryArgName);
+const APP_MANAGERS = Object.freeze({
+    MESSAGE_MANAGER: {
+        name: "MessageManager",
+        module_path: "/static/scripts/managers/message.js",
+        options: {},
+    },
+    SIDEBAR: {
+        name: "SidebarManager",
+        module_path: "/static/scripts/managers/sidebar.js",
+        options: {},
+    },
+    FORM_CONTROLLER: {
+        name: "FormController",
+        module_path: "/static/scripts/managers/formController.js",
+        options: {},
+    },
+    NOTIF_UPDATER: {
+        name: "NotificationUpdater",
+        module_path: "/static/scripts/managers/notifications.js",
+        options: {
+            delay: 60000,
+        },
+    },
+});
 
 
-export class App {
+class App {
 
-    #notifUpdatedDelay = 60000;
+    #signedUser = null;
     #campaignContext = {};
 
-    #sidebar = new Sidebar();
-    #formCtrl = new FormController();
-    #flashTimer = new FlashTimer();
-    #notifUpdater = null;
+    #flaskES6 = null;
+    #managers = {};
+
+    get campaignContext() {
+        return this.#campaignContext;
+    }
+
+    get signedUser() {
+        return this.#signedUser;
+    }
 
     constructor(options = {}) {
         this.#loadOptions(options);
 
-        this.#sidebar = new Sidebar();
-        this.#formCtrl = new FormController();
-        this.#flashTimer = new FlashTimer();
-        this.#notifUpdater = new NotificationUpdater({delay: this.#notifUpdatedDelay});
+        this.#flaskES6 = new FlaskES6(flaskEndpoints);
     }
 
     #loadOptions(options = {}) {
-        this.#notifUpdatedDelay = options.notificationUpdaterDelay || 60000;
+        this.#signedUser = options.signedUser || {};
         this.#campaignContext = options.campaignContext || {};
     }
 
-    mount() {
-        this.#sidebar.refresh();
-        this.#formCtrl.bind();
-        this.#flashTimer.bind();
-        this.#notifUpdater.refresh();
+    async #initManager(managerName, options) {
+        if (Object.keys(APP_MANAGERS).includes(managerName)) {
+            let manager = APP_MANAGERS[managerName];
+            let { default: ManagerClass } = await import(manager.module_path);
+            if (!Object.keys(this.#managers).includes(manager.name)) {
+                let managerInstance = new ManagerClass({...manager.config, ...options});
+                managerInstance.mount();
+                this.#managers[manager.name] = managerInstance;
+            }
+            else {
+                console.warn(`${managerName} manager is already loaded!`);
+            }
+        }
+        else {
+            console.error(`Unknown ${managerName} manager, can not load!`);
+        }
+    }
+
+    flashMessage(message, category="message", delay=null, dismiss=true) {
+        this.#managers[APP_MANAGERS.MESSAGE_MANAGER.name]?.flash(message, category, delay, dismiss);
+    }
+
+    urlFor(endpoint, rule) {
+        return this.#flaskES6.urlFor(endpoint, rule);
+    }
+
+    refreshNotifs() {
+        this.#managers[APP_MANAGERS.NOTIF_UPDATER.name]?.refresh();
+    }
+
+    mount(managers = {}) {
+        for (let [managerName, managerConfig] of Object.entries(managers)) {
+            this.#initManager(managerName, managerConfig);
+        }
     }
 }
 
 
-export { flaskES6, signedUser, campaignContextQueryArgName } ;
+export let app = null;
+
+
+export function createApp(options) {
+    app = new App(options);
+    return app;
+}

@@ -97,15 +97,11 @@
 <script type="module">
     import { CampaignScopeManageGroupsView } from "{{ url_for('static', filename='scripts/modules/views/campaignScopes/manageGroups.js') }}";
 
-
-    const campaignScope = {{ campaign_scope | tojson }};
-
-
     document.addEventListener("DOMContentLoaded", () => {
+        let campaignScope = {{ campaign_scope | tojson }};
 
-        let campaignScopeManageGroupsView = new CampaignScopeManageGroupsView(campaignScope);
-        campaignScopeManageGroupsView.refresh();
-
+        let view = new CampaignScopeManageGroupsView(campaignScope);
+        view.mount();
     });
 </script>
 {% endfilter %}

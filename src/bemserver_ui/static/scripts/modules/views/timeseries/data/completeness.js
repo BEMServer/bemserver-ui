@@ -1,6 +1,5 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6 } from "/static/scripts/app.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { TimeseriesChartCompleteness } from "/static/scripts/modules/components/charts/tsChartCompleteness.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
@@ -8,13 +7,12 @@ import { TimeCalendar } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class TimeSeriesDataCompletenessView {
+class TimeSeriesDataCompletenessView {
 
     #internalAPIRequester = null;
     #tsDataStatesReqID = null;
     #tsDataCompletenessReqID = null;
 
-    #messagesElmt = null;
     #chartContainerElmt = null;
     #loadBtnElmt = null;
 
@@ -40,17 +38,14 @@ export class TimeSeriesDataCompletenessView {
         this.#monthRef = date.getUTCMonth() + 1;
 
         this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorCompleteness");
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
         this.#initElements();
-
-        this.#internalAPIRequester = new InternalAPIRequest();
-
         this.#initEventListeners();
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#chartContainerElmt = document.getElementById("chartContainer");
         this.#loadBtnElmt = document.getElementById("loadBtn");
 
@@ -209,7 +204,7 @@ export class TimeSeriesDataCompletenessView {
         }
 
         this.#tsDataStatesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.datastates.retrieve_list`),
+            app.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
                 this.#tsDataStatesSelectElmt.innerHTML = "";
                 for (let option of data.data) {
@@ -220,8 +215,7 @@ export class TimeSeriesDataCompletenessView {
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -254,7 +248,7 @@ export class TimeSeriesDataCompletenessView {
         }
 
         this.#tsDataCompletenessReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
+            app.urlFor(`api.analysis.completeness.retrieve_completeness`, urlParams),
             (data) => {
                 let chartContainerHeight = (Object.entries(data["timeseries"]).length * 25) + 140;
                 if (chartContainerHeight < 400) {
@@ -270,9 +264,7 @@ export class TimeSeriesDataCompletenessView {
                 this.#chartCompleteness.resize();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
-
+                app.flashMessage(error.toString(), "error");
             },
             () => {
                 this.#loadBtnElmt.innerHTML = loadBtnInnerBackup;

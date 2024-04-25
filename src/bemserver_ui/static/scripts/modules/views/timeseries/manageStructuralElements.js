@@ -1,24 +1,22 @@
-import "/static/scripts/modules/components/itemsCount.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Pagination, PageSizeSelector } from "/static/scripts/modules/components/pagination.js";
 import { AccordionList } from "/static/scripts/modules/components/accordionList.js";
 import { DropZone } from "/static/scripts/modules/components/dropZone.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
-import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { flaskES6 } from "/static/scripts/app.js";
 import "/static/scripts/modules/components/tree.js";
+import "/static/scripts/modules/components/itemsCount.js";
 
 
-export class TimeseriesManageStructuralElementsView {
+class TimeseriesManageStructuralElementsView {
 
     #internalAPIRequester = null;
     #getTSListReqID = null;
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
-    #messagesElmt = null;
     #searchElmt = null;
     #clearSearchBtnElmt = null;
 
@@ -53,7 +51,6 @@ export class TimeseriesManageStructuralElementsView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#searchElmt = document.getElementById("search");
         this.#clearSearchBtnElmt = document.getElementById("clear");
 
@@ -123,7 +120,7 @@ export class TimeseriesManageStructuralElementsView {
                 dropZoneElmt.setLoading();
 
                 this.#internalAPIRequester.get(
-                    flaskES6.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
+                    app.urlFor(`api.timeseries.retrieve_structural_elements`, {id: tsId}),
                     (data) => {
                         dropZoneElmt.clear();
                         for (let [structuralElementType, tsStructElmtLinks] of Object.entries(data.data)) {
@@ -143,14 +140,13 @@ export class TimeseriesManageStructuralElementsView {
 
                                 let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, () => {
                                     this.#internalAPIRequester.post(
-                                        flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
+                                        app.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
                                         {"type": structuralElementType, "rel_id": tsStructElmtLinkId},
                                         () => {
                                             dropZoneElmt.removeElement(dropedItemElmt);
                                         },
                                         (error) => {
-                                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                                            this.#messagesElmt.appendChild(flashMsgElmt);
+                                            app.flashMessage(error.toString(), "error");
                                         },
                                     );
                                 });
@@ -162,8 +158,7 @@ export class TimeseriesManageStructuralElementsView {
                         event.target.isLoaded = true;
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }
@@ -205,25 +200,23 @@ export class TimeseriesManageStructuralElementsView {
             let dropedItemText = jsonData.sourceNodeData.path;
 
             if (event.detail.isDuplicate) {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: `${tsTitle} timeseries is already located in ${dropedItemTitle}`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(`${tsTitle} timeseries is already located in ${dropedItemTitle}`, "warning");
             }
             else {
                 this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.timeseries.post_structural_elements`, {id: tsId}),
+                    app.urlFor(`api.timeseries.post_structural_elements`, {id: tsId}),
                     {type: jsonData.sourceNodeData.type, id: jsonData.sourceNodeData.id},
                     (data) => {
                         let dropedItemElmt = this.#createDropedItemElement(dropedItemId, dropedItemIcon, dropedItemTitle, dropedItemText, () => {
 
                             this.#internalAPIRequester.post(
-                                flaskES6.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
+                                app.urlFor(`api.timeseries.remove_structural_elements`, {id: tsId}),
                                 {type: jsonData.sourceNodeData.type, rel_id: data.data.id},
                                 () => {
                                     dropZoneElmt.removeElement(dropedItemElmt);
                                 },
                                 (error) => {
-                                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                                    this.#messagesElmt.appendChild(flashMsgElmt);
+                                    app.flashMessage(error.toString(), "error");
                                 },
                             );
                         });
@@ -231,8 +224,7 @@ export class TimeseriesManageStructuralElementsView {
                         dropZoneElmt.addElement(dropedItemElmt);
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }
@@ -324,14 +316,13 @@ export class TimeseriesManageStructuralElementsView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, {draggable: true}),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {draggable: true}),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -345,14 +336,13 @@ export class TimeseriesManageStructuralElementsView {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`, {draggable: true}),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`, {draggable: true}),
             (data) => {
                 this.#zonesTreeElmt.load(data.data);
                 this.#zonesTreeElmt.collapseAll();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -379,7 +369,7 @@ export class TimeseriesManageStructuralElementsView {
         }
 
         this.#getTSListReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.retrieve_list`, fetcherOptions),
+            app.urlFor(`api.timeseries.retrieve_list`, fetcherOptions),
             (data) => {
                 for (let row of data.data) {
                     row.icon = "clock-history";
@@ -412,8 +402,7 @@ export class TimeseriesManageStructuralElementsView {
                 this.#tsItemsCountElmt.update({totalCount: this.#tsPaginationElmt.totalItems, firstItem: this.#tsPaginationElmt.startItem, lastItem: this.#tsPaginationElmt.endItem});
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -430,3 +419,9 @@ export class TimeseriesManageStructuralElementsView {
         this.refresh();
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new TimeseriesManageStructuralElementsView();
+    view.mount();
+});

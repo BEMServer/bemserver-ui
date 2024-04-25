@@ -1,10 +1,9 @@
-import { InternalAPIRequest } from "./tools/fetcher.js";
-import { flaskES6 } from "../app.js";
-import { FlashMessageTypes, FlashMessage } from "./components/flash.js";
-import { Parser } from "./tools/parser.js";
+import { app } from "/static/scripts/app.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class NotificationUpdater {
+export default class NotificationUpdater {
 
     #intervalDelay = 60000;
     #intervalID = null;
@@ -12,8 +11,6 @@ export class NotificationUpdater {
 
     #internalAPIRequester = null;
     #refreshReqID = null;
-
-    #messagesElmt = null;
 
     #notifBellElmt = null;
     #notifBellIconElmt = null;
@@ -43,8 +40,6 @@ export class NotificationUpdater {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#notifBellElmt = document.getElementById("notifBell");
         this.#notifBellIconElmt = this.#notifBellElmt.querySelector("i:first-child");
     }
@@ -119,7 +114,7 @@ export class NotificationUpdater {
             }
 
             this.#refreshReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.notifications.retrieve_count`, refreshOptions),
+                app.urlFor(`api.notifications.retrieve_count`, refreshOptions),
                 (data) => {
                     if (data.data != null) {
                         this.#notifsETag = data.etag;
@@ -128,8 +123,7 @@ export class NotificationUpdater {
                     }
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -143,5 +137,9 @@ export class NotificationUpdater {
     enable() {
         this.#notifBellElmt.classList.remove("d-none", "invisible");
         this.#setInterval();
+    }
+
+    mount() {
+        this.refresh();
     }
 }

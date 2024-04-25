@@ -1,7 +1,6 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6 } from "/static/scripts/app.js";
 import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { TimeseriesSelector } from  "/static/scripts/modules/components/timeseries/selector.js";
 import "/static/scripts/modules/components/tree.js";
 import "/static/scripts/modules/components/itemsCount.js";
@@ -19,8 +18,6 @@ export class TimeseriesSemanticSetupView {
     #postReqIDByTab = {};
     #putReqIDByTab = {};
     #deleteReqIDByTab = {};
-
-    #messagesElmt = null;
 
     #sitesTreeElmt = null;
     #weatherTabElmt = null;
@@ -103,8 +100,6 @@ export class TimeseriesSemanticSetupView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#sitesTreeElmt = document.getElementById("sitesTree");
         this.#weatherTabElmt = document.getElementById("weather-tab");
         this.#forecastWeatherTabElmt = document.getElementById("weatherForecast-tab");
@@ -198,8 +193,7 @@ export class TimeseriesSemanticSetupView {
     }
 
     #internalApiErrorCallback(error) {
-        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-        this.#messagesElmt.appendChild(flashMsgElmt);
+        app.flashMessage(error.toString(), "error");
     }
 
     #updateSaveBtnState() {
@@ -231,10 +225,7 @@ export class TimeseriesSemanticSetupView {
             };
             let updateSetupDoneCallback = () => {
                 let weatherData = this.#weatherSetupByParam[this.#weatherParamEdited];
-
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${weatherData.parameter_label} weather parameter setup saved!`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
-
+                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success");
                 this.#selectTimeseriesModal.hide();
             };
 
@@ -249,7 +240,7 @@ export class TimeseriesSemanticSetupView {
             if (weatherData.id == null) {
                 // Create setup (post call).
                 this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.semantics.weather.create`),
+                    app.urlFor(`api.semantics.weather.create`),
                     payload,
                     updateSetupCallback,
                     this.#internalApiErrorCallback,
@@ -259,7 +250,7 @@ export class TimeseriesSemanticSetupView {
             else if (weatherData.timeseries_id != this.#tsSelector.selectedItems[0].id) {
                 // Update setup (put call).
                 this.#putReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.semantics.weather.update`, {id: weatherData.id}),
+                    app.urlFor(`api.semantics.weather.update`, {id: weatherData.id}),
                     payload,
                     weatherData.etag,
                     updateSetupCallback,
@@ -282,10 +273,7 @@ export class TimeseriesSemanticSetupView {
             };
             let updateSetupDoneCallback = () => {
                 let weatherData = this.#forecastWeatherSetupByParam[this.#forecastWeatherParamEdited];
-
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${weatherData.parameter_label} weather parameter setup saved!`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
-
+                app.flashMessage(`${weatherData.parameter_label} weather parameter setup saved!`, "success");
                 this.#selectTimeseriesModal.hide();
             };
 
@@ -300,7 +288,7 @@ export class TimeseriesSemanticSetupView {
             if (weatherData.id == null) {
                 // Create setup (post call).
                 this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.semantics.weather.create`),
+                    app.urlFor(`api.semantics.weather.create`),
                     payload,
                     updateSetupCallback,
                     this.#internalApiErrorCallback,
@@ -310,7 +298,7 @@ export class TimeseriesSemanticSetupView {
             else if (weatherData.timeseries_id != this.#tsSelector.selectedItems[0].id) {
                 // Update setup (put call).
                 this.#putReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.semantics.weather.update`, {id: weatherData.id}),
+                    app.urlFor(`api.semantics.weather.update`, {id: weatherData.id}),
                     payload,
                     weatherData.etag,
                     updateSetupCallback,
@@ -336,8 +324,7 @@ export class TimeseriesSemanticSetupView {
                 let energyName = this.#energies[energyProdData.energy_id];
                 let prodTechName = this.#energyProdTechs[energyProdData.prod_tech_id];
 
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energyName} - ${prodTechName}] energy production setup saved!`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup saved!`, "success");
 
                 this.#selectTimeseriesModal.hide();
             };
@@ -353,7 +340,7 @@ export class TimeseriesSemanticSetupView {
             if (energyProdData.id == null) {
                 // Create setup (post call).
                 this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.semantics.energy.production.create`, {"struct_elmt_type": this.#structuralElementType}),
+                    app.urlFor(`api.semantics.energy.production.create`, {"struct_elmt_type": this.#structuralElementType}),
                     payload,
                     updateSetupCallback,
                     this.#internalApiErrorCallback,
@@ -363,7 +350,7 @@ export class TimeseriesSemanticSetupView {
             else if (energyProdData.timeseries_id != this.#tsSelector.selectedItems[0].id) {
                 // Update setup (put call).
                 this.#putReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.semantics.energy.production.update`, {id: energyProdData.id, "struct_elmt_type": this.#structuralElementType}),
+                    app.urlFor(`api.semantics.energy.production.update`, {id: energyProdData.id, "struct_elmt_type": this.#structuralElementType}),
                     payload,
                     energyProdData.etag,
                     updateSetupCallback,
@@ -389,8 +376,7 @@ export class TimeseriesSemanticSetupView {
                 let energyName = this.#energies[energyConsData.energy_id];
                 let endUseName = this.#energyEndUses[energyConsData.end_use_id];
 
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energyName} - ${endUseName}] energy consumption setup saved!`, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup saved!`, "success");
 
                 this.#selectTimeseriesModal.hide();
             };
@@ -406,7 +392,7 @@ export class TimeseriesSemanticSetupView {
             if (energyConsData.id == null) {
                 // Create setup (post call).
                 this.#postReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.semantics.energy.consumption.create`, {"struct_elmt_type": this.#structuralElementType}),
+                    app.urlFor(`api.semantics.energy.consumption.create`, {"struct_elmt_type": this.#structuralElementType}),
                     payload,
                     updateSetupCallback,
                     this.#internalApiErrorCallback,
@@ -416,7 +402,7 @@ export class TimeseriesSemanticSetupView {
             else if (energyConsData.timeseries_id != this.#tsSelector.selectedItems[0].id) {
                 // Update setup (put call).
                 this.#putReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.semantics.energy.consumption.update`, {id: energyConsData.id, "struct_elmt_type": this.#structuralElementType}),
+                    app.urlFor(`api.semantics.energy.consumption.update`, {id: energyConsData.id, "struct_elmt_type": this.#structuralElementType}),
                     payload,
                     energyConsData.etag,
                     updateSetupCallback,
@@ -463,7 +449,7 @@ export class TimeseriesSemanticSetupView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
@@ -615,7 +601,7 @@ export class TimeseriesSemanticSetupView {
             () => {
                 let dataToDelete = data.forecast ? this.#forecastWeatherSetupByParam[data.parameter] : this.#weatherSetupByParam[data.parameter];
                 this.#deleteReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.delete(
-                    flaskES6.urlFor(`api.semantics.weather.delete`, {id: dataToDelete.id}),
+                    app.urlFor(`api.semantics.weather.delete`, {id: dataToDelete.id}),
                     dataToDelete.etag,
                     () => {
                         dataToDelete.id = null;
@@ -633,8 +619,7 @@ export class TimeseriesSemanticSetupView {
                     },
                     this.#internalApiErrorCallback,
                     () => {
-                        let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `${dataToDelete.parameter_label} weather parameter setup removed!`, isDismissible: true});
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(`${dataToDelete.parameter_label} weather parameter setup removed!`, "success");
                     },
                 );
             },
@@ -662,7 +647,7 @@ export class TimeseriesSemanticSetupView {
         let weatherData = weatherTsData.forecast ? this.#forecastWeatherSetupByParam[weatherTsData.parameter] : this.#weatherSetupByParam[weatherTsData.parameter];
         if (weatherData.id != null && weatherData.etag == null) {
             this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.weather.retrieve_one`, {id: weatherData.id}),
+                app.urlFor(`api.semantics.weather.retrieve_one`, {id: weatherData.id}),
                 (data) => {
                     weatherData = data.data;
                     weatherData.etag = data.etag;
@@ -702,7 +687,7 @@ export class TimeseriesSemanticSetupView {
             }
 
             this.#weatherSetupGetReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: false}),
+                app.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: false}),
                 (data) => {
                     tableBodyElmt.innerHTML = "";
                     if (data.data.length > 0) {
@@ -797,7 +782,7 @@ export class TimeseriesSemanticSetupView {
             }
 
             this.#forecastWeatherSetupGetReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: true}),
+                app.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: true}),
                 (data) => {
                     tableBodyElmt.innerHTML = "";
                     if (data.data.length > 0) {
@@ -908,7 +893,7 @@ export class TimeseriesSemanticSetupView {
                 () => {
                     let dataToDelete = this.#energyProdSetupByEnergyAndTech[energyProdTechSetup.energy_id][energyProdTechSetup.prod_tech_id];
                     this.#deleteReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.delete(
-                        flaskES6.urlFor(`api.semantics.energy.production.delete`, {id: dataToDelete.id, "struct_elmt_type": this.#structuralElementType}),
+                        app.urlFor(`api.semantics.energy.production.delete`, {id: dataToDelete.id, "struct_elmt_type": this.#structuralElementType}),
                         dataToDelete.etag,
                         () => {
                             dataToDelete.id = null;
@@ -921,8 +906,7 @@ export class TimeseriesSemanticSetupView {
                         },
                         this.#internalApiErrorCallback,
                         () => {
-                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energyName} - ${prodTechName}] energy production setup removed!`, isDismissible: true});
-                            this.#messagesElmt.appendChild(flashMsgElmt);
+                            app.flashMessage(`[${energyName} - ${prodTechName}] energy production setup removed!`, "success");
                         },
                     );
                 },
@@ -949,7 +933,7 @@ export class TimeseriesSemanticSetupView {
         let energyProdData = this.#energyProdSetupByEnergyAndTech[energyID][prodTechID];
         if (energyProdData.id != null && energyProdData.etag == null) {
             this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.energy.production.retrieve_one`, {id: energyProdData.id, "struct_elmt_type": this.#structuralElementType}),
+                app.urlFor(`api.semantics.energy.production.retrieve_one`, {id: energyProdData.id, "struct_elmt_type": this.#structuralElementType}),
                 (data) => {
                     energyProdData = data.data;
                     energyProdData.etag = data.etag;
@@ -999,7 +983,7 @@ export class TimeseriesSemanticSetupView {
         let queryArgs = {"struct_elmt_type": this.#structuralElementType};
         queryArgs[this.#structuralElementType] = this.#structuralElementId;
         this.#energyProdSetupGetReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.semantics.energy.production.list`, queryArgs),
+            app.urlFor(`api.semantics.energy.production.list`, queryArgs),
             (data) => {
                 tableBodyElmt.innerHTML = "";
                 if (data.data.length > 0) {
@@ -1113,7 +1097,7 @@ export class TimeseriesSemanticSetupView {
                 () => {
                     let dataToDelete = this.#energyConsSetupByEnergyAndUses[energyConsEndUseSetup.energy_id][energyConsEndUseSetup.end_use_id];
                     this.#deleteReqIDByTab[this.#selectedTab] = this.#internalAPIRequester.delete(
-                        flaskES6.urlFor(`api.semantics.energy.consumption.delete`, {id: dataToDelete.id, "struct_elmt_type": this.#structuralElementType}),
+                        app.urlFor(`api.semantics.energy.consumption.delete`, {id: dataToDelete.id, "struct_elmt_type": this.#structuralElementType}),
                         dataToDelete.etag,
                         () => {
                             dataToDelete.id = null;
@@ -1126,8 +1110,7 @@ export class TimeseriesSemanticSetupView {
                         },
                         this.#internalApiErrorCallback,
                         () => {
-                            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `[${energyName} - ${endUseName}] energy consumption setup removed!`, isDismissible: true});
-                            this.#messagesElmt.appendChild(flashMsgElmt);
+                            app.flashMessage(`[${energyName} - ${endUseName}] energy consumption setup removed!`, "success");
                         },
                     );
                 },
@@ -1154,7 +1137,7 @@ export class TimeseriesSemanticSetupView {
         let energyConsData = this.#energyConsSetupByEnergyAndUses[energyID][endUseID];
         if (energyConsData.id != null && energyConsData.etag == null) {
             this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.semantics.energy.consumption.retrieve_one`, {id: energyConsData.id, "struct_elmt_type": this.#structuralElementType}),
+                app.urlFor(`api.semantics.energy.consumption.retrieve_one`, {id: energyConsData.id, "struct_elmt_type": this.#structuralElementType}),
                 (data) => {
                     energyConsData = data.data;
                     energyConsData.etag = data.etag;
@@ -1204,7 +1187,7 @@ export class TimeseriesSemanticSetupView {
         let queryArgs = {"struct_elmt_type": this.#structuralElementType};
         queryArgs[this.#structuralElementType] = this.#structuralElementId;
         this.#energyConsSetupGetReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.semantics.energy.consumption.list`, queryArgs),
+            app.urlFor(`api.semantics.energy.consumption.list`, queryArgs),
             (data) => {
                 tableBodyElmt.innerHTML = "";
                 if (data.data.length > 0) {

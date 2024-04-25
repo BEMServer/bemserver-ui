@@ -1,6 +1,5 @@
-import { flaskES6 } from "/static/scripts/app.js";
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
@@ -28,8 +27,6 @@ export class EventListView {
     #zonesTreeReqID = null;
 
     #delayedUpdateTimeoutID = null;
-
-    #messagesElmt = null;
 
     #filtersContainerElmt = null;
     #sourceSearchFilterElmt = null;
@@ -96,8 +93,6 @@ export class EventListView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
         this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
         this.#siteSelectorRecursiveSwitchElmt = document.getElementById("siteSelectorRecursiveSwitch");
@@ -162,19 +157,19 @@ export class EventListView {
         this.#searchSelectFilters = {
             "level": {
                 "label": "levels",
-                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_levels`),
+                "fetchUrl": app.urlFor(`api.events.retrieve_levels`),
                 "htmlElement": new FilterSelect(),
                 "defaultValue": (this.#defaultFilters["level"] || null)?.toString(),
             },
             "category": {
                 "label": "categories",
-                "fetchUrl": flaskES6.urlFor(`api.events.retrieve_categories`),
+                "fetchUrl": app.urlFor(`api.events.retrieve_categories`),
                 "htmlElement": new FilterSelect(),
                 "defaultValue": (this.#defaultFilters["category"] || null)?.toString(),
             },
             "campaign_scope": {
                 "label": "campaign scopes",
-                "fetchUrl": flaskES6.urlFor(`api.campaign_scopes.retrieve_list`),
+                "fetchUrl": app.urlFor(`api.campaign_scopes.retrieve_list`),
                 "htmlElement": new FilterSelect(),
                 "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
             },
@@ -224,8 +219,7 @@ export class EventListView {
                 this.refresh();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -542,7 +536,7 @@ export class EventListView {
             this.#currentEventElmt.classList.add("app-table-tr-selected");
 
             // Update event edit link button.
-            this.#eventEditLinkElmt.href = flaskES6.urlFor(`events.edit`, {id: eventId});
+            this.#eventEditLinkElmt.href = app.urlFor(`events.edit`, {id: eventId});
 
             // Update footer navigation (on page-sized events table).
             let itemIndex = ((this.#paginationElmt.page - 1) * this.#pageSizeElmt.current) + rowIndex + 1;
@@ -638,7 +632,7 @@ export class EventListView {
 
         // Execute web request and load data on tabs.
         this.#loadEventInfoTabReqIDs = this.#internalAPIRequester.gets(
-            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return flaskES6.urlFor(eventInfoTabReqOpts["fetchUrl"], eventInfoTabReqOpts["fetchUrlParams"]); }),
+            Object.values(eventInfoTabReqData).map((eventInfoTabReqOpts) => { return app.urlFor(eventInfoTabReqOpts["fetchUrl"], eventInfoTabReqOpts["fetchUrlParams"]); }),
             (data) => {
                 for (let [index, eventInfoTabData] of Object.entries(data)) {
                     let eventInfoTabDataPagination = eventInfoTabData.pagination;
@@ -666,7 +660,7 @@ export class EventListView {
                             eventInfoReqParams["page"] = event.detail.page;
 
                             this.#loadEventInfoTabReqPageIDs[eventInfoTabKey] = this.#internalAPIRequester.get(
-                                flaskES6.urlFor(eventInfoReqOpts["fetchUrl"], eventInfoReqParams),
+                                app.urlFor(eventInfoReqOpts["fetchUrl"], eventInfoReqParams),
                                 (dataTab) => {
                                     let dataTabPagination = dataTab.pagination;
                                     dataTab = dataTab.data != undefined ? dataTab.data : dataTab;
@@ -674,8 +668,7 @@ export class EventListView {
                                     this.#updateEventInfoTab(dataTab, dataTabPagination, eventInfoTabKey, eventInfoReqOpts);
                                 },
                                 (error) => {
-                                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                                    this.#messagesElmt.appendChild(flashMsgElmt);
+                                    app.flashMessage(error.toString(), "error");
                                 },
                             );
                         });
@@ -703,8 +696,7 @@ export class EventListView {
                 // Hide event info tabs spinner loader.
                 this.#eventInfoTabSpinnerElmt.classList.add("d-none");
 
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
             () => {
                 // Show event info tabs and contents if at least one tab has been loaded.
@@ -872,13 +864,12 @@ export class EventListView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
             (data) => {
                 this.#siteSelector.loadTree(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -892,13 +883,12 @@ export class EventListView {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
             (data) => {
                 this.#zoneSelector.loadTree(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -966,7 +956,7 @@ export class EventListView {
         }
 
         this.#searchReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_list`, searchOptions),
+            app.urlFor(`api.events.retrieve_list`, searchOptions),
             (data) => {
                 this.#eventsContainerElmt.innerHTML = "";
                 if (data.data.length > 0) {
@@ -998,8 +988,7 @@ export class EventListView {
                 afterResfreshCallback?.();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

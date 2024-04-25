@@ -1,6 +1,6 @@
-import { generateUUID } from "./uuid.js";
-import { Parser } from "./parser.js";
-import { isDict } from "./dict.js";
+import { generateUUID } from "/static/scripts/modules/tools/uuid.js";
+import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { isDict } from "/static/scripts/modules/tools/dict.js";
 
 
 // TODO: rework fetch use in order to better use async/await when needed

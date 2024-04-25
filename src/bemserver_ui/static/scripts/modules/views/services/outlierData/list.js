@@ -1,6 +1,5 @@
-import { flaskES6 } from "/static/scripts/app.js";
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
@@ -11,8 +10,6 @@ class CheckOutlierDataServiceListView {
 
     #internalAPIRequester = null;
     #searchReqID = null;
-
-    #messagesElmt = null;
 
     #campaignNameSearchElmt = null;
     #campaignStateFilterElmt = null;
@@ -30,8 +27,6 @@ class CheckOutlierDataServiceListView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#campaignNameSearchElmt = document.getElementById("campaignNameSearch");
         this.#campaignStateFilterElmt = document.getElementById("campaign_state");
         this.#serviceStateFilterElmt = document.getElementById("service_state");
@@ -114,12 +109,12 @@ class CheckOutlierDataServiceListView {
     #createEntryElement(entryData) {
         let isSelected = Parser.parseBoolOrDefault(entryData["is_selected"], false);
 
-        let manageUrl = flaskES6.urlFor(`services.outlier_data.campaign_state`, {id: entryData["campaign_id"]});
+        let manageUrl = app.urlFor(`services.outlier_data.campaign_state`, {id: entryData["campaign_id"]});
         if (isSelected) {
-            manageUrl = flaskES6.urlFor(`services.outlier_data.campaign_context_state`);
+            manageUrl = app.urlFor(`services.outlier_data.campaign_context_state`);
         }
         else if (entryData["id"] != null) {
-            manageUrl = flaskES6.urlFor(`services.outlier_data.service_state`, {id: entryData["id"]});
+            manageUrl = app.urlFor(`services.outlier_data.service_state`, {id: entryData["id"]});
         }
 
         let entryElmt = document.createElement("a");
@@ -207,7 +202,7 @@ class CheckOutlierDataServiceListView {
         }
 
         this.#searchReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.services.outlier_data.retrieve_list`, searchOptions),
+            app.urlFor(`api.services.outlier_data.retrieve_list`, searchOptions),
             (data) => {
                 this.#serviceStatesContainerElmt.innerHTML = "";
                 if (data.data.length > 0) {
@@ -225,17 +220,18 @@ class CheckOutlierDataServiceListView {
                 this.#itemsCountElmt.update({firstItem: data.data.length > 0 ? 1 : 0, lastItem: data.data.length}, true);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
+    }
+
+    mount() {
+        this.refresh();
     }
 }
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let view = new CheckOutlierDataServiceListView();
-    view.refresh();
-
+    view.mount();
 });

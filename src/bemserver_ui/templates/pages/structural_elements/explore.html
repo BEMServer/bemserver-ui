@@ -150,16 +150,13 @@
 <script type="module">
     import { StructuralElementsExploreView } from "{{ url_for('static', filename='scripts/modules/views/structuralElements/explore.js') }}";
 
-
     document.addEventListener("DOMContentLoaded", () => {
-
         let options = {
             timezone: {{ g.campaign_ctxt.tz_name | tojson }},
         };
 
-        let structuralElmts = new StructuralElementsExploreView(options);
-        structuralElmts.mount();
-
+        let view = new StructuralElementsExploreView(options);
+        view.mount();
     });
 </script>
 {% endfilter %}

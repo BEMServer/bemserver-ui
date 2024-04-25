@@ -1,6 +1,5 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
 import "/static/scripts/modules/components/itemsCount.js";
@@ -15,8 +14,6 @@ class WeatherDataServiceManageView {
     #updateStateReqID = null;
     #getSvcEtagReqID = null;
     #getSemanticsReqID = null;
-
-    #messagesElmt = null;
 
     #filtersContainerElmt = null;
     #siteNameSearchElmt = null;
@@ -47,8 +44,6 @@ class WeatherDataServiceManageView {
     }
     
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#filtersContainerElmt = document.getElementById("filtersContainer");
         this.#siteNameSearchElmt = document.getElementById("siteNameSearch");
         this.#removeFiltersBtnElmt = document.getElementById("removeFiltersBtn");
@@ -59,7 +54,7 @@ class WeatherDataServiceManageView {
         this.#forecastWeatherItemsCountElmt = document.getElementById("weatherForecastItemsCount");
         this.#forecastWeatherServiceStatesContainerElmt = document.getElementById("weatherForecastServiceStatesContainer");
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#fetchDataModalElmt = document.getElementById("fetchDataModal");
             this.#fetchDataModal = new bootstrap.Modal(this.#fetchDataModalElmt);
             this.#fetchDataModalBodyElmt = document.getElementById("fetchDataModalBody");
@@ -120,7 +115,7 @@ class WeatherDataServiceManageView {
             }
         });
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#fetchDataDatetimeStartElmt.addEventListener("datetimeChange", (event) => {
                 event.preventDefault();
 
@@ -144,7 +139,7 @@ class WeatherDataServiceManageView {
                 this.#fetchDataModalBodyElmt.classList.add("placeholder");
 
                 this.#internalAPIRequester.put(
-                    flaskES6.urlFor(`api.structural_elements.fetch_weather_data`, {id: this.#fetchDataSiteIdElmt.value}),
+                    app.urlFor(`api.structural_elements.fetch_weather_data`, {id: this.#fetchDataSiteIdElmt.value}),
                     {
                         "start_date": this.#fetchDataDatetimeStartElmt.date,
                         "start_time": this.#fetchDataDatetimeStartElmt.time,
@@ -153,14 +148,12 @@ class WeatherDataServiceManageView {
                     },
                     null,
                     () => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.SUCCESS, text: `Weather data successfully fetched.`, isDismissible: true, isTimed: false });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(`Weather data successfully fetched.`, "success");
 
                         this.#fetchDataModal.hide();
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true, isTimed: false });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
 
                         this.#fetchDataModal.hide();
                     },
@@ -209,7 +202,7 @@ class WeatherDataServiceManageView {
         let svcCtrlElmt = document.createElement("div");
         svcCtrlElmt.classList.add("d-flex", "gap-1", "my-auto", "placeholder-glow");
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             let svcEtagInputElmt = document.createElement("input");
             svcEtagInputElmt.setAttribute("type", "hidden");
             svcCtrlElmt.appendChild(svcEtagInputElmt);
@@ -275,19 +268,17 @@ class WeatherDataServiceManageView {
                     if (isEnabled) {
                         // Enable weather data service for site.
                         this.#updateStateReqID = this.#internalAPIRequester.post(
-                            flaskES6.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}enable`),
+                            app.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}enable`),
                             { site_id: serviceStateData.site_id, is_enabled: isEnabled },
                             (data) => {
                                 serviceStateData = data.data;
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `${forecast ? "Forecast w": "W"}eather data service enabled!`, isDismissible: true });
-                                this.#messagesElmt.appendChild(flashMsgElmt);
+                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service enabled!`, "info");
                             },
                             (error) => {
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                                this.#messagesElmt.appendChild(flashMsgElmt);
+                                app.flashMessage(error.toString(), "error");
 
                                 svcOnLabelElmt.classList.remove("placeholder");
                                 svcOffLabelElmt.classList.remove("placeholder");
@@ -299,7 +290,7 @@ class WeatherDataServiceManageView {
                     let _updateSvcState = (_isEnabled) => {
                         // Update weather data service state for site.
                         this.#updateStateReqID = this.#internalAPIRequester.put(
-                            flaskES6.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}update_state`, {id: serviceStateData.id}),
+                            app.urlFor(`api.services.weather_data.${forecast ? "forecast_": ""}update_state`, {id: serviceStateData.id}),
                             { is_enabled: _isEnabled },
                             svcEtagInputElmt.value,
                             (data) => {
@@ -307,12 +298,10 @@ class WeatherDataServiceManageView {
                                 svcEtagInputElmt.value = data.etag;
                                 updateSvcInputState();
 
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `${forecast ? "Forecast w": "W"}eather data service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
-                                this.#messagesElmt.appendChild(flashMsgElmt);
+                                app.flashMessage(`${forecast ? "Forecast w": "W"}eather data service ${isEnabled ? "en": "dis"}abled!`, "info");
                             },
                             (error) => {
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                                this.#messagesElmt.appendChild(flashMsgElmt);
+                                app.flashMessage(error.toString(), "error");
 
                                 updateSvcInputState();
                             },
@@ -326,14 +315,13 @@ class WeatherDataServiceManageView {
                         }
 
                         this.#getSvcEtagReqID = this.#internalAPIRequester.get(
-                            flaskES6.urlFor(`api.services.weather_data.retrieve_${forecast ? "forecast_": ""}one`, {id: serviceStateData.id}),
+                            app.urlFor(`api.services.weather_data.retrieve_${forecast ? "forecast_": ""}one`, {id: serviceStateData.id}),
                             (data) => {
                                 svcEtagInputElmt.value = data.etag;
                                 _updateSvcState(isEnabled);
                             },
                             (error) => {
-                                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                                this.#messagesElmt.appendChild(flashMsgElmt);
+                                app.flashMessage(error.toString(), "error");
 
                                 updateSvcInputState();
                             },
@@ -377,7 +365,7 @@ class WeatherDataServiceManageView {
         tdStateElmt.appendChild(svcCtrlElmt);
         trElmt.appendChild(tdStateElmt);
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             if (serviceStateData.id == null) {
                 let warnAlertElmt = this.#createWarnAlertElement("Never launched yet");
                 tdStateElmt.appendChild(warnAlertElmt);
@@ -386,7 +374,7 @@ class WeatherDataServiceManageView {
             // Verify that the site has long/lat coordinates.
             let siteHasCoord = true;
             this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: "site", id: serviceStateData.site_id}),
+                app.urlFor(`api.structural_elements.retrieve_data`, {type: "site", id: serviceStateData.site_id}),
                 (data) => {
                     if (data.structural_element.latitude == null || data.structural_element.longitude == null) {
                         siteHasCoord = false;
@@ -395,8 +383,7 @@ class WeatherDataServiceManageView {
                     }
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
 
@@ -431,7 +418,7 @@ class WeatherDataServiceManageView {
                     }
 
                     this.#getSemanticsReqID = this.#internalAPIRequester.get(
-                        flaskES6.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id, forecast: false}),
+                        app.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id, forecast: false}),
                         (data) => {
                             this.#fetchDataModalParamsContainerElmt.innerHTML = "";
 
@@ -467,8 +454,7 @@ class WeatherDataServiceManageView {
                             }
                         },
                         (error) => {
-                            let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                            this.#messagesElmt.appendChild(flashMsgElmt);
+                            app.flashMessage(error.toString(), "error");
                         },
                     );
                 });
@@ -525,7 +511,7 @@ class WeatherDataServiceManageView {
         }
 
         this.#weatherListReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.services.weather_data.retrieve_list`, filters),
+            app.urlFor(`api.services.weather_data.retrieve_list`, filters),
             (data) => {
                 this.#weatherServiceStatesContainerElmt.innerHTML = "";
                 if (data.length > 0) {
@@ -544,8 +530,7 @@ class WeatherDataServiceManageView {
                 this.#weatherItemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -572,7 +557,7 @@ class WeatherDataServiceManageView {
         }
 
         this.#forecastWeatherListReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.services.weather_data.retrieve_forecast_list`, filters),
+            app.urlFor(`api.services.weather_data.retrieve_forecast_list`, filters),
             (data) => {
                 this.#forecastWeatherServiceStatesContainerElmt.innerHTML = "";
                 if (data.length > 0) {
@@ -591,8 +576,7 @@ class WeatherDataServiceManageView {
                 this.#forecastWeatherItemsCountElmt.update({firstItem: data.length > 0 ? 1 : 0, lastItem: data.length, totalCount: data.length});
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -605,8 +589,6 @@ class WeatherDataServiceManageView {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let view = new WeatherDataServiceManageView();
     view.mount();
-
 });

@@ -1,4 +1,3 @@
-{% import "macros/flash.html" as mac_flash %}
 {% import "macros/partners.html" as mac_partners %}
 {% extends "pages/skeleton.html" %}
 
@@ -41,23 +40,21 @@
         {% endif %}
     </div>
 </div>
-<div id="messages" class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3 app-messages">
-    {% filter indent(width=4) %}
-    {{ mac_flash.display_messages() -}}
-    {% endfilter %}
-</div>
 {% endblock body_content %}
 
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { FlashTimer } from "{{ url_for('static', filename='scripts/modules/flashTimer.js') }}";
+    import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 
+    let app = createApp();
 
     document.addEventListener("DOMContentLoaded", () => {
-        let flashTimer = new FlashTimer();
-        flashTimer.bind();
+        let managers = {
+            "MESSAGE_MANAGER": {},
+        };
+        app.mount(managers);
     });
 </script>
 {% endfilter %}

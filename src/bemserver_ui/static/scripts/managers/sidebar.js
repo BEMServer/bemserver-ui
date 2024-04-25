@@ -1,7 +1,7 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js"
 
 
-export class Sidebar {
+export default class SidebarManager {
 
     #navLinkElmts = null;
 
@@ -65,7 +65,7 @@ export class Sidebar {
         }
     }
 
-    refresh() {
+    mount() {
         // Set active the "nav-link" element that corresponds to the current page location.
         let currentUrl = window.location.pathname + window.location.search;
 

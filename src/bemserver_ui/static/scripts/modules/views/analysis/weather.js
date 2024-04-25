@@ -1,6 +1,5 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
@@ -13,7 +12,6 @@ export class WeatherExploreView {
     #retrieveDataReqID = null;
     #sitesTreeReqID = null;
 
-    #messagesElmt = null;
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
     #periodDaySelectElmt = null;
@@ -68,7 +66,6 @@ export class WeatherExploreView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#mainChartContainerElmt = document.getElementById("chartContainer");
 
         this.#sitesTreeElmt = document.getElementById("sitesTree");
@@ -296,7 +293,7 @@ export class WeatherExploreView {
             }
 
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(
+                app.urlFor(
                     `api.analysis.weather.retrieve`,
                     {
                         site_id: this.#structuralElementId,
@@ -355,9 +352,7 @@ export class WeatherExploreView {
                 },
                 (error) => {
                     this.#mainChartContainerElmt.innerHTML = "";
-
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -372,7 +367,7 @@ export class WeatherExploreView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(
+            app.urlFor(
                 `api.structural_elements.retrieve_tree_sites`,
                 {
                     types: ["site"],
@@ -386,16 +381,14 @@ export class WeatherExploreView {
                     this.#sitesTreeElmt.select(data.data[0].node_id);
                 }
                 else {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.WARNING, text: "No site available in this campaign", isDismissible: false, isTimed: false});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage("No site available in this campaign", "warning");
 
                     this.#periodTypeSelectElmt.setAttribute("disabled", true);
                     this.#forecastSwitchElmt.setAttribute("disabled", true);
                 }
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }

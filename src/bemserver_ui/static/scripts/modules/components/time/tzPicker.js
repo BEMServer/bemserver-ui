@@ -1,4 +1,4 @@
-import { TimezoneTool } from "../../tools/timezones.js";
+import { TimezoneTool } from "/static/scripts/modules/tools/timezones.js";
 
 
 export class TimezonePicker extends HTMLDivElement {

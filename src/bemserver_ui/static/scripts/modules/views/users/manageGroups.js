@@ -1,10 +1,9 @@
-import { DropZone } from "../../components/dropZone.js";
-import { FlashMessageTypes, FlashMessage } from "../../components/flash.js";
-import { Spinner } from "../../components/spinner.js";
-import { UserGroupItem } from "../../components/userGroup/userGroupItem.js";
-import { ModalConfirm } from "../../components/modalConfirm.js";
-import { InternalAPIRequest } from "../../tools/fetcher.js";
-import { flaskES6, signedUser } from "../../../app.js";
+import { app } from "/static/scripts/app.js";
+import { DropZone } from "/static/scripts/modules/components/dropZone.js";
+import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { UserGroupItem } from "/static/scripts/modules/components/userGroup/userGroupItem.js";
+import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
+import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 
 
 export class UserManageGroupsView {
@@ -13,7 +12,6 @@ export class UserManageGroupsView {
 
     #internalAPIRequester = null;
     #getGroupListReqID = null;
-    #messagesElmt = null;
 
     #userGroupTabElmt = null;
     #userGroupAvailableBtnElmt = null;
@@ -29,10 +27,9 @@ export class UserManageGroupsView {
 
     constructor(user) {
         this.#user = user;
+        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#cacheDOM();
-
-        this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#dropZoneElmt = new DropZone({ dropEffect: "move", helpNoItemsText: `Not yet a member of any group.`, helpBackgroundText: `Drag and drop groups here` });
         this.#dropZoneElmt.id = `dropZone-${this.#user.id}`;
@@ -43,7 +40,6 @@ export class UserManageGroupsView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
         this.#userGroupTabElmt = document.getElementById("groups-tab");
         this.#userGroupAvailableBtnElmt = document.getElementById("userGroupAvailableBtn");
         this.#userGroupContainerElmt = document.getElementById("userGroupContainer");
@@ -104,10 +100,10 @@ export class UserManageGroupsView {
             let groupName = jsonData.sourceNodeData.name;
 
             this.#internalAPIRequester.post(
-                flaskES6.urlFor(`api.user_groups.add_user`, {id: groupId}),
+                app.urlFor(`api.user_groups.add_user`, {id: groupId}),
                 {user_id: this.#user.id},
                 (data) => {
-                    let userGroupItemElmt = new UserGroupItem(groupId, groupName, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: groupId, tab: `users`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, groupId, groupName, data.data.id, this.#user.name) : null);
+                    let userGroupItemElmt = new UserGroupItem(groupId, groupName, false, app.signedUser.is_admin ? app.urlFor(`user_groups.view`, {id: groupId, tab: `users`}) : null, app.signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, groupId, groupName, data.data.id, this.#user.name) : null);
                     this.#dropZoneElmt.addElement(userGroupItemElmt);
 
                     let dropedItemElmt = document.getElementById(jsonData.sourceNodeId);
@@ -115,12 +111,10 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User added to ${groupName} group!`, isDismissible: true, delay: 4});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(`User added to ${groupName} group!`, "success", 4);
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         });
@@ -133,7 +127,7 @@ export class UserManageGroupsView {
         let modalConfirm = new ModalConfirm(`usergroup-${groupId}`, `Remove <mark>${userName}</mark> user from <mark>${groupName}</mark> group`, () => {
             // Inside the callback to remove user from group.
             this.#internalAPIRequester.post(
-                flaskES6.urlFor("api.user_groups.remove_user", {id: groupId, rel_id: groupUserRelId}),
+                app.urlFor("api.user_groups.remove_user", {id: groupId, rel_id: groupUserRelId}),
                 null,
                 () => {
                     let dropedItemElmt = document.getElementById(`drag-usergroup-${groupId}`);
@@ -148,12 +142,10 @@ export class UserManageGroupsView {
 
                     this.#refreshCounters();
 
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.SUCCESS, text: `User removed from ${groupName} group!`, isDismissible: true, delay: 4});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(`User removed from ${groupName} group!`, "success", 4);
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         });
@@ -185,7 +177,7 @@ export class UserManageGroupsView {
         }
     }
 
-    refresh() {
+    mount() {
         if (!this.#userGroupTabElmt.isLoaded) {
             this.#userGroupCountElmt.innerHTML = "";
             this.#userGroupCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
@@ -203,11 +195,11 @@ export class UserManageGroupsView {
                 this.#getGroupListReqID = null;
             }
             this.#getGroupListReqID = this.#internalAPIRequester.get(
-                flaskES6.urlFor(`api.users.list_groups`, {id: this.#user.id}),
+                app.urlFor(`api.users.list_groups`, {id: this.#user.id}),
                 (data) => {
                     this.#dropZoneElmt.clear();
                     for (let row of data.groups) {
-                        let userGroupItemElmt = new UserGroupItem(row.id, row.name, false, signedUser.is_admin ? flaskES6.urlFor(`user_groups.view`, {id: row.id, tab: `users`}) : null, signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, row.id, row.name, row.rel_id, this.#user.name) : null);
+                        let userGroupItemElmt = new UserGroupItem(row.id, row.name, false, app.signedUser.is_admin ? app.urlFor(`user_groups.view`, {id: row.id, tab: `users`}) : null, app.signedUser.is_admin ? this.#userGroupRemoveUserCallback.bind(this, row.id, row.name, row.rel_id, this.#user.name) : null);
                         this.#dropZoneElmt.addElement(userGroupItemElmt);
                     }
 
@@ -222,8 +214,7 @@ export class UserManageGroupsView {
                     this.#userGroupTabElmt.isLoaded = true;
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true});
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }

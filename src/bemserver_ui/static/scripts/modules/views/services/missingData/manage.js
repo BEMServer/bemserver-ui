@@ -1,14 +1,11 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 
 
 class CheckMissingDataServiceManageView {
 
     #internalAPIRequester = null;
     #updateStateReqID = null;
-
-    #messagesElmt = null;
 
     #stateOnRadioElmt = null;
     #stateOffRadioElmt = null;
@@ -17,17 +14,14 @@ class CheckMissingDataServiceManageView {
     #etagInputElmt = null;
 
     constructor() {
-        this.#cacheDOM();
-
         this.#internalAPIRequester = new InternalAPIRequest();
 
+        this.#cacheDOM();
         this.#initEventListeners();
     }
     
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#stateOnRadioElmt = document.getElementById("svc_state_on");
             this.#stateOffRadioElmt = document.getElementById("svc_state_off");
             this.#campaignServiceIDInputElmt = document.getElementById("campaign_service_id");
@@ -37,7 +31,7 @@ class CheckMissingDataServiceManageView {
     }
 
     #initEventListeners() {
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             this.#stateOnRadioElmt.addEventListener("change", () => {
                 if (this.#stateOnRadioElmt.checked) {
                     this.#updateServiceState(this.#stateOnRadioElmt.checked);
@@ -62,18 +56,16 @@ class CheckMissingDataServiceManageView {
             if (isEnabled) {
                 // Enable service for campaign.
                 this.#updateStateReqID = this.#internalAPIRequester.post(
-                    flaskES6.urlFor(`api.services.missing_data.enable`),
+                    app.urlFor(`api.services.missing_data.enable`),
                     { campaign_id: this.#campaignIDInputElmt.value, is_enabled: isEnabled },
                     (data) => {
                         this.#campaignServiceIDInputElmt.value = data.data.id;
                         this.#etagInputElmt.value = data.etag;
 
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: "Check missing data service enabled!", isDismissible: true });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage("Check missing data service enabled!", "info");
                     },
                     (error) => {
-                        let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                        this.#messagesElmt.appendChild(flashMsgElmt);
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }
@@ -81,18 +73,16 @@ class CheckMissingDataServiceManageView {
         else {
             // Update campaign service state.
             this.#updateStateReqID = this.#internalAPIRequester.put(
-                flaskES6.urlFor(`api.services.missing_data.update_state`, {id: this.#campaignServiceIDInputElmt.value}),
+                app.urlFor(`api.services.missing_data.update_state`, {id: this.#campaignServiceIDInputElmt.value}),
                 { is_enabled: isEnabled },
                 this.#etagInputElmt.value,
                 (data) => {
                     this.#etagInputElmt.value = data.etag;
 
-                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.INFO, text: `Check missing data service ${isEnabled ? "en": "dis"}abled!`, isDismissible: true });
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(`Check missing data service ${isEnabled ? "en": "dis"}abled!`, "info");
                 },
                 (error) => {
-                    let flashMsgElmt = new FlashMessage({ type: FlashMessageTypes.ERROR, text: error.toString(), isDismissible: true });
-                    this.#messagesElmt.appendChild(flashMsgElmt);
+                    app.flashMessage(error.toString(), "error");
                 },
             );
         }
@@ -105,8 +95,6 @@ class CheckMissingDataServiceManageView {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
     let view = new CheckMissingDataServiceManageView();
     view.mount();
-
 });

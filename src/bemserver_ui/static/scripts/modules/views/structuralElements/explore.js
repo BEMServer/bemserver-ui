@@ -1,9 +1,8 @@
+import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
-import { flaskES6, signedUser } from "/static/scripts/app.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
-import { FlashMessageTypes, FlashMessage } from "/static/scripts/modules/components/flash.js";
 import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/tree.js";
@@ -12,7 +11,6 @@ import "/static/scripts/modules/components/tree.js";
 export class StructuralElementsExploreView {
 
     #tzName = "UTC";
-    #messagesElmt = null;
 
     #internalAPIRequester = null;
     #generalReqID = null;
@@ -80,8 +78,6 @@ export class StructuralElementsExploreView {
     }
 
     #cacheDOM() {
-        this.#messagesElmt = document.getElementById("messages");
-
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
         this.#tabDataItemElmts = [].slice.call(document.querySelectorAll("#tabData button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
@@ -277,7 +273,7 @@ export class StructuralElementsExploreView {
         }
 
         try {
-            let editUrl = flaskES6.urlFor(`structural_elements.edit`, editUrlParams);
+            let editUrl = app.urlFor(`structural_elements.edit`, editUrlParams);
 
             let elmt = document.createElement("a");
             elmt.classList.add("btn", "btn-sm", "btn-outline-primary", "text-nowrap");
@@ -296,8 +292,7 @@ export class StructuralElementsExploreView {
             return elmt;
         }
         catch (error) {
-            let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-            this.#messagesElmt.appendChild(flashMsgElmt);
+            app.flashMessage(error.toString(), "error");
         }
 
         return null;
@@ -326,7 +321,7 @@ export class StructuralElementsExploreView {
         structNameElmt.textContent = data.structural_element.name;
         titleContainerElmt.appendChild(structNameElmt);
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             let editBtnElmt = this.#createEditBtnElement(data.type, data.structural_element.id, "general");
             if (editBtnElmt != null) {
                 mainContainerElmt.appendChild(editBtnElmt);
@@ -401,7 +396,7 @@ export class StructuralElementsExploreView {
         propContainerElmt.classList.add("d-flex", "gap-4");
         mainContainerElmt.appendChild(propContainerElmt);
 
-        if (signedUser.is_admin) {
+        if (app.signedUser.is_admin) {
             let editBtnElmt = this.#createEditBtnElement(data.type, id, "properties");
             if (editBtnElmt != null) {
                 mainContainerElmt.appendChild(editBtnElmt);
@@ -465,13 +460,12 @@ export class StructuralElementsExploreView {
             this.#generalReqID = null;
         }
         this.#generalReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id}),
+            app.urlFor(`api.structural_elements.retrieve_data`, {type: type, id: id}),
             (data) => {
                 this.#populateGeneral(data, path);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -485,13 +479,12 @@ export class StructuralElementsExploreView {
             this.#propertiesReqID = null;
         }
         this.#propertiesReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id}),
+            app.urlFor(`api.structural_elements.retrieve_property_data`, {type: type, id: id}),
             (data) => {
                 this.#populateProperties(data, id);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -622,7 +615,7 @@ export class StructuralElementsExploreView {
         }
 
         this.#tsReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.timeseries.retrieve_list`, tsOptions),
+            app.urlFor(`api.timeseries.retrieve_list`, tsOptions),
             (data) => {
                 let tsPaginationOpts = {
                     pageSize: this.#tsPageSizeElmt.current,
@@ -640,8 +633,7 @@ export class StructuralElementsExploreView {
                 this.#populateTimeseriesList(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -674,7 +666,7 @@ export class StructuralElementsExploreView {
         }
 
         this.#eventsReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.events.retrieve_list`, eventsOptions),
+            app.urlFor(`api.events.retrieve_list`, eventsOptions),
             (data) => {
                 let eventsPaginationOpts = {
                     pageSize: this.#eventsPageSizeElmt.current,
@@ -692,8 +684,7 @@ export class StructuralElementsExploreView {
                 this.#populateEventList(data.data);
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -707,14 +698,13 @@ export class StructuralElementsExploreView {
         }
 
         this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_sites`),
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
             (data) => {
                 this.#sitesTreeElmt.load(data.data);
                 this.#sitesTreeElmt.collapseAll();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
@@ -728,14 +718,13 @@ export class StructuralElementsExploreView {
         }
 
         this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            flaskES6.urlFor(`api.structural_elements.retrieve_tree_zones`),
+            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
             (data) => {
                 this.#zonesTreeElmt.load(data.data);
                 this.#zonesTreeElmt.collapseAll();
             },
             (error) => {
-                let flashMsgElmt = new FlashMessage({type: FlashMessageTypes.ERROR, text: error, isDismissible: true});
-                this.#messagesElmt.appendChild(flashMsgElmt);
+                app.flashMessage(error.toString(), "error");
             },
         );
     }
