@@ -1,75 +1,10 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js";
+import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
-
-    #chart = null;
-
-    #initOptions = {
-        height: 500,
-        width: "auto",
-    };
-    #theme = null;
+export class TimeseriesChartEnergyConsumption extends ChartBase {
 
     #defaultTitle = "Energy consumption";
-    #defaultOptions = {
-        title: {
-            left: "center",
-            text: this.#defaultTitle,
-            subtextStyle: {
-                fontSize: 14,
-            },
-        },
-        grid: {
-            left: "3%",
-            right: "5%",
-            bottom: 90,
-            containLabel: true,
-        },
-        toolbox: {
-            feature: {
-                dataZoom: {
-                    yAxisIndex: "none",
-                },
-                dataView: {
-                    readOnly: true,
-                    buttonColor: "#95c11a",
-                },
-                saveAsImage: {},
-            },
-        },
-        tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "shadow",
-            },
-        },
-        legend: {
-            type: "scroll",
-            bottom: 10,
-        },
-        dataZoom: [
-            {
-                type: "slider",
-                bottom: 50,
-            },
-        ],
-        xAxis: [
-            {
-                type: "time",
-            },
-        ],
-        yAxis: [
-            {
-                type: "value",
-                nameLocation: "middle",
-                axisLabel: {},
-            },
-        ],
-        series: [],
-        useUTC: false,
-    };
 
     #energyUseColors = {
         "all": "#6e8a98",
@@ -80,20 +15,67 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
         "appliances": "#9a60b4",
     };
 
-    constructor(options = null, theme = null) {
-        super();
+    constructor(chartContainerElmt, initOptions = null) {
+        super(chartContainerElmt, initOptions);
 
-        this.#initOptions = options || this.#initOptions;
-        this.#theme = theme;
+        this.#initChartOptions();
     }
 
-    #initEventListeners() {
-        window.addEventListener("resize", (event) => {
-            this.resize();
-        });
-
-        window.addEventListener("unload", (event) => {
-            this.dispose();
+    #initChartOptions() {
+        this.setOption({
+            title: {
+                left: "center",
+                text: this.#defaultTitle,
+                subtextStyle: {
+                    fontSize: 14,
+                },
+            },
+            grid: {
+                bottom: 90,
+            },
+            xAxis: [
+                {
+                    type: "time",
+                },
+            ],
+            yAxis: [
+                {
+                    type: "value",
+                    nameLocation: "middle",
+                    axisLabel: {
+                        color: "#333333",
+                    },
+                },
+            ],
+            legend: [
+                {
+                    type: "scroll",
+                    bottom: 0,
+                },
+            ],
+            toolbox: {
+                feature: {
+                    dataZoom: {
+                        yAxisIndex: "none",
+                    },
+                    dataView: {
+                        readOnly: true,
+                        buttonColor: "#95c11a",
+                        lang: [
+                            `${this.#defaultTitle} data`,
+                            "Close",
+                            "Refresh",
+                        ],
+                    },
+                    saveAsImage: {},
+                },
+            },
+            dataZoom: [
+                {
+                    type: "slider",
+                    bottom: 50,
+                },
+            ],
         });
     }
 
@@ -195,42 +177,8 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
         return tooltipContainerElmt;
     }
 
-    connectedCallback() {
-        this.#chart = echarts.init(this, this.#theme, this.#initOptions);
-        this.#chart.setOption(this.#defaultOptions);
-
-        this.#initEventListeners();
-    }
-
-    resize() {
-        this.#chart.resize();
-    }
-
-    dispose() {
-        this.#chart.dispose();
-    }
-
-    showLoading() {
-        this.#chart.showLoading();
-    }
-
-    hideLoading() {
-        this.#chart.hideLoading();
-    }
-
     load(timestamps, energy, energyUses, unit, timeFormat) {
-        this.hideLoading();
-
-        let options = this.#chart.getOption();
-
-        options.title[0].subtext = `energy: ${energy}`;
-        options.toolbox[0].feature.dataView.lang[0] = `${this.#defaultTitle} data`;
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, unit, timeFormat); };
-
-        options.tooltip[0].formatter = (params) => { return this.#tooltipFormatter(params, unit, timeFormat); };
-
-        options.series.length = 0;
-        options.series = Object.entries(energyUses).map(([energyUse, consumptions]) => {
+        let dataSeries = Object.entries(energyUses).map(([energyUse, consumptions]) => {
             let serie = {
                 id: energyUse,
                 name: energyUse,
@@ -241,30 +189,43 @@ export class TimeseriesChartEnergyConsumption extends HTMLDivElement {
                 emphasis: {
                     focus: "series",
                 },
-                itemStyle: {},
             };
             if (energyUse != "all") {
                 serie.stack = energy;
             }
             if (energyUse in this.#energyUseColors) {
-                serie.itemStyle.color = this.#energyUseColors[energyUse];
+                serie.itemStyle = {...serie.itemStyle, ...{ color: this.#energyUseColors[energyUse] }};
             }
             return serie;
         });
 
-        options.yAxis[0].data = options.series.map((serie) => {
-            return serie.name;
-        });
-        options.yAxis[0].axisLabel.formatter = `{value} ${unit}`;
+        let options = {
+            title: {
+                subtext: `energy: ${energy}`,
+            },
+            toolbox: {
+                feature: {
+                    dataView: {
+                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat); },
+                    },
+                },
+            },
+            tooltip: {
+                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat); },
+            },
+            yAxis: [
+                {
+                    data: dataSeries.map((serie) => {
+                        return serie.name;
+                    }),
+                    axisLabel: {
+                        formatter: `{value} ${unit}`,
+                    },
+                },
+            ],
+            series: dataSeries,
+        };
 
-        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-        this.#chart.clear();
-
-        this.#chart.setOption(options);
+        this.setOption(options);
     }
-}
-
-
-if (window.customElements.get("app-ts-chart-energy-cons") == null) {
-    window.customElements.define("app-ts-chart-energy-cons", TimeseriesChartEnergyConsumption, { extends: "div" });
 }

@@ -202,21 +202,21 @@ export class EnergyConsumptionExploreView {
                     }
                     else {
                         for (let [energy, energyUses] of Object.entries(data["energy"])) {
-                            let energyChart = new TimeseriesChartEnergyConsumption();
-                            this.#chartByEnergy[energy] = energyChart;
+                            let colElmt = document.createElement("div");
+                            colElmt.classList.add("col");
+                            this.#mainChartContainerElmt.appendChild(colElmt);
 
                             let chartContainerElmt = document.createElement("div");
                             chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
-                            chartContainerElmt.appendChild(energyChart);
-
-                            let colElmt = document.createElement("div");
-                            colElmt.classList.add("col");
+                            chartContainerElmt.style.height = "500px";
                             colElmt.appendChild(chartContainerElmt);
 
-                            this.#mainChartContainerElmt.appendChild(colElmt);
+                            let energyChart = new TimeseriesChartEnergyConsumption(chartContainerElmt);
+                            this.#chartByEnergy[energy] = energyChart;
 
                             energyChart.showLoading();
                             energyChart.load(data["timestamps"], energy, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                            energyChart.hideLoading();
                         }
                     }
                 },

@@ -186,7 +186,6 @@ class TimeseriesDataExploreView {
 
     #cacheDOM() {
         this.#chartContainerElmt = document.getElementById("chartContainer");
-        this.#chartExplore = document.getElementById("tsChartExplore");
 
         this.#periodTypeElmt = document.getElementById("periodType");
         this.#periodCustomElmt = document.getElementById("periodCustom");
@@ -374,7 +373,7 @@ class TimeseriesDataExploreView {
         });
 
         this.#removeAllSeriesBtnElmt.addEventListener("click", () => {
-            this.#chartExplore.clear();
+            this.#chartExplore.clearAll();
             this.#tsSeriesOptions = {};
             this.#chartSeriesContainerBodyElmt.innerHTML = "";
             this.#updateSeriesCount();
@@ -761,9 +760,7 @@ class TimeseriesDataExploreView {
 
         this.#loadDataStates();
 
-        this.#chartExplore = new TimeseriesChartExplore({ height: 600, width: "auto" });
-        this.#chartContainerElmt.innerHTML = "";
-        this.#chartContainerElmt.appendChild(this.#chartExplore);
+        this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
 
         if (Object.keys(this.#tsSeriesOptions).length <= 0) {
             this.#chartSettingsCanvas.show();

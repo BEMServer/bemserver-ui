@@ -5,6 +5,8 @@ export class ChartBase {
 
     #chart = null;
     #chartEventCallbacks = {};
+    #showLoadingPreCallback = null;
+    #hideLoadingPostCallback = null;
 
     #loadingOptions = {
         text: "loading...",
@@ -19,10 +21,9 @@ export class ChartBase {
             fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Noto Sans, Liberation Sans, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji",
         },
         grid: {
-            top: 20,
-            bottom: 30,
             left: 20,
             right: 20,
+            bottom: 50,
             containLabel: true,
         },
         tooltip: {
@@ -32,11 +33,6 @@ export class ChartBase {
             },
         },
         series: [],
-        legend: [
-            {
-                bottom: 0,
-            },
-        ],
     }
 
     constructor(chartContainerElmt, initOptions = null) {
@@ -55,8 +51,9 @@ export class ChartBase {
             this.dispose();
         });
 
+        // TODO for now, only legendselectchanged is really listened.
         this.#chart.on("legendselectchanged", (params) => {
-            if (this.#chartEventCallbacks["legendselectchanged"]) {
+            if (this.#chartEventCallbacks["legendselectchanged"] != null) {
                 for (let eventCallback of this.#chartEventCallbacks["legendselectchanged"]) {
                     eventCallback(params);
                 }
@@ -88,11 +85,15 @@ export class ChartBase {
     }
 
     showLoading() {
+        this.#showLoadingPreCallback?.();
+
         this.#chart.showLoading(this.#loadingOptions);
     }
 
     hideLoading() {
         this.#chart.hideLoading();
+
+        this.#hideLoadingPostCallback?.();
     }
 
     resize(options = null) {
@@ -111,20 +112,44 @@ export class ChartBase {
     }
 
     registerEventCallback(eventName, callback) {
-        if (!this.#chartEventCallbacks[eventName]) {
-            this.#chartEventCallbacks[eventName] = [];
+        if (eventName == "showLoadingPre") {
+            this.#showLoadingPreCallback = callback;
         }
-        this.#chartEventCallbacks[eventName].push(callback);
+        else if (eventName == "hideLoadingPost") {
+            this.#hideLoadingPostCallback = callback;
+        }
+        else {
+            if (!this.#chartEventCallbacks[eventName]) {
+                this.#chartEventCallbacks[eventName] = [];
+            }
+            this.#chartEventCallbacks[eventName].push(callback);
+        }
     }
 
     unregisterEventCallback(eventName, callback) {
-        if (this.#chartEventCallbacks[eventName])
-        {
-            this.#chartEventCallbacks[eventName] = this.#chartEventCallbacks[eventName].filter(
-                (evtCallback) => {
-                    return evtCallback != callback;
-                }
-            );
+        if (eventName == "showLoadingPre") {
+            this.#showLoadingPreCallback = null;
         }
+        else if (eventName == "hideLoadingPost") {
+            this.#hideLoadingPostCallback = null;
+        }
+        else {
+            if (this.#chartEventCallbacks[eventName])
+            {
+                this.#chartEventCallbacks[eventName] = this.#chartEventCallbacks[eventName].filter(
+                    (evtCallback) => {
+                        return evtCallback != callback;
+                    }
+                );
+            }
+        }
+    }
+
+    dispatchAction(params) {
+        this.#chart.dispatchAction(params);
+    }
+
+    dispatchEvent(event) {
+        this.#chart.getDom().dispatchEvent(event);
     }
 }

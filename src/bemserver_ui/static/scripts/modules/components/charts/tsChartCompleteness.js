@@ -1,4 +1,4 @@
-import  { ChartBase } from "/static/scripts/modules/components/charts/common.js";
+import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 
@@ -40,9 +40,6 @@ export class TimeseriesChartCompleteness extends ChartBase {
                     overflow: "truncate",
                     hideOverlap: false,
                 },
-            },
-            legend: {
-                show: false,
             },
             toolbox: {
                 feature: {

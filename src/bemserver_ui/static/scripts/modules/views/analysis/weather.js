@@ -256,7 +256,7 @@ export class WeatherExploreView {
                 }
                 col1.appendChild(tsName);
 
-                if (signedUser.is_admin && weatherParamData.timeseries.id != null) {
+                if (app.signedUser.is_admin && weatherParamData.timeseries.id != null) {
                     let col2 = document.createElement("div");
                     col2.classList.add("col", "hstack", "gap-2");
                     row.appendChild(col2);
@@ -320,7 +320,7 @@ export class WeatherExploreView {
                         pHelpElmt.innerText = `Maybe the view is not configured for this ${this.#structuralElementType}.`;
                         colElmt.appendChild(pHelpElmt);
 
-                        if (!signedUser.is_admin) {
+                        if (!app.signedUser.is_admin) {
                             pHelpElmt.classList.add("mb-0");
 
                             let pHelpNotAdminElmt = document.createElement("p");
@@ -332,21 +332,21 @@ export class WeatherExploreView {
                     }
                     else {
                         for (let [name, dataset] of Object.entries(data)) {
-                            let weatherChart = new TimeseriesChartWeather();
-                            this.#chartWeather[name] = weatherChart;
+                            let colElmt = document.createElement("div");
+                            colElmt.classList.add("col");
+                            this.#mainChartContainerElmt.appendChild(colElmt);
 
                             let chartContainerElmt = document.createElement("div");
                             chartContainerElmt.classList.add("border", "border-1", "rounded", "justify-content-center", "bg-white", "p-2");
-                            chartContainerElmt.appendChild(weatherChart);
-
-                            let colElmt = document.createElement("div");
-                            colElmt.classList.add("col");
+                            chartContainerElmt.style.height = "500px";
                             colElmt.appendChild(chartContainerElmt);
 
-                            this.#mainChartContainerElmt.appendChild(colElmt);
+                            let weatherChart = new TimeseriesChartWeather(chartContainerElmt);
+                            this.#chartWeather[name] = weatherChart;
 
                             weatherChart.showLoading();
                             weatherChart.load(name, dataset, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], () => { this.#updateTsInfoModal(name, dataset)});
+                            weatherChart.hideLoading();
                         }
                     }
                 },

@@ -1,100 +1,8 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js";
+import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class TimeseriesChartWeather extends HTMLDivElement {
-
-    #chart = null;
-
-    #initOptions = {
-        height: 500,
-        width: "auto",
-    };
-    #theme = null;
-
-    #defaultOptions = {
-        title: {
-            left: "center",
-            text: "",
-        },
-        grid: {
-            left: 20,
-            right: 20,
-            top: 70,
-            bottom: 90,
-            containLabel: true,
-        },
-        toolbox: {
-            feature: {
-                myTSInfo: {
-                    show: true,
-                    title: "Weather parameters timeseries",
-                    icon: "path://m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z",
-                    onclick: () => {
-                        this.#showTSInfo();
-                    },
-                },
-                dataView: {
-                    readOnly: true,
-                    buttonColor: "#95c11a",
-                },
-                saveAsImage: {},
-            },
-        },
-        tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "cross",
-            },
-            valueFormatter: (value) => {
-                return Parser.parseFloatOrDefault(value, Number.NaN, 2);
-            },
-        },
-        legend: [
-            {
-                data: [],
-                width: "45%",
-                bottom: 0,
-                left: 0,
-                type: "scroll",
-            },
-            {
-                data: [],
-                width: "45%",
-                bottom: 0,
-                right: 0,
-                type: "scroll",
-            }
-        ],
-        dataZoom: [
-            {
-                type: "slider",
-                bottom: 50,
-            },
-            {
-                type: "inside",
-            },
-        ],
-        xAxis: [
-            {
-                type: "time",
-            },
-        ],
-        yAxis: [
-            {
-                type: "value",
-                position: "left",
-                scale: true,
-            },
-            {
-                type: "value",
-                position: "right",
-                scale: true,
-            },
-        ],
-        series: [],
-        useUTC: false,
-    };
+export class TimeseriesChartWeather extends ChartBase {
 
     #energyUseColors = {
         "Air temperature": "#0880A4",
@@ -107,20 +15,88 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         "Surface solar radiation forecast": "#E38028",
     };
 
-    constructor(options = null, theme = null) {
-        super();
+    constructor(chartContainerElmt, initOptions = null) {
+        super(chartContainerElmt, initOptions);
 
-        this.#initOptions = options || this.#initOptions;
-        this.#theme = theme;
+        this.#initChartOptions();
     }
 
-    #initEventListeners() {
-        window.addEventListener("resize", (event) => {
-            this.resize();
-        });
-
-        window.addEventListener("unload", (event) => {
-            this.dispose();
+    #initChartOptions() {
+        this.setOption({
+            title: {
+                left: "center",
+            },
+            grid: {
+                top: 70,
+                bottom: 90,
+            },
+            xAxis: [
+                {
+                    type: "time",
+                },
+            ],
+            yAxis: [
+                {
+                    type: "value",
+                    position: "left",
+                    scale: true,
+                },
+                {
+                    type: "value",
+                    position: "right",
+                    scale: true,
+                },
+            ],
+            legend: [
+                {
+                    data: [],
+                    width: "45%",
+                    bottom: 0,
+                    left: 0,
+                    type: "scroll",
+                },
+                {
+                    data: [],
+                    width: "45%",
+                    bottom: 0,
+                    right: 0,
+                    type: "scroll",
+                }
+            ],
+            toolbox: {
+                feature: {
+                    myTSInfo: {
+                        show: true,
+                        title: "Weather parameters timeseries",
+                        icon: "path://m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z",
+                        onclick: () => {
+                            this.#showTSInfo();
+                        },
+                    },
+                    dataView: {
+                        readOnly: true,
+                        buttonColor: "#95c11a",
+                    },
+                    saveAsImage: {},
+                },
+            },
+            tooltip: {
+                axisPointer: {
+                    type: "cross",
+                },
+                valueFormatter: (value) => {
+                    return Parser.parseFloatOrDefault(value, Number.NaN, 2);
+                },
+            },
+            dataZoom: [
+                {
+                    type: "slider",
+                    bottom: 50,
+                },
+                {
+                    type: "inside",
+                },
+            ],
         });
     }
 
@@ -196,47 +172,10 @@ export class TimeseriesChartWeather extends HTMLDivElement {
         return mainContainerElmt;
     }
 
-    connectedCallback() {
-        this.#chart = echarts.init(this, this.#theme, this.#initOptions);
-        this.#chart.setOption(this.#defaultOptions);
-
-        this.#initEventListeners();
-    }
-
-    resize() {
-        this.#chart.resize();
-    }
-
-    dispose() {
-        this.#chart.dispose();
-    }
-
-    showLoading() {
-        this.#chart.showLoading();
-    }
-
-    hideLoading() {
-        this.#chart.hideLoading();
-    }
-
     load(name, dataset, timeFormat, tsInfoCallback = null) {
-        this.hideLoading();
-
-        let options = this.#chart.getOption();
-
-        options.legend[0].data = [];
-        options.legend[1].data = [];
-
-        options.title[0].text = name;
-        
-        options.toolbox[0].feature.dataView.optionToContent = (opt) => { return this.#optionToContent(opt, timeFormat); };
-        options.toolbox[0].feature.myTSInfo.show = tsInfoCallback != null;
-        options.toolbox[0].feature.myTSInfo.onclick = () => { this.#showTSInfo(tsInfoCallback); };
-
-        options.series.length = 0;
-
         let listUnit = {0: [], 1: []};
-        let series = [];
+        let dataLegend = {0: [], 1: []};
+        let dataSeries = [];
         for (let [_parameter, serieParams] of Object.entries(dataset)) {
             for (let [_settings, value] of Object.entries(serieParams)) {
                 if (Object.values(value.data).length > 0) {
@@ -259,33 +198,56 @@ export class TimeseriesChartWeather extends HTMLDivElement {
                         symbol: "path://",
                         connectNulls: true,
                     };
-                    series.push(serie);
+                    dataSeries.push(serie);
 
                     if (value.timeseries.unit_symbol != null && !listUnit[value.yAxis].includes(value.timeseries.unit_symbol)) {
                         listUnit[value.yAxis].push(value.timeseries.unit_symbol);
                     }
 
-                    options.legend[value.yAxis].data.push(serie.name);
+                    dataLegend[value.yAxis].push(serie.name);
                 }
             }
         }
-        options.series = series;
 
-        options.yAxis[0].name = listUnit[0].join(", ");
-        options.yAxis[1].name = listUnit[1].join(", ");
+        let options = {
+            title: {
+                text: name,
+            },
+            toolbox: {
+                feature: {
+                    dataView: {
+                        optionToContent: (opt) => { return this.#optionToContent(opt, timeFormat); },
+                    },
+                    myTSInfo: {
+                        show: tsInfoCallback != null,
+                        onclick: () => { this.#showTSInfo(tsInfoCallback); },
+                    },
+                },
+            },
+            yAxis: [
+                {
+                    name: listUnit[0].join(", "),
+                },
+                {
+                    name: listUnit[1].join(", "),
+                },
+            ],
+            series: dataSeries,
+            legend: [
+                {
+                    data: dataLegend[0],
+                },
+                {
+                    data: dataLegend[1],
+                },
+            ],
+        };
 
         if (options.legend[1].data.length == 0) {
             options.legend[0].left = "center";
             options.legend[0].width = "auto";
         };
 
-        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-        this.#chart.clear();
-
-        this.#chart.setOption(options);
+        this.setOption(options);
     }
-}
-
-if (window.customElements.get("app-ts-chart-weather") == null) {
-    window.customElements.define("app-ts-chart-weather", TimeseriesChartWeather, { extends: "div" });
 }

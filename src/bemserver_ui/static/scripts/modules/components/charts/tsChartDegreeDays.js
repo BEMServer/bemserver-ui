@@ -1,4 +1,4 @@
-import  { ChartBase } from "/static/scripts/modules/components/charts/common.js";
+import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 

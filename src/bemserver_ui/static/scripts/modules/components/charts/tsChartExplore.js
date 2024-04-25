@@ -1,97 +1,8 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js";
+import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 
 
-export class TimeseriesChartExplore extends HTMLDivElement {
-
-    #chart = null;
-
-    #initOptions = {
-        height: 500,
-        width: "auto",
-    };
-    #theme = null;
-
-    // Some IDs are use in the "normalMerge" strategy of echarts (yAxis, dataZoom...).
-    #defaultOptions = {
-        title: {
-            top: "middle",
-            left: "center",
-            text: "No data",
-            subtext: "Select timeseries to display",
-        },
-        grid: {
-            left: 20,
-            right: 20,
-            bottom: 90,
-            containLabel: true,
-        },
-        toolbox: {
-            feature: {
-                dataView: {
-                    readOnly: true,
-                    buttonColor: "#95c11a",
-                    optionToContent: (opt) => { return this.#optionToContent(opt); },
-                },
-                saveAsImage: {},
-            },
-        },
-        tooltip: {
-            trigger: "axis",
-            axisPointer: {
-                type: "cross",
-            },
-            valueFormatter: (value) => { return Parser.parseFloatOrDefault(value, Number.NaN, 2) },
-        },
-        legend: [
-            {
-                id: "legend-left",
-                type: "scroll",
-                width: "auto",
-                bottom: 0,
-                left: 0,
-                data: [],
-            },
-            {
-                id: "legend-right",
-                type: "scroll",
-                width: "45%",
-                bottom: 0,
-                right: 0,
-                show: false,
-                data: [],
-            },
-        ],
-        dataZoom: [
-            {
-                id: "dataZoom-slider",
-                type: "slider",
-                bottom: 50,
-            },
-            {
-                id: "dataZoom-inside",
-                type: "inside",
-            },
-        ],
-        xAxis: [
-            {
-                type: "time",
-            },
-        ],
-        yAxis: [
-            {
-                id: "y-axis1",
-                type: "value",
-            },
-            {
-                id: "y-axis2",
-                type: "value",
-                position: "right",
-            },
-        ],
-        series: [],
-        useUTC: false,
-    };
+export class TimeseriesChartExplore extends ChartBase {
 
     #chartOpts = {};
     #currentSeriesIndex = 0;
@@ -102,69 +13,131 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     }
 
 
-    constructor(options = null, theme = null) {
-        super();
+    constructor(chartContainerElmt, initOptions = null) {
+        super(chartContainerElmt, initOptions);
 
-        this.#initOptions = options || this.#initOptions;
-        this.#theme = theme;
-    }
+        this.#initChartOptions();
+        this.#chartOpts = this.getOption();
 
-    connectedCallback() {
-        this.#chart = echarts.init(this, this.#theme, this.#initOptions);
-        this.#chart.setOption(this.#defaultOptions);
-        this.#chartOpts = this.#chart.getOption();
-        this.#initEventListeners();
-    }
-
-    #initEventListeners() {
-        window.addEventListener("resize", () => {
-            this.resize();
-        });
-
-        window.addEventListener("unload", () => {
-            this.dispose();
-        });
-
-        this.#chart.on("legendselectchanged", (params) => {
+        this.registerEventCallback("legendselectchanged", (params) => {
             // Get series id from name.
             let seriesIndex = this.#getSeriesIndexFromName(params.name);
             let seriesID = this.#chartOpts.series[seriesIndex].id;
             let isVisible = params.selected[params.name];
-
+    
             this.#chartOpts.series[seriesIndex].visible = isVisible;
             this.#updateYAxisName(true);
-
+    
             let seriesVisibilityEvent = new CustomEvent(
                 "seriesVisibilityChanged",
                 { detail: { id: seriesID, visibility: isVisible }, bubbles: true },
             );
             this.dispatchEvent(seriesVisibilityEvent);
         });
+        this.registerEventCallback("showLoadingPre", () => {
+            // Hide "No data" title.
+            this.#hideNoData(true);
+        });
+        this.registerEventCallback("hideLoadingPost", () => {
+            // Show "No data" title when chart has no series.
+            if (this.#chartOpts.series.length <= 0) {
+                this.#showNoData(true);
+            }
+        });
     }
 
-    resize() {
-        this.#chart.resize();
+    #initChartOptions() {
+        // Some IDs are use in the "normalMerge" strategy of echarts (yAxis, dataZoom...).
+        this.setOption({
+            title: {
+                top: "middle",
+                left: "center",
+                text: "No data",
+                subtext: "Select timeseries to display",
+            },
+            grid: {
+                bottom: 90,
+            },
+            xAxis: [
+                {
+                    type: "time",
+                },
+            ],
+            yAxis: [
+                {
+                    id: "y-axis1",
+                    type: "value",
+                },
+                {
+                    id: "y-axis2",
+                    type: "value",
+                    position: "right",
+                },
+            ],
+            legend: [
+                {
+                    id: "legend-left",
+                    type: "scroll",
+                    width: "auto",
+                    bottom: 0,
+                    left: 0,
+                    data: [],
+                },
+                {
+                    id: "legend-right",
+                    type: "scroll",
+                    width: "45%",
+                    bottom: 0,
+                    right: 0,
+                    show: false,
+                    data: [],
+                },
+            ],
+            toolbox: {
+                feature: {
+                    dataView: {
+                        readOnly: true,
+                        buttonColor: "#95c11a",
+                        optionToContent: (opt) => { return this.#optionToContent(opt); },
+                    },
+                    saveAsImage: {},
+                },
+            },
+            tooltip: {
+                axisPointer: {
+                    type: "cross",
+                },
+                valueFormatter: (value) => { return Parser.parseFloatOrDefault(value, Number.NaN, 2) },
+            },
+            dataZoom: [
+                {
+                    id: "dataZoom-slider",
+                    type: "slider",
+                    bottom: 50,
+                },
+                {
+                    id: "dataZoom-inside",
+                    type: "inside",
+                },
+            ],
+        });
     }
 
-    dispose() {
-        this.#chart.dispose();
-    }
+    // showLoading() {
+    //     // Hide "No data" title.
+    //     this.#hideNoData(true);
 
-    showLoading() {
-        // Hide "No data" title.
-        this.#hideNoData(true);
+    //     super().showLoading();
+    // }
 
-        this.#chart.showLoading();
-    }
+    // hideLoading() {
+    //     super().hideLoading();
 
-    hideLoading() {
-        this.#chart.hideLoading();
-
-        // Show "No data" title when chart has no series.
-        if (this.#chartOpts.series.length <= 0) {
-            this.#showNoData(true);
-        }
-    }
+    //     // Show "No data" title when chart has no series.
+    //     if (this.#chartOpts.series.length <= 0) {
+    //         this.#showNoData(true);
+    //     }
+    // }
 
     getNextColor() {
         let chatColors = this.#chartOpts.color;
@@ -325,7 +298,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
     #setChartOptions() {
         // TODO: keep dataZoom values?
 
-        this.#chart.setOption(this.#chartOpts);
+        this.setOption(this.#chartOpts);
     }
 
     addSeries(seriesParams, data = null) {
@@ -434,7 +407,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
             let series = this.#chartOpts.series[seriesIndex];
 
             let actionType = "legendToggleSelect";
-            this.#chart.dispatchAction({
+            this.dispatchAction({
                 type: actionType,
                 name: series.name,
             });
@@ -443,8 +416,7 @@ export class TimeseriesChartExplore extends HTMLDivElement {
 
     removeSeries(id) {
         if (this.#hasSeries(id)) {
-            // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-            this.#chart.clear();
+            this.clear();
 
             let seriesIndex = this.#getSeriesIndex(id);
             let series = this.#chartOpts.series[seriesIndex];
@@ -466,9 +438,8 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         }
     }
 
-    clear() {
-        // Fix for bug, see: https://github.com/apache/incubator-echarts/issues/6202
-        this.#chart.clear();
+    clearAll() {
+        this.clear();
 
         this.#chartOpts.series = [];
         for (let leg of this.#chartOpts.legend) {
@@ -487,9 +458,4 @@ export class TimeseriesChartExplore extends HTMLDivElement {
         this.#updateLegend();
         this.#setChartOptions();
     }
-}
-
-
-if (window.customElements.get("app-chart-explore") == null) {
-    window.customElements.define("app-chart-explore", TimeseriesChartExplore, { extends: "div" });
 }
