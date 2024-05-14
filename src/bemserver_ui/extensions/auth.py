@@ -1,10 +1,4 @@
-"""Sign in required decorator.
-
-At the same time:
-  - verify user's credentials
-  - verify if user's role has grant access
-  - refresh user data in session
-"""
+"""Authentication stuff (sign in required decorator...)"""
 
 import enum
 import functools
@@ -12,8 +6,6 @@ import json
 
 import flask
 import werkzeug.exceptions as wexc
-
-import bemserver_api_client.exceptions as bac
 
 
 class Roles(enum.Enum):
@@ -37,26 +29,8 @@ def signin_required(func=None, roles=None):
             if "auth_data" not in flask.session or "user" not in flask.session:
                 flask.session.clear()
                 raise wexc.Unauthorized
-            try:
-                # Verfify user existence and credentials at the same time.
-                user_resp = flask.g.api_client.users.getone(
-                    flask.session["user"]["data"]["id"],
-                    etag=flask.session["user"]["etag"],
-                )
-            except wexc.NotFound as exc:
-                flask.session.clear()
-                raise wexc.Unauthorized from exc
-            except wexc.Forbidden as exc:
-                # Case of deactivated user while already using app.
-                raise wexc.Unauthorized from exc
-            except bac.BEMServerAPINotModified:
-                # User still exist and not been updated since last check.
-                pass
-            else:
-                # User exists and credentials are valid.
-                flask.session["user"] = user_resp.toJSON()
 
-            # Verify if user's role is sufficient for the requested action.
+            # Verify that user's role is enough to do the requested action.
             if Roles.admin in roles and not flask.session["user"]["data"]["is_admin"]:
                 raise wexc.Forbidden
 
