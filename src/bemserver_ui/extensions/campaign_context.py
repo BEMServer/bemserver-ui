@@ -8,7 +8,6 @@ import functools
 import zoneinfo
 
 import flask
-import werkzeug.exceptions as wexc
 from flask import url_for as flask_url_for
 
 import bemserver_api_client.exceptions as bac
@@ -168,14 +167,10 @@ def init_app(app):
             "es6_signed_user",
             "generate_timezones_es6_module",
         ):
-            try:
-                flask.g.campaign_ctxt = CampaignContext(
-                    flask.request.args.get(FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
-                    or flask.request.args.get(CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
-                )
-            except bac.BEMServerAPIAuthenticationError as exc:
-                # XXX: Case of deactivated user while already using app.
-                raise wexc.Unauthorized from exc
+            flask.g.campaign_ctxt = CampaignContext(
+                flask.request.args.get(FORCED_CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
+                or flask.request.args.get(CAMPAIGN_CONTEXT_QUERY_ARG_NAME)
+            )
 
     # Monkey patch flask.url_for used in jinja templates.
     app.jinja_env.globals["url_for"] = url_for_campaign

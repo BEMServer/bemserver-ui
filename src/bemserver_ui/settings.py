@@ -8,7 +8,8 @@ class Config:
 
     BEMSERVER_API_HOST = ""
     BEMSERVER_API_USE_SSL = True
-    BEMSERVER_API_AUTH_METHOD = "http_basic"
+    # Authentication method choices are: "jwt" (preferred and default) or "http_basic"
+    BEMSERVER_API_AUTH_METHOD = "jwt"
 
     BEMSERVER_UI_PARTNERS_FILE = None
 

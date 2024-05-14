@@ -17,25 +17,36 @@ def init_app(app):
 @blp.route("/signin", methods=["GET", "POST"])
 def signin():
     # Verify if user has already signed in.
-    if "user" in flask.session:
+    if "user" in flask.session and "auth_data" in flask.session:
         return flask.redirect(flask.url_for("main.index"))
 
     # User tries to sign in.
     if flask.request.method == "POST":
-        flask.session["auth_data"] = {
-            "email": flask.request.form["email"],
-            "password": flask.request.form["pwd"],
-        }
+        user_email = flask.request.form["email"]
+        user_pwd = flask.request.form["pwd"]
+        auth_method = flask.current_app.config.get("BEMSERVER_API_AUTH_METHOD", "jwt")
 
         # Credentials check.
-        user_resp = flask.g.api_client.users.getall(
-            email=flask.session["auth_data"]["email"],
-        )
+        if auth_method == "jwt":
+            auth_resp = flask.g.api_client.auth.get_tokens(user_email, user_pwd)
+            if auth_resp.data["status"] == "failure":
+                flask.abort(401)
+            auth.update_bearer_tokens(
+                auth_resp.data["access_token"], auth_resp.data["refresh_token"]
+            )
+        elif auth_method == "http_basic":
+            # In this case, just set auth data in session.
+            # Credentials check will really be done in next api request (get user...).
+            flask.session["auth_data"] = {
+                "email": user_email,
+                "password": user_pwd,
+            }
+        user_resp = flask.g.api_client.users.getall(email=user_email)
 
         # At this step, credentials are valid.
         #  (else flask's error_handlers would have done something)
-        # XXX: Little trick to "adapt" response data.
         user_json = user_resp.toJSON()
+        # XXX: Ugly trick here... not really a problem as email is unique in DB.
         user_json["data"] = user_json["data"][0]
         flask.session["user"] = user_json
         flask.flash(f"Welcome back {user_json['data']['name']}!", "message", delay=5)

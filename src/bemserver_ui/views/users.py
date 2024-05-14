@@ -100,10 +100,14 @@ def edit(id):
         )
         # If self edit password, update session.
         if flask.session["user"]["data"]["id"] == id:
-            flask.session["auth_data"] = {
-                "email": payload["email"],
-                "password": payload["password"],
-            }
+            if (
+                flask.current_app.config.get("BEMSERVER_API_AUTH_METHOD")
+                == "http_basic"
+            ):
+                flask.session["auth_data"] = {
+                    "email": payload["email"],
+                    "password": payload["password"],
+                }
             flask.session["user"] = user_resp.toJSON()
 
         flask.flash("User account updated!", "success", delay=5)
