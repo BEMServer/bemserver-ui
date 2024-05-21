@@ -8,6 +8,12 @@ Features:
 
 - Add profiling feature
 
+Other changes:
+
+- Require bemserver-api-client >=0.20.3 and <0.21.0
+- Require bemserver-api 0.23.0
+- Require bemserver-core 0.17.1
+
 0.6.1 (2023-07-06)
 ++++++++++++++++++
 
