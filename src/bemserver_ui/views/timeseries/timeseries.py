@@ -284,7 +284,7 @@ def create_property(id):
     flask.g.api_client.timeseries_property_data.create(payload)
     flask.flash("Attribute value defined!", "success", delay=5)
 
-    return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
+    return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="attributes"))
 
 
 @blp.route("/<int:id>/property/<int:property_id>/delete", methods=["POST"])
@@ -295,7 +295,7 @@ def delete_property(id, property_id):
         property_id, etag=flask.request.form[f"delPropertyEtag-{property_id}"]
     )
     flask.flash("Attribute value deleted!", "success", delay=5)
-    return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="properties"))
+    return flask.redirect(flask.url_for("timeseries.edit", id=id, tab="attributes"))
 
 
 @blp.route("/manage_structural_elements")
