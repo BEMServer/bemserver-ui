@@ -44,11 +44,11 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="latitude">Latitude <span class="fst-italic text-muted">[°]</span></label>
-                                <input type="number" form="editForm" class="form-control hide-arrows" id="latitude" name="latitude" min="-90" max="90" step="any" value="{{ structural_element.latitude }}">
+                                <input type="number" form="editForm" class="form-control input-number-hide-arrows" id="latitude" name="latitude" min="-90" max="90" step="any" value="{{ structural_element.latitude }}">
                             </div>
                             <div class="col">
                                 <label class="form-label" for="longitude">Longitude <span class="fst-italic text-muted">[°]</span></label>
-                                <input type="number" form="editForm" class="form-control hide-arrows" id="longitude" name="longitude" min="-180" max="180" step="any" value="{{ structural_element.longitude }}">
+                                <input type="number" form="editForm" class="form-control input-number-hide-arrows" id="longitude" name="longitude" min="-180" max="180" step="any" value="{{ structural_element.longitude }}">
                             </div>
                         </div>
                         {% endif %}
