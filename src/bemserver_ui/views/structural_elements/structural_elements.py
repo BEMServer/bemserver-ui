@@ -58,7 +58,7 @@ def create(type):
                 "structural_elements.edit",
                 type=type,
                 id=ret_resp.data["id"],
-                tab="properties",
+                tab="attributes",
             )
         )
 
@@ -220,7 +220,7 @@ def create_property(type, id):
     flask.flash("Attribute defined!", "success", delay=5)
 
     return flask.redirect(
-        flask.url_for("structural_elements.edit", type=type, id=id, tab="properties")
+        flask.url_for("structural_elements.edit", type=type, id=id, tab="attributes")
     )
 
 
@@ -236,7 +236,7 @@ def delete_property(type, id, property_id):
     )
     flask.flash("Attribute deleted!", "success", delay=5)
     return flask.redirect(
-        flask.url_for("structural_elements.edit", id=id, type=type, tab="properties")
+        flask.url_for("structural_elements.edit", id=id, type=type, tab="attributes")
     )
 
 

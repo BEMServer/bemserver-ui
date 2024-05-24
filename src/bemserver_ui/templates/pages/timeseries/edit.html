@@ -8,7 +8,7 @@
     {% set tab = "general" %}
 {% endif %}
 
-{% set url_create_property = url_for('timeseries.properties.create', back=url_for('timeseries.edit', id=timeseries.id, tab='properties')|urlencode) %}
+{% set url_create_property = url_for('timeseries.properties.create', back=url_for('timeseries.edit', id=timeseries.id, tab='attributes')|urlencode) %}
 
 {% block main_toolbar %}
 {{ super() -}}
@@ -40,7 +40,7 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'attributes' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'attributes' %}true{% else %}false{% endif %}">Attributes <span class="badge bg-secondary">{{ properties|length }}</span></button>
+                    <button class="nav-link{% if tab == 'attributes' %} active{% endif %}" id="attributes-tab" data-bs-toggle="tab" data-bs-target="#attributes-tabcontent" type="button" role="tab" aria-controls="attributes-tabcontent" aria-selected="{% if tab == 'attributes' %}true{% else %}false{% endif %}">Attributes <span class="badge bg-secondary">{{ properties|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
@@ -61,7 +61,7 @@
                         </div>
                     </fieldset>
                 </div>
-                <div class="tab-pane fade{% if tab == 'attributes' %} show active{% endif %} p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab">
+                <div class="tab-pane fade{% if tab == 'attributes' %} show active{% endif %} p-3" id="attributes-tabcontent" role="tabpanel" aria-labelledby="attributes-tab">
                     <fieldset>
                         <legend class="invisible d-none">Timeseries attributes</legend>
                         {% for property_id, property_data in properties.items() %}
@@ -155,78 +155,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        let availablePropertySelectElmt = document.getElementById("availableProperty");
-        let availablePropertyInputContainerElmt = document.getElementById("availablePropertyInputContainer");
-        let availablePropertyInputElmt = document.getElementById("availablePropertyValue");
-        let availablePropertyValueTypeElmt = document.getElementById("availablePropertyValueType");
-        let availablePropertyDescriptionElmt = document.getElementById("availablePropertyDescription");
-        let addPropertyModalElmt = document.getElementById("addProperty");
-
-        function updatePropertyDescription() {
-            if (availablePropertySelectElmt.selectedIndex != -1) {
-                let selectedProperty = availablePropertySelectElmt.selectedOptions[0];
-                let propertyType = selectedProperty.getAttribute("data-property-type", "string");
-
-                availablePropertyInputElmt.removeAttribute("readonly");
-                availablePropertyInputElmt.removeAttribute("maxlength");
-                availablePropertyInputElmt.removeAttribute("required");
-                availablePropertyInputElmt.removeAttribute("step");
-                availablePropertyInputElmt.removeAttribute("role");
-                availablePropertyInputElmt.classList.replace("form-check-input", "form-control");
-                availablePropertyInputElmt.parentElement.className = "";
-
-                availablePropertyValueTypeElmt.value = propertyType;
-
-                switch (propertyType) {
-                    case "string":
-                        availablePropertyInputElmt.type = "text";
-                        availablePropertyInputElmt.setAttribute("maxlength", 100);
-                        availablePropertyInputElmt.setAttribute("required", true);
-                        break;
-                    case "integer":
-                        availablePropertyInputElmt.type = "number";
-                        availablePropertyInputElmt.setAttribute("required", true);
-                        break;
-                    case "float":
-                        availablePropertyInputElmt.type = "number";
-                        availablePropertyInputElmt.setAttribute("step", 0.01);
-                        availablePropertyInputElmt.setAttribute("required", true);
-                        break;
-                    case "boolean":
-                        availablePropertyInputElmt.classList.replace("form-control", "form-check-input");
-                        availablePropertyInputElmt.type = "checkbox";
-                        availablePropertyInputElmt.setAttribute("role", "switch");
-                        availablePropertyInputElmt.parentElement.classList.add("form-check", "form-switch");
-                        break;
-                }
-
-                availablePropertyInputElmt.focus();
-
-                availablePropertyDescriptionElmt.innerHTML = [selectedProperty.getAttribute("data-property-description"), propertyType].filter(Boolean).join(", ");
-            }
-            else {
-                availablePropertyInputElmt.setAttribute("readonly", true);
-                availablePropertyDescriptionElmt.innerHTML = "";
-            }
-        }
-
-        availablePropertySelectElmt.addEventListener("change", () => {
-            updatePropertyDescription();
-        });
-
-        addPropertyModalElmt.addEventListener("shown.bs.modal", () => {
-            availablePropertyInputElmt.focus();
-        });
-
-        if (availablePropertySelectElmt.selectedIndex != -1) {
-            updatePropertyDescription();
-        }
-
-    });
-</script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/edit.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

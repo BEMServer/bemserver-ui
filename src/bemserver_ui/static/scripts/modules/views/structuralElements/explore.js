@@ -51,7 +51,7 @@ export class StructuralElementsExploreView {
     #selectedItemsPerTab = {};
     #renderPerTab = {
         "general-tab": this.#renderGeneral.bind(this),
-        "properties-tab": this.#renderProperties.bind(this),
+        "attributes-tab": this.#renderProperties.bind(this),
         "timeseries-tab": this.#renderTimeseries.bind(this),
         "events-tab": this.#renderEvents.bind(this),
     }
@@ -79,7 +79,7 @@ export class StructuralElementsExploreView {
         this.#tabSitesElmts = [].slice.call(document.querySelectorAll("#tabSites button[data-bs-toggle='tab']"));
         this.#tabDataItemElmts = [].slice.call(document.querySelectorAll("#tabData button[data-bs-toggle='tab']"));
         this.#generalTabContentElmt = document.getElementById("general-tabcontent");
-        this.#propertiesTabContentElmt = document.getElementById("properties-tabcontent");
+        this.#propertiesTabContentElmt = document.getElementById("attributes-tabcontent");
 
         this.#alertInfoDataElmt = document.getElementById("alertInfoData");
         this.#selectedStructutalElementInfoContainerElmt = document.getElementById("selectedStructutalElementInfoContainer");
@@ -383,7 +383,7 @@ export class StructuralElementsExploreView {
         mainContainerElmt.appendChild(propContainerElmt);
 
         if (app.signedUser.is_admin) {
-            let editBtnElmt = this.#createEditBtnElement(data.type, id, "properties");
+            let editBtnElmt = this.#createEditBtnElement(data.type, id, "attributes");
             if (editBtnElmt != null) {
                 mainContainerElmt.appendChild(editBtnElmt);
             }
@@ -433,7 +433,7 @@ export class StructuralElementsExploreView {
             }
         }
         else {
-            propContainerElmt.appendChild(this.#createNoDataElement("No properties"));
+            propContainerElmt.appendChild(this.#createNoDataElement("No attributes"));
         }
     }
 
