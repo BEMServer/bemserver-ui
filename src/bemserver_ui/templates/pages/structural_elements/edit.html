@@ -7,7 +7,7 @@
     {% set tab = "general" %}
 {% endif %}
 
-{% set url_create_property = url_for('structural_elements.properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='properties')|urlencode) %}
+{% set url_create_property = url_for('structural_elements.properties.create', type=type, back=url_for('structural_elements.edit', type=type, id=structural_element.id, tab='attributes')|urlencode) %}
 
 {% block main_toolbar %}
 {{ super() -}}
@@ -29,7 +29,7 @@
                     <button class="nav-link{% if tab == 'general' %} active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-tabcontent" type="button" role="tab" aria-controls="general-tabcontent" aria-selected="{% if tab == 'general' %}true{% else %}false{% endif %}">General</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link{% if tab == 'attributes' %} active{% endif %}" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties-tabcontent" type="button" role="tab" aria-controls="properties-tabcontent" aria-selected="{% if tab == 'attributes' %}true{% else %}false{% endif %}">Attributes <span class="badge bg-secondary">{{ properties|length }}</span></button>
+                    <button class="nav-link{% if tab == 'attributes' %} active{% endif %}" id="attributes-tab" data-bs-toggle="tab" data-bs-target="#attributes-tabcontent" type="button" role="tab" aria-controls="attributes-tabcontent" aria-selected="{% if tab == 'attributes' %}true{% else %}false{% endif %}">Attributes <span class="badge bg-secondary">{{ properties|length }}</span></button>
                 </li>
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white mb-3">
@@ -62,7 +62,7 @@
                         </div>
                     </fieldset>
                 </div>
-                <div class="tab-pane fade{% if tab == 'attributes' %} show active{% endif %} p-3" id="properties-tabcontent" role="tabpanel" aria-labelledby="properties-tab">
+                <div class="tab-pane fade{% if tab == 'attributes' %} show active{% endif %} p-3" id="attributes-tabcontent" role="tabpanel" aria-labelledby="attributes-tab">
                     <fieldset>
                         <legend class="invisible d-none">{{ type|capitalize }} attributes</legend>
                         {% for property_id, property_data in properties.items() %}
