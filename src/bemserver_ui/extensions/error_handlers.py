@@ -25,9 +25,10 @@ def _is_from_internal_api():
 
 
 def _handle_for_internal_api(status_code, message, validation_errors=None):
-    payload = {"message": message}
-    if validation_errors is not None:
-        payload["_validation_errors"] = validation_errors
+    payload = {
+        "message": message,
+        "_validation_errors": validation_errors,
+    }
     return flask.jsonify(payload), status_code
 
 
@@ -132,14 +133,15 @@ def _handle_422(exc, message=None, errors=None):
         errors = exc.errors if hasattr(exc, "errors") else {}
 
         if _is_from_internal_api():
-            return _handle_for_internal_api(http_status_code, message, errors)
+            return _handle_for_internal_api(
+                http_status_code, message, validation_errors=errors
+            )
 
         # Special case for sign in page (to clear session, especially auth_data).
         if flask.request.endpoint == "auth.signin":
             flask.session.clear()
 
-        flask.session["_validation_errors"] = errors
-        flask.flash(message, "error")
+        flask.flash(message, "error", validation_errors=errors)
         return flask.redirect(_get_back_location())
 
 
