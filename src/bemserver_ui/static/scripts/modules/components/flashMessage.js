@@ -1,4 +1,5 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { isDict } from "/static/scripts/modules/tools/dict.js";
 
 
 const FLASH_MESSAGE_DATA = {
@@ -41,6 +42,7 @@ export class FlashMessage extends HTMLDivElement {
     #message = "";
     #delay = null;
     #isDismissible = true;
+    #validationErrors = null;
 
     #progressBarElmt = null;
 
@@ -67,6 +69,9 @@ export class FlashMessage extends HTMLDivElement {
         }
         if (this.hasAttribute("dismiss")) {
             this.#isDismissible = Parser.parseBoolOrDefault(this.getAttribute("dismiss"), this.#isDismissible);
+        }
+        if (this.hasAttribute("validation-errors")) {
+            this.#validationErrors = JSON.parse(this.getAttribute("validation-errors"));
         }
     }
 
@@ -138,6 +143,10 @@ export class FlashMessage extends HTMLDivElement {
         textElmt.innerHTML = this.#message;
         messageContentElmt.appendChild(textElmt);
 
+        if (this.#validationErrors) {
+            messageBodyContainerElmt.appendChild(FlashMessage.createValidationErrorsElement(this.#validationErrors));
+        }
+
         if (this.#isDismissible) {
             this.classList.add("alert-dismissible");
 
@@ -149,6 +158,67 @@ export class FlashMessage extends HTMLDivElement {
         }
 
         this.#initEventListeners();
+    }
+
+    static createValidationErrorsElement(validationErrors) {
+        let containerElmt = document.createElement("div");
+
+        if (validationErrors._general != null && typeof(validationErrors._general) === "string") {
+            validationErrors._general = [validationErrors._general];
+        }
+        if (Array.isArray(validationErrors._general)) {
+            for (let generalError of validationErrors._general) {
+                let generalErrorElmt = document.createElement("p");
+                generalErrorElmt.classList.add("fst-italic", "mb-0");
+                generalErrorElmt.innerText = generalError;
+                containerElmt.appendChild(generalErrorElmt);
+            }
+            delete validationErrors._general;
+        }
+
+        if (Object.keys(validationErrors).length > 0) {
+            let validationErrorsContainerElmt = document.createElement("dl");
+            validationErrorsContainerElmt.classList.add("row", "ms-2", "mb-0");
+            containerElmt.appendChild(validationErrorsContainerElmt);
+
+            for (let [index, [fieldName, fieldErrors]] of Object.entries(Object.entries(validationErrors))) {
+                let isLastItem = (index == Object.keys(validationErrors).length - 1);
+
+                let fieldNameElmt = document.createElement("dt");
+                fieldNameElmt.classList.add("col-4");
+                fieldNameElmt.innerText = fieldName;
+                validationErrorsContainerElmt.appendChild(fieldNameElmt);
+
+                let fieldErrorsElmt = document.createElement("dd");
+                fieldErrorsElmt.classList.add("col-8");
+                if (isLastItem) {
+                    fieldErrorsElmt.classList.add("mb-0");
+                }
+                validationErrorsContainerElmt.appendChild(fieldErrorsElmt);
+
+                let _fieldErrors = fieldErrors;
+                if (isDict(fieldErrors)) {
+                    _fieldErrors = [];
+                    for (let fieldErrs of Object.values(fieldErrors)) {
+                        if (Array.isArray(fieldErrs)) {
+                            _fieldErrors.push(...fieldErrs);
+                        }
+                        else {
+                            _fieldErrors.push(fieldErrs);
+                        }
+                    }
+                }
+
+                for (let fieldError of _fieldErrors) {
+                    let fieldErrorElmt = document.createElement("p");
+                    fieldErrorElmt.classList.add("fst-italic", "mb-0");
+                    fieldErrorElmt.innerText = fieldError;
+                    fieldErrorsElmt.appendChild(fieldErrorElmt);
+                }
+            }
+        }
+
+        return containerElmt;
     }
 }
 

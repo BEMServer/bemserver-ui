@@ -93,14 +93,12 @@ export class NotificationSetupView {
                         this.#config[this.#editedEventCategoryInputElmt.value] = eventCategoryConfigData;
 
                         this.#refreshConf(eventCategoryConfigData.category_id);
-                    },
-                    (error) => {
-                        app.flashMessage(error.toString(), "error");
-                    },
-                    () => {
                         this.#editConfigModal.hide();
 
                         app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success", 5);
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }
@@ -120,14 +118,12 @@ export class NotificationSetupView {
                         this.#config[this.#editedEventCategoryInputElmt.value] = eventCategoryConfigData;
 
                         this.#refreshConf(eventCategoryConfigData.category_id);
-                    },
-                    (error) => {
-                        app.flashMessage(error.toString(), "error");
-                    },
-                    () => {
                         this.#editConfigModal.hide();
 
                         app.flashMessage(`${this.#editedEventCategoryLabelElmt.innerText} notification setup saved!`, "success", 5);
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
                     },
                 );
             }

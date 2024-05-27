@@ -1,8 +1,8 @@
 <div id="messageContainer" class="position-fixed top-0 start-50 translate-middle-x overflow-auto p-3" style="z-index: 1031; max-height: 100%;">
 {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
-        {% for category, message, delay, is_dismissible in messages %}
-    <div is="app-flash-message" category="{{ category }}" message="{{ message }}"{% if delay is defined and delay is not none %} delay="{{ delay }}"{% endif %}{% if is_dismissible is defined and is_dismissible is not none %} dismiss="{{ is_dismissible | lower }}"{% endif %}></div>
+        {% for category, message, delay, is_dismissible, validation_errors in messages %}
+    <div is="app-flash-message" category="{{ category }}" message="{{ message }}"{% if delay is defined and delay is not none %} delay="{{ delay }}"{% endif %}{% if is_dismissible is defined and is_dismissible is not none %} dismiss="{{ is_dismissible | lower }}"{% endif %}{% if validation_errors is defined and validation_errors is not none %} validation-errors="{{ validation_errors }}"{% endif %}></div>
         {% endfor %}
     {% endif %}
 {% endwith %}

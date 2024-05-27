@@ -1,19 +1,31 @@
 """Monkey patch flask helpers such as flash and get_flashed_messages."""
 
+import json
+
 import flask
 from flask.globals import request_ctx
 
 
-def _flash(message, category="message", *, delay=None, is_dismissible=True):
+def _flash(
+    message,
+    category="message",
+    *,
+    delay=None,
+    is_dismissible=True,
+    validation_errors=None,
+):
     """As the original implementation, flashes a message to the next request.
 
     .. *New* parameters:
     :param delay: time in seconds after which the message will be closed.
         ``None`` produces messages with no timer (and allows manual close).
     :param is_dismissible: ``False`` if message must not be closed manually.
+    :param validation_errors: dict that contains details on validation errors
     """
+    validation_errors = json.dumps(validation_errors)
+
     flashes = flask.session.get("_flashes", [])
-    flashes.append((category, message, delay, is_dismissible))
+    flashes.append((category, message, delay, is_dismissible, validation_errors))
     flask.session["_flashes"] = flashes
     app = flask.current_app._get_current_object()
     flask.message_flashed.send(
@@ -21,6 +33,7 @@ def _flash(message, category="message", *, delay=None, is_dismissible=True):
         _async_wrapper=app.ensure_sync,
         message=message,
         category=category,
+        validation_errors=validation_errors,
         delay=delay,
         is_dismissible=is_dismissible,
     )
