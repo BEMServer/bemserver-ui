@@ -102,7 +102,7 @@ def edit(id):
 
     # Get event campaign scope name.
     campaign_scope_resp = flask.g.api_client.campaign_scopes.getone(
-        id=flask.g.campaign_ctxt.id
+        id=event_data["campaign_scope_id"]
     )
     event_data["campaign_scope_name"] = campaign_scope_resp.data["name"]
 
