@@ -329,6 +329,7 @@ export class EventEditView {
             this.#tsUnselectAllBtnElmt.removeAttribute("disabled");
             this.#tsUnselectAllBtnElmt.classList.remove("d-none", "invisible");
             this.#tsSelectAllBtnElmt.classList.remove("rounded-1");
+            this.#tsSelectAllBtnElmt.classList.remove("rounded-start-0");
 
             if (nbSelectedTimeseriesLinks == Math.min(this.#tsPaginationElmt.totalItems, this.#tsPageSizeElmt.current)) {
                 this.#tsSelectAllBtnElmt.setAttribute("disabled", true)
@@ -345,6 +346,7 @@ export class EventEditView {
             this.#tsUnselectAllBtnElmt.classList.add("d-none", "invisible");
             this.#tsSelectAllBtnElmt.classList.remove("d-none", "invisible");
             this.#tsSelectAllBtnElmt.classList.add("rounded-1");
+            this.#tsSelectAllBtnElmt.classList.add("rounded-start-0");
         }
 
         if (this.#tsPaginationElmt.totalItems > 0) {
@@ -376,7 +378,8 @@ export class EventEditView {
             this.#locUnlinkSelectedBtnElmts[structElmtType].removeAttribute("disabled");
             this.#locUnselectAllBtnElmts[structElmtType].removeAttribute("disabled");
             this.#locUnselectAllBtnElmts[structElmtType].classList.remove("d-none", "invisible");
-            this.#locSelectAllBtnElmts[structElmtType].classList.remove("rounded-end");
+            this.#locSelectAllBtnElmts[structElmtType].classList.remove("rounded-1");
+            this.#locSelectAllBtnElmts[structElmtType].classList.remove("rounded-start-0");
 
             if (nbSelectedItems == Math.min(this.#locPaginationElmts[structElmtType].totalItems, this.#locPageSizeElmts[structElmtType].current)) {
                 this.#locSelectAllBtnElmts[structElmtType].setAttribute("disabled", true)
@@ -392,7 +395,8 @@ export class EventEditView {
             this.#locUnselectAllBtnElmts[structElmtType].setAttribute("disabled", true);
             this.#locUnselectAllBtnElmts[structElmtType].classList.add("d-none", "invisible");
             this.#locSelectAllBtnElmts[structElmtType].classList.remove("d-none", "invisible");
-            this.#locSelectAllBtnElmts[structElmtType].classList.add("rounded-end");
+            this.#locSelectAllBtnElmts[structElmtType].classList.add("rounded-1");
+            this.#locSelectAllBtnElmts[structElmtType].classList.add("rounded-start-0");
         }
 
         if (this.#locPaginationElmts[structElmtType].totalItems > 0) {

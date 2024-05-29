@@ -155,6 +155,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/edit.js') }}" defer></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/edit.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

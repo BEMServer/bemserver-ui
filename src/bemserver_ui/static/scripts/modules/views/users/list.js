@@ -1,7 +1,7 @@
 import "/static/scripts/modules/components/itemsCount.js";
 
 
-export class UsersListView {
+class UsersListView {
 
     #formFiltersElmt = null;
     #sortInputElmt = null;
@@ -36,5 +36,12 @@ export class UsersListView {
     }
 
     mount() {
+
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new UsersListView();
+    view.mount();
+});

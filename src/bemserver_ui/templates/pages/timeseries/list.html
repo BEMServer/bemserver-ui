@@ -215,7 +215,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}";
 
     document.addEventListener("DOMContentLoaded", () => {

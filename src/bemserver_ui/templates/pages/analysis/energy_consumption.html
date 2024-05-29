@@ -74,7 +74,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { EnergyConsumptionExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/energyConsumption.js') }}";
 
     document.addEventListener("DOMContentLoaded", () => {

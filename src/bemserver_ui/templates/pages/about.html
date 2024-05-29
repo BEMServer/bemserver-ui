@@ -3,6 +3,15 @@
 
 {% set title = "About" %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+{% if partners is defined %}
+<link nonce="{{ csp_nonce() }}" rel="stylesheet" href="{{ url_for('static', filename='styles/partners.css') }}">
+{% endif %}
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">

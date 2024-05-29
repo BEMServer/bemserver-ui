@@ -51,7 +51,7 @@
     </div>
     <div class="row">
         <div class="col">
-            <div id="chartContainer" class="border border-1 rounded bg-white p-2" style="height: 600px;"></div>
+            <div id="chartContainer" class="border border-1 rounded bg-white p-2 app-chart-container"></div>
         </div>
     </div>
     <div class="offcanvas offcanvas-end bg-light border-0 rounded-start shadow app-chart-settings-panel" tabindex="-1" id="chartSettingsPanel" aria-labelledby="chartSettingsPanelLabel">
@@ -150,6 +150,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/data/explore.js') }}" defer></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/data/explore.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

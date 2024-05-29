@@ -57,41 +57,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
-    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        let tzPickerElmt = document.getElementById("timezonePicker");
-        let startDatetimePickerElmt = document.getElementById("start_datetime");
-        let endDatetimePickerElmt = document.getElementById("end_datetime");
-
-        startDatetimePickerElmt.tzName = tzPickerElmt.tzName;
-        endDatetimePickerElmt.tzName = tzPickerElmt.tzName;
-
-        tzPickerElmt.addEventListener("tzChange", (event) => {
-            event.preventDefault();
-
-            startDatetimePickerElmt.tzName = event.detail.tzName;
-            endDatetimePickerElmt.tzName = event.detail.tzName;
-        });
-
-        startDatetimePickerElmt.addEventListener("dateChange", (event) => {
-            event.preventDefault();
-
-            endDatetimePickerElmt.dateMin = startDatetimePickerElmt.date;
-        });
-
-        endDatetimePickerElmt.addEventListener("dateChange", (event) => {
-            event.preventDefault();
-
-            startDatetimePickerElmt.dateMax = endDatetimePickerElmt.date;
-        });
-
-    });
-</script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/views/campaigns/create.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

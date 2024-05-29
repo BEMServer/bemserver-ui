@@ -2,6 +2,17 @@
 
 {% set user_guide_url = config.get("BEMSERVER_UI_USER_GUIDE_URL") %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<style nonce="{{ csp_nonce() }}">
+    #bs-logo {
+        height: 120px;
+    }
+</style>
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -10,7 +21,7 @@
             <div class="card border-light p-2">
                 <div class="row align-items-end g-2">
                     <div class="col-auto d-none d-sm-block align-self-center">
-                        <img class="p-2" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer" style="height: 120px;">
+                        <img id="bs-logo" class="p-2" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
                     </div>
                     <div class="col">
                         <div class="card-body py-1">

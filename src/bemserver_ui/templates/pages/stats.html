@@ -1,5 +1,16 @@
 {% extends "pages/base.html" %}
 
+{% block head_styles %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<style nonce="{{ csp_nonce() }}">
+    .card-stretched-link {
+        transform: rotate(0);
+    }
+</style>
+{% endfilter %}
+{% endblock head_styles %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -20,17 +31,17 @@
                 </div>
                 <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
                     {% if signed_user.is_admin %}
-                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                    <div class="d-flex flex-column justify-content-center border rounded p-2 card-stretched-link">
                         <span class="badge bg-primary rounded-pill mx-auto">{{ campaign_scopes_count }}</span>
                         <a class="stretched-link text-decoration-none" href="{{ url_for('campaign_scopes.list') }}" title="View campaign scopes">scopes</a>
                     </div>
                     {% endif %}
-                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                    <div class="d-flex flex-column justify-content-center border rounded p-2 card-stretched-link">
                         <span class="badge bg-primary rounded-pill mx-auto">{{ ts_count }}</span>
                         <a class="stretched-link text-decoration-none" href="{{ url_for('timeseries.list') }}" title="View timeseries">timeseries</a>
                     </div>
                     {% for struct_elmt_type in structural_element_types %}
-                    <div class="d-flex flex-column justify-content-center border rounded p-2" style="transform: rotate(0);">
+                    <div class="d-flex flex-column justify-content-center border rounded p-2 card-stretched-link">
                         <span class="badge bg-primary rounded-pill mx-auto">{{ structural_element_count[struct_elmt_type] }}</span>
                         <a class="stretched-link text-decoration-none" href="{{ url_for('structural_elements.explore', tab='sites' if struct_elmt_type != 'zone' else 'zones') }}" title="Explore sites">{{ struct_elmt_type }}s</a>
                     </div>
@@ -102,6 +113,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+<script nonce="{{ csp_nonce() }}" src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 {% endfilter %}
 {% endblock body_scripts %}

@@ -106,7 +106,7 @@
                         </div>
                         <div class="btn-group btn-group-sm" role="group" aria-label="Unlink timeseries">
                             <button id="ts-unlinkSelectedBtn" type="button" class="btn btn-outline-danger text-nowrap hstack gap-1" disabled title="Unlink selected timeseries"><i class="bi bi-trash"></i><span class="d-none d-md-block">Unlink</span><span>(<span id="ts-unlinkSelectedCount">0</span>)</span></button>
-                            <button id="ts-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;" title="Select all timeseries in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
+                            <button id="ts-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Select all timeseries in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
                             <button id="ts-unselectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Unselect all timeseries in page"><i class="bi bi-toggle-off"></i><span class="d-none d-md-block">Unselect all</span></button>
                         </div>
                     </div>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="btn-group btn-group-sm" role="group" aria-label="Unlink {{ struct_elmt_type }}s">
                             <button id="{{ struct_elmt_type }}s-unlinkSelectedBtn" type="button" class="btn btn-outline-danger text-nowrap hstack gap-1" disabled title="Unlink selected {{ struct_elmt_type }}s"><i class="bi bi-trash"></i><span class="d-none d-md-block">Unlink</span><span>(<span id="{{ struct_elmt_type }}s-unlinkSelectedCount">0</span>)</span></button>
-                            <button id="{{ struct_elmt_type }}s-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;" title="Select all {{ struct_elmt_type }}s in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
+                            <button id="{{ struct_elmt_type }}s-selectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Select all {{ struct_elmt_type }}s in page"><i class="bi bi-toggle-on"></i><span class="d-none d-md-block">Select all</span></button>
                             <button id="{{ struct_elmt_type }}s-unselectAllBtn" type="button" class="btn btn-outline-secondary text-nowrap hstack gap-1" title="Unselect all {{ struct_elmt_type }}s in page"><i class="bi bi-toggle-off"></i><span class="d-none d-md-block">Unselect all</span></button>
                         </div>
                     </div>
@@ -188,7 +188,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { EventEditView } from "{{ url_for('static', filename='scripts/modules/views/events/edit.js') }}";
 
     document.addEventListener("DOMContentLoaded", () => {

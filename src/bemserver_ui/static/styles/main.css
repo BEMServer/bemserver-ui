@@ -37,3 +37,7 @@ input[type=number].input-number-hide-arrows::-webkit-inner-spin-button {
 .app-flash-message .progress {
     height: 2px !important;
 }
+
+#messageContainer {
+    z-index: 1031;
+}

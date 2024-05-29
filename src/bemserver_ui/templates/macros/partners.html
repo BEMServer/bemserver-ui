@@ -3,28 +3,23 @@
     {% for partner_name, partner_data in partner_data.items() %}
         {% set has_url = (partner_data.url is defined and partner_data.url is not none) %}
         {% set has_logo = (partner_data.logo is defined and partner_data.logo is not none and partner_data.logo.src is defined and partner_data.logo.src is not none) %}
-        {% set has_logo_style = (has_logo and partner_data.logo.style is defined and partner_data.logo.style is not none) %}
         {% set has_description = (partner_data.text is defined and partner_data.text is not none) %}
-        {% set img_style = "height: 50px;" %}
-        {% if partner_data.logo.style is defined and partner_data.logo.style is not none %}
-            {% set img_style = partner_data.logo.style %}
-        {% endif %}
 <div class="d-inline-flex align-items-center gap-2">
     {% if has_url %}
     <a href="{{ partner_data.url }}" target="_blank" title="{{ partner_name | safe }}">
         {% if has_logo %}
-        <img style="{{ partner_data.logo.style if has_logo_style else 'height: 50px;' }}" src="{{ partner_data.logo.src }}" alt="{{ partner_name | safe }}">
+        <img class="partner-logo" src="{{ partner_data.logo.src }}" alt="{{ partner_name | safe }}">
         {% else %}
         {{ partner_name | safe }}
         {% endif %}
     </a>
     {% elif has_logo %}
-    <img style="{{ partner_data.logo.style if has_logo_style else 'height: 50px;' }}" src="{{ partner_data.logo.src }}" alt="{{ partner_name | safe }}">
+    <img class="partner-logo" src="{{ partner_data.logo.src }}" alt="{{ partner_name | safe }}">
     {% else %}
     {{ partner_name | safe }}
     {% endif %}
     {% if has_description %}
-    <p class="text-muted mb-0" style="min-width: 200px;">{{ partner_data.text | safe }}</p>
+    <p class="text-muted mb-0 partner-text">{{ partner_data.text | safe }}</p>
     {% endif %}
 </div>
     {% endfor %}

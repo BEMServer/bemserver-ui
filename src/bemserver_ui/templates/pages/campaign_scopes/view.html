@@ -94,7 +94,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { CampaignScopeManageGroupsView } from "{{ url_for('static', filename='scripts/modules/views/campaignScopes/manageGroups.js') }}";
 
     document.addEventListener("DOMContentLoaded", () => {

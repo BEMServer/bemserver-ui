@@ -55,13 +55,13 @@
     </div>
 </div>
 <div class="modal" id="notifInfoModal" data-bs-keyboard="true" tabindex="-1" aria-labelledby="notifInfoModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="height: 90%;">
-        <div class="modal-content" style="height: 90%;">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title font-monospace" id="notifInfoModalTitle">Notification information</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="height: calc(100% - 135px);">
+            <div class="modal-body">
                 <div class="row mb-3" id="notifInfoContainer"></div>
                 <div class="row mb-3">
                     <div class="col">
@@ -144,7 +144,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { NotificationExploreView } from "{{ url_for('static', filename='scripts/modules/views/notifications/explore.js') }}";
 
 

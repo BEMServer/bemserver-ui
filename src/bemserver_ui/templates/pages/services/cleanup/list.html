@@ -56,7 +56,7 @@
                 {% elif x.id is not none %}
                     {% set manage_url = url_for("services.cleanup.cleanup_state", id=x.id) %}
                 {% endif %}
-                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if is_campaign_selected %} app-campaign-selected{% endif %}" href="{{ manage_url }}" title="Manage campaign cleanup">
+                <a class="list-group-item list-group-item-action d-flex gap-3 py-3{% if is_campaign_selected %} app-campaign-selected border-4 border-top-0 border-bottom-0 border-end-0{% endif %}" href="{{ manage_url }}" title="Manage campaign cleanup">
                     <i class="bi bi-puzzle"></i>
                     <div class="d-sm-flex d-grid justify-content-between gap-2 w-100">
                         <div class="d-grid gap-2">
@@ -87,7 +87,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='scripts/modules/components/campaigns/statusInfo.js') }}"></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/components/campaigns/statusInfo.js') }}"></script>
 {% endfilter %}
 {% endblock body_scripts %}

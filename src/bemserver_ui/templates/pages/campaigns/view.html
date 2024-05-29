@@ -140,6 +140,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}"></script>
 {% endfilter %}
 {% endblock body_scripts %}

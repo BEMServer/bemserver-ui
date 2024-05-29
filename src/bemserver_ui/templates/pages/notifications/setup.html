@@ -24,9 +24,9 @@
                 <sup class="ms-2"><a class="link-secondary" title="Help" role="button" data-bs-toggle="collapse" data-bs-target="#addEventCategoryHelpCollapsePanel" aria-expanded="false" aria-controls="addEventCategoryHelpCollapsePanel"><i class="bi bi-question-diamond"></i></a></sup>
             </div>
         </div>
-        <div class="col">
+        <div class="col-lg-auto">
             <div class="collapse" id="addEventCategoryHelpCollapsePanel">
-                <div class="alert alert-info mb-0 pb-0" role="alert" style="max-width: 700px;">
+                <div class="alert alert-info mb-0 me-auto pb-0" role="alert">
                     <span class="fw-bold"><i class="bi bi-question-diamond"></i> Help</span>
                     <p>You can <span class="fw-bold">add an event category</span> to select the <span class="fw-bold">notification level</span> wanted.</p>
                 </div>
@@ -87,7 +87,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import "{{ url_for('static', filename='scripts/modules/components/itemsCount.js') }}";
     import { NotificationSetupView } from "{{ url_for('static', filename='scripts/modules/views/notifications/setup.js') }}";
 

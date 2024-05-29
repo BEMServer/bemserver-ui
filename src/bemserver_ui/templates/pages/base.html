@@ -3,7 +3,7 @@
 {% block head_styles %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<link rel="stylesheet" media="all" href="{{ url_for('static', filename='styles/app.css') }}">
+<link nonce="{{ csp_nonce() }}" rel="stylesheet" media="all" href="{{ url_for('static', filename='styles/app.css') }}">
 {% endfilter %}
 {% endblock head_styles %}
 
@@ -46,7 +46,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { signedUser } from "{{ url_for('static', filename='scripts/modules/signedUserData.js') }}";
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 

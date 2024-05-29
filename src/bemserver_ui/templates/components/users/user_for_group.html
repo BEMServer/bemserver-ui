@@ -1,7 +1,7 @@
 <div class="btn-group bg-white rounded" role="group" aria-label="Actions on user">
     <a class="btn btn-outline-secondary" role="button" href="{{ url_for('users.view', id=user.id) }}" title="Manage user acount">
         <div class="d-flex flex-column justify-content-start text-start">
-            <span class="text-truncate" title="{{ user.name }}" style="max-width: 200px;"><i class="bi bi-person"></i> {{ user.name }}</span>
+            <span class="text-truncate app-user-name" title="{{ user.name }}"><i class="bi bi-person"></i> {{ user.name }}</span>
             <small class="fst-italic">{{ user.email }}</small>
         </div>
     </a>

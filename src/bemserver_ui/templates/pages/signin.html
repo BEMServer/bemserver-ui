@@ -6,7 +6,10 @@
 {% block head_styles %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<link rel="stylesheet" href="{{ url_for('static', filename='styles/signin.css') }}">
+<link nonce="{{ csp_nonce() }}" rel="stylesheet" href="{{ url_for('static', filename='styles/signin.css') }}">
+{% if partners is defined %}
+<link nonce="{{ csp_nonce() }}" rel="stylesheet" href="{{ url_for('static', filename='styles/partners.css') }}">
+{% endif %}
 {% endfilter %}
 {% endblock head_styles %}
 
@@ -45,7 +48,7 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
+<script nonce="{{ csp_nonce() }}" type="module">
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 
     let app = createApp();

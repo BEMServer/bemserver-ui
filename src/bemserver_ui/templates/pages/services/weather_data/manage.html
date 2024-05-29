@@ -14,12 +14,12 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    <div class="row g-5 mb-3">
+    <div class="row g-3 g-lg-5 mb-3">
         <div class="col-auto">
             <h5>Campaign</h5>
             {{- mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet") }}
         </div>
-        <div class="col">
+        <div class="col-auto">
             <div class="alert alert-info border border-info mb-0" role="alert">
                 <i class="bi bi-info-square me-1"></i>
                 For each site, {% if signed_user.is_admin %}by using the ON/OFF buttons below, {% endif %}weather data can be fetched automatically from <a href="https://oikolab.com/" target="_blank">oikolab</a> web service.
@@ -140,6 +140,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module" src="{{ url_for('static', filename='scripts/modules/views/services/weatherData/manage.js') }}" defer></script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/views/services/weatherData/manage.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

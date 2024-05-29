@@ -330,6 +330,10 @@ body,
     }
 }
 
+.app-chart-container {
+    height: 600px;
+}
+
 @keyframes target-highlight {
     0% { background-color: rgba(var(--app-green-rgb), .8); }
     100% { background-color: rgba(var(--app-green-rgb), 0); }
@@ -338,4 +342,12 @@ body,
 .app-target-highlight {
     border-radius: var(--bs-border-radius) !important;
     animation: target-highlight 3s 1s ease-in-out infinite;
+}
+
+.app-user-name {
+    max-width: 200px;
+}
+
+.app-user-group-name {
+    max-width: 250px;
 }

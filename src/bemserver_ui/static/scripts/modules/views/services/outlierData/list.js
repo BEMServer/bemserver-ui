@@ -120,7 +120,7 @@ class CheckOutlierDataServiceListView {
         let entryElmt = document.createElement("a");
         entryElmt.classList.add("list-group-item", "list-group-item-action", "d-flex", "gap-3", "py-3");
         if (isSelected) {
-            entryElmt.classList.add("app-campaign-selected");
+            entryElmt.classList.add("app-campaign-selected", "border-4", "border-top-0", "border-bottom-0", "border-end-0");
         }
         entryElmt.href = manageUrl;
         entryElmt.title = "Manage campaign check outlier data service";

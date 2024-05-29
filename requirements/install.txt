@@ -16,6 +16,8 @@ click==8.1.7
     # via flask
 flask==3.0.2
     # via bemserver-ui (pyproject.toml)
+flask-talisman==1.1.0
+    # via bemserver-ui (pyproject.toml)
 idna==3.6
     # via requests
 importlib-metadata==7.1.0

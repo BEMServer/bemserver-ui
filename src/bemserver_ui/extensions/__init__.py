@@ -10,6 +10,7 @@ from . import (
     jinja_custom_filters,
     partners,
     plugins,
+    security,
     timezones,
 )
 from .auth import Roles  # noqa
@@ -18,6 +19,7 @@ from .campaign_context import ensure_campaign_context  # noqa
 EXT_MODULES = (
     jinja_custom_filters,
     error_handlers,
+    security,
     auth,
     api_client,
     campaign_context,

@@ -83,44 +83,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
-    import "{{ url_for('static', filename='scripts/modules/components/time/tzPicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/time/datetimePicker.js') }}";
-    import "{{ url_for('static', filename='scripts/modules/components/spinner.js') }}";
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-
-        let tzPickerElmt = document.getElementById("timezonePicker");
-        let timestampPickerElmt = document.getElementById("timestamp");
-        let inputSourceElmt = document.getElementById("source");
-        let btnEditSourceElmt = document.getElementById("btnEditSource");
-        let colTimezoneElmt = document.getElementById("colTimezone");
-        let btnEditTimezoneElmt = document.getElementById("btnEditTimezone");
-
-        tzPickerElmt.addEventListener("tzChange", (event) => {
-            event.preventDefault();
-
-            timestampPickerElmt.tzName = event.detail.tzName;
-        });
-
-        btnEditSourceElmt.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            inputSourceElmt.classList.remove("bg-dark", "bg-opacity-25");
-            inputSourceElmt.removeAttribute("readonly");
-            inputSourceElmt.select()
-            btnEditSourceElmt.remove();
-        });
-
-        btnEditTimezoneElmt.addEventListener("click", (event) => {
-            event.preventDefault();
-
-            colTimezoneElmt.classList.remove("d-none", "invisible");
-            btnEditTimezoneElmt.remove();
-        });
-
-    });
-</script>
+<script nonce="{{ csp_nonce() }}" type="module" src="{{ url_for('static', filename='scripts/modules/views/events/create.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}
