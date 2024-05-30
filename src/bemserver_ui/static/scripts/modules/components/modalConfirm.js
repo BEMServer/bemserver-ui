@@ -1,12 +1,15 @@
 export class ModalConfirm extends HTMLElement {
 
     #targetId = null;
-    #modalElmt = null;
+    #message = "";
     #okCallback = null;
     #cancelCallback = null;
     #keyboard = false;
 
-    #message = "";
+    #modalElmt = null;
+    #modalMessageContainerElmt = null;
+    #modalOkBtnElmt = null;
+    #modalCancelBtnElmt = null;
 
     get message() {
         return this.#message;
@@ -21,56 +24,109 @@ export class ModalConfirm extends HTMLElement {
         super();
 
         this.#targetId = targetId;
-        this.#modalElmt = null;
         this.#okCallback = okCallback;
         this.#cancelCallback = cancelCallback;
         this.#keyboard = keyboard;
 
         this.modalId = `modalConfirm-${this.#targetId}`;
         this.#message = message;
+
+        this.#modalElmt = null;
+        this.#modalOkBtnElmt = null;
+        this.#modalCancelBtnElmt = null;
     }
 
     #updateMessage() {
-        let messageElmt = this.querySelector(`p[id="${this.modalId}-message"]`);
-        messageElmt.innerHTML = this.#message;
+        this.#modalMessageContainerElmt.innerHTML = this.#message;
+    }
+
+    #createModalElement() {
+        let modalElmt = document.createElement("div");
+        modalElmt.id = this.modalId;
+        modalElmt.classList.add("modal", "fade");
+        modalElmt.setAttribute("data-bs-backdrop", "static");
+        modalElmt.setAttribute("data-bs-keyboard", this.#keyboard);
+        modalElmt.setAttribute("tabindex", "-1");
+        modalElmt.setAttribute("aria-labelledby", `modalConfirmTitle-${this.#targetId}`);
+        modalElmt.setAttribute("aria-hidden", true);
+
+        let modalDialogElmt = document.createElement("div");
+        modalDialogElmt.classList.add("modal-dialog", "modal-dialog-centered", "modal-dialog-scrollable");
+        modalElmt.appendChild(modalDialogElmt);
+
+        let modalContentElmt = document.createElement("div");
+        modalContentElmt.classList.add("modal-content");
+        modalDialogElmt.appendChild(modalContentElmt);
+
+        let modalHeaderElmt = document.createElement("div");
+        modalHeaderElmt.classList.add("modal-header");
+        modalContentElmt.appendChild(modalHeaderElmt);
+
+        let modalTitleElmt = document.createElement("h5");
+        modalTitleElmt.id = `modalConfirmTitle-${this.#targetId}`;
+        modalTitleElmt.classList.add("modal-title", "font-monospace");
+        modalTitleElmt.textContent = "Action confirmation";
+        modalHeaderElmt.appendChild(modalTitleElmt);
+
+        let modalCloseBtnElmt = document.createElement("button");
+        modalCloseBtnElmt.classList.add("btn-close");
+        modalCloseBtnElmt.setAttribute("type", "button");
+        modalCloseBtnElmt.setAttribute("data-bs-dismiss", "modal");
+        modalCloseBtnElmt.setAttribute("aria-label", "Close");
+        modalHeaderElmt.appendChild(modalCloseBtnElmt);
+
+        let modalBodyElmt = document.createElement("div");
+        modalBodyElmt.classList.add("modal-body");
+        modalContentElmt.appendChild(modalBodyElmt);
+
+        this.#modalMessageContainerElmt = document.createElement("p");
+        this.#modalMessageContainerElmt.id = `${this.modalId}-message`;
+        this.#updateMessage();
+        modalBodyElmt.appendChild(this.#modalMessageContainerElmt);
+
+        let modalMessageConfirmElmt = document.createElement("p");
+        modalMessageConfirmElmt.classList.add("fw-bold");
+        modalMessageConfirmElmt.textContent = "Do you confirm this action?";
+        modalBodyElmt.appendChild(modalMessageConfirmElmt);
+
+        let modalFooterElmt = document.createElement("div");
+        modalFooterElmt.classList.add("modal-footer");
+        modalContentElmt.appendChild(modalFooterElmt);
+
+        this.#modalCancelBtnElmt = document.createElement("button");
+        this.#modalCancelBtnElmt.classList.add("btn", "btn-sm", "btn-outline-secondary");
+        this.#modalCancelBtnElmt.setAttribute("type", "button");
+        this.#modalCancelBtnElmt.setAttribute("data-bs-dismiss", "modal");
+        this.#modalCancelBtnElmt.textContent = "Cancel";
+        modalFooterElmt.appendChild(this.#modalCancelBtnElmt);
+
+        this.#modalOkBtnElmt = document.createElement("button");
+        this.#modalOkBtnElmt.classList.add("btn", "btn-sm", "btn-primary");
+        this.#modalOkBtnElmt.setAttribute("type", "button");
+        this.#modalOkBtnElmt.textContent = "OK";
+        modalFooterElmt.appendChild(this.#modalOkBtnElmt);
+
+        return modalElmt;
+    }
+
+    #initEventListeners() {
+        this.#modalCancelBtnElmt.addEventListener("click", () => {
+            this.#cancelCallback?.();
+        });
+
+        this.#modalOkBtnElmt.addEventListener("click", () => {
+            this.#okCallback?.();
+            this.hide();
+        });
     }
 
     connectedCallback() {
-        this.render();
+        this.innerHTML = "";
 
-        this.#modalElmt = this.querySelector(`div[id=${this.modalId}]`);
-        if (this.#cancelCallback != null) {
-            this.#modalElmt.querySelector("button[data-modal-confirm-cancel]").addEventListener("click", () => {
-                this.#cancelCallback();
-            });
-        }
-        if (this.#okCallback != null) {
-            this.#modalElmt.querySelector("button[data-modal-confirm-ok]").addEventListener("click", () => {
-                this.#okCallback();
-                this.hide();
-            });
-        }
-    }
+        this.#modalElmt = this.#createModalElement();
+        this.appendChild(this.#modalElmt);
 
-    render() {
-        this.innerHTML = `<div class="modal fade" id="${this.modalId}" data-bs-backdrop="static" data-bs-keyboard="${this.#keyboard}" tabindex="-1" aria-labelledby="modalConfirmTitle-${this.#targetId}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title font-monospace" id="modalConfirmTitle-${this.#targetId}">Action confirmation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p id="${this.modalId}-message">${this.#message}</p>
-                <p class="fw-bold">Do you confirm this action?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" data-modal-confirm-cancel>Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary" data-modal-confirm-ok>OK</button>
-            </div>
-        </div>
-    </div>
-</div>`;
+        this.#initEventListeners();
     }
 
     show() {
@@ -83,6 +139,6 @@ export class ModalConfirm extends HTMLElement {
 }
 
 
-if (window.customElements.get("modal-confirm") == null) {
-    window.customElements.define("modal-confirm", ModalConfirm);
+if (window.customElements.get("app-modal-confirm") == null) {
+    window.customElements.define("app-modal-confirm", ModalConfirm);
 }
