@@ -4,6 +4,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { CampaignStatusInfoElement } from "/static/scripts/modules/components/campaigns/statusInfo.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 class CheckOutlierDataServiceListView {
@@ -182,7 +183,7 @@ class CheckOutlierDataServiceListView {
 
     refresh() {
         this.#itemsCountElmt.setLoading();
-        this.#serviceStatesContainerElmt.innerHTML = "";
+        clearHTML(this.#serviceStatesContainerElmt);
         let loadingContainerElmt = document.createElement("div");
         loadingContainerElmt.classList.add("text-center", "p-4", "w-100");
         loadingContainerElmt.appendChild(new Spinner());
@@ -204,7 +205,7 @@ class CheckOutlierDataServiceListView {
         this.#searchReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.services.outlier_data.retrieve_list`, searchOptions),
             (data) => {
-                this.#serviceStatesContainerElmt.innerHTML = "";
+                clearHTML(this.#serviceStatesContainerElmt);
                 if (data.data.length > 0) {
                     for (let row of data.data) {
                         this.#serviceStatesContainerElmt.appendChild(this.#createEntryElement(row));

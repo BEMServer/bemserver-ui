@@ -1,5 +1,6 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 // TODO: TreeNode class? (extends from HTMLLIElement)
@@ -286,7 +287,7 @@ export class Tree extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("d-flex", "justify-content-between", "align-items-start", "border", "rounded", "p-2", "gap-3");
 
         this.#treeContainerElmt.style.maxWidth = this.#maxWidth;
@@ -315,12 +316,12 @@ export class Tree extends HTMLElement {
     }
 
     showLoading() {
-        this.#treeContainerElmt.innerHTML = "";
+        clearHTML(this.#treeContainerElmt);
         this.#treeContainerElmt.appendChild(new Spinner());
     }
 
     hideLoading() {
-        this.#treeContainerElmt.innerHTML = "";
+        clearHTML(this.#treeContainerElmt);
     }
 
     load(data) {

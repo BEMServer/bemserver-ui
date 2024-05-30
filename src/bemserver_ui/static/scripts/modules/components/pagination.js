@@ -1,4 +1,6 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
+import { sanitizeData } from "/static/scripts/modules/tools/sanityze.js";
 
 
 export class PageSizeSelector extends HTMLDivElement {
@@ -56,7 +58,7 @@ export class PageSizeSelector extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("d-flex", "d-grid", "align-items-center", "gap-2");
 
         let labelElmt = document.createElement("label");
@@ -200,14 +202,14 @@ class PaginationItem extends HTMLLIElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("page-item");
 
         this.#pageLinkElmt = document.createElement("a");
         this.#pageLinkElmt.classList.add("page-link");
         this.#pageLinkElmt.title = this.#title;
         this.#pageLinkElmt.setAttribute("role", "button");
-        this.#pageLinkElmt.innerHTML = this.#innerHTML;
+        this.#pageLinkElmt.innerHTML = sanitizeData(this.#innerHTML);
         this.appendChild(this.#pageLinkElmt);
 
         this.#update();
@@ -348,7 +350,7 @@ export class Pagination extends HTMLUListElement {
         this.#lastPageItemElmt.page = this.#lastPage;
 
         if (this.#hasPaginationDataChanged) {
-            this.innerHTML = "";
+            clearHTML(this);
             this.appendChild(this.#firstPageItemElmt);
             this.appendChild(this.#previousPageItemElmt);
             this.appendChild(this.#startEllipsisPageItemElmt);
@@ -390,7 +392,7 @@ export class Pagination extends HTMLUListElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("pagination", "justify-content-end", "mb-0");
 
         // First page.

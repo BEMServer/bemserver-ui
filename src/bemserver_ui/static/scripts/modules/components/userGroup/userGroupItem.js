@@ -1,3 +1,6 @@
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
+
+
 export class UserGroupItem extends HTMLDivElement {
 
     #groupId = null;
@@ -66,7 +69,7 @@ export class UserGroupItem extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
 
         this.classList.add("text-truncate");
         this.style.maxWidth = "250px";

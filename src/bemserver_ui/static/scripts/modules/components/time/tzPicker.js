@@ -1,4 +1,5 @@
 import { TimezoneTool } from "/static/scripts/modules/tools/timezones.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class TimezonePicker extends HTMLDivElement {
@@ -83,7 +84,7 @@ export class TimezonePicker extends HTMLDivElement {
     }
 
     #updateTzRegionChoices() {
-        this.#tzRegionSelectElmt.innerHTML = "";
+        clearHTML(this.#tzRegionSelectElmt);
         for (let tzRegion of this.#tzTool.regions) {
             let optElmt = document.createElement("option");
             optElmt.value = tzRegion;
@@ -96,7 +97,7 @@ export class TimezonePicker extends HTMLDivElement {
     }
 
     #updateTzNameChoices() {
-        this.#tzNameSelectElmt.innerHTML = "";
+        clearHTML(this.#tzNameSelectElmt);
 
         for (let tzArea of this.#tzTool.areasByRegion[this.#tzRegionSelected]) {
             let optGroupElmt = document.createElement("optgroup");
@@ -122,7 +123,7 @@ export class TimezonePicker extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("input-group", "input-group-sm");
 
         if (this.#title != null) {

@@ -1,3 +1,7 @@
+import { sanitizeData } from "/static/scripts/modules/tools/sanityze.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
+
+
 export class ModalConfirm extends HTMLElement {
 
     #targetId = null;
@@ -37,7 +41,7 @@ export class ModalConfirm extends HTMLElement {
     }
 
     #updateMessage() {
-        this.#modalMessageContainerElmt.innerHTML = this.#message;
+        this.#modalMessageContainerElmt.innerHTML = sanitizeData(this.#message);
     }
 
     #createModalElement() {
@@ -121,7 +125,7 @@ export class ModalConfirm extends HTMLElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
 
         this.#modalElmt = this.#createModalElement();
         this.appendChild(this.#modalElmt);

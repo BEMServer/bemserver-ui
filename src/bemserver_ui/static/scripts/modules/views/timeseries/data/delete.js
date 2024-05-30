@@ -5,6 +5,7 @@ import { TimeseriesSelector } from "/static/scripts/modules/components/timeserie
 import "/static/scripts/modules/components/time/tzPicker.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import "/static/scripts/modules/components/spinner.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 class TimeseriesDeleteView {
@@ -153,7 +154,7 @@ class TimeseriesDeleteView {
         this.#getDataStatesReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.timeseries.datastates.retrieve_list`),
             (data) => {
-                this.#dataStatesElmt.innerHTML = "";
+                clearHTML(this.#dataStatesElmt);
                 for (let option of data.data) {
                     let optionElmt = document.createElement("option");
                     optionElmt.value = option.id.toString();

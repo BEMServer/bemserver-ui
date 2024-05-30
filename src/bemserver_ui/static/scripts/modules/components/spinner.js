@@ -1,4 +1,5 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class Spinner extends HTMLDivElement {
@@ -18,7 +19,7 @@ export class Spinner extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("d-flex", "justify-content-center");
 
         let spinnerElmt = document.createElement("div");

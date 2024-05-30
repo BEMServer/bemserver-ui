@@ -1,4 +1,5 @@
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class DropZone extends HTMLDivElement {
@@ -33,7 +34,7 @@ export class DropZone extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("position-relative");
         this.style.minHeight = "100";
 
@@ -133,7 +134,7 @@ export class DropZone extends HTMLDivElement {
     }
 
     setLoading() {
-        this.#innerDropZoneElmt.innerHTML = "";
+        clearHTML(this.#innerDropZoneElmt);
         this.#innerDropZoneElmt.appendChild(new Spinner());
     }
 
@@ -149,7 +150,7 @@ export class DropZone extends HTMLDivElement {
 
     showNoItems() {
         if (this.#dropCount <= 0) {
-            this.#innerDropZoneElmt.innerHTML = "";
+            clearHTML(this.#innerDropZoneElmt);
             let noItemsElmt = document.createElement("span");
             noItemsElmt.classList.add("fst-italic", "text-muted");
             noItemsElmt.innerText = this.#helpNoItemsText;
@@ -158,7 +159,7 @@ export class DropZone extends HTMLDivElement {
     }
 
     clear() {
-        this.#innerDropZoneElmt.innerHTML = "";
+        clearHTML(this.#innerDropZoneElmt);
         this.#dropCount = 0;
     }
 }

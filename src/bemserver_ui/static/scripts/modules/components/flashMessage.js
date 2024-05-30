@@ -1,5 +1,6 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { isDict } from "/static/scripts/modules/tools/dict.js";
+import { sanitizeData } from "/static/scripts/modules/tools/sanityze.js";
 
 
 const FLASH_MESSAGE_DATA = {
@@ -140,7 +141,7 @@ export class FlashMessage extends HTMLDivElement {
 
         let textElmt = document.createElement("div");
         textElmt.classList.add("text-break");
-        textElmt.innerHTML = this.#message;
+        textElmt.innerHTML = sanitizeData(this.#message);
         messageContentElmt.appendChild(textElmt);
 
         if (this.#validationErrors) {

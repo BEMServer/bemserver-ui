@@ -1,5 +1,6 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { TimezoneTool } from "/static/scripts/modules/tools/timezones.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class DatetimePicker extends HTMLDivElement {
@@ -231,7 +232,7 @@ export class DatetimePicker extends HTMLDivElement {
     connectedCallback() {
         this.#loadOptions(this.#initOptions);
 
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("input-group", "input-group-sm");
         this.style.minWidth = "230px";
 

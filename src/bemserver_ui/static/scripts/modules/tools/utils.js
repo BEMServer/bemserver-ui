@@ -11,3 +11,10 @@ export const debounce = (fn, delay = 500) => {
         }, delay);
     };
 };
+
+
+export function clearHTML(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}

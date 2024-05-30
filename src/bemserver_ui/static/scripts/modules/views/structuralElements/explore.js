@@ -7,6 +7,7 @@ import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/tree.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class StructuralElementsExploreView {
@@ -286,7 +287,7 @@ export class StructuralElementsExploreView {
     }
 
     #populateGeneral(data, path) {
-        this.#generalTabContentElmt.innerHTML = "";
+        clearHTML(this.#generalTabContentElmt);
 
         let mainContainerElmt = document.createElement("div");
         mainContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-3");
@@ -372,7 +373,7 @@ export class StructuralElementsExploreView {
     }
 
     #populateProperties(data, id) {
-        this.#propertiesTabContentElmt.innerHTML = "";
+        clearHTML(this.#propertiesTabContentElmt);
 
         let mainContainerElmt = document.createElement("div");
         mainContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-3");
@@ -438,7 +439,7 @@ export class StructuralElementsExploreView {
     }
 
     #renderGeneral(id, type, path) {
-        this.#generalTabContentElmt.innerHTML = "";
+        clearHTML(this.#generalTabContentElmt);
         this.#generalTabContentElmt.appendChild(new Spinner());
 
         if (this.#generalReqID != null) {
@@ -457,7 +458,7 @@ export class StructuralElementsExploreView {
     }
 
     #renderProperties(id, type, path) {
-        this.#propertiesTabContentElmt.innerHTML = "";
+        clearHTML(this.#propertiesTabContentElmt);
         this.#propertiesTabContentElmt.appendChild(new Spinner());
 
         if (this.#propertiesReqID != null) {
@@ -483,7 +484,7 @@ export class StructuralElementsExploreView {
     }
 
     #populateTimeseriesList(tsList) {
-        this.#tsListElmt.innerHTML = "";
+        clearHTML(this.#tsListElmt);
         if (tsList.length > 0) {
             for (let tsData of tsList) {
                 let tsElmt = document.createElement("div");
@@ -524,7 +525,7 @@ export class StructuralElementsExploreView {
     }
 
     #populateEventList(eventsList) {
-        this.#eventsListElmt.innerHTML = "";
+        clearHTML(this.#eventsListElmt);
         if (eventsList.length > 0) {
             for (let eventData of eventsList) {
                 let eventElmt = document.createElement("div");
@@ -575,7 +576,7 @@ export class StructuralElementsExploreView {
 
     #renderTimeseries(id, type, path) {
         this.#tsCountElmt.setLoading();
-        this.#tsListElmt.innerHTML = "";
+        clearHTML(this.#tsListElmt);
         this.#tsListElmt.appendChild(new Spinner());
 
         if (this.#tsReqID != null) {
@@ -626,7 +627,7 @@ export class StructuralElementsExploreView {
 
     #renderEvents(id, type, path) {
         this.#eventsCountElmt.setLoading();
-        this.#eventsListElmt.innerHTML = "";
+        clearHTML(this.#eventsListElmt);
         this.#eventsListElmt.appendChild(new Spinner());
 
         if (this.#eventsReqID != null) {
@@ -735,9 +736,9 @@ export class StructuralElementsExploreView {
             }
         }
         else {
-            this.#generalTabContentElmt.innerHTML = "";
+            clearHTML(this.#generalTabContentElmt);
             this.#generalTabContentElmt.appendChild(this.#createNoSelectionElement());
-            this.#propertiesTabContentElmt.innerHTML = "";
+            clearHTML(this.#propertiesTabContentElmt);
             this.#propertiesTabContentElmt.appendChild(this.#createNoSelectionElement());
             this.#populateTimeseriesList([]);
             this.#populateEventList([]);

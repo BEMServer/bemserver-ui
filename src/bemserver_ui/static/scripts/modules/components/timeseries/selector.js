@@ -6,7 +6,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
-import { debounce } from "/static/scripts/modules/tools/utils.js";
+import { debounce, clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 class TimeseriesItem {
@@ -73,7 +73,7 @@ export class SelectedItem extends HTMLDivElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
 
         this.style.maxWidth = "250px";
         this.classList.add("hstack", "badge", "rounded-pill", "border", "bg-primary", "bg-opacity-25", "text-dark", "gap-2");
@@ -196,7 +196,7 @@ export class SearchResultItem extends HTMLButtonElement {
 
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.style.maxWidth = "250px";
         this.classList.add("btn", "btn-sm", "btn-outline-secondary", "text-truncate");
         this.setAttribute("type", "button");
@@ -481,7 +481,7 @@ export class TimeseriesSelector extends HTMLElement {
 
     #updateSelectedItemsContainer() {
         if (this.#selectedItems.length <= 0) {
-            this.#selectedItemsContainerElmt.innerHTML = "";
+            clearHTML(this.#selectedItemsContainerElmt);
 
             this.#clearSelectionBtnElmt.classList.add("d-none", "invisible");
         }
@@ -666,7 +666,7 @@ export class TimeseriesSelector extends HTMLElement {
                 let selectedItem = this.#createSelectedItemElement(event.detail.timeseries, afterRemoveSelectedCallback);
 
                 if (this.#selectedItems.length <= 0) {
-                    this.#selectedItemsContainerElmt.innerHTML = "";
+                    clearHTML(this.#selectedItemsContainerElmt);
                 }
                 this.#selectedItemsContainerElmt.appendChild(selectedItem);
                 this.#selectedItems.push(selectedItem.timeseries);
@@ -747,7 +747,7 @@ export class TimeseriesSelector extends HTMLElement {
                         let selectedItem = this.#createSelectedItemElement(tsItem, afterSelectCallback);
 
                         if (this.#selectedItems.length <= 0) {
-                            this.#selectedItemsContainerElmt.innerHTML = "";
+                            clearHTML(this.#selectedItemsContainerElmt);
                         }
                         this.#selectedItemsContainerElmt.appendChild(selectedItem);
                         this.#selectedItems.push(selectedItem.timeseries);
@@ -809,7 +809,7 @@ export class TimeseriesSelector extends HTMLElement {
         }
 
         this.#searchResultsCountElmt.setLoading();
-        this.#searchResultsContainerElmt.innerHTML = "";
+        clearHTML(this.#searchResultsContainerElmt);
         this.#searchResultsContainerElmt.appendChild(new Spinner());
 
         let searchOptions = {
@@ -834,7 +834,7 @@ export class TimeseriesSelector extends HTMLElement {
         this.#searchReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.timeseries.retrieve_list`, searchOptions),
             (data) => {
-                this.#searchResultsContainerElmt.innerHTML = "";
+                clearHTML(this.#searchResultsContainerElmt);
 
                 if (data.data.length > 0) {
                     for (let row of data.data) {

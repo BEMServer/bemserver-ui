@@ -1,5 +1,6 @@
 import "/static/scripts/modules/components/tree.js";
 import { filter } from "/static/scripts/modules/tools/array.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class StructuralElementSelector extends HTMLElement {
@@ -77,7 +78,7 @@ export class StructuralElementSelector extends HTMLElement {
             this.#searchClearBtnElmt.classList.add("d-none", "invisible");
         }
 
-        this.#selectedItemsContainerElmt.innerHTML = "";
+        clearHTML(this.#selectedItemsContainerElmt);
         if (this.#treeNodeDataSelected != null) {
             let selectedNodeContainerElmt = document.createElement("div");
             selectedNodeContainerElmt.classList.add("hstack", "gap-2");

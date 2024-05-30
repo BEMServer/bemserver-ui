@@ -47,6 +47,13 @@ def init_app(app):
         "object-src": [
             "'none'",
         ],
+        "require-trusted-types-for": [
+            "'script'",
+        ],
+        "trusted-types": [
+            "default",
+            "dompurify",
+        ],
     }
 
     csp_nonce = [

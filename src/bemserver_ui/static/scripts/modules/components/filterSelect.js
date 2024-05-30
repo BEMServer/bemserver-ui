@@ -1,4 +1,5 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class FilterSelect extends HTMLSelectElement {
@@ -33,7 +34,7 @@ export class FilterSelect extends HTMLSelectElement {
     }
 
     connectedCallback() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("form-select", "form-select-sm", "border");
         this.setAttribute("aria-label", "Select a filter value");
 
@@ -48,7 +49,7 @@ export class FilterSelect extends HTMLSelectElement {
     }
 
     load(options, selectedOptionIndex = 0) {
-        this.innerHTML = "";
+        clearHTML(this);
         for (let option of options) {
             let optionElmt = document.createElement("option");
             optionElmt.value = option.value.toString();

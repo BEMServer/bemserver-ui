@@ -4,6 +4,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { UserGroupItem } from "/static/scripts/modules/components/userGroup/userGroupItem.js";
 import { ModalConfirm } from "/static/scripts/modules/components/modalConfirm.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class UserManageGroupsView {
@@ -63,7 +64,7 @@ export class UserManageGroupsView {
 
                 let iconElmt = document.createElement("i");
                 iconElmt.classList.add("bi", "bi-arrow-bar-right");
-                this.#userGroupAvailableBtnElmt.innerHTML = "";
+                clearHTML(this.#userGroupAvailableBtnElmt);
                 this.#userGroupAvailableBtnElmt.appendChild(iconElmt);
 
                 this.#dropZoneElmt.showHelp();
@@ -86,7 +87,7 @@ export class UserManageGroupsView {
                 let iconElmt = document.createElement("i");
                 iconElmt.classList.add("bi", "bi-arrow-bar-left", "me-1");
 
-                this.#userGroupAvailableBtnElmt.innerHTML = "";
+                clearHTML(this.#userGroupAvailableBtnElmt);
                 this.#userGroupAvailableBtnElmt.appendChild(iconElmt);
                 this.#userGroupAvailableBtnElmt.appendChild(textElmt);
             }
@@ -179,10 +180,10 @@ export class UserManageGroupsView {
 
     mount() {
         if (!this.#userGroupTabElmt.isLoaded) {
-            this.#userGroupCountElmt.innerHTML = "";
+            clearHTML(this.#userGroupCountElmt);
             this.#userGroupCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
 
-            this.#userGroupAvailableCountElmt.innerHTML = "";
+            clearHTML(this.#userGroupAvailableCountElmt);
             this.#userGroupAvailableCountElmt.appendChild(new Spinner({useSmallSize: true, useSecondaryColor: true}));
 
             this.#userGroupAvailableContainerElmt.innnerHTML = "";
@@ -203,7 +204,7 @@ export class UserManageGroupsView {
                         this.#dropZoneElmt.addElement(userGroupItemElmt);
                     }
 
-                    this.#userGroupAvailableContainerElmt.innerHTML = "";
+                    clearHTML(this.#userGroupAvailableContainerElmt);
                     for (let row of data.available_groups) {
                         let userGroupAvailableItemElmt = new UserGroupItem(row.id, row.name, true);
                         this.#userGroupAvailableContainerElmt.appendChild(userGroupAvailableItemElmt);

@@ -3,6 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/components/charts/tsChartEnergyConsumption.js";
 import "/static/scripts/modules/components/tree.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class EnergyConsumptionExploreView {
@@ -91,7 +92,7 @@ export class EnergyConsumptionExploreView {
     #updatePeriodSelect() {
         if (this.#periodTypeSelectElmt.value == "Yearly") {
             if (this.#previousPeriodType != this.#periodTypeSelectElmt.value) {
-                this.#periodYearSelectElmt.innerHTML = "";
+                clearHTML(this.#periodYearSelectElmt);
                 let offsetPastYear = 0;
                 let offsetStep = 5;
                 let isOptSelected = false;
@@ -114,7 +115,7 @@ export class EnergyConsumptionExploreView {
         }
         else {
             if (this.#previousPeriodType == null || this.#previousPeriodType == "Yearly") {
-                this.#periodYearSelectElmt.innerHTML = "";
+                clearHTML(this.#periodYearSelectElmt);
                 for (let offsetPastYear = 0 ; offsetPastYear < this.#maxPastYears ; offsetPastYear++) {
                     let year = this.#yearRef - offsetPastYear;
                     let optionElmt = document.createElement("option");
@@ -154,7 +155,7 @@ export class EnergyConsumptionExploreView {
             }
             this.#chartByEnergy = {};
 
-            this.#mainChartContainerElmt.innerHTML = "";
+            clearHTML(this.#mainChartContainerElmt);
             this.#mainChartContainerElmt.appendChild(new Spinner());
 
             if (this.#retrieveDataReqID != null) {
@@ -175,7 +176,7 @@ export class EnergyConsumptionExploreView {
                     }
                 ),
                 (data) => {
-                    this.#mainChartContainerElmt.innerHTML = "";
+                    clearHTML(this.#mainChartContainerElmt);
 
                     if (Object.keys(data["energy"]).length <= 0) {
                         let colElmt = document.createElement("div");
@@ -221,7 +222,7 @@ export class EnergyConsumptionExploreView {
                     }
                 },
                 (error) => {
-                    this.#mainChartContainerElmt.innerHTML = "";
+                    clearHTML(this.#mainChartContainerElmt);
                     app.flashMessage(error.toString(), "error");
                 },
             );

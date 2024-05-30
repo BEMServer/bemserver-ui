@@ -4,6 +4,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 class WeatherDataServiceManageView {
@@ -409,7 +410,7 @@ class WeatherDataServiceManageView {
                     this.#fetchDataDatetimeEndElmt.reset({ ignoreTime: true });
                     this.#updateFetchDataBtn();
 
-                    this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+                    clearHTML(this.#fetchDataModalParamsContainerElmt);
                     this.#fetchDataModalParamsContainerElmt.appendChild(new Spinner());
 
                     if (this.#getSemanticsReqID != null) {
@@ -420,7 +421,7 @@ class WeatherDataServiceManageView {
                     this.#getSemanticsReqID = this.#internalAPIRequester.get(
                         app.urlFor(`api.semantics.weather.list`, {site: serviceStateData.site_id, forecast: false}),
                         (data) => {
-                            this.#fetchDataModalParamsContainerElmt.innerHTML = "";
+                            clearHTML(this.#fetchDataModalParamsContainerElmt);
 
                             if (data.data.length > 0) {
                                 let weatherParamsTitleElmt = document.createElement("h6");
@@ -491,7 +492,7 @@ class WeatherDataServiceManageView {
 
     #refreshWeatherList() {
         this.#weatherItemsCountElmt.setLoading();
-        this.#weatherServiceStatesContainerElmt.innerHTML = "";
+        clearHTML(this.#weatherServiceStatesContainerElmt);
         this.#weatherServiceStatesContainerElmt.appendChild(this.#getListLoadingElement());
 
         if (this.#weatherListReqID != null) {
@@ -513,7 +514,7 @@ class WeatherDataServiceManageView {
         this.#weatherListReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.services.weather_data.retrieve_list`, filters),
             (data) => {
-                this.#weatherServiceStatesContainerElmt.innerHTML = "";
+                clearHTML(this.#weatherServiceStatesContainerElmt);
                 if (data.length > 0) {
                     for (let row of data) {
                         row.is_enabled = row.is_enabled == null ? false : row.is_enabled;
@@ -537,7 +538,7 @@ class WeatherDataServiceManageView {
 
     #refreshForecastWeatherList() {
         this.#forecastWeatherItemsCountElmt.setLoading();
-        this.#forecastWeatherServiceStatesContainerElmt.innerHTML = "";
+        clearHTML(this.#forecastWeatherServiceStatesContainerElmt);
         this.#forecastWeatherServiceStatesContainerElmt.appendChild(this.#getListLoadingElement());
 
         if (this.#forecastWeatherListReqID != null) {
@@ -559,7 +560,7 @@ class WeatherDataServiceManageView {
         this.#forecastWeatherListReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.services.weather_data.retrieve_forecast_list`, filters),
             (data) => {
-                this.#forecastWeatherServiceStatesContainerElmt.innerHTML = "";
+                clearHTML(this.#forecastWeatherServiceStatesContainerElmt);
                 if (data.length > 0) {
                     for (let row of data) {
                         row.is_enabled = row.is_enabled == null ? false : row.is_enabled;

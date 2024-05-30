@@ -1,3 +1,6 @@
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
+
+
 export class CampaignStatusInfoElement extends HTMLDivElement {
 
     #availableRenderStyles = ["text", "bullet"];
@@ -46,7 +49,7 @@ export class CampaignStatusInfoElement extends HTMLDivElement {
     }
 
     #render() {
-        this.innerHTML = "";
+        clearHTML(this);
         this.classList.add("hstack", "align-items-center", "gap-2", "w-100");
 
         this.#statusElmt = document.createElement("span");
@@ -61,7 +64,7 @@ export class CampaignStatusInfoElement extends HTMLDivElement {
     }
 
     #updateStatus() {
-        this.#statusElmt.innerHTML = "";
+        clearHTML(this.#statusElmt);
         this.#statusElmt.className = "";
         this.#statusElmt.removeAttribute("title");
 

@@ -1,5 +1,6 @@
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
+import { clearHTML } from "/static/scripts/modules/tools/utils.js";
 
 
 export class ItemsCount extends HTMLElement {
@@ -25,7 +26,7 @@ export class ItemsCount extends HTMLElement {
     }
 
     #update() {
-        this.innerHTML = "";
+        clearHTML(this);
         if (this.#totalCount <= 0) {
             this.innerText = "No item"
         }
@@ -63,8 +64,8 @@ export class ItemsCount extends HTMLElement {
     }
 
     setLoading() {
+        clearHTML(this);
         this.innerText = "";
-        this.innerHTML = "";
         this.appendChild(this.#spinnerElmt);
     }
 
