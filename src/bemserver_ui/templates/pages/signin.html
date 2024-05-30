@@ -30,6 +30,7 @@
                         <input type="password" form="signinForm" class="form-control" id="pwd" name="pwd" placeholder="Password" required>
                         <label for="pwd">Password</label>
                     </div>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 </form>
                 <button type="submit" form="signinForm" class="btn btn-primary w-100">Sign in</button>
             </div>

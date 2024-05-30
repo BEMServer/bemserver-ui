@@ -247,7 +247,9 @@ def manage_groups(id):
     campaign_resp = flask.g.api_client.campaigns.getone(id)
 
     if flask.request.method == "POST":
-        user_group_ids = [x.split("-")[1] for x in flask.request.form.keys()]
+        user_group_ids = [
+            x.split("-")[1] for x in flask.request.form.keys() if x.startswith("group-")
+        ]
         for user_group_id in user_group_ids:
             flask.g.api_client.user_groups_by_campaigns.create(
                 {

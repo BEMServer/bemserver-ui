@@ -58,6 +58,18 @@ def _handle_304(exc):
         return flask.redirect(_get_back_location(flask.request.endpoint))
 
 
+def _handle_400(exc):
+    http_status_code = 400
+    if _should_handle_error(exc, http_status_code):
+        message = "Bad request!"
+        if hasattr(exc, "description"):
+            message = exc.description
+        if _is_from_internal_api():
+            return _handle_for_internal_api(http_status_code, message)
+        flask.flash(message, "error")
+        return flask.redirect(_get_back_location())
+
+
 def _handle_401(exc):
     http_status_code = 401
     if _should_handle_error(exc, http_status_code):
@@ -157,6 +169,8 @@ def _handle_428(exc):
 
 def init_app(app):
     # Internal app errors.
+    # 400: bad request
+    app.register_error_handler(wexc.BadRequest, _handle_400)
     # 401: unauthorized
     app.register_error_handler(wexc.Unauthorized, _handle_401)
     # 403: forbidden

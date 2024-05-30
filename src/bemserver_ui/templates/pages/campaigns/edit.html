@@ -10,6 +10,7 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
     <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
 </form>
@@ -75,6 +76,7 @@
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('campaigns.view', id=campaign.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
                     <form id="editForm" action="{{ url_for('campaigns.edit', id=campaign.id) }}" method="POST">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                         <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </form>

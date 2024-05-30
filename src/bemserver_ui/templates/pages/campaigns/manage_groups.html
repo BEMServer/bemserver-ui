@@ -37,6 +37,7 @@
                 {% include "components/user_groups/user_group_available.html" %}
                 {% endfilter %}
                 {% endfor %}
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             </form>
             {% else %}
             <span class="fst-italic text-muted">none</span>

@@ -22,6 +22,7 @@
     {% if signed_user.is_admin %}
     <div class="hstack gap-2{% if is_campaign_selected_edit %} ms-auto ms-lg-auto me-lg-0{% else %} me-auto{% endif %}">
         <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
             <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"{% if is_campaign_selected_edit %} disabled aria-disabled="true"{% endif %}><i class="bi bi-trash"></i> Delete</button>
         </form>

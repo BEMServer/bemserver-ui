@@ -1,15 +1,37 @@
 """Improve web application security, following Flask's security considerations,
-using flask-talisman extension.
+using flask-talisman and flask-wtf (for CSRF) extensions.
 
 See https://flask.palletsprojects.com/en/3.0.x/web-security/
 
 Check CSP with https://csp-evaluator.withgoogle.com/
 """
 
+import flask
 from flask_talisman import Talisman
+from flask_wtf.csrf import CSRFProtect, generate_csrf
+
+csrf = CSRFProtect()
 
 
 def init_app(app):
+    csrf.init_app(app)
+
+    @app.after_request
+    def inject_csrf_token(response):
+        if flask.request.endpoint not in (
+            "static",
+            "flask_es6_endpoints",
+            "es6_signed_user",
+            "generate_timezones_es6_module",
+        ) and not flask.request.endpoint.startswith("api."):
+            response.set_cookie(
+                app.config.get("WTF_CSRF_FIELD_NAME", "csrf_token"),
+                generate_csrf(),
+                samesite=app.config.get("SESSION_COOKIE_SAMESITE", "Lax"),
+                secure=app.config.get("WTF_CSRF_SSL_STRICT", True),
+            )
+        return response
+
     # Whitelist domains for content security policy.
     csp = {
         "base-uri": [

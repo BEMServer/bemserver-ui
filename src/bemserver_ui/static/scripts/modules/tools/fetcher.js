@@ -2,6 +2,7 @@ import { generateUUID } from "/static/scripts/modules/tools/uuid.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { isDict } from "/static/scripts/modules/tools/dict.js";
 import { FlashMessage } from "/static/scripts/modules/components/flashMessage.js";
+import "https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js";
 
 
 // TODO: rework fetch use in order to better use async/await when needed
@@ -241,14 +242,21 @@ export class InternalAPIRequest {
         return reqIDByUrl;
     }
 
-    #preparePost(payload) {
+    #prepareParams(httpMethod, payload = null, etag = null) {
         let params = {
-            method: "POST",
+            method: httpMethod,
             headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
             },
         };
+        if (etag != null) {
+            params.headers["ETag"] = etag;
+        }
+        let csrfToken = Cookies.get("csrf_token");
+        if (csrfToken != null) {
+            params.headers["X-CSRF-Token"] = csrfToken;
+        }
         if (payload != null) {
             params.body = JSON.stringify(payload);
         }
@@ -256,53 +264,27 @@ export class InternalAPIRequest {
     }
 
     async postAsync(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = this.#preparePost(payload);
+        let params = this.#prepareParams("POST", payload);
         return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     post(url, payload, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = this.#preparePost(payload);
+        let params = this.#prepareParams("POST", payload);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     put(url, payload, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = {
-            method: "PUT",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-        };
-        if (etag != null) {
-            params.headers["ETag"] = etag;
-        }
-        if (payload != null) {
-            params.body = JSON.stringify(payload);
-        }
+        let params = this.#prepareParams("PUT", payload, etag);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
-    #prepareDelete(etag) {
-        let params = {
-            method: "DELETE",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-            },
-        };
-        if (etag != null) {
-            params.headers["ETag"] = etag;
-        }
-        return params;
-    }
-
     async deleteAsync(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = this.#prepareDelete(etag);
+        let params = this.#prepareParams("DELETE", null, etag);
         return await this.#executeRequestAsync(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 
     delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
-        let params = this.#prepareDelete(etag);
+        let params = this.#prepareParams("DELETE", null, etag);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
     }
 }

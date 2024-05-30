@@ -48,6 +48,7 @@
                         <button type="submit" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </div>
                 </fieldset>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
             </form>
         </div>
     </div>

@@ -12,6 +12,7 @@
     <a href="{{ url_back }}" class="btn btn-sm btn-outline-secondary text-nowrap ms-auto" title="Back to campaign"><i class="bi bi-arrow-return-left"></i> Back to campaign</a>
     <div class="vr d-none d-lg-block"></div>
     <form id="delForm" action="{{ url_for('campaign_scopes.delete', id=campaign_scope.id, next=url_back) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign_scope.name }}&lt;/mark&gt; campaign scope">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" form="delForm" id="delEtag" name="delEtag" value="{{ etag }}">
         <button type="submit" form="delForm" class="btn btn-sm btn-outline-danger text-nowrap" title="Delete"><i class="bi bi-trash"></i> Delete</button>
     </form>
@@ -47,6 +48,7 @@
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('campaign_scopes.view', id=campaign_scope.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>
                     <form id="editForm" action="{{ url_for('campaign_scopes.edit', id=campaign_scope.id) }}" method="POST">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" form="editForm" id="editEtag" name="editEtag" value="{{ etag }}">
                         <button type="submit" form="editForm" class="btn btn-sm btn-primary text-break" title="Save"><i class="bi bi-save"></i> Save</button>
                     </form>
