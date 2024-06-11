@@ -36,8 +36,8 @@ Flask custom var config available:
         API host name (and port)
     **BEMSERVER_API_USE_SSL = True**
         Is API published through SSL?
-    **BEMSERVER_API_AUTH_METHOD = "http_basic"**
-        API authentication method
+    **BEMSERVER_API_AUTH_METHOD = "jwt"**
+        API authentication method: "jwt" (preferred and default, fastest) or "http_basic"
     **BEMSERVER_UI_TIMEZONE_NAME = "UTC"**
         Default application timezone name, when not overrided campaign timezone
     **BEMSERVER_UI_NOTIFICATION_UPDATER_DELAY = 60000**

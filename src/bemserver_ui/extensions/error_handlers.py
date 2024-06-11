@@ -5,6 +5,7 @@ import werkzeug.exceptions as wexc
 
 from bemserver_api_client.exceptions import (
     BEMServerAPIAuthenticationError,
+    BEMServerAPIAuthorizationError,
     BEMServerAPIConflictError,
     BEMServerAPIError,
     BEMServerAPINotFoundError,
@@ -62,6 +63,8 @@ def _handle_401(exc):
     http_status_code = 401
     if _should_handle_error(exc, http_status_code):
         message = "Incorrect or missing credentials"
+        if hasattr(exc, "code"):
+            message = f"{message} ({exc.code})"
         if _is_from_internal_api():
             return _handle_for_internal_api(http_status_code, message)
         flask.session.clear()
@@ -177,13 +180,10 @@ def init_app(app):
     app.register_error_handler(BEMServerAPINotModified, _handle_304)
 
     # 401: unauthorized
+    app.register_error_handler(BEMServerAPIAuthenticationError, _handle_401)
+
     # 403: forbidden
-    @app.errorhandler(BEMServerAPIAuthenticationError)
-    def _handle_401_403(exc):
-        if exc.status_code == 401:
-            return _handle_401(exc)
-        elif exc.status_code == 403:
-            return _handle_403(exc)
+    app.register_error_handler(BEMServerAPIAuthorizationError, _handle_403)
 
     # 404: not found
     app.register_error_handler(BEMServerAPINotFoundError, _handle_404)

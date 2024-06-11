@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements/install.txt pyproject.toml
 #
-bemserver-api-client==0.20.3
+bemserver-api-client==0.21.1
     # via bemserver-ui (pyproject.toml)
 blinker==1.7.0
     # via flask
@@ -28,11 +28,11 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
-packaging==23.2
+packaging==24.1
     # via bemserver-api-client
 python-dotenv==1.0.1
     # via bemserver-ui (pyproject.toml)
-requests==2.31.0
+requests==2.32.3
     # via bemserver-api-client
 urllib3==2.2.0
     # via requests

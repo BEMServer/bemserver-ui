@@ -43,6 +43,13 @@ def signin_required(func=None, roles=None):
     return signin_required_internal
 
 
+def update_bearer_tokens(access_token, refresh_token=None):
+    flask.session["auth_data"] = {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+
+
 def init_app(app):
     @app.context_processor
     def inject_signed_user():
