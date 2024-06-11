@@ -14,7 +14,7 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via flask
-flask==3.0.2
+flask==3.0.3
     # via bemserver-ui (pyproject.toml)
 idna==3.6
     # via requests
