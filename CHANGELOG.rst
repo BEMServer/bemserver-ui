@@ -1,6 +1,38 @@
 Changelog
 ---------
 
+0.7.0 (2024-06-11)
+++++++++++++++++++
+
+Features:
+
+- Authentication:
+
+  - Use bearer token authentication mode (huge page load speed improvement)
+
+- Timeseries data:
+
+  - Rework completeness analysis (period selection, chart auto height size...)
+
+- Campaigns:
+
+  - Change the campaign selection mode from the campaign list page (click on campaign item)
+
+Fixes:
+
+- Fix deegre days analysis (month order of x-axis in compare mode)
+- Fix inappropriate validation error when site latitude/longitude is empty
+- Fix events edit page (campaign context was wrong)
+- Fix timeseries edit page (problem on attributes tab selection)
+- Fix structural elements (sites, buildings...) edit and explore pages (problem on attributes tab selection)
+
+Other changes:
+
+- Change license to MIT
+- Require bemserver-api-client >=0.21.1 and <0.22.0
+- Require bemserver-api 0.24.0
+- Require bemserver-core 0.18.0
+
 0.6.2 (2024-02-15)
 ++++++++++++++++++
 
