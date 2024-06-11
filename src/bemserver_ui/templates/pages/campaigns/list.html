@@ -53,16 +53,20 @@
             <div class="list-group">
                 {% for x in campaigns %}
                 {% set is_campaign_selected = g.campaign_ctxt.has_campaign and g.campaign_ctxt.id|string == x.id|string %}
+                {% set action_url = url_for("campaigns.view", id=x.id) if is_campaign_selected else url_for("structural_elements.explore", forced_campaign_ctxt=x.id) %}
+                {% set action_title = "More information on this campaign" if is_campaign_selected else "Set this campaign as working context" %}
                 <div class="list-group-item d-flex justify-content-between gap-3 p-0{% if is_campaign_selected %} border-start border-5 border-top-0 border-end-0 border-bottom-0 app-campaign-selected{% endif %}">
-                    <a class="list-group-item-action text-decoration-none d-flex gap-3 py-3 p-2 ps-3 w-100" href="{{ url_for('campaigns.view', id=x.id) }}" title="View details">
+                    <a class="list-group-item-action text-decoration-none d-flex gap-3 py-3 p-2 ps-3 w-100" href="{{ action_url }}" title="{{ action_title }}">
                         <i class="bi bi-boxes"></i>
-                        <div class="d-xl-flex d-grid justify-content-between gap-3 w-100">
+                        <div class="d-xl-flex d-grid justify-content-between gap-3 w-100{% if is_campaign_selected %} pe-3{% endif %}">
                             <div class="d-grid gap-2">
                                 <h6 class="fw-bold">
-                                    {{- mac_camp.render_campaign_info(x.name, x.state, render_style="bullet") }}
+                                    {% filter indent(width=36) %}
+                                    {{ mac_camp.render_campaign_info(x.name, x.state, render_style="bullet") -}}
+                                    {% endfilter %}
                                 </h6>
                                 {% if is_campaign_selected %}
-                                <div><small class="text-opacity-50 text-primary fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected.</small></div>
+                                <div><small class="text-opacity-50 text-primary fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected as the working context.</small></div>
                                 {% endif %}
                                 <div class="text-muted ms-2">{{ x.description }}</div>
                             </div>
@@ -85,14 +89,11 @@
                             </div>
                         </div>
                     </a>
-                    <div class="text-center my-md-auto my-3 me-3">
-                        {% if is_campaign_selected %}
-                        {% set extra_kwargs = {"state": request.args["state"]} if "state" in request.args else {} %}
-                        <a href="{{ url_for(request.endpoint, ignore_campaign_ctxt=True, **extra_kwargs) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect">Unselect</a>
-                        {% else %}
-                        <a href="{{ url_for('structural_elements.explore', forced_campaign_ctxt=x.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
-                        {% endif %}
+                    {% if not is_campaign_selected %}
+                    <div class="vstack align-items-center gap-2 my-md-auto my-3 me-3">
+                        <a href="{{ url_for('campaigns.view', id=x.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="More information on this campaign">More info</a>
                     </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

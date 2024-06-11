@@ -11,14 +11,16 @@
 {{ super() -}}
 {% filter indent(width=20, first=True) %}
 <div class="d{% if is_campaign_selected_edit %}-xl{% endif %}-flex {% if is_campaign_selected_edit %} d-grid{% endif %} gap-2 mx-auto">
-    {% if not is_campaign_selected_edit %}
     <div class="hstack gap-3 ms-auto">
-        <a href="{{ url_for('structural_elements.explore', forced_campaign_ctxt=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select">Select</a>
+        {% if is_campaign_selected_edit %}
+        <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign_ctxt=True) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect this campaign and reset the current working context">Unselect</a>
+        {% else %}
+        <a href="{{ url_for('structural_elements.explore', forced_campaign_ctxt=campaign.id) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Select this campaign as working context">Select</a>
+        {% endif %}
         {% if signed_user.is_admin %}
         <div class="vr me-2"></div>
         {% endif %}
     </div>
-    {% endif %}
     {% if signed_user.is_admin %}
     <div class="hstack gap-2{% if is_campaign_selected_edit %} ms-auto ms-lg-auto me-lg-0{% else %} me-auto{% endif %}">
         <form id="delForm" action="{{ url_for('campaigns.delete', id=campaign.id) }}" method="POST" data-modal-confirm-message="Delete &lt;mark&gt;{{ campaign.name }}&lt;/mark&gt; campaign">
@@ -34,19 +36,29 @@
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
-    {% if is_campaign_selected_edit and signed_user.is_admin %}
     <div class="row mb-3">
-        <div class="col">
-            <div class="alert alert-info d-flex justify-content-between align-items-center" role="alert">
+        <div class="col-auto">
+            <div class="alert alert-info" role="alert">
                 <div>
                     <i class="bi bi-info-square me-2"></i>
-                    This is the campaign currently selected. <span class="fw-bold fst-italic">Deletion is disabled.</span>
+                    This campaign is {% if is_campaign_selected_edit %}currently{% else %}NOT{% endif %} selected as the working context.
                 </div>
-                <a href="{{ url_for('campaigns.view', id=campaign.id, ignore_campaign_ctxt=True) }}" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" title="Unselect">Unselect</a>
+                <dl class="mt-2 mb-0">
+                    {% if is_campaign_selected_edit %}
+                    <dt>Unselect</dt>
+                    <dd>Reset the current working context, this campaign is not selected anymore.</dd>
+                    {% if signed_user.is_admin %}
+                    <dt>Delete</dt>
+                    <dd>While this campaign is set as the current working context, deletion is <span class="fw-bold fst-italic">disabled</span>.</dd>
+                    {% endif %}
+                    {% else %}
+                    <dt>Select</dt>
+                    <dd>This campaign is set as the current working context{% if g.campaign_ctxt.has_campaign %} (and replaces the current selected campaign: {{ g.campaign_ctxt.name }}){% endif %}.</dd>
+                    {% endif %}
+                </dl>
             </div>
         </div>
     </div>
-    {% endif %}
     <div class="row">
         <div class="col">
             <ul class="nav nav-tabs app-tabs" role="tablist">
@@ -121,7 +133,7 @@
                     {% if user_groups|length > 0 %}
                     <div class="d-flex flex-wrap gap-2">
                         {% for user_group in user_groups %}
-                        {% filter indent(width=16) %}
+                        {% filter indent(width=24, first=True) %}
                         {% include "components/user_groups/group_for_campaign.html" %}
                         {% endfilter %}
                         {% endfor %}
