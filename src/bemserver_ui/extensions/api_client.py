@@ -21,20 +21,23 @@ def init_app(app):
 
     def make_api_client(_):
         authentication_method = None
-        try:
-            if auth_method == "jwt":
-                authentication_method = BEMServerApiClient.make_bearer_token_auth(
-                    flask.session["auth_data"]["access_token"],
-                    flask.session["auth_data"]["refresh_token"],
-                    after_refresh_tokens_callback=update_bearer_tokens,
-                )
-            elif auth_method == "http_basic":
-                authentication_method = BEMServerApiClient.make_http_basic_auth(
-                    flask.session["auth_data"]["email"],
-                    flask.session["auth_data"]["password"],
-                )
-        except KeyError:
-            flask.abort(401)
+        if "auth_data" in flask.session:
+            try:
+                if auth_method == "jwt":
+                    authentication_method = BEMServerApiClient.make_bearer_token_auth(
+                        flask.session["auth_data"]["access_token"],
+                        flask.session["auth_data"]["refresh_token"],
+                        after_refresh_tokens_callback=update_bearer_tokens,
+                    )
+                elif auth_method == "http_basic":
+                    authentication_method = BEMServerApiClient.make_http_basic_auth(
+                        flask.session["auth_data"]["email"],
+                        flask.session["auth_data"]["password"],
+                    )
+            except KeyError:
+                # Prevent internal error when changing authentication method
+                #  while users are connected.
+                flask.abort(401)
         return BEMServerApiClient(
             host,
             use_ssl=use_ssl,
