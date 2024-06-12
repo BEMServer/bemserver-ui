@@ -21,7 +21,7 @@ def init_app(app):
 
     def make_api_client(_):
         authentication_method = None
-        if "auth_data" in flask.session:
+        try:
             if auth_method == "jwt":
                 authentication_method = BEMServerApiClient.make_bearer_token_auth(
                     flask.session["auth_data"]["access_token"],
@@ -33,6 +33,8 @@ def init_app(app):
                     flask.session["auth_data"]["email"],
                     flask.session["auth_data"]["password"],
                 )
+        except KeyError:
+            flask.abort(401)
         return BEMServerApiClient(
             host,
             use_ssl=use_ssl,
