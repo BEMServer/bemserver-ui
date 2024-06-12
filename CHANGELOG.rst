@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+0.7.1 (2024-06-12)
+++++++++++++++++++
+
+Fixes:
+
+- Fix internal error when session does not contain authentication data as expected and raise 401 (instead of 500)
+
+Other changes:
+
+- Still require bemserver-api-client >=0.21.1 and <0.22.0
+- Still require bemserver-api 0.24.0
+- Still require bemserver-core 0.18.0
+
 0.7.0 (2024-06-11)
 ++++++++++++++++++
 
