@@ -31,29 +31,30 @@
             </div>
         </div>
         <div class="col">
-            <h5 class="text-secondary">Locations available</h5>
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <i class="bi bi-info-square float-start me-2"></i>
-                <span>Open a timeseries accordion panel to <span class="fw-bold fst-italic">drag and drop</span> locations over it.</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="true"><i class="bi bi-buildings"></i> Sites</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="false"><i class="bi bi-bullseye"></i> Zones</button>
-                </li>
-            </ul>
-            <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
-                <div class="tab-pane fade show active p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
-                    <app-tree id="sitesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted"></app-tree>
+            <div class="sticky-xl-top">
+                <h5 class="text-secondary">Locations available</h5>
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-square float-start me-2"></i>
+                    <span>Open a timeseries accordion panel to <span class="fw-bold fst-italic">drag and drop</span> locations over it.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-                <div class="tab-pane fade p-3" id="zones-tabcontent" role="tabpanel" aria-labelledby="zones-tab">
-                    <app-tree id="zonesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" toolbar="false"></app-tree>
+                <ul class="nav nav-tabs app-tabs" id="tabSites" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="sites-tab" data-bs-toggle="tab" data-bs-target="#sites-tabcontent" type="button" role="tab" aria-controls="sites-tabcontent" aria-selected="true"><i class="bi bi-buildings"></i> Sites</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="zones-tab" data-bs-toggle="tab" data-bs-target="#zones-tabcontent" type="button" role="tab" aria-controls="zones-tabcontent" aria-selected="false"><i class="bi bi-bullseye"></i> Zones</button>
+                    </li>
+                </ul>
+                <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
+                    <div class="tab-pane fade show active p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
+                        <app-tree id="sitesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted"></app-tree>
+                    </div>
+                    <div class="tab-pane fade p-3" id="zones-tabcontent" role="tabpanel" aria-labelledby="zones-tab">
+                        <app-tree id="zonesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" toolbar="false"></app-tree>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
