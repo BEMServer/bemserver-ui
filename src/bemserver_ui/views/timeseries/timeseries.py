@@ -68,6 +68,8 @@ def list():
     recurse_prefix = ""
     # Get requested filters.
     if flask.request.method == "POST":
+        if "search" in flask.request.form:
+            filters["in_name"] = flask.request.form["search"]
         if flask.request.form["campaign_scope"] != "None":
             filters["campaign_scope_id"] = flask.request.form["campaign_scope"]
         if (
@@ -98,17 +100,23 @@ def list():
         if "page" in flask.request.form and flask.request.form["page"] != "":
             filters["page"] = int(flask.request.form["page"])
 
-    is_filtered = filters["campaign_scope_id"] is not None or any(
-        [
-            (
-                f"{recurse_prefix}{x}_id"
-                if x != "space"
-                else f"{x}_id" in filters
-                and filters[f"{recurse_prefix}{x}_id" if x != "space" else f"{x}_id"]
-                is not None
-            )
-            for x in FULL_STRUCTURAL_ELEMENT_TYPES
-        ]
+    is_filtered = (
+        filters.get("in_name", "") != ""
+        or filters["campaign_scope_id"] is not None
+        or any(
+            [
+                (
+                    f"{recurse_prefix}{x}_id"
+                    if x != "space"
+                    else f"{x}_id" in filters
+                    and filters[
+                        f"{recurse_prefix}{x}_id" if x != "space" else f"{x}_id"
+                    ]
+                    is not None
+                )
+                for x in FULL_STRUCTURAL_ELEMENT_TYPES
+            ]
+        )
     )
 
     campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
