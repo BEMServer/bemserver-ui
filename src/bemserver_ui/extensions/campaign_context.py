@@ -174,6 +174,9 @@ def init_app(app):
 
     # Monkey patch flask.url_for used in jinja templates.
     app.jinja_env.globals["url_for"] = url_for_campaign
+    app.jinja_env.globals["campaign_ctxt_query_arg_name"] = (
+        CAMPAIGN_CONTEXT_QUERY_ARG_NAME
+    )
 
     # Monkey patch main flask.url_for function.
     flask.url_for = url_for_campaign
