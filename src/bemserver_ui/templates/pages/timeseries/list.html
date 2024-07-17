@@ -64,12 +64,13 @@
                                     <input type="hidden" form="formFilters" id="zone_filter" name="zone_id" value="{{ filters['zone_id'] }}">
                                 </div>
                             </div>
-                            <form id="formFilters" class="d-xl-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}" method="POST">
-                                <input type="text" class="form-control form-control-sm border{% if filters['in_name'] | length > 0 %} border-info bg-info bg-opacity-10{% endif %}" id="search" name="search" placeholder="Name..." value="{{ filters['in_name'] }}" autofocus></input>
-                                <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope" name="campaign_scope" form="formFilters" aria-label="Select a filter value">
+                            <form id="formFilters" class="d-xl-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}">
+                                <input type="hidden" name="{{ campaign_ctxt_query_arg_name }}" value="{{ g.campaign_ctxt.id }}" required />
+                                <input type="text" class="form-control form-control-sm border{% if filters['in_name'] | length > 0 %} border-info bg-info bg-opacity-10{% endif %}" id="in_name" name="in_name" placeholder="Name..." value="{{ filters['in_name'] }}" autofocus />
+                                <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope_id" name="campaign_scope_id" form="formFilters" aria-label="Select a filter value">
                                     <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
                                     {% for x in campaign_scopes %}
-                                    <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id|string %} selected{% endif %}>{{ x.name }}</option>
+                                    <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id | string %} selected{% endif %}>{{ x.name }}</option>
                                     {% endfor %}
                                 </select>
                                 <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
@@ -221,7 +222,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         let options = {
-            filters: {{ filters | tojson }},
             timezone: {{ g.campaign_ctxt.tz_name | tojson }},
         };
 

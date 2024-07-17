@@ -53,53 +53,66 @@ def prepare_pagination(pagination, nb_total_links=5):
     return pagination
 
 
-@blp.route("/", methods=["GET", "POST"])
+@blp.route("/")
 @auth.signin_required
 @ensure_campaign_context
 def list():
     campaign_id = flask.g.campaign_ctxt.id
 
+    # Get campaign scopes data.
+    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
+        campaign_id=campaign_id, sort="+name"
+    )
+    campaign_scopes_by_id = {}
+    for campaign_scope in campaign_scopes_resp.data:
+        campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
+
+    # Build timeseries filters from query args.
+    # `filters` are for API request and `ui_filers` is just values for UI components.
     filters = {
         "campaign_id": campaign_id,
         "campaign_scope_id": None,
         "page_size": 10,
     }
     ui_filters = {}
-    recurse_prefix = ""
-    # Get requested filters.
-    if flask.request.method == "POST":
-        if "search" in flask.request.form:
-            filters["in_name"] = flask.request.form["search"]
-        if flask.request.form["campaign_scope"] != "None":
-            filters["campaign_scope_id"] = flask.request.form["campaign_scope"]
-        if (
-            "structural_element_recursive" in flask.request.form
-            and flask.request.form["structural_element_recursive"] != ""
-        ):
-            recurse_prefix = "recurse_"
-            ui_filters["structural_element_recursive"] = True
-        else:
-            ui_filters["structural_element_recursive"] = False
-        for struct_elmt_type in STRUCTURAL_ELEMENT_TYPES:
-            if struct_elmt_type != "space":
-                struct_elmt_filter_key = f"{recurse_prefix}{struct_elmt_type}_id"
-            else:
-                struct_elmt_filter_key = f"{struct_elmt_type}_id"
-            struct_elmt_filter_value = flask.request.form.get(struct_elmt_filter_key)
-            if (
-                struct_elmt_filter_key in flask.request.form
-                and struct_elmt_filter_value != ""
-            ):
-                filters[struct_elmt_filter_key] = struct_elmt_filter_value
-                ui_filters["structural_element_filter_type"] = struct_elmt_type
-                ui_filters["structural_element_filter_id"] = struct_elmt_filter_value
-        if "zone_id" in flask.request.form and flask.request.form["zone_id"] != "":
-            filters["zone_id"] = flask.request.form["zone_id"]
-        if "page_size" in flask.request.form:
-            filters["page_size"] = int(flask.request.form["page_size"])
-        if "page" in flask.request.form and flask.request.form["page"] != "":
-            filters["page"] = int(flask.request.form["page"])
 
+    # Filter timeseries for a campaign scope only.
+    if (
+        "campaign_scope_id" in flask.request.args
+        and flask.request.args["campaign_scope_id"] != "None"
+    ):
+        campaign_scope_id = flask.request.args["campaign_scope_id"]
+        if campaign_scope_id in [str(x) for x in campaign_scopes_by_id.keys()]:
+            filters["campaign_scope_id"] = campaign_scope_id
+
+    # Filter value to search in timeseries name.
+    if "in_name" in flask.request.args:
+        filters["in_name"] = flask.request.args["in_name"]
+
+    # Filters for timeseries location (site/building..., recursively or not, and zone).
+    recurse_prefix = ""
+    if "structural_element_recursive" in flask.request.args:
+        recurse_prefix = "recurse_"
+        ui_filters["structural_element_recursive"] = "on"
+
+    for struct_elmt_type in STRUCTURAL_ELEMENT_TYPES:
+        struct_elmt_filter_key = f"{recurse_prefix}{struct_elmt_type}_id"
+        if struct_elmt_filter_key in flask.request.args:
+            struct_elmt_filter_value = flask.request.args[struct_elmt_filter_key]
+            filters[struct_elmt_filter_key] = struct_elmt_filter_value
+            ui_filters["structural_element_filter_type"] = struct_elmt_type
+            ui_filters["structural_element_filter_id"] = struct_elmt_filter_value
+
+    if "zone_id" in flask.request.args and flask.request.args["zone_id"] != "":
+        filters["zone_id"] = flask.request.args["zone_id"]
+
+    # Query args to set current page and page size.
+    if "page_size" in flask.request.args:
+        filters["page_size"] = int(flask.request.args["page_size"])
+    if "page" in flask.request.args and flask.request.args["page"] != "":
+        filters["page"] = int(flask.request.args["page"])
+
+    # Is there any filter value (different then default) defined.
     is_filtered = (
         filters.get("in_name", "") != ""
         or filters["campaign_scope_id"] is not None
@@ -112,16 +125,8 @@ def list():
         )
     )
 
-    campaign_scopes_resp = flask.g.api_client.campaign_scopes.getall(
-        campaign_id=campaign_id, sort="+name"
-    )
-    campaign_scopes_by_id = {}
-    for campaign_scope in campaign_scopes_resp.data:
-        campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
-
     # Get timeseries list applying filters.
     timeseries_resp = flask.g.api_client.timeseries.getall(**filters, sort="+name")
-
     timeseries_data = deepcopy(timeseries_resp.data)
     for ts_data in timeseries_data:
         ts_data["campaign_scope_name"] = campaign_scopes_by_id[

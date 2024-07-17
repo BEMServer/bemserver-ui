@@ -19,9 +19,11 @@ export class TimeseriesListView {
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
 
+    #filters = {};
     #tzName = "UTC";
 
     #formFiltersElmt = null;
+    #searchInputElmt = null;
     #campaignScopeElmt = null;
     #pageInputElmt = null;
     #pageSizeElmt = null;
@@ -43,13 +45,14 @@ export class TimeseriesListView {
     }
 
     #loadOptions(options = {}) {
-        this.filters = options.filters || {};
+        this.#filters = options.filters || {};
         this.#tzName = options.timezone || "UTC";
     }
 
     #cacheDOM() {
         this.#formFiltersElmt = document.getElementById("formFilters");
-        this.#campaignScopeElmt = document.getElementById("campaign_scope");
+        this.#searchInputElmt = document.getElementById("in_name");
+        this.#campaignScopeElmt = document.getElementById("campaign_scope_id");
         this.#pageInputElmt = document.getElementById("page");
         this.#pageSizeElmt = document.getElementById("page_size");
         this.#pageLinkElmts = [].slice.call(document.querySelectorAll(".page-item:not(.disabled) .page-link"));
@@ -64,16 +67,29 @@ export class TimeseriesListView {
     }
 
     #initEventListeners() {
+        this.#searchInputElmt.addEventListener("input", () => {
+            if (this.#filters.in_name != this.#searchInputElmt.value) {
+                this.#searchInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            }
+            else {
+                this.#searchInputElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            }
+        });
+
         this.#campaignScopeElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
-            if (event.target.options[event.target.selectedIndex].value != this.filters.campaign_scope_id) {
+            let newCampaignScopeId = event.target.options[event.target.selectedIndex].value;
+
+            if (newCampaignScopeId != this.#filters.campaign_scope_id) {
                 this.#pageInputElmt.value = 1;
                 event.target.classList.remove("border-info", "bg-info", "bg-opacity-10");
             }
             else {
-                this.#pageInputElmt.value = this.filters.page;
-                event.target.classList.add("border-info", "bg-info", "bg-opacity-10");
+                this.#pageInputElmt.value = this.#filters.page;
+                if (newCampaignScopeId != "None") {
+                    event.target.classList.add("border-info", "bg-info", "bg-opacity-10");
+                }
             }
         });
 
@@ -545,5 +561,12 @@ export class TimeseriesListView {
     mount() {
         this.#loadSitesTreeData();
         this.#loadZonesTreeData();
+
+        // Store initial filter values.
+        this.#filters = {
+            in_name: this.#searchInputElmt.value,
+            campaign_scope_id: this.#campaignScopeElmt.options[this.#campaignScopeElmt.selectedIndex].value,
+            page: this.#pageInputElmt.value,
+        }
     }
 }
