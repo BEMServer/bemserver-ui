@@ -11,3 +11,10 @@ export const debounce = (fn, delay = 500) => {
         }, delay);
     };
 };
+
+
+// Inspired by https://stackoverflow.com/a/44476626
+// Returns a Promise that resolves after "ms" Milliseconds
+export const timer = (ms) => {
+    new Promise(res => setTimeout(res, ms));
+};
