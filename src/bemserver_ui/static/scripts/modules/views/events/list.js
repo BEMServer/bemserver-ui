@@ -231,7 +231,7 @@ export class EventListView {
 
             this.#paginationElmt.page = 1;
             this.refresh();
-        }), 1000);
+        }, 1000));
 
         this.#timestampMaxSearchFilterElmt.addEventListener("datetimeChange", debounce((event) => {
             event.preventDefault();
@@ -240,7 +240,7 @@ export class EventListView {
 
             this.#paginationElmt.page = 1;
             this.refresh();
-        }), 1000);
+        }, 1000));
 
         this.#sourceSearchFilterElmt.addEventListener("input", debounce((event) => {
             event.preventDefault();
@@ -249,7 +249,7 @@ export class EventListView {
 
             this.#paginationElmt.page = 1;
             this.refresh();
-        }), 700);
+        }, 700));
 
         this.#btnRemoveFiltersElmt.addEventListener("click", (event) => {
             event.preventDefault();

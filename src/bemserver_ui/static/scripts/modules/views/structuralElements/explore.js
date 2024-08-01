@@ -141,7 +141,7 @@ export class StructuralElementsExploreView {
             this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#tsPaginationElmt.page = 1;
             this.#refreshTabs();    
-        }), 700);
+        }, 700));
 
         this.#tsClearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
@@ -185,7 +185,7 @@ export class StructuralElementsExploreView {
             this.#alreadyLoadedPerTab[this.#tabDataSelected.id] = false;
             this.#eventsPaginationElmt.page = 1;
             this.#refreshTabs();
-        }), 700);
+        }, 700));
 
         this.#eventsClearSearchBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();

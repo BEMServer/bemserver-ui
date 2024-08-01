@@ -242,12 +242,12 @@ class TimeseriesDataExploreView {
         this.#periodStartDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
             this.#loadChartSeries();
-        }), 1000);
+        }, 1000));
 
         this.#periodEndDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
             this.#loadChartSeries();
-        }), 1000);
+        }, 1000));
 
         this.#aggInputElmt.addEventListener("change", () => {
             this.#updateAggregationBucketState();
