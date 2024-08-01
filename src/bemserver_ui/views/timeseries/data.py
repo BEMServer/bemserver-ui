@@ -1,5 +1,6 @@
 """Timeseries data views"""
 
+import calendar
 import datetime as dt
 import io
 import zoneinfo
@@ -8,8 +9,14 @@ import flask
 
 from bemserver_api_client.enums import Aggregation, BucketWidthUnit, DataFormat
 
+from bemserver_ui.common.analysis import get_completeness_period_types
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
-from bemserver_ui.common.time import convert_html_form_datetime
+from bemserver_ui.common.time import (
+    convert_from_iso,
+    convert_html_form_datetime,
+    get_isoweek_from_date,
+    get_month_weeks,
+)
 from bemserver_ui.common.tools import is_filestream_empty
 from bemserver_ui.extensions import Roles, auth, ensure_campaign_context
 
@@ -62,9 +69,79 @@ def explore():
 @auth.signin_required
 @ensure_campaign_context
 def completeness():
+    timeseries_ids = []
+    if "timeseries" in flask.request.args:
+        timeseries_ids = [
+            int(x) for x in flask.request.args["timeseries"].split(",") if x != ""
+        ]
+
+    ts_datastates_resp = flask.g.api_client.timeseries_datastates.getall(sort="+name")
+    ts_datastate_ids = [int(x["id"]) for x in ts_datastates_resp.data]
+
+    try:
+        data_state_id = int(flask.request.args["data_state"])
+    except (TypeError, ValueError, KeyError):
+        data_state_id = None
+    if len(ts_datastate_ids) > 0:
+        if data_state_id not in ts_datastate_ids:
+            data_state_id = ts_datastate_ids[0]
+    else:
+        data_state_id = None
+
+    period_types = get_completeness_period_types()
+    period_type_ids = [x["id"] for x in period_types]
+
+    period_type = flask.request.args.get("period_type")
+    if len(period_type_ids) > 0:
+        if period_type not in period_type_ids:
+            period_type = period_type_ids[0]
+    else:
+        period_type = None
+
+    tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
+    dt_now = dt.datetime.now(tz=tz)
+
+    nb_years = 20
+    years = list(range(dt_now.year - nb_years + 1, dt_now.year + 1))
+
+    try:
+        period_day = convert_from_iso(flask.request.args.get("period_day"), tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        period_day = dt_now
+
+    period_year = period_day.year
+    if "period_year" in flask.request.args:
+        period_year = int(flask.request.args["period_year"])
+
+    months = {
+        month_number + 1: month_name
+        for month_number, month_name in enumerate(calendar.month_name[1:])
+    }
+
+    period_month = period_day.month
+    if "period_month" in flask.request.args:
+        period_month = int(flask.request.args["period_month"])
+
+    weeks = get_month_weeks(period_year, period_month, tz=tz)
+
+    period_week = get_isoweek_from_date(period_day)
+    if "period_week" in flask.request.args:
+        period_week = flask.request.args["period_week"]
+
     return flask.render_template(
         "pages/timeseries/data/completeness.html",
-        dt_end=dt.datetime.now(tz=zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)),
+        timeseries_ids=",".join([str(x) for x in timeseries_ids]),
+        data_states=ts_datastates_resp.data,
+        data_state_id=data_state_id,
+        period_types=period_types,
+        period_type=period_type,
+        years=years,
+        period_year=period_year,
+        months=months,
+        period_month=period_month,
+        weeks=weeks,
+        period_week=period_week,
+        period_day=period_day,
     )
 
 

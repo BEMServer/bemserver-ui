@@ -35,6 +35,11 @@ export class ChartBase {
         series: [],
     }
 
+    get seriesCount() {
+        let options = this.getOption();
+        return options.series != null ? options.series.length : 0;
+    }
+
     constructor(chartContainerElmt, initOptions = null) {
         this.#chart = echarts.init(chartContainerElmt, null, initOptions);
         this.#chart.setOption(this.#options);

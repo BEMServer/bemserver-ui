@@ -10,61 +10,54 @@
         <div class="col">
             <div class="row mb-2">
                 <div class="col">
+                    <input type="hidden" id="timeseries" value="{{ timeseries_ids }}">
                     {% filter indent(width=20, first=False) %}
                     {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorCompleteness") -}}
                     {% endfilter %}
                 </div>
             </div>
-            <div class="row align-items-end d-lg-flex d-grid">
-                <div class="col">
-                    <div class="row d-lg-flex d-grid mb-2">
-                        <div class="col-auto pb-1 pb-lg-0">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">Period</span>
-                                <select id="periodType" class="form-select" aria-label="Select a period" required>
-                                    <option value="Year-Monthly" selected>Monthly over 1 year</option>
-                                    <option value="Year-Daily">Daily over 1 year</option>
-                                    <option value="Month-Daily">Daily over 1 month</option>
-                                    <option value="Week-Daily">Daily over 1 week</option>
-                                    <option value="Week-Hourly">Hourly over 1 week</option>
-                                    <option value="Day-Hourly">Hourly over 1 day</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="hstack gap-2">
-                                <select id="periodYear" class="form-select form-select-sm d-none invisible" aria-label="Select a period year" required></select>
-                                <select id="periodMonth" class="form-select form-select-sm d-none invisible" aria-label="Select a period month" required>
-                                    <option value="1">January</option>
-                                    <option value="2">February</option>
-                                    <option value="3">March</option>
-                                    <option value="4">April</option>
-                                    <option value="5">May</option>
-                                    <option value="6">June</option>
-                                    <option value="7">July</option>
-                                    <option value="8">August</option>
-                                    <option value="9">September</option>
-                                    <option value="10">October</option>
-                                    <option value="11">November</option>
-                                    <option value="12">December</option>
-                                </select>
-                                <select id="periodWeek" class="form-select form-select-sm w-auto d-none invisible" aria-label="Select a period week" required></select>
-                                <input type="date" id="periodDay" class="form-control form-control-sm d-none invisible" value="{{ dt_end.date().isoformat() }}" max="{{ dt_end.date().isoformat() }}" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row d-lg-flex d-grid">
-                        <div class="col-auto">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text">Timeseries data state</span>
-                                <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
-                            </div>
-                        </div>
+            <div class="row d-lg-flex d-grid mb-2">
+                <div class="col-auto pb-1 pb-lg-0">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Period</span>
+                        <select id="periodType" class="form-select" aria-label="Select a period" required>
+                            {% for x in period_types %}
+                            <option value="{{ x.id }}"{% if x.id == period_type %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
-                <div class="col-auto pt-2 pt-lg-0">
-                    <div class="d-flex justify-content-end">
-                        <button id="loadBtn" class="btn btn-sm btn-outline-primary" title="Load chart"><i class="bi bi-arrow-clockwise"></i> Load chart</button>
+                <div class="col-auto">
+                    <div class="hstack gap-2">
+                        <input type="hidden" id="tzname" value="{{ g.campaign_ctxt.tz_name }}">
+                        <select id="periodYear" class="form-select form-select-sm d-none invisible" aria-label="Select a period year" required>
+                            {% for x in years %}
+                            <option value="{{ x }}"{% if x == period_year %} selected{% endif %}>{{ x }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="periodMonth" class="form-select form-select-sm d-none invisible" aria-label="Select a period month" required>
+                            {% for month_number, month_name in months | items %}
+                            <option value="{{ month_number }}"{% if month_number == period_month %} selected{% endif %}>{{ month_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="periodWeek" class="form-select form-select-sm w-auto d-none invisible" aria-label="Select a period week" required>
+                            {% for isoweek, week_info in weeks | items %}
+                            <option value="{{ isoweek }}"{% if isoweek == period_week %} selected{% endif %}>{{ isoweek }} ({{ week_info["start"].date().isoformat() }} | {{ week_info["end"].date().isoformat() }})</option>
+                            {% endfor %}
+                        </select>
+                        <input type="date" id="periodDay" class="form-control form-control-sm d-none invisible" value="{{ period_day.date().isoformat() }}" max="{{ period_day.date().isoformat() }}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-lg-flex d-grid">
+                <div class="col-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Timeseries data state</span>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required>
+                            {% for x in data_states %}
+                            <option value="{{ x.id }}"{% if x.id == data_state_id %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
@@ -76,7 +69,6 @@
         </div>
     </div>
 </div>
-<input type="hidden" id="tzname" value="{{ g.campaign_ctxt.tz_name }}">
 {% endblock main_content %}
 
 {% block body_scripts %}

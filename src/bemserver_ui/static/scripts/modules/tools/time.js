@@ -76,4 +76,33 @@ export class TimeCalendar {
             || (weekFirstDate >= rangeStartDate && weekFirstDate < rangeEndDate && weekLastDate >= rangeEndDate)
         );
     }
+
+    static getMonthWeeks(year, month) {
+        let weeks = {};
+
+        let periodStartDate = new Date(Date.UTC(year, month -1, 1));
+        let periodEndDate = new Date(Date.UTC(year, month, 1));
+        let baseDate = new Date(Date.UTC(year, month - 1, 1));
+
+        let dowOffset = 1; // We want weeks to start on monday.
+        let [weekStartDate, weekEndDate] = TimeCalendar.getWeek(baseDate, dowOffset);
+        let weekNumber = TimeCalendar.getWeekNumber(baseDate, dowOffset);
+
+        do {
+            let weekISO = `${weekStartDate.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`;
+
+            weeks[weekISO] = {
+                "week_num": weekNumber,
+                "start": weekStartDate,
+                "end": weekEndDate,
+            }
+
+            baseDate.setDate(baseDate.getDate() + 7);
+            [weekStartDate, weekEndDate] = TimeCalendar.getWeek(baseDate, dowOffset);
+            weekNumber = TimeCalendar.getWeekNumber(baseDate, dowOffset);
+        }
+        while (TimeCalendar.isWeekInRange(periodStartDate, periodEndDate, weekStartDate, weekEndDate));
+
+        return weeks;
+    }
 }
