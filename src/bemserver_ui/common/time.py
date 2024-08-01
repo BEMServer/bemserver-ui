@@ -173,3 +173,85 @@ def add_time(dt_ref, years=0, months=0):
         dt_ref.microsecond,
         tzinfo=dt_ref.tzinfo,
     )
+
+
+def get_weeks(dt_start, dt_end, *, complete_weeks=True):
+    weeks = {}
+
+    if complete_weeks:
+        # Extend bounds if start/end is not the first/last day of a week.
+        if dt_start.weekday() != 0:
+            nb_backward = dt_start.weekday()
+            dt_start -= dt.timedelta(days=nb_backward)
+        if dt_end.weekday() != 6:
+            nb_forward = 6 - dt_end.weekday()
+            dt_end += dt.timedelta(days=nb_forward)
+
+    dt_current = dt_start
+    while dt_current <= dt_end:
+        dt_current_isocal = dt_current.isocalendar()
+
+        cur_week = f"{dt_current_isocal.year}-W{dt_current_isocal.week:02d}"
+        if cur_week not in weeks:
+            weeks[cur_week] = {
+                "week_num": dt_current_isocal.week,
+                "start": None,
+                "end": None,
+                "dates": [],
+            }
+
+        weeks[cur_week]["dates"].append(dt_current)
+
+        if dt_current == dt_start or dt_current_isocal.weekday == 1:
+            weeks[cur_week]["start"] = dt_current
+
+        if dt_current == dt_end or dt_current_isocal.weekday == 7:
+            weeks[cur_week]["end"] = dt_current
+
+        dt_current += dt.timedelta(days=1.0)
+
+    return weeks
+
+
+def get_year_weeks(year, *, complete_weeks=True, tz=dt.timezone.utc):
+    dt_start = dt.datetime(year, 1, 1, tzinfo=tz)
+    dt_end = dt.datetime(year, 12, 31, tzinfo=tz)
+    return get_weeks(dt_start, dt_end, complete_weeks=complete_weeks)
+
+
+def get_month_weeks(year, month, *, complete_weeks=True, tz=dt.timezone.utc):
+    dt_start = dt.datetime(year, month, 1, tzinfo=tz)
+    dt_end = dt.datetime(year, month, calendar.monthrange(year, month)[1], tzinfo=tz)
+    return get_weeks(dt_start, dt_end, complete_weeks=complete_weeks)
+
+
+def _get_date_from_isoweek(isoweek, *, tz=dt.timezone.utc):
+    try:
+        ret = dt.datetime.strptime(isoweek, "%G-W%V-%u")
+    except (
+        ValueError,
+        TypeError,
+    ) as exc:
+        raise BEMServerUICommonInvalidDatetimeError from exc
+
+    try:
+        ret = ret.replace(tzinfo=tz)
+    except (
+        TypeError,
+        zi.ZoneInfoNotFoundError,
+    ) as exc:
+        raise BEMServerUICommonInvalidDatetimeError from exc
+
+    return ret
+
+
+def get_period_from_isoweek(isoweek, *, tz=dt.timezone.utc):
+    isoweek_firstday = 1
+    dt_start = _get_date_from_isoweek(f"{isoweek}-{isoweek_firstday}", tz=tz)
+    dt_end = _get_date_from_isoweek(f"{isoweek}-{isoweek_firstday + 6}", tz=tz)
+    return dt_start, dt_end
+
+
+def get_isoweek_from_date(date, *, include_daynum=False):
+    isoweek_format = "%G-W%V-%u" if include_daynum else "%G-W%V"
+    return dt.datetime.strftime(date, isoweek_format)

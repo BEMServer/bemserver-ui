@@ -144,4 +144,11 @@ export class TimeseriesChartCompleteness extends ChartBase {
 
         this.setOption(options);
     }
+
+    clear() {
+        super.clear();
+        this.showLoading();
+        this.#initChartOptions();
+        this.hideLoading();
+    }
 }

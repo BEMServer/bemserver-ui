@@ -1,5 +1,6 @@
 """Common time tests"""
 
+import calendar
 import datetime as dt
 from zoneinfo import ZoneInfo
 
@@ -7,9 +8,15 @@ import pytest
 
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 from bemserver_ui.common.time import (
+    _get_date_from_isoweek,
     add_time,
     convert_from_iso,
     convert_html_form_datetime,
+    get_isoweek_from_date,
+    get_month_weeks,
+    get_period_from_isoweek,
+    get_weeks,
+    get_year_weeks,
     strfdelta,
 )
 
@@ -321,3 +328,127 @@ class TestCommonTime:
             dt.datetime(2019, 2, 28, 9, 7, tzinfo=tz)
         )
         assert add_time(dt_ref, years=-4) == (dt.datetime(2016, 2, 29, 9, 7, tzinfo=tz))
+
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("complete_weeks", [False, True])
+    def test_get_weeks(self, tz, complete_weeks):
+        dt_start = dt.datetime(2023, 12, 21, tzinfo=tz)
+        dt_end = dt.datetime(2024, 2, 3, tzinfo=tz)
+        weeks = get_weeks(dt_start, dt_end, complete_weeks=complete_weeks)
+
+        first_isoweek = dt.datetime.strftime(dt_start, "%G-W%V")
+        assert first_isoweek in weeks
+        if complete_weeks:
+            assert weeks[first_isoweek]["start"] <= dt_start
+        else:
+            assert weeks[first_isoweek]["start"] == dt_start
+
+        last_isoweek = dt.datetime.strftime(dt_end, "%G-W%V")
+        assert last_isoweek in weeks
+        if complete_weeks:
+            assert weeks[last_isoweek]["end"] >= dt_end
+        else:
+            assert weeks[last_isoweek]["end"] == dt_end
+
+        for isoweek, week_info in weeks.items():
+            dt_start_isocal = week_info["start"].isocalendar()
+            assert isoweek == f"{dt_start_isocal.year}-W{dt_start_isocal.week:02d}"
+            assert week_info["week_num"] == dt_start_isocal.week
+            assert week_info["start"] in week_info["dates"]
+            assert week_info["end"] in week_info["dates"]
+            assert week_info["start"] <= week_info["end"]
+            if complete_weeks:
+                assert len(week_info["dates"]) == 7
+            else:
+                assert 1 <= len(week_info["dates"]) <= 7
+
+    @pytest.mark.parametrize("year", [2020, 2021, 2022, 2023, 2024])
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("complete_weeks", [False, True])
+    def test_get_year_weeks(self, year, tz, complete_weeks):
+        weeks = get_year_weeks(year, complete_weeks=complete_weeks, tz=tz)
+        for isoweek, week_info in weeks.items():
+            dt_start_isocal = week_info["start"].isocalendar()
+            assert isoweek == f"{dt_start_isocal.year}-W{dt_start_isocal.week:02d}"
+            assert week_info["week_num"] == dt_start_isocal.week
+            assert week_info["start"] in week_info["dates"]
+            assert week_info["end"] in week_info["dates"]
+            assert week_info["start"] <= week_info["end"]
+            if complete_weeks:
+                assert len(week_info["dates"]) == 7
+            else:
+                assert 1 <= len(week_info["dates"]) <= 7
+
+    @pytest.mark.parametrize("tz", [dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("complete_weeks", [False, True])
+    def test_get_month_weeks(self, tz, complete_weeks):
+        year = 2024
+        month = 2
+        weeks = get_month_weeks(year, month, complete_weeks=complete_weeks, tz=tz)
+
+        dt_start = dt.datetime(year, month, 1, tzinfo=tz)
+        dt_start_isocal = dt_start.isocalendar()
+        dt_end = dt.datetime(
+            year, month, calendar.monthrange(year, month)[1], tzinfo=tz
+        )
+
+        first_isoweek = dt.datetime.strftime(dt_start, "%G-W%V")
+        assert first_isoweek in weeks
+        if complete_weeks:
+            assert weeks[first_isoweek]["start"] <= dt_start
+        else:
+            assert weeks[first_isoweek]["start"] == dt_start
+
+        last_isoweek = dt.datetime.strftime(dt_end, "%G-W%V")
+        assert last_isoweek in weeks
+        if complete_weeks:
+            assert weeks[last_isoweek]["end"] >= dt_end
+        else:
+            assert weeks[last_isoweek]["end"] == dt_end
+
+        for isoweek, week_info in weeks.items():
+            dt_start_isocal = week_info["start"].isocalendar()
+            assert isoweek == f"{dt_start_isocal.year}-W{dt_start_isocal.week:02d}"
+            assert week_info["week_num"] == dt_start_isocal.week
+            assert week_info["start"] in week_info["dates"]
+            assert week_info["end"] in week_info["dates"]
+            assert week_info["start"] <= week_info["end"]
+            if complete_weeks:
+                assert len(week_info["dates"]) == 7
+            else:
+                assert 1 <= len(week_info["dates"]) <= 7
+
+        assert len(weeks) == 5
+
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    def test_get_date_from_isoweek(self, tz):
+        ret = _get_date_from_isoweek("2024-W01-1", tz=tz)
+        assert ret == dt.datetime(2024, 1, 1, tzinfo=tz)
+
+    def test_get_date_from_isoweek_errors(self):
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            _get_date_from_isoweek("whatever")
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            _get_date_from_isoweek("2024-W01-666")
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            _get_date_from_isoweek("2024-W01-1", tz="bad_tz")
+
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    def test_get_period_from_isoweek(self, tz):
+        dt_start, dt_end = get_period_from_isoweek("2024-W01", tz=tz)
+        assert dt_start == dt.datetime(2024, 1, 1, tzinfo=tz)
+        assert dt_end == dt.datetime(2024, 1, 7, tzinfo=tz)
+
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    def test_get_isoweek_from_date(self, tz):
+        dt_ref = dt.datetime(2024, 7, 24, tzinfo=tz)
+        dt_ref_isocal = dt_ref.isocalendar()
+
+        isoweek = get_isoweek_from_date(dt_ref)
+        assert isoweek == f"{dt_ref_isocal.year}-W{dt_ref_isocal.week}"
+
+        isoweek = get_isoweek_from_date(dt_ref, include_daynum=True)
+        assert (
+            isoweek
+            == f"{dt_ref_isocal.year}-W{dt_ref_isocal.week}-{dt_ref.weekday() + 1}"
+        )

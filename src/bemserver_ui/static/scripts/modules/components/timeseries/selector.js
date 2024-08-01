@@ -6,7 +6,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
-import { debounce } from "/static/scripts/modules/tools/utils.js";
+import { debounce, timer } from "/static/scripts/modules/tools/utils.js";
 
 
 class TimeseriesItem {
@@ -26,7 +26,7 @@ class TimeseriesItem {
 }
 
 
-export class SelectedItem extends HTMLDivElement {
+class SelectedItem extends HTMLDivElement {
 
     #tsItem = null;
 
@@ -47,12 +47,6 @@ export class SelectedItem extends HTMLDivElement {
             event.preventDefault();
 
             this.remove();
-
-            let removeEvent = new CustomEvent(
-                "remove",
-                { detail: this.#tsItem },
-            );
-            this.dispatchEvent(removeEvent);
         });
 
         this.#removeBtnElmt.addEventListener("mouseover", (event) => {
@@ -98,10 +92,19 @@ export class SelectedItem extends HTMLDivElement {
 
         this.#initEventListeners();
     }
+
+    remove(dispatchActionEvents = true) {
+        super.remove();
+
+        if (dispatchActionEvents) {
+            let removeEvent = new CustomEvent("remove", { detail: this.#tsItem });
+            this.dispatchEvent(removeEvent);
+        }
+    }
 }
 
 
-export class SearchResultItem extends HTMLButtonElement {
+class SearchResultItem extends HTMLButtonElement {
 
     #tsItem = null;
     #isActive = false;
@@ -124,14 +127,6 @@ export class SearchResultItem extends HTMLButtonElement {
     get isActive() {
         return this.#isActive;
     }
-    set isActive(value) {
-        let cleanValue = Parser.parseBoolOrDefault(value, this.#isActive);
-        if (cleanValue != this.#isActive) {
-            this.#isActive = cleanValue;
-            this.#update();
-            this.#dispatchEvents();
-        }
-    }
 
     get isEnabled() {
         return this.#isEnabled;
@@ -148,28 +143,14 @@ export class SearchResultItem extends HTMLButtonElement {
         this.addEventListener("click", (event) => {
             event.preventDefault();
 
-            if (this.#isEnabled) {
-                this.#isActive = !this.#isActive;
-                this.#update();
-                this.#dispatchEvents();
-            }
+            this.toggle();
         });
     }
 
     #dispatchEvents() {
         let eventDetail = { timeseries: this.#tsItem, isActive: this.#isActive };
-
-        let btnEvent = new CustomEvent(
-            this.#isActive ? "on" : "off",
-            { detail: eventDetail, bubbles: true },
-        );
-        this.dispatchEvent(btnEvent);
-
-        let btnToggleEvent = new CustomEvent(
-            "toggle",
-            { detail: eventDetail, bubbles: true },
-        );
-        this.dispatchEvent(btnToggleEvent);
+        let toggleEvent = new CustomEvent("toggle", { detail: eventDetail, bubbles: true });
+        this.dispatchEvent(toggleEvent);
     }
 
     #update() {
@@ -194,7 +175,6 @@ export class SearchResultItem extends HTMLButtonElement {
         }
     }
 
-
     connectedCallback() {
         this.innerHTML = "";
         this.style.maxWidth = "250px";
@@ -205,6 +185,35 @@ export class SearchResultItem extends HTMLButtonElement {
         this.innerText = this.#tsItem.label;
 
         this.#initEventListeners();
+    }
+
+    select(dispatchActionEvents = true) {
+        if (this.#isEnabled && !this.#isActive) {
+            this.#isActive = true;
+            this.#update();
+            if (dispatchActionEvents) {
+                this.#dispatchEvents();
+            }
+        }
+    }
+
+    unselect(dispatchActionEvents = true) {
+        if (this.#isEnabled && this.#isActive) {
+            this.#isActive = false;
+            this.#update();
+            if (dispatchActionEvents) {
+                this.#dispatchEvents();
+            }
+        }
+    }
+
+    toggle(dispatchActionEvents = true) {
+        if (this.#isActive) {
+            this.unselect(dispatchActionEvents);
+        }
+        else {
+            this.select(dispatchActionEvents);
+        }
     }
 }
 
@@ -217,13 +226,13 @@ export class TimeseriesSelector extends HTMLElement {
     #internalAPIRequester = null;
     #filterReqIDs = {};
     #searchReqID = null;
-    #selectReqID = null;
     #sitesTreeReqID = null;
     #zonesTreeReqID = null;
+    #getTimeseriesRedIDs = {};
 
     #selectedItemsContainerElmt = null;
     #clearSelectionBtnElmt = null;
-    #selectedItems = [];
+    #dropdownSearchBtnElmt = null;
     #dropdownSearchPanelElmt = null;
     #bsDropdownSearchPanel = null;
 
@@ -251,8 +260,28 @@ export class TimeseriesSelector extends HTMLElement {
 
     #availableFilters = ["campaign-scope", "site", "building", "storey", "space", "zone", "extend"];
 
+    // null -> not loaded
+    // loading
+    // ready -> loaded
+    #filterStates = {
+        "sites": null,
+        "zones": null,
+        "campaign_scopes": null,
+    };
+
+    // List of SelectedItem instance that are in selectedItemsContainerElmt.
+    #selectedItemElmts = [];
+
+    #isOpened = false;
+
+    // TODO rename to selectedTimeseries
     get selectedItems() {
-        return this.#selectedItems;
+        // TODO maybe we can assume here that all element in selected items container are only SelectedItem instances?
+        return this.#selectedItemElmts.map(x => x.timeseries);
+    }
+
+    get isOpened() {
+        return this.#isOpened;
     }
 
     constructor(options = {}) {
@@ -288,6 +317,7 @@ export class TimeseriesSelector extends HTMLElement {
     #cacheDOM() {
         this.#selectedItemsContainerElmt = document.getElementById("selectedItemsContainer");
         this.#clearSelectionBtnElmt = this.querySelector("#clearSelectionBtn");
+        this.#dropdownSearchBtnElmt = document.getElementById("dropdownSearchBtn");
         this.#dropdownSearchPanelElmt = document.getElementById("dropdownSearchPanel");
         this.#bsDropdownSearchPanel = bootstrap.Dropdown.getOrCreateInstance(this.#dropdownSearchPanelElmt);
 
@@ -327,8 +357,8 @@ export class TimeseriesSelector extends HTMLElement {
             this.#updateSearchInput();
 
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
-        }), 700);
+            this.#loadSearchResults();
+        }, 700));
 
         this.#filtersRemoveBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
@@ -355,7 +385,7 @@ export class TimeseriesSelector extends HTMLElement {
             }
             if (hasFilterChanged) {
                 this.#searchResultsPaginationElmt.page = 1;
-                this.refresh();
+                this.#loadSearchResults();
             }
         });
 
@@ -365,7 +395,7 @@ export class TimeseriesSelector extends HTMLElement {
             this.#searchInputElmt.value = "";
             this.#updateSearchInput();
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#searchResultsPageSizeSelectorElmt.addEventListener("pageSizeChange", (event) => {
@@ -373,24 +403,27 @@ export class TimeseriesSelector extends HTMLElement {
 
             if (event.detail.newValue != event.detail.oldValue) {
                 this.#searchResultsPaginationElmt.page = 1;
-                this.refresh();
+                this.#loadSearchResults();
             }
         });
 
         this.#searchResultsPaginationElmt.addEventListener("pageItemClick", (event) => {
             event.preventDefault();
 
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#selectAllResultsBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            let searchResultItems = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll("button"))
+            // Get all search result items and filter them to get only the part corresponding to the unselected items.
+            let searchResultItems = [].slice.call(
+                this.#searchResultsContainerElmt.querySelectorAll(`button[data-ts-id]`)
+            ).filter(x => !this.#isSelected(x.timeseries.id));
+
             for (let item of searchResultItems) {
-                if (!item.isActive && item.isEnabled) {
-                    item.click();
-                }
+                item.select(false);
+                this.#updateSelection(item, false);
                 if (this.#isSelectionLimitReached()) {
                     break;
                 }
@@ -400,11 +433,14 @@ export class TimeseriesSelector extends HTMLElement {
         this.#unselectAllResultsBtnElmt.addEventListener("click", (event) => {
             event.preventDefault();
 
-            let searchResultItems = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll("button"))
+            // Get all search result items and filter them to get only the part corresponding to the selected items.
+            let searchResultItems = [].slice.call(
+                this.#searchResultsContainerElmt.querySelectorAll(`button[data-ts-id]`)
+            ).filter(x => this.#isSelected(x.timeseries.id));
+
             for (let item of searchResultItems) {
-                if (item.isActive) {
-                    item.click();
-                }
+                item.unselect(false);
+                this.#updateSelection(item, false);
             }
         });
 
@@ -424,82 +460,126 @@ export class TimeseriesSelector extends HTMLElement {
             }
 
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#siteSelector.addEventListener("treeNodeUnselect", () => {
             this.#siteSelectorRecursiveSwitchElmt.removeAttribute("disabled");
 
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#zoneSelector.addEventListener("treeNodeSelect", () => {
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#zoneSelector.addEventListener("treeNodeUnselect", () => {
             this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
+            this.#loadSearchResults();
         });
 
         this.#siteSelectorRecursiveSwitchElmt.addEventListener("change", () => {
-            if (this.#siteSelector.selectedData != null)
-            {
+            if (this.#siteSelector.selectedData != null) {
                 this.#searchResultsPaginationElmt.page = 1;
-                this.refresh();
+                this.#loadSearchResults();
             }
         });
 
-        this.#dropdownSearchPanelElmt.addEventListener("shown.bs.dropdown", () => {
+        this.#dropdownSearchBtnElmt.addEventListener("shown.bs.dropdown", () => {
+            this.#isOpened = true;
             this.#fixDropdownSearchPanelPosition();
+        });
+
+        this.#dropdownSearchBtnElmt.addEventListener("show.bs.dropdown", () => {
+            let eventDetail = { isOpened: true };
+
+            let openEvent = new CustomEvent("openPanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(openEvent);
+
+            let toggleEvent = new CustomEvent("togglePanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(toggleEvent);
+        });
+
+        this.#dropdownSearchBtnElmt.addEventListener("hide.bs.dropdown", () => {
+            let eventDetail = { isOpened: false };
+
+            let openEvent = new CustomEvent("closePanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(openEvent);
+
+            let toggleEvent = new CustomEvent("togglePanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(toggleEvent);
+        });
+
+        this.#dropdownSearchBtnElmt.addEventListener("hidden.bs.dropdown", () => {
+            this.#isOpened = false;
         });
     }
 
     #updateSearchInput() {
         if (this.#searchInputElmt.value == "") {
             this.#searchInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
+            this.#searchClearBtnElmt.classList.add("d-none", "invisible");
         }
         else if (!this.#searchInputElmt.classList.contains("border-info")) {
             this.#searchInputElmt.classList.add("border-info", "bg-info", "bg-opacity-10");
+            this.#searchClearBtnElmt.classList.remove("d-none", "invisible");
         }
     }
 
     #update() {
-        if (this.#searchInputElmt.value != "") {
-            this.#searchClearBtnElmt.classList.remove("d-none", "invisible");
-        }
-        else {
-            this.#searchClearBtnElmt.classList.add("d-none", "invisible");
-        }
-
         this.#searchResultsCountElmt.update({totalCount: this.#searchResultsPaginationElmt.totalItems, firstItem: this.#searchResultsPaginationElmt.startItem, lastItem: this.#searchResultsPaginationElmt.endItem});
 
         this.#updateSelectedItemsContainer();
+        this.#updateSearchResultsContainer();
+    }
+
+    #updateSelectedItemsCounter() {
+        // Update the selected items counter.
+        this.#countResultsSelectedElmt.innerText = `No items selected`;
+        if (this.#selectedItemElmts.length > 0) {
+            this.#countResultsSelectedElmt.innerText = `${this.#selectedItemElmts.length.toString()}${this.#allowedSelectionLimit != -1 ? `/${this.#allowedSelectionLimit.toString()}`: ""} item${this.#selectedItemElmts.length > 1 ? "s" : ""} selected out of ${this.#searchResultsPaginationElmt.totalItems.toString()}`;
+        }
     }
 
     #updateSelectedItemsContainer() {
-        if (this.#selectedItems.length <= 0) {
+        if (this.#selectedItemElmts.length <= 0) {
             this.#selectedItemsContainerElmt.innerHTML = "";
 
             this.#clearSelectionBtnElmt.classList.add("d-none", "invisible");
         }
-
-        this.#countResultsSelectedElmt.innerText = `No items selected`;
-        if (this.#selectedItems.length > 0) {
-            this.#countResultsSelectedElmt.innerText = `${this.#selectedItems.length.toString()}${this.#allowedSelectionLimit != -1 ? `/${this.#allowedSelectionLimit.toString()}`: ""} item${this.#selectedItems.length > 1 ? "s" : ""} selected out of ${this.#searchResultsPaginationElmt.totalItems.toString()}`;
+        else {
+            // Ensure that #selectedItemElmts and elements in selected items container is synchronized.
+            // Add missing elements.
+            for (let selectedItemElmt of this.#selectedItemElmts) {
+                if (!this.#selectedItemsContainerElmt.contains(selectedItemElmt)) {
+                    this.#selectedItemsContainerElmt.appendChild(selectedItemElmt);
+                }
+            }
+            // Remove ghosts... (this should never happen)
+            let selectedItemElmts = [].slice.call(this.#selectedItemsContainerElmt.querySelectorAll(`div[data-ts-id]`));
+            for (let selectedItemElmt of selectedItemElmts) {
+                if (!this.#selectedItemElmts.includes(selectedItemElmt)) {
+                    selectedItemElmt.remove(false);
+                }
+            }
 
             this.#clearSelectionBtnElmt.classList.remove("d-none", "invisible");
         }
 
+        this.#updateSelectedItemsCounter();
+
+        // Enable or disable (not selected yet) search items based on reaching the selection limit.
         if (this.#isSelectionLimitReached()) {
             this.#selectionLimitElmt.classList.replace("text-muted", "text-danger");
             this.#selectAllResultsBtnElmt.setAttribute("disabled", true);
 
             let notSelectedSearchResultElmts = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll(`button:not(.active)`));
             for (let searchResultItem of notSelectedSearchResultElmts) {
-                searchResultItem.isEnabled = false;
+                if (!this.#isSelected(searchResultItem.timeseries.id)) {
+                    searchResultItem.isEnabled = false;
+                }
             }
         }
         else {
@@ -513,74 +593,101 @@ export class TimeseriesSelector extends HTMLElement {
         }
     }
 
+    #updateSearchResultsContainer() {
+        let searchResultItems = [].slice.call(this.#searchResultsContainerElmt.querySelectorAll(`button[data-ts-id]`))
+        for (let item of searchResultItems) {
+            if (this.#isSelected(item.timeseries.id)) {
+                item.select(false);
+            }
+            else {
+                item.unselect(false);
+            }
+        }
+    }
+
     #initFilters() {
-        if (this.#defaultFilters["extend"]) {
-            this.#siteSelectorRecursiveSwitchElmt.checked = Parser.parseBoolOrDefault(this.#defaultFilters["extend"].toLowerCase(), false);
-        }
+        // Check if some filters are not initialized yet...
+        if (!Object.values(this.#filterStates).every(x => x != null)) {
+            if (this.#defaultFilters["extend"] != null && this.#filterStates["extend"] == null) {
+                this.#filterStates["extend"] = "loading";
+                this.#siteSelectorRecursiveSwitchElmt.checked = Parser.parseBoolOrDefault(this.#defaultFilters["extend"].toLowerCase(), false);
+                this.#filterStates["extend"] = "loaded";
+            }
 
-        this.#loadSitesTreeData();
-        this.#loadZonesTreeData();
+            this.#loadSitesTreeData();
+            this.#loadZonesTreeData();
 
-        this.#searchSelectFilters = {
-            "campaign_scope_id": {
-                "label": "campaign scopes",
-                "fetchUrl": app.urlFor(`api.campaign_scopes.retrieve_list`),
-                "htmlElement": new FilterSelect(),
-                "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
-            },
-        };
+            if (this.#filterStates["campaign_scopes"] == null) {
+                this.#filterStates["campaign_scopes"] = "loading";
 
-        for (let [filterFetchUrl, filterReqID] of Object.entries(this.#filterReqIDs)) {
-            this.#internalAPIRequester.abort(filterReqID);
-            this.#filterReqIDs[filterFetchUrl] = null;
-        }
+                this.#searchSelectFilters = {
+                    "campaign_scope_id": {
+                        "label": "campaign scopes",
+                        "fetchUrl": app.urlFor(`api.campaign_scopes.retrieve_list`),
+                        "htmlElement": new FilterSelect(),
+                        "defaultValue": (this.#defaultFilters["campaign-scope"] || null)?.toString(),
+                    },
+                };
 
-        this.#filterReqIDs = this.#internalAPIRequester.gets(
-            Object.values(this.#searchSelectFilters).map((filterOpts) => { return filterOpts["fetchUrl"]; }),
-            (data) => {
-                for (let [index, filterData] of Object.entries(data)) {
-                    filterData = filterData.data != undefined ? filterData.data : filterData;
-
-                    let searchSelectFilterKey = Object.keys(this.#searchSelectFilters)[index];
-                    let searchSelectFilterOpts = this.#searchSelectFilters[searchSelectFilterKey];
-
-                    let selectedOptionIndex = 0;
-                    let selectOptions = filterData.map((row, filterIndex) => {
-                        if (searchSelectFilterOpts["defaultValue"] == row.id.toString()) {
-                            selectedOptionIndex = filterIndex + 1;
-                        }
-                        return {value: row.id.toString(), text: row.name};
-                    });
-                    selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
-
-                    let searchSelectFilterElmt = searchSelectFilterOpts["htmlElement"];
-                    searchSelectFilterElmt.id = searchSelectFilterKey;
-                    this.#searchFiltersContainerElmt.insertBefore(searchSelectFilterElmt, this.#filtersRemoveBtnElmt);
-                    searchSelectFilterElmt.load(selectOptions, selectedOptionIndex);
-                    searchSelectFilterElmt.addEventListener("change", (event) => {
-                        event.preventDefault();
-
-                        this.#searchResultsPaginationElmt.page = 1;
-                        this.refresh();
-                    });
+                for (let [filterFetchUrl, filterReqID] of Object.entries(this.#filterReqIDs)) {
+                    this.#internalAPIRequester.abort(filterReqID);
+                    this.#filterReqIDs[filterFetchUrl] = null;
                 }
 
-                this.refresh();
-            },
-            (error) => {
-                app.flashMessage(error.toString(), "error");
-            },
-        );
+                this.#filterReqIDs = this.#internalAPIRequester.gets(
+                    Object.values(this.#searchSelectFilters).map((filterOpts) => { return filterOpts["fetchUrl"]; }),
+                    (data) => {
+                        for (let [index, filterData] of Object.entries(data)) {
+                            filterData = filterData.data != undefined ? filterData.data : filterData;
+
+                            let searchSelectFilterKey = Object.keys(this.#searchSelectFilters)[index];
+                            let searchSelectFilterOpts = this.#searchSelectFilters[searchSelectFilterKey];
+
+                            let selectedOptionIndex = 0;
+                            let selectOptions = filterData.map((row, filterIndex) => {
+                                if (searchSelectFilterOpts["defaultValue"] == row.id.toString()) {
+                                    selectedOptionIndex = filterIndex + 1;
+                                }
+                                return {value: row.id.toString(), text: row.name};
+                            });
+                            selectOptions.splice(0, 0, {value: "None", text: `All ${searchSelectFilterOpts["label"]}`});
+
+                            let searchSelectFilterElmt = searchSelectFilterOpts["htmlElement"];
+                            searchSelectFilterElmt.id = searchSelectFilterKey;
+                            this.#searchFiltersContainerElmt.insertBefore(searchSelectFilterElmt, this.#filtersRemoveBtnElmt);
+                            searchSelectFilterElmt.load(selectOptions, selectedOptionIndex);
+                            searchSelectFilterElmt.addEventListener("change", (event) => {
+                                event.preventDefault();
+
+                                this.#searchResultsPaginationElmt.page = 1;
+                                this.#loadSearchResults();
+                            });
+                        }
+
+                        this.#filterStates["campaign_scopes"] = "loaded";
+                        this.#loadSearchResults();
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
+                        this.#filterStates["campaign_scopes"] = null;
+                    },
+                );
+            }
+        }
     }
 
     #isSelected(tsId) {
-        return this.#selectedItems.map(ts => ts.id).includes(tsId);
+        return this.#getSelectedItem(tsId) != null;
+    }
+
+    #getSelectedItem(tsId) {
+        return this.#selectedItemElmts.find(x => x.timeseries.id.toString() == tsId.toString());
     }
 
     #isSelectionLimitReached() {
         let isLimitReached = false;
         if (this.#allowedSelectionLimit != -1) {
-            isLimitReached = this.#selectedItems.length >= this.#allowedSelectionLimit;
+            isLimitReached = this.#selectedItemElmts.length >= this.#allowedSelectionLimit;
         }
         return isLimitReached;
     }
@@ -590,117 +697,134 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     #loadSitesTreeData() {
-        this.#siteSelector.showLoadingTree();
+        if (this.#filterStates["sites"] == null) {
+            this.#filterStates["sites"] = "loading";
 
-        if (this.#sitesTreeReqID != null) {
-            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
-            this.#sitesTreeReqID = null;
-        }
+            this.#siteSelector.showLoadingTree();
 
-        this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            app.urlFor(`api.structural_elements.retrieve_tree_sites`),
-            (data) => {
-                this.#siteSelector.loadTree(data.data);
+            if (this.#sitesTreeReqID != null) {
+                this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+                this.#sitesTreeReqID = null;
+            }
 
-                for (let structElmtType of ["site", "building", "storey", "space"]) {
-                    if (this.#defaultFilters[structElmtType]) {
-                        this.#siteSelector.select(`${structElmtType}-${this.#defaultFilters[structElmtType]}`);
-                        break;
+            this.#sitesTreeReqID = this.#internalAPIRequester.get(
+                app.urlFor(`api.structural_elements.retrieve_tree_sites`),
+                (data) => {
+                    this.#siteSelector.loadTree(data.data);
+
+                    for (let structElmtType of ["site", "building", "storey", "space"]) {
+                        if (this.#defaultFilters[structElmtType]) {
+                            this.#siteSelector.select(`${structElmtType}-${this.#defaultFilters[structElmtType]}`);
+                            break;
+                        }
                     }
-                }
-            },
-            (error) => {
-                app.flashMessage(error.toString(), "error");
-            },
-        );
+
+                    this.#filterStates["sites"] = "loaded";
+                },
+                (error) => {
+                    app.flashMessage(error.toString(), "error");
+                    this.#filterStates["sites"] = null;
+                },
+            );
+        }
     }
 
     #loadZonesTreeData() {
-        this.#zoneSelector.showLoadingTree();
+        if (this.#filterStates["zones"] == null) {
+            this.#filterStates["zones"] = "loading";
 
-        if (this.#zonesTreeReqID != null) {
-            this.#internalAPIRequester.abort(this.#zonesTreeReqID);
-            this.#zonesTreeReqID = null;
+            this.#zoneSelector.showLoadingTree();
+
+            if (this.#zonesTreeReqID != null) {
+                this.#internalAPIRequester.abort(this.#zonesTreeReqID);
+                this.#zonesTreeReqID = null;
+            }
+
+            this.#zonesTreeReqID = this.#internalAPIRequester.get(
+                app.urlFor(`api.structural_elements.retrieve_tree_zones`),
+                (data) => {
+                    this.#zoneSelector.loadTree(data.data);
+
+                    if (this.#defaultFilters["zone"]) {
+                        this.#zoneSelector.select(`zone-${this.#defaultFilters["zone"]}`);
+                    }
+
+                    this.#filterStates["zones"] = "loaded";
+                },
+                (error) => {
+                    app.flashMessage(error.toString(), "error");
+                    this.#filterStates["zones"] = null;
+                },
+            );
         }
-
-        this.#zonesTreeReqID = this.#internalAPIRequester.get(
-            app.urlFor(`api.structural_elements.retrieve_tree_zones`),
-            (data) => {
-                this.#zoneSelector.loadTree(data.data);
-
-                if (this.#defaultFilters["zone"]) {
-                    this.#zoneSelector.select(`zone-${this.#defaultFilters["zone"]}`);
-                }
-            },
-            (error) => {
-                app.flashMessage(error.toString(), "error");
-            },
-        );
     }
 
-    #createSelectedItemElement(tsData, afterRemoveSelectedCallback = null) {
-        let selectedItem = new SelectedItem(tsData);
+    #createSelectedItemElement(tsData) {
+        let tsItem = new TimeseriesItem(tsData);
+        let selectedItem = new SelectedItem(tsItem);
+
         selectedItem.addEventListener("remove", (event) => {
             event.preventDefault();
 
             let searchResultItem = this.#searchResultsContainerElmt.querySelector(`button[data-ts-id="${tsData.id.toString()}"]`);
-            if (searchResultItem == null) {
-                searchResultItem = this.#createSearchResultItemElement(tsData);
-            }
-            searchResultItem.isActive = false;
+            searchResultItem?.unselect(false);
 
-            afterRemoveSelectedCallback?.();
+            this.#selectedItemElmts = this.#selectedItemElmts.filter(x => x.timeseries.id != selectedItem.timeseries.id);
+            this.#updateSelectedItemsCounter();
+
+            let eventDetail = { timeseries: selectedItem.timeseries };
+            let removeEvent = new CustomEvent("removeItem", { detail: eventDetail, bubbles: true});
+            this.dispatchEvent(removeEvent);
         });
 
-        return selectedItem
+        return selectedItem;
     }
 
-    #createSearchResultItemElement(tsData, afterRemoveSelectedCallback = null) {
+    #createSearchResultItemElement(tsData) {
         let tsItem = new TimeseriesItem(tsData);
         let searchResultItem = new SearchResultItem(tsItem, this.#isSelected(tsItem.id));
-
-        searchResultItem.addEventListener("on", (event) => {
-            event.preventDefault();
-
-            if (this.#canSelect(event.detail.timeseries.id)) {
-                let selectedItem = this.#createSelectedItemElement(event.detail.timeseries, afterRemoveSelectedCallback);
-
-                if (this.#selectedItems.length <= 0) {
-                    this.#selectedItemsContainerElmt.innerHTML = "";
-                }
-                this.#selectedItemsContainerElmt.appendChild(selectedItem);
-                this.#selectedItems.push(selectedItem.timeseries);
-
-                this.#updateSelectedItemsContainer();
-            }
-            else {
-                searchResultItem.isActive = false;
-            }
-        });
-
-        searchResultItem.addEventListener("off", (event) => {
-            event.preventDefault();
-
-            if (this.#isSelected(event.detail.timeseries.id)) {
-                this.#selectedItems = this.#selectedItems.filter(ts => ts.id != event.detail.timeseries.id);
-
-                let selectedItem = this.#selectedItemsContainerElmt.querySelector(`div[data-ts-id="${event.detail.timeseries.id.toString()}"]`);
-                selectedItem?.remove();
-
-                this.#updateSelectedItemsContainer();
-            }
-        });
 
         searchResultItem.addEventListener("toggle", (event) => {
             event.preventDefault();
 
-            this.#fixDropdownSearchPanelPosition();
-
-            let toggleEvent = new CustomEvent("toggleItem", { detail: event.detail, bubbles: true});
-            this.dispatchEvent(toggleEvent);
+            this.#updateSelection(searchResultItem);
         });
 
         return searchResultItem;
+    }
+
+    #updateSelection(searchResultItem, dispatchActionEvent = true) {
+        if (searchResultItem.isActive) {
+            if (this.#canSelect(searchResultItem.timeseries.id)) {
+                let selectedItemElmt = this.#createSelectedItemElement(searchResultItem.timeseries);
+                this.#selectedItemElmts.push(selectedItemElmt);
+
+                this.#updateSelectedItemsContainer();
+            }
+            else {
+                dispatchActionEvent = false;
+            }
+        }
+        else {
+            let selectedItemElmt = this.#getSelectedItem(searchResultItem.timeseries.id);
+            if (selectedItemElmt != null) {
+                selectedItemElmt.remove(dispatchActionEvent);
+                this.#selectedItemElmts = this.#selectedItemElmts.filter(x => x.timeseries.id.toString() != selectedItemElmt.timeseries.id.toString());
+
+                this.#updateSelectedItemsContainer();
+            }
+            else {
+                dispatchActionEvent = false;
+            }
+        }
+
+        this.#fixDropdownSearchPanelPosition();
+
+        if (dispatchActionEvent) {
+            let eventDetail = { timeseries: searchResultItem.timeseries, isActive: searchResultItem.isActive };
+            let toggleEvent = new CustomEvent("toggleItem", { detail: eventDetail, bubbles: true});
+            this.dispatchEvent(toggleEvent);
+        }
     }
 
     #fixDropdownSearchPanelPosition() {
@@ -708,101 +832,7 @@ export class TimeseriesSelector extends HTMLElement {
         this.#dropdownSearchPanelElmt.style.transform = `translate(0px, ${this.#selectedItemsContainerElmt.offsetHeight + this.#bsDropdownSearchPanel._config.offset[1]}px)`;
     }
 
-    connectedCallback() {
-        this.#initFilters();
-        this.#initEventListeners();
-        this.#update();
-    }
-
-    clearAllSelection() {
-        this.#unselectAllResultsBtnElmt.click();
-        if (this.#selectedItems.length > 0) {
-            this.#selectedItems = [];
-            this.#updateSelectedItemsContainer();
-        }
-    }
-
-    select(tsId, afterSelectCallback = null) {
-        tsId = Parser.parseIntOrDefault(tsId);
-
-        // Check that tsId is not selected yet, because in this case nothing to do.
-        if (!this.#selectedItems.map((item) => { return item.id }).includes(tsId)) {
-            let searchResultItemElmt = this.#searchResultsContainerElmt.querySelector(`button[data-ts-id="${tsId.toString()}"]`);
-            if (searchResultItemElmt != null) {
-                searchResultItemElmt.click();
-
-                this.#update();
-                afterSelectCallback?.();
-            }
-            else {
-                if (this.#selectReqID != null) {
-                    this.#internalAPIRequester.abort(this.#selectReqID);
-                    this.#selectReqID = null;
-                }
-
-                this.#selectReqID = this.#internalAPIRequester.get(
-                    app.urlFor(`api.timeseries.retrieve_one`, {id: tsId}),
-                    (data) => {
-                        let tsItem = new TimeseriesItem(data.data);
-                        let selectedItem = this.#createSelectedItemElement(tsItem, afterSelectCallback);
-
-                        if (this.#selectedItems.length <= 0) {
-                            this.#selectedItemsContainerElmt.innerHTML = "";
-                        }
-                        this.#selectedItemsContainerElmt.appendChild(selectedItem);
-                        this.#selectedItems.push(selectedItem.timeseries);
-                    },
-                    (error) => {
-                        app.flashMessage(error.toString(), "error");
-                    },
-                    () => {
-                        this.#update();
-                        afterSelectCallback?.();
-                    },
-                );
-            }
-        }
-    }
-
-    setFilters(filters) {
-        let needRefresh = false;
-
-        for (let [optFilterName, optFilterValue] of Object.entries(filters || {})) {
-            if (this.#availableFilters.includes(optFilterName) && this.#defaultFilters[optFilterName] != optFilterValue) {
-                this.#defaultFilters[optFilterName] = optFilterValue;
-                needRefresh = true;
-            }
-
-            if (["site", "building", "storey", "space"].includes(optFilterName)) {
-                this.#siteSelector.select(`${optFilterName}-${optFilterValue}`);
-            }
-            else if (optFilterName == "zone") {
-                this.#zoneSelector.select(`${optFilterName}-${optFilterValue}`);
-            }
-            else if (optFilterName == "extend") {
-                this.#siteSelectorRecursiveSwitchElmt.checked = Parser.parseBoolOrDefault(optFilterValue, false);
-            }
-            else if (optFilterName == "campaign-scope") {
-                let filterElmt = this.querySelector(`app-filter-select[id="campaign_scope_id"]`);
-                filterElmt.value = optFilterValue;
-            }
-        }
-
-        if (needRefresh) {
-            this.#searchResultsPaginationElmt.page = 1;
-            this.refresh();
-        }
-    }
-
-    open() {
-        this.#bsDropdownSearchPanel.show();
-    }
-
-    close() {
-        this.#bsDropdownSearchPanel.hide();
-    }
-
-    refresh() {
+    #loadSearchResults() {
         if (this.#searchReqID != null) {
             this.#internalAPIRequester.abort(this.#searchReqID);
             this.#searchReqID = null;
@@ -867,6 +897,95 @@ export class TimeseriesSelector extends HTMLElement {
                 app.flashMessage(error.toString(), "error");
             },
         );
+    }
+
+    connectedCallback() {
+        this.#initFilters();
+        this.#initEventListeners();
+        this.#update();
+    }
+
+    clearAllSelection() {
+        this.#selectedItemElmts = [];
+        this.#updateSelectedItemsContainer();
+        this.#updateSearchResultsContainer();
+
+        let clearEvent = new CustomEvent("clearSelection", { bubbles: true});
+        this.dispatchEvent(clearEvent);
+    }
+
+    select(tsIds, afterSelectCallback = null) {
+        // Exclude timeseries that are already selected.
+        tsIds = tsIds.map(
+            tsId => Parser.parseIntOrDefault(tsId)
+        ).filter(
+            tsId => !this.#selectedItemElmts.map(item => { item.timeseries.id }).includes(tsId)
+        );
+
+        for (let [fetchUrl, reqID] of Object.entries(this.#getTimeseriesRedIDs)) {
+            this.#internalAPIRequester.abort(reqID);
+            this.#getTimeseriesRedIDs[fetchUrl] = null;
+        }
+
+        this.#getTimeseriesRedIDs = this.#internalAPIRequester.gets(
+            tsIds.map(tsId => app.urlFor(`api.timeseries.retrieve_one`, {id: tsId})),
+            (responses) => {
+                for (let tsResponse of responses) {
+                    let selectedItemElmt = this.#createSelectedItemElement(tsResponse.data);
+                    this.#selectedItemElmts.push(selectedItemElmt);
+                }
+
+                this.#update();
+                afterSelectCallback?.();
+            },
+            (error) => {
+                app.flashMessage(error.toString(), "error");
+            },
+        );
+    }
+
+    async setFilters(filters) {
+        // TODO raise timeout if waited more than XXX seconds?
+
+        // Wait until all filters are loaded before setting values.
+        while (!Object.values(this.#filterStates).every(x => x == "loaded")) {
+            await timer(100);
+        }
+
+        let searchResultsReloadNeeded = false;
+        for (let [optFilterName, optFilterValue] of Object.entries(filters || {})) {
+            if (this.#availableFilters.includes(optFilterName) && this.#defaultFilters[optFilterName] != optFilterValue) {
+                this.#defaultFilters[optFilterName] = optFilterValue;
+                searchResultsReloadNeeded = true;
+            }
+
+            if (["site", "building", "storey", "space"].includes(optFilterName)) {
+                this.#siteSelector.select(`${optFilterName}-${optFilterValue}`);
+            }
+            else if (optFilterName == "zone") {
+                this.#zoneSelector.select(`${optFilterName}-${optFilterValue}`);
+            }
+            else if (optFilterName == "extend") {
+                this.#siteSelectorRecursiveSwitchElmt.checked = Parser.parseBoolOrDefault(optFilterValue, false);
+            }
+            else if (optFilterName == "campaign-scope") {
+                let filterElmt = this.#searchFiltersContainerElmt.querySelector(`select[id="campaign_scope_id"]`);
+                filterElmt.value = optFilterValue;
+            }
+        }
+
+        if (searchResultsReloadNeeded) {
+            this.#searchResultsPaginationElmt.page = 1;
+            this.#loadSearchResults();
+        }
+    }
+
+    open() {
+        this.#bsDropdownSearchPanel.show();
+    }
+
+    close() {
+        this.#bsDropdownSearchPanel.hide();
     }
 
     static getInstance(elementId = null) {

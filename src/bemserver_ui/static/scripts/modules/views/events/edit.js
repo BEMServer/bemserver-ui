@@ -140,6 +140,11 @@ export class EventEditView {
 
         this.#tsSelectModalElmt.addEventListener("show.bs.modal", () => {
             this.#tsSelector.clearAllSelection();
+            // TODO also disable this filter to avoid campaign scope change?
+            let filters = {
+                "campaign-scope": this.#eventData.campaign_scope_id,
+            };
+            this.#tsSelector.setFilters(filters);
 
             this.#updateTimeseriesSaveSelectedBtn();
         });

@@ -585,7 +585,7 @@ export class TimeseriesSemanticSetupView {
                         // Get up-to-date setup data.
                         let dataToEdit = data.forecast ? this.#forecastWeatherSetupByParam[data.parameter] : this.#weatherSetupByParam[data.parameter];
                         if (dataToEdit.timeseries_id != null) {
-                            this.#tsSelector.select(dataToEdit.timeseries_id, () => { this.#updateSaveBtnState(); });
+                            this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
                         }
                     },
                 );
@@ -881,8 +881,8 @@ export class TimeseriesSemanticSetupView {
                         () => {
                             let dataToEdit = this.#energyProdSetupByEnergyAndTech[energyProdTechSetup.energy_id][energyProdTechSetup.prod_tech_id];
                             if (dataToEdit.timeseries_id != null) {
-                                this.#tsSelector.select(dataToEdit.timeseries_id, () => { this.#updateSaveBtnState(); });
-                            }        
+                                this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
+                            }
                         },
                     );
 
@@ -1085,7 +1085,7 @@ export class TimeseriesSemanticSetupView {
                         () => {
                             let dataToEdit = this.#energyConsSetupByEnergyAndUses[energyConsEndUseSetup.energy_id][energyConsEndUseSetup.end_use_id];
                             if (dataToEdit.timeseries_id != null) {
-                                this.#tsSelector.select(dataToEdit.timeseries_id, () => { this.#updateSaveBtnState(); });
+                                this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
                             }
                         },
                     );
