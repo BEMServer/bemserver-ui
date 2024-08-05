@@ -41,6 +41,7 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
         return this.#widthValue;
     }
     set bucketWidthValue(value) {
+        value = Parser.parseIntOrDefault(value, this.#widthValue);
         if (value != this.#widthValue && DURATIONS[this.#widthUnit].includes(value)) {
             this.#widthValue = value;
             this.#selectElmt.value = `${this.#widthValue}_${this.#widthUnit}`;
@@ -108,22 +109,22 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
     }
 
     setEnabled() {
-        this.#selectElmt.removeAttribute("disabled");
+        this.#selectElmt?.removeAttribute("disabled");
     }
     setDisabled() {
-        this.#selectElmt.setAttribute("disabled", true);
+        this.#selectElmt?.setAttribute("disabled", true);
     }
 
     #loadOptions(options = {}) {
         this.#title = this.getAttribute("title") || options.title;
         this.#widthUnit = this.getAttribute("unit") || options.unit || this.#defaultWidthUnit;
-        this.#widthValue = this.getAttribute("value") || options.value || this.#defaultWidthValue;
+        this.#widthValue = Parser.parseIntOrDefault(this.getAttribute("value") || options.value, this.#defaultWidthValue);
 
         if (DURATIONS[this.#widthUnit] === undefined) {
             this.#widthUnit = this.#defaultWidthUnit;
         }
         if (!DURATIONS[this.#widthUnit].includes(this.#widthValue)) {
-            this.#widthValue = Parser.parseIntOrDefault(DURATIONS[this.#widthUnit][0], this.#defaultWidthValue);
+            this.#widthValue = DURATIONS[this.#widthUnit][0];
         }
     }
 
@@ -134,6 +135,9 @@ export class TimeseriesBucketWidth extends HTMLDivElement {
             let optParts = this.#selectElmt.options[this.#selectElmt.selectedIndex].value.split("_");
             this.#widthValue = Parser.parseIntOrDefault(optParts[0], this.#defaultWidthValue);
             this.#widthUnit = optParts[1];
+
+            this.setAttribute("value", this.#widthValue);
+            this.setAttribute("unit", this.#widthUnit);
         });
     }
 }
