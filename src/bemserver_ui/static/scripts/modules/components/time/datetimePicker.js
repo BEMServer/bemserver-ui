@@ -20,6 +20,7 @@ export class DatetimePicker extends HTMLDivElement {
     #timeInputFormBind = null;
     #title = null;
     #tzName = null;
+    #tzInfo = {};
     #dateMin = null;
     #dateMax = null;
     #usedAsFilter = false;
@@ -203,17 +204,17 @@ export class DatetimePicker extends HTMLDivElement {
     }
 
     #updateTzInfo() {
-        let tzInfo = this.#tzTool.getTzInfo(this.#tzName);
+        this.#tzInfo = this.#tzTool.getTzInfo(this.#tzName);
 
         let tzInfoTitleContentElmt = document.createElement("div");
         tzInfoTitleContentElmt.classList.add("d-grid");
         let tzInfoAreaLabelElmt = document.createElement("span");
         tzInfoAreaLabelElmt.classList.add("fw-bold");
-        tzInfoAreaLabelElmt.innerText = tzInfo["area"]["label"];
+        tzInfoAreaLabelElmt.innerText = this.#tzInfo["area"]["label"];
         tzInfoTitleContentElmt.appendChild(tzInfoAreaLabelElmt);
         let tzInfoLabelElmt = document.createElement("span");
         tzInfoLabelElmt.classList.add("fst-italic");
-        tzInfoLabelElmt.innerText = tzInfo["label"];
+        tzInfoLabelElmt.innerText = this.#tzInfo["label"];
         tzInfoTitleContentElmt.appendChild(tzInfoLabelElmt);
 
         this.#tzInfoElmt.setAttribute("title", tzInfoTitleContentElmt.outerHTML);

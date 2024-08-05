@@ -1,3 +1,4 @@
+// File generated dynamically by app timezones extension.
 import { TimezoneTool } from "/static/scripts/modules/tools/timezones.js";
 
 
@@ -44,6 +45,10 @@ export class TimezonePicker extends HTMLDivElement {
 
     get value() {
         return this.#tzNameSelected;
+    }
+
+    get tzInfo() {
+        return this.#tzTool.getTzInfo(this.#tzNameSelected);
     }
 
     #loadOptions(options = {}) {
