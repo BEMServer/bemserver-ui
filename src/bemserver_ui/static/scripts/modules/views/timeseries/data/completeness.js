@@ -123,7 +123,7 @@ class TimeSeriesDataCompletenessView {
             this.#refreshChart(this.#updateUrlParams());
         });
 
-        window.addEventListener("popstate", (event) => {
+        window.addEventListener("popstate", () => {
             let url = new URL(window.location);
 
             this.#tsDataStatesSelectElmt.value = url.searchParams.get("data_state");
@@ -149,7 +149,7 @@ class TimeSeriesDataCompletenessView {
             this.#tsSelector.clearAllSelection();
             this.#timeseriesElmt.value = url.searchParams.get("timeseries");
             let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
-            this.#tsSelector.select(tsIDs, () => { this.#refreshChart(Object.fromEntries(url.searchParams)); }, true);
+            this.#tsSelector.select(tsIDs, () => { this.#refreshChart(Object.fromEntries(url.searchParams)); });
         });
     }
 
@@ -321,7 +321,7 @@ class TimeSeriesDataCompletenessView {
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
-        this.#tsSelector.select(tsIDs, () => { this.#refreshChart(this.#updateUrlParams()); }, true);
+        this.#tsSelector.select(tsIDs, () => { this.#refreshChart(this.#updateUrlParams()); });
     }
 }
 
