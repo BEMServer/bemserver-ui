@@ -12,6 +12,12 @@ export class TimeseriesChartExplore extends ChartBase {
         return this.#chartOpts.series.length;
     }
 
+    get seriesDataCount() {
+        return this.#chartOpts.series.reduce((accumulator, currentSeries) => {
+            return accumulator + currentSeries.data.length;
+        }, 0);
+    }
+
 
     constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
@@ -34,20 +40,10 @@ export class TimeseriesChartExplore extends ChartBase {
             );
             this.dispatchEvent(seriesVisibilityEvent);
         });
-        this.registerEventCallback("showLoadingPre", () => {
-            // Hide "No data" title.
-            this.#hideNoData(true);
-        });
-        this.registerEventCallback("hideLoadingPost", () => {
-            // Show "No data" title when chart has no series.
-            if (this.#chartOpts.series.length <= 0) {
-                this.#showNoData(true);
-            }
-        });
     }
 
     #initChartOptions() {
-        // Some IDs are use in the "normalMerge" strategy of echarts (yAxis, dataZoom...).
+        // IDs are used in the "merge" strategy of echarts to update elements (yAxis, dataZoom...).
         this.setOption({
             title: {
                 top: "middle",
@@ -123,21 +119,21 @@ export class TimeseriesChartExplore extends ChartBase {
         });
     }
 
-    // showLoading() {
-    //     // Hide "No data" title.
-    //     this.#hideNoData(true);
+    showLoading() {
+        // Hide "No data" title.
+        this.#hideNoData(true);
 
-    //     super().showLoading();
-    // }
+        super.showLoading();
+    }
 
-    // hideLoading() {
-    //     super().hideLoading();
+    hideLoading() {
+        super.hideLoading();
 
-    //     // Show "No data" title when chart has no series.
-    //     if (this.#chartOpts.series.length <= 0) {
-    //         this.#showNoData(true);
-    //     }
-    // }
+        // Show "No data" title when chart has no series or no data in series.
+        if (this.seriesDataCount <= 0) {
+            this.#showNoData(true);
+        }
+    }
 
     getNextColor() {
         let chatColors = this.#chartOpts.color;
@@ -307,7 +303,7 @@ export class TimeseriesChartExplore extends ChartBase {
             this.#chartOpts.legend[seriesParams.yAxisIndex].data.push(seriesParams.name);
             this.#chartOpts.series.push(seriesParams);
 
-            if (this.#chartOpts.series.length > 0) {
+            if (this.seriesDataCount > 0) {
                 this.#hideNoData();
             }
 

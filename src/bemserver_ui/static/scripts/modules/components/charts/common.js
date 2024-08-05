@@ -5,8 +5,6 @@ export class ChartBase {
 
     #chart = null;
     #chartEventCallbacks = {};
-    #showLoadingPreCallback = null;
-    #hideLoadingPostCallback = null;
 
     #loadingOptions = {
         text: "loading...",
@@ -90,15 +88,11 @@ export class ChartBase {
     }
 
     showLoading() {
-        this.#showLoadingPreCallback?.();
-
         this.#chart.showLoading(this.#loadingOptions);
     }
 
     hideLoading() {
         this.#chart.hideLoading();
-
-        this.#hideLoadingPostCallback?.();
     }
 
     resize(options = null) {
@@ -117,36 +111,20 @@ export class ChartBase {
     }
 
     registerEventCallback(eventName, callback) {
-        if (eventName == "showLoadingPre") {
-            this.#showLoadingPreCallback = callback;
+        if (!this.#chartEventCallbacks[eventName]) {
+            this.#chartEventCallbacks[eventName] = [];
         }
-        else if (eventName == "hideLoadingPost") {
-            this.#hideLoadingPostCallback = callback;
-        }
-        else {
-            if (!this.#chartEventCallbacks[eventName]) {
-                this.#chartEventCallbacks[eventName] = [];
-            }
-            this.#chartEventCallbacks[eventName].push(callback);
-        }
+        this.#chartEventCallbacks[eventName].push(callback);
     }
 
     unregisterEventCallback(eventName, callback) {
-        if (eventName == "showLoadingPre") {
-            this.#showLoadingPreCallback = null;
-        }
-        else if (eventName == "hideLoadingPost") {
-            this.#hideLoadingPostCallback = null;
-        }
-        else {
-            if (this.#chartEventCallbacks[eventName])
-            {
-                this.#chartEventCallbacks[eventName] = this.#chartEventCallbacks[eventName].filter(
-                    (evtCallback) => {
-                        return evtCallback != callback;
-                    }
-                );
-            }
+        if (this.#chartEventCallbacks[eventName])
+        {
+            this.#chartEventCallbacks[eventName] = this.#chartEventCallbacks[eventName].filter(
+                (evtCallback) => {
+                    return evtCallback != callback;
+                }
+            );
         }
     }
 
