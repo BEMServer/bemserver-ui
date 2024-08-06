@@ -9,7 +9,12 @@ import flask
 
 from bemserver_api_client.enums import Aggregation, BucketWidthUnit, DataFormat
 
-from bemserver_ui.common.analysis import get_completeness_period_types
+from bemserver_ui.common.analysis import (
+    get_aggregation_types,
+    get_completeness_period_types,
+    get_default_aggregation_type,
+    get_explore_period_types,
+)
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 from bemserver_ui.common.time import (
     convert_from_iso,
@@ -59,9 +64,82 @@ def upload():
 @auth.signin_required
 @ensure_campaign_context
 def explore():
+    timeseries_ids = []
+    if "timeseries" in flask.request.args:
+        timeseries_ids = [
+            int(x) for x in flask.request.args["timeseries"].split(",") if x != ""
+        ]
+
+    ts_datastates_resp = flask.g.api_client.timeseries_datastates.getall(sort="+name")
+    ts_datastate_ids = [int(x["id"]) for x in ts_datastates_resp.data]
+
+    try:
+        data_state_id = int(flask.request.args["data_state"])
+    except (TypeError, ValueError, KeyError):
+        data_state_id = None
+    if len(ts_datastate_ids) > 0:
+        if data_state_id not in ts_datastate_ids:
+            data_state_id = ts_datastate_ids[0]
+    else:
+        data_state_id = None
+
+    period_types = get_explore_period_types()
+    period_type_ids = [x["id"] for x in period_types]
+
+    period_type = flask.request.args.get("period_type")
+    if len(period_type_ids) > 0:
+        if period_type not in period_type_ids:
+            period_type = period_type_ids[0]
+    else:
+        period_type = None
+
+    tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
+    dt_now = dt.datetime.now(tz=tz)
+
+    period_end_date = flask.request.args.get("period_end_date")
+    period_end_time = flask.request.args.get("period_end_time", "00:00") or "00:00"
+    try:
+        period_end = convert_html_form_datetime(period_end_date, period_end_time, tz=tz)
+    except BEMServerUICommonInvalidDatetimeError:
+        period_end = dt_now
+
+    period_start_date = flask.request.args.get("period_start_date")
+    period_start_time = flask.request.args.get("period_start_time", "00:00") or "00:00"
+    try:
+        period_start = convert_html_form_datetime(
+            period_start_date, period_start_time, tz=tz
+        )
+    except BEMServerUICommonInvalidDatetimeError:
+        period_start = period_end - dt.timedelta(days=1.0)
+
+    agg_types = get_aggregation_types()
+    agg_type_ids = [x["id"] for x in agg_types]
+
+    agg = flask.request.args.get("agg")
+    if agg == "":
+        agg = None
+    if agg is not None and agg not in agg_type_ids:
+        agg = get_default_aggregation_type()["id"]
+
+    try:
+        bucket_width_value = int(flask.request.args["bucket_width_value"])
+    except (TypeError, ValueError, KeyError):
+        bucket_width_value = 1
+    bucket_width_unit = flask.request.args.get("bucket_width_unit", "hour")
+
     return flask.render_template(
         "pages/timeseries/data/explore.html",
-        dt_end=dt.datetime.now(tz=zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)),
+        timeseries_ids=",".join([str(x) for x in timeseries_ids]),
+        data_states=ts_datastates_resp.data,
+        data_state_id=data_state_id,
+        period_types=period_types,
+        period_type=period_type,
+        period_start=period_start,
+        period_end=period_end,
+        agg_types=agg_types,
+        agg=agg,
+        bucket_width_value=bucket_width_value,
+        bucket_width_unit=bucket_width_unit,
     )
 
 

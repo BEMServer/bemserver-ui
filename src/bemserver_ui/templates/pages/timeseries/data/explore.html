@@ -8,22 +8,21 @@
 <div class="container-fluid">
     <div class="row align-items-end mb-3">
         <div class="col">
+            <input type="hidden" id="timeseries" value="{{ timeseries_ids }}">
             <div class="row d-xl-flex d-grid mb-2">
                 <div class="col-auto">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Period</span>
                         <select id="periodType" class="form-select form-select-sm" aria-label="Select a period" required>
-                            <option value="last-24-hours" selected>Last 24 hours</option>
-                            <option value="last-7-days">Last 7 days</option>
-                            <option value="last-30-days">Last 30 days</option>
-                            <option value="last-12-months">Last 12 months</option>
-                            <option value="custom">Custom</option>
+                            {% for x in period_types %}
+                            <option value="{{ x.id }}"{% if x.id == period_type %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
                 <div id="periodCustom" class="col-auto d-xl-flex d-grid py-2 py-xl-0 gap-2 d-none invisible">
-                    <div is="app-datetime-picker" id="start_datetime" title="From" time="{{ dt_end.time().isoformat()[:5] }}" max="{{ dt_end.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
-                    <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ dt_end.date().isoformat() }}" time="{{ dt_end.time().isoformat()[:5] }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                    <div is="app-datetime-picker" id="start_datetime" title="From" date="{{ period_start.date().isoformat() }}" time="{{ period_start.time().isoformat()[:5] }}" max="{{ period_end.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                    <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ period_end.date().isoformat() }}" time="{{ period_end.time().isoformat()[:5] }}" min="{{ period_start.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
                 </div>
             </div>
             <div class="row d-lg-flex d-grid">
@@ -31,17 +30,14 @@
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Aggregation mode</span>
                         <select class="form-select" id="agg" name="agg" aria-label="Select an aggregation mode">
-                            <option value="none">No aggregation</option>
-                            <option value="avg" selected>average</option>
-                            <option value="sum">sum</option>
-                            <option value="min">minimum</option>
-                            <option value="max">maximum</option>
-                            <option value="count">count</option>
+                            {% for x in agg_types %}
+                            <option value="{{ x.id }}"{% if agg is none and x.id == "none" or agg == x.id %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
                 <div class="col-auto">
-                    <div is="app-ts-bucket-width" id="bucket" title="Duration" unit="hour" value="1"></div>
+                    <div is="app-ts-bucket-width" id="bucket" class="d-none invisible" title="Duration" unit="{{ bucket_width_unit }}" value="{{ bucket_width_value }}" disabled="true"></div>
                 </div>
             </div>
         </div>
@@ -62,7 +58,7 @@
         <div class="offcanvas-body">
             <div class="row mb-2">
                 <div class="col-auto">
-                    <h5 class="text-secondary">Data series<span id="seriesCount"></span></h5>
+                    <h5 class="text-secondary">Data series<span id="seriesCount" class="ms-1"></span></h5>
                 </div>
                 <div class="col-auto">
                     <a id="chartSeriesBtnAdd" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#selectTimeseries"><i class="bi bi-plus-circle"></i> Add series</a>
@@ -93,7 +89,11 @@
                 <div class="col-auto">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">Timeseries data state</span>
-                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+                        <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required>
+                            {% for x in data_states %}
+                            <option value="{{ x.id }}"{% if x.id == data_state_id %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>

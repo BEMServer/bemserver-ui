@@ -133,12 +133,12 @@ const defaultSeriesBarDecal = "none";
 class TimeseriesDataExploreView {
 
     #internalAPIRequester = null;
-    #tsDataStatesReqID = null;
     #tsDataGetReqID = null;
 
     #chartContainerElmt = null;
     #chartExplore = null;
 
+    #timeseriesElmt = null;
     #periodTypeElmt = null;
     #periodCustomElmt = null;
     #periodStartDatetimeElmt = null;
@@ -149,7 +149,7 @@ class TimeseriesDataExploreView {
     #chartSettingsCanvas = null;
     #chartSeriesContainerElmt = null;
     #chartSeriesContainerBodyElmt = null;
-    #seriesCount = null;
+    #seriesCountElmt = null;
     #removeAllSeriesBtnElmt = null;
     #tsDataStatesSelectElmt = null;
     #timezonePickerElmt = null;
@@ -161,15 +161,10 @@ class TimeseriesDataExploreView {
     #selectTimeseriesSeriesTypeContainerElmt = null;
     #selectedTimeseriesSaveBtnElmt = null;
 
-    #defaultEndDate = null;
-    #defaultEndTime = null;
-    #defaultTsDataState = "Clean";
-    #defaultPeriodType = "last-24-hours";
-    #defaultAggregationOperator = "avg";
-    #defaultAggregationBucketWidth = {
-        "unit": "hour",
-        "value": 1,
-    }
+    #endDateDefault = null;
+    #endTimeDefault = null;
+    #endDateCustomBackup = null;
+    #endTimeCustomBackup = null;
 
     #tsSeriesOptions = {};
     #periodTypeLoaded = null;
@@ -180,12 +175,12 @@ class TimeseriesDataExploreView {
 
         this.#cacheDOM();
         this.#initEventListeners();
-        this.#initDefaults();
     }
 
     #cacheDOM() {
         this.#chartContainerElmt = document.getElementById("chartContainer");
 
+        this.#timeseriesElmt = document.getElementById("timeseries");
         this.#periodTypeElmt = document.getElementById("periodType");
         this.#periodCustomElmt = document.getElementById("periodCustom");
         this.#periodStartDatetimeElmt = document.getElementById("start_datetime");
@@ -196,7 +191,7 @@ class TimeseriesDataExploreView {
         this.#chartSettingsCanvas = new bootstrap.Offcanvas("#chartSettingsPanel");
         this.#chartSeriesContainerElmt = document.getElementById("chartSeriesContainer");
         this.#chartSeriesContainerBodyElmt = this.#chartSeriesContainerElmt.querySelector("tbody");
-        this.#seriesCount = document.getElementById("seriesCount");
+        this.#seriesCountElmt = document.getElementById("seriesCount");
         this.#removeAllSeriesBtnElmt = document.getElementById("removeAllSeriesBtn");
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
         this.#timezonePickerElmt = document.getElementById("timezonePicker");
@@ -209,33 +204,11 @@ class TimeseriesDataExploreView {
         this.#selectedTimeseriesSaveBtnElmt = document.getElementById("selectedTimeseriesSaveBtn");
     }
 
-    #initDefaults() {
-        this.#periodTypeElmt.value = this.#defaultPeriodType;
-        this.#aggInputElmt.value = this.#defaultAggregationOperator;
-        this.#bucketElmt.bucketWidthValue = this.#defaultAggregationBucketWidth["unit"];
-        this.#bucketElmt.bucketWidthValue = this.#defaultAggregationBucketWidth["value"];
-    }
-
     #initEventListeners() {
         this.#periodTypeElmt.addEventListener("change", () => {
-            if (this.#periodTypeElmt.value == "custom") {
-                this.#periodCustomElmt.classList.remove("d-none", "invisible");
-                this.#periodStartDatetimeElmt.setAttribute("required", true);
-                this.#periodEndDatetimeElmt.setAttribute("required", true);
-
-                this.#periodStartDatetimeElmt.focus();
-            }
-            else {
-                this.#periodCustomElmt.classList.add("d-none", "invisible");
-                this.#periodStartDatetimeElmt.removeAttribute("required");
-                this.#periodEndDatetimeElmt.removeAttribute("required");
-
-                this.#periodEndDatetimeElmt.date = this.#defaultEndDate;
-                this.#periodEndDatetimeElmt.time = this.#defaultEndTime;
-
-                if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
-                    this.#loadChartSeries();
-                }
+            this.#updatePeriodCustomState();
+            if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
+                this.#loadChartSeries();
             }
         });
 
@@ -280,33 +253,8 @@ class TimeseriesDataExploreView {
         this.#selectedTimeseriesSaveBtnElmt.addEventListener("click", () => {
             let seriesYAxisPosition = this.#selectTimeseriesYAxisPositionContainerElmt.querySelector(`input[type="radio"][name="selectTimeseriesYAxisPositionRadioOptions"]:checked`).value;
             let seriesType = this.#selectTimeseriesSeriesTypeContainerElmt.querySelector(`input[type="radio"][name="selectTimeseriesSeriesTypeRadioOptions"]:checked`).value;
-
-            let addedTsIDs = [];
-            for (let selectedTimeseries of this.#tsSelector.selectedItems) {
-                if (!Object.keys(this.#tsSeriesOptions).includes(selectedTimeseries.id.toString())) {
-                    let seriesColor = this.#chartExplore.getNextColor();
-
-                    let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(selectedTimeseries, seriesColor, seriesYAxisPosition, seriesType);
-                    let tsSeriesChartOptsRowElmt = this.#createTimeseriesChartOptionsRowElment(tsChartSeriesOpts);
-                    this.#chartSeriesContainerBodyElmt.appendChild(tsSeriesChartOptsRowElmt);
-
-                    let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
-                    this.#chartExplore.addSeries(chartSeriesParams);
-
-                    this.#tsSeriesOptions[selectedTimeseries.id] = tsChartSeriesOpts;
-
-                    addedTsIDs.push(selectedTimeseries.id);
-                }
-            }
-
+            this.#addTimeseries(this.#tsSelector.selectedItems, seriesYAxisPosition, seriesType);
             this.#selectTimeseriesModal.hide();
-
-            this.#updateSeriesCount();
-
-            if (addedTsIDs.length > 0) {
-                // Get timeseries data and draw chart.
-                this.#loadChartSeries(addedTsIDs);
-            }
         });
 
         this.#selectTimeseriesModalElmt?.addEventListener("shown.bs.modal", () => {
@@ -367,7 +315,8 @@ class TimeseriesDataExploreView {
             this.#chartExplore.clearAll();
             this.#tsSeriesOptions = {};
             this.#chartSeriesContainerBodyElmt.innerHTML = "";
-            this.#updateSeriesCount();
+            this.#updateSelectedTimeseriesInfo();
+            this.#updateUrlParams();
         });
 
         // Chart explore event listener.
@@ -375,6 +324,76 @@ class TimeseriesDataExploreView {
             this.#tsSeriesOptions[event.detail.id].show = event.detail.visibility;
             this.#updateChartSeriesOptionsVisibility(event.detail.id);
         });
+
+        window.addEventListener("popstate", () => {
+            let url = new URL(window.location);
+
+            this.#tsDataStatesSelectElmt.value = url.searchParams.get("data_state");
+
+            this.#periodTypeElmt.value = url.searchParams.get("period_type");
+            let tzName = url.searchParams.get("tz");
+            this.#timezonePickerElmt.tzName = tzName;
+            this.#periodStartDatetimeElmt.tzName = tzName;
+            this.#periodEndDatetimeElmt.tzName = tzName;
+            if (this.#isPeriodCustom()) {
+                this.#periodStartDatetimeElmt.date = url.searchParams.get("period_start_date");
+                this.#periodStartDatetimeElmt.time = url.searchParams.get("period_start_time");
+                this.#periodEndDatetimeElmt.date = url.searchParams.get("period_end_date");
+                this.#periodEndDatetimeElmt.time = url.searchParams.get("period_end_time");
+            }
+            this.#updatePeriodCustomState();
+
+            let agg = url.searchParams.get("agg");
+            this.#aggInputElmt.value = agg == "" ? "none" : agg;
+            this.#bucketElmt.bucketWidthValue = url.searchParams.get("bucket_width_value");
+            this.#bucketElmt.bucketWidthUnit = url.searchParams.get("bucket_width_unit");
+            this.#updateAggregationBucketState();
+
+            // Update timeseries selector component with (un)selected timeseries and refresh chart.
+            this.#tsSelector.clearAllSelection();
+            this.#tsSeriesOptions = {};
+            this.#chartExplore.clearAll();
+            this.#timeseriesElmt.value = url.searchParams.get("timeseries");
+            let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
+            this.#tsSelector.select(
+                tsIDs,
+                () => {
+                    this.#addTimeseries(this.#tsSelector.selectedItems, "left", "line", true);
+                    this.#tsSelector.clearAllSelection();
+
+                    if (Object.keys(this.#tsSeriesOptions).length <= 0) {
+                        this.#chartSettingsCanvas.show();
+                    }
+                },
+            );
+        });
+    }
+
+    #addTimeseries(timeseriesList, seriesYAxisPosition = "left", seriesType = "line") {
+        let addedTsIDs = [];
+        for (let tsData of timeseriesList) {
+            if (!Object.keys(this.#tsSeriesOptions).includes(tsData.id.toString())) {
+                let seriesColor = this.#chartExplore.getNextColor();
+
+                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, seriesColor, seriesYAxisPosition, seriesType);
+                let tsSeriesChartOptsRowElmt = this.#createTimeseriesChartOptionsRowElment(tsChartSeriesOpts);
+                this.#chartSeriesContainerBodyElmt.appendChild(tsSeriesChartOptsRowElmt);
+
+                let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
+                this.#chartExplore.addSeries(chartSeriesParams);
+
+                this.#tsSeriesOptions[tsData.id] = tsChartSeriesOpts;
+
+                addedTsIDs.push(tsData.id);
+            }
+        }
+
+        this.#updateSelectedTimeseriesInfo();
+
+        if (addedTsIDs.length > 0) {
+            // Get timeseries data and draw chart.
+            this.#loadChartSeries(addedTsIDs);
+        }
     }
 
     #updateChartSeriesOptionsVisibility(tsID) {
@@ -407,38 +426,7 @@ class TimeseriesDataExploreView {
     }
 
     #hasPeriodSelected() {
-        return this.#periodTypeElmt.value != "custom" || (this.#periodStartDatetimeElmt.hasDatetime && this.#periodEndDatetimeElmt.hasDatetime);
-    }
-
-    #loadDataStates() {
-        this.#tsDataStatesSelectElmt.innerHTML = "";
-        let loadingOptionElmt = document.createElement("option");
-        loadingOptionElmt.value = "None";
-        loadingOptionElmt.innerText = "loading...";
-        this.#tsDataStatesSelectElmt.appendChild(loadingOptionElmt);
-
-        if (this.#tsDataStatesReqID != null) {
-            this.#internalAPIRequester.abort(this.#tsDataStatesReqID);
-            this.#tsDataStatesReqID = null;
-        }
-        this.#tsDataStatesReqID = this.#internalAPIRequester.get(
-            app.urlFor(`api.timeseries.datastates.retrieve_list`),
-            (data) => {
-                this.#tsDataStatesSelectElmt.innerHTML = "";
-                for (let option of data.data) {
-                    let optionElmt = document.createElement("option");
-                    optionElmt.value = option.id;
-                    optionElmt.innerText = option.name;
-                    if (option.name == this.#defaultTsDataState) {
-                        optionElmt.selected = true;
-                    }
-                    this.#tsDataStatesSelectElmt.appendChild(optionElmt);
-                }
-            },
-            (error) => {
-                app.flashMessage(error.toString(), "error");
-            },
-        );
+        return !this.#isPeriodCustom() || (this.#periodStartDatetimeElmt.hasDatetime && this.#periodStartDatetimeElmt.isValid && this.#periodEndDatetimeElmt.hasDatetime && this.#periodEndDatetimeElmt.isValid);
     }
 
     #createTimeseriesChartOptionsRowElment(tsChartSeriesOpts) {
@@ -628,32 +616,58 @@ class TimeseriesDataExploreView {
             rowElmt.remove();
             this.#chartExplore.removeSeries(tsChartSeriesOpts.id);
             delete this.#tsSeriesOptions[tsChartSeriesOpts.id];
-            this.#updateSeriesCount();
+            this.#updateSelectedTimeseriesInfo();
+            this.#updateUrlParams();
         });
 
         return rowElmt;
     }
 
-    #updateAggregationBucketState() {
-        if (this.#aggInputElmt.value == "none") {
-            this.#bucketElmt.setAttribute("disabled", true);
-            this.#bucketElmt.parentElement.classList.add("d-none", "invisible");
+    #updatePeriodCustomState() {
+        if (this.#isPeriodCustom()) {
+            this.#periodEndDatetimeElmt.date = this.#endDateCustomBackup;
+            this.#periodEndDatetimeElmt.time = this.#endTimeCustomBackup;
+
+            this.#periodCustomElmt.classList.remove("d-none", "invisible");
+            this.#periodStartDatetimeElmt.setAttribute("required", true);
+            this.#periodEndDatetimeElmt.setAttribute("required", true);
+
+            this.#periodStartDatetimeElmt.focus();
         }
         else {
-            this.#bucketElmt.removeAttribute("disabled");
-            this.#bucketElmt.parentElement.classList.remove("d-none", "invisible");
+            this.#endDateCustomBackup = this.#periodEndDatetimeElmt.date;
+            this.#endTimeCustomBackup = this.#periodEndDatetimeElmt.time;
+            this.#periodEndDatetimeElmt.date = this.#endDateDefault;
+            this.#periodEndDatetimeElmt.time = this.#endTimeDefault;
+
+            this.#periodCustomElmt.classList.add("d-none", "invisible");
+            this.#periodStartDatetimeElmt.removeAttribute("required");
+            this.#periodEndDatetimeElmt.removeAttribute("required");
         }
     }
 
-    #updateSeriesCount() {
+    #updateAggregationBucketState() {
+        if (this.#aggInputElmt.value == "none") {
+            this.#bucketElmt.setAttribute("disabled", true);
+            this.#bucketElmt.classList.add("d-none", "invisible");
+        }
+        else {
+            this.#bucketElmt.removeAttribute("disabled");
+            this.#bucketElmt.classList.remove("d-none", "invisible");
+        }
+    }
+
+    #updateSelectedTimeseriesInfo() {
+        this.#timeseriesElmt.value = Object.keys(this.#tsSeriesOptions).join();
+
         let nbSeries = Object.keys(this.#tsSeriesOptions).length;
         if (nbSeries > 0) {
             this.#chartSeriesContainerElmt.parentElement.classList.remove("d-none", "invisible");
-            this.#seriesCount.innerText = ` (${nbSeries.toString()})`;
+            this.#seriesCountElmt.textContent = `(${nbSeries.toString()})`;
         }
         else {
             this.#chartSeriesContainerElmt.parentElement.classList.add("d-none", "invisible");
-            this.#seriesCount.innerText = ``;
+            this.#seriesCountElmt.textContent = ``;
         }
 
         if (nbSeries > 1) {
@@ -662,6 +676,77 @@ class TimeseriesDataExploreView {
         else {
             this.#removeAllSeriesBtnElmt.classList.add("d-none", "invisible");
         }
+    }
+
+    #updateUrlParams() {
+        let url = new URL(window.location);
+
+        url.searchParams.set("timeseries", this.#timeseriesElmt.value);
+        url.searchParams.set("data_state", this.#tsDataStatesSelectElmt.value);
+        url.searchParams.set("period_type", this.#periodTypeElmt.value);
+        url.searchParams.set("tz", this.#timezonePickerElmt.tzName);
+
+        let doUpdateUrl = true;
+        if (this.#isPeriodCustom()) {
+            if (this.#periodStartDatetimeElmt.hasDatetime && this.#periodStartDatetimeElmt.isValid) {
+                url.searchParams.set("period_start_date", this.#periodStartDatetimeElmt.date);
+                url.searchParams.set("period_start_time", this.#periodStartDatetimeElmt.time);
+            }
+            else {
+                // Do not update page URL because period start date is invalid.
+                doUpdateUrl = false;
+                url.searchParams.delete("period_start_date");
+                url.searchParams.delete("period_start_time");
+            }
+            if (this.#periodEndDatetimeElmt.hasDatetime && this.#periodEndDatetimeElmt.isValid) {
+                url.searchParams.set("period_end_date", this.#periodEndDatetimeElmt.date);
+                url.searchParams.set("period_end_time", this.#periodEndDatetimeElmt.time);
+            }
+            else {
+                // Do not update page URL because period end date is invalid.
+                doUpdateUrl = false;
+                url.searchParams.delete("period_end_date");
+                url.searchParams.delete("period_end_time");
+            }
+        }
+        else {
+            url.searchParams.delete("period_start_date");
+            url.searchParams.delete("period_start_time");
+            url.searchParams.delete("period_end_date");
+            url.searchParams.delete("period_end_time");
+        }
+
+        let doReplaceUrl = false;
+        if (this.#aggInputElmt.value != "none") {
+            // Just replace page URL when aggregation has not changed while buket is not defined.
+            doReplaceUrl = url.searchParams.has("agg", this.#aggInputElmt.value) && (!url.searchParams.has("bucket_width_value") || !url.searchParams.has("bucket_width_unit"));
+
+            url.searchParams.set("agg", this.#aggInputElmt.value);
+            url.searchParams.set("bucket_width_value", this.#bucketElmt.bucketWidthValue);
+            url.searchParams.set("bucket_width_unit", this.#bucketElmt.bucketWidthUnit);
+        }
+        else {
+            // Just replace page URL when aggregation is "none" or empty (equals "none").
+            doReplaceUrl = url.searchParams.has("agg", "none") || url.searchParams.has("agg", "");
+
+            url.searchParams.delete("agg");
+            url.searchParams.delete("bucket_width_value");
+            url.searchParams.delete("bucket_width_unit");
+        }
+
+        // Update current page URL only when different than current one.
+        if (doReplaceUrl) {
+            window.history.replaceState(null, document.title, url);
+        }
+        else if (doUpdateUrl && url.toString() != window.location) {
+            window.history.pushState(null, document.title, url);
+        }
+
+        return Object.fromEntries(url.searchParams);
+    }
+
+    #isPeriodCustom() {
+        return this.#periodTypeElmt.value == "custom";
     }
 
     #loadChartSeries(tsIDs) {
@@ -676,15 +761,17 @@ class TimeseriesDataExploreView {
             tsIDs = Object.keys(this.#tsSeriesOptions);
         }
         if (tsIDs.length > 0 && this.#hasPeriodSelected()) {
+            this.#updateUrlParams();
+
             let urlParams = {
                 timeseries: tsIDs,
                 data_state: this.#tsDataStatesSelectElmt.value,
                 timezone: this.#timezonePickerElmt.tzName,
                 period: this.#periodTypeElmt.value,
-                end_date: this.#periodEndDatetimeElmt.date,
-                end_time: this.#periodEndDatetimeElmt.time,
             };
-            if (this.#periodTypeElmt.value == "custom") {
+            urlParams.end_date = this.#periodEndDatetimeElmt.date;
+            urlParams.end_time = this.#periodEndDatetimeElmt.time;
+            if (this.#isPeriodCustom()) {
                 urlParams.start_date = this.#periodStartDatetimeElmt.date;
                 urlParams.start_time = this.#periodStartDatetimeElmt.time;
             }
@@ -698,7 +785,7 @@ class TimeseriesDataExploreView {
             }
 
             this.#tsDataGetReqID = this.#internalAPIRequester.get(
-                app.urlFor(`api.timeseries.data.retrieve_multiple_data_json`, urlParams),
+                app.urlFor(`api.timeseries.data.retrieve_multiple_data`, urlParams),
                 (data) => {
                     // Iterate over each requested timeseries ID (instead of data from internal API response).
                     // The main reason is that, in some cases (and especially with no aggregation requested), data can be empty and therefore chart series are not updated.
@@ -739,16 +826,29 @@ class TimeseriesDataExploreView {
     }
 
     mount() {
-        this.#defaultEndDate = this.#periodEndDatetimeElmt.date;
-        this.#defaultEndTime = this.#periodEndDatetimeElmt.time;
+        this.#endDateDefault = this.#periodEndDatetimeElmt.date;
+        this.#endTimeDefault = this.#periodEndDatetimeElmt.time;
+        this.#endDateCustomBackup = this.#periodEndDatetimeElmt.date;
+        this.#endTimeCustomBackup = this.#periodEndDatetimeElmt.time;
 
-        this.#loadDataStates();
+        this.#updatePeriodCustomState();
+        this.#updateAggregationBucketState();
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
 
-        if (Object.keys(this.#tsSeriesOptions).length <= 0) {
-            this.#chartSettingsCanvas.show();
-        }
+        // Update timeseries selector component with selected timeseries and update chart.
+        let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
+        this.#tsSelector.select(
+            tsIDs,
+            () => {
+                this.#addTimeseries(this.#tsSelector.selectedItems);
+                this.#tsSelector.clearAllSelection();
+
+                if (Object.keys(this.#tsSeriesOptions).length <= 0) {
+                    this.#chartSettingsCanvas.show();
+                }
+            },
+        );
     }
 }
 
