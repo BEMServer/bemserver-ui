@@ -95,6 +95,10 @@ export class DatetimePicker extends HTMLDivElement {
         return this.#dateInputElmt.value != "" && this.#dateInputElmt.value != null;
     }
 
+    get isValid() {
+        return this.#dateInputElmt.validity.valid && this.#timeInputElmt.validity.valid;
+    }
+
     #loadOptions(options = {}) {
         this.#dateInputFormBind = this.getAttribute("date-input-form-bind") || options.dateInputFormBind;
         this.#timeInputFormBind = this.getAttribute("time-input-form-bind") || options.timeInputFormBind;
