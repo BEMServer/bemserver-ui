@@ -5,7 +5,7 @@ import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { TimeDisplay, TimeCalendar } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
@@ -58,6 +58,7 @@ export class EventListView {
     #eventInfoTabItemsCountElmts = {};
     #eventInfoTabPaginationElmts = {};
     #eventInfoTabListContainerElmts = {};
+    #eventInfoTabExploreLinkElmt = null;
     #eventInfoTabSpinnerElmt = null;
     #eventInfoTabsElmt = null;
     #eventInfoTabContentsElmt = null;
@@ -121,6 +122,7 @@ export class EventListView {
         this.#eventInfoTabItemsCountElmts["ts"] = document.getElementById("tsItemsCount");
         this.#eventInfoTabPaginationElmts["ts"] = document.getElementById("tsPagination");
         this.#eventInfoTabListContainerElmts["ts"] = document.getElementById("tsListContainer");
+        this.#eventInfoTabExploreLinkElmt = document.getElementById("tsDataExploreLink");
         for (let structuralElment of this.#structuralElementTypes) {
             this.#eventInfoTabElmts[structuralElment] = document.getElementById(`${structuralElment}s-tab`);
             this.#eventInfoTabContentElmts[structuralElment] = document.getElementById(`${structuralElment}s-tabcontent`);
@@ -732,6 +734,43 @@ export class EventListView {
             lastItem: this.#eventInfoTabPaginationElmts[eventInfoTabKey].endItem,
             totalCount: this.#eventInfoTabPaginationElmts[eventInfoTabKey].totalItems,
         });
+
+        // Update event timeseries data explore link button.
+        if (eventInfoTabKey == "ts") {
+            let tsIds = data.map((dataRow) => { return dataRow.id; });
+            let eventDatetime = new Date(this.#currentEventElmt.getAttribute("data-timestamp"));
+            this.#updateEventInfoTabTsDataExploreLink(tsIds, eventDatetime);
+        }
+    }
+
+    #updateEventInfoTabTsDataExploreLink(tsIds, eventDatetime) {
+        if (tsIds?.length > 0) {
+            this.#eventInfoTabExploreLinkElmt.classList.remove("disabled");
+            this.#eventInfoTabExploreLinkElmt.removeAttribute("aria-disabled");
+            this.#eventInfoTabExploreLinkElmt.removeAttribute("tabindex");
+
+            let exploreDatetimeStart = TimeCalendar.addDays(eventDatetime, -7);
+            let exploreDatetimeEnd = TimeCalendar.addDays(eventDatetime, 7);
+            let exploreDatetimeStartLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeStart);
+            let exploreDatetimeEndLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeEnd);
+
+            let exploreLinkParams = {
+                timeseries: tsIds.join(","),
+                tz: this.#tzName,
+                period_type: "custom",
+                period_start_date: exploreDatetimeStartLocaleISO.split("T")[0],
+                period_start_time: exploreDatetimeStartLocaleISO.split("T")[1].split(":", 2).join(":"),
+                period_end_date: exploreDatetimeEndLocaleISO.split("T")[0],
+                period_end_time: exploreDatetimeEndLocaleISO.split("T")[1].split(":", 2).join(":"),
+            };
+            this.#eventInfoTabExploreLinkElmt.href = app.urlFor(`timeseries.data.explore`, exploreLinkParams);
+        }
+        else {
+            this.#eventInfoTabExploreLinkElmt.classList.add("disabled");
+            this.#eventInfoTabExploreLinkElmt.setAttribute("disabled", true);
+            this.#eventInfoTabExploreLinkElmt.setAttribute("tabindex", -1);
+            this.#eventInfoTabExploreLinkElmt.removeAttribute("href");
+        }
     }
 
     #createEventElement(eventData, rowIndex) {
@@ -741,7 +780,8 @@ export class EventListView {
         eventElmt.setAttribute("data-bs-toggle", "modal");
         eventElmt.setAttribute("data-bs-target", "#eventInfoModal");
         eventElmt.setAttribute("data-event", eventData.id);
-        eventElmt.setAttribute("data-index", rowIndex)
+        eventElmt.setAttribute("data-index", rowIndex);
+        eventElmt.setAttribute("data-timestamp", eventData.timestamp);
 
         let timestampElmt = document.createElement("th");
         timestampElmt.setAttribute("scope", "row");

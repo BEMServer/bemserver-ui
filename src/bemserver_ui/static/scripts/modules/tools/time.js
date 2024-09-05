@@ -1,6 +1,23 @@
 export class TimeDisplay {
     static toLocaleString(datetime, {locale = navigator.language, timezone = "UTC"}) {
-        return datetime.toLocaleString(locale, {timeZone: timezone, timeZoneName: "longOffset"})
+        return datetime.toLocaleString(locale, {timeZone: timezone, timeZoneName: "longOffset"});
+    }
+
+    static toLocaleISOString(datetime) {
+        let leftPadFunc = (val, maxLength = 2, fillString = "0") => {
+            return ("" + val).padStart(maxLength, fillString);
+        };
+
+        let offset = datetime.getTimezoneOffset();
+        let tzOffset = (offset < 0 ? "+" : "-") + [leftPadFunc(Math.floor(Math.abs(offset / 60))), leftPadFunc(Math.abs(offset % 60))].join(":");
+
+        let dateISO = [datetime.getFullYear(), leftPadFunc(datetime.getMonth() + 1), leftPadFunc(datetime.getDate())].join("-");
+        let timeISO = [
+            [leftPadFunc(datetime.getHours()), leftPadFunc(datetime.getMinutes()), leftPadFunc(datetime.getSeconds())].join(":"),
+            leftPadFunc(datetime.getMilliseconds(), 3),
+        ].join(".");
+
+        return `${dateISO}T${timeISO}${tzOffset}`;
     }
 
     static getMonthName(monthNumber, locale = navigator.language) {
