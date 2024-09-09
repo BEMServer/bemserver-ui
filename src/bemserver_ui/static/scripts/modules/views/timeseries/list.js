@@ -23,6 +23,8 @@ export class TimeseriesListView {
     #tzName = "UTC";
 
     #formFiltersElmt = null;
+    #formFiltersSubmitBtnElmt = null;
+    #formFiltersResetBtnElmt = null;
     #searchInputElmt = null;
     #campaignScopeElmt = null;
     #pageInputElmt = null;
@@ -51,6 +53,8 @@ export class TimeseriesListView {
 
     #cacheDOM() {
         this.#formFiltersElmt = document.getElementById("formFilters");
+        this.#formFiltersSubmitBtnElmt = document.getElementById("formFiltersSubmitBtn");
+        this.#formFiltersResetBtnElmt = document.getElementById("formFiltersResetBtn");
         this.#searchInputElmt = document.getElementById("in_name");
         this.#campaignScopeElmt = document.getElementById("campaign_scope_id");
         this.#pageInputElmt = document.getElementById("page");
@@ -67,6 +71,14 @@ export class TimeseriesListView {
     }
 
     #initEventListeners() {
+        this.#formFiltersSubmitBtnElmt.addEventListener("click", () => {
+            this.#pageInputElmt.value = 1;
+        });
+
+        this.#formFiltersResetBtnElmt.addEventListener("click", () => {
+            this.#pageInputElmt.value = 1;
+        });
+
         this.#searchInputElmt.addEventListener("input", () => {
             if (this.#filters.in_name != this.#searchInputElmt.value) {
                 this.#searchInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");

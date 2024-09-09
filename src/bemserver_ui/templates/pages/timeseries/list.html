@@ -73,8 +73,8 @@
                                     <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id | string %} selected{% endif %}>{{ x.name }}</option>
                                     {% endfor %}
                                 </select>
-                                <button class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
-                                <a class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                                <button id="formFiltersSubmitBtn" class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
+                                <a id="formFiltersResetBtn" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
                             </form>
                         </div>
                     </div>
