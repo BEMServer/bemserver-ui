@@ -18,3 +18,9 @@ export const debounce = (fn, delay = 500) => {
 export const timer = (ms) => {
     new Promise(res => setTimeout(res, ms));
 };
+
+
+export const getOptionIndexFromSelect = (selectElement, optionValue) => {
+    let options = Array.from(selectElement.options);
+    return options.findIndex((opt) => opt.value == optionValue);
+};

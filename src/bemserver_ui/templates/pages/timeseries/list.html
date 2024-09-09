@@ -44,7 +44,7 @@
                     </h2>
                     <div id="collapseFilters" class="accordion-collapse collapse{% if is_filtered %} show{% endif %}" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
                         <div class="accordion-body">
-                            <div class="row mb-3">
+                            <div class="row gy-2 mb-3">
                                 <div class="col-12 col-xl-6">
                                     <label for="siteSelector" class="form-label">Sites selection</label>
                                     {% filter indent(width=12, first=False) %}
@@ -64,17 +64,74 @@
                                     <input type="hidden" form="formFilters" id="zone_filter" name="zone_id" value="{{ filters['zone_id'] }}">
                                 </div>
                             </div>
-                            <form id="formFilters" class="d-xl-flex d-grid gap-2" action="{{ url_for(request.endpoint) }}">
+                            <div class="row gy-2 mb-3">
+                                <div class="col-12 col-xl-6">
+                                    <input type="text" form="formFilters" class="form-control form-control-sm border{% if filters['in_name'] | length > 0 %} border-info bg-info bg-opacity-10{% endif %}" id="in_name" name="in_name" placeholder="Name..." value="{{ filters['in_name'] }}" autofocus />
+                                </div>
+                                <div class="col-12 col-xl-6">
+                                    <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope_id" name="campaign_scope_id" form="formFilters" aria-label="Select a filter value">
+                                        <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
+                                        {% for x in campaign_scopes %}
+                                        <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id | string %} selected{% endif %}>{{ x.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            {% if ts_properties | length > 0 %}
+                            <label class="form-label">Timeseries attributes</label>
+                            <div id="definePropertyContainer" class="row g-2 mb-2{% if not are_prop_filters_not_defined %} d-none invisible{% endif %}">
+                                <div class="col-12 col-xl">
+                                    <div class="input-group input-group-sm">
+                                        <select id="definePropertySelect" class="form-select form-select-sm" id="ts_props" aria-label="Select a filter value"{% if not are_prop_filters_not_defined %} disabled{% endif %}>
+                                            {% for x in ts_properties %}
+                                            <option value="{{ x.id }}"{% if loop.first %} selected{% endif %} data-type="{{ x.value_type }}" data-unit="{{ x.unit_symbol }}" data-description="{{ x.description }}"{% if "prop_" + x.id | string in filters %} disabled{% endif %}>{{ x.name }}{% if x.unit_symbol %} [{{ x.unit_symbol }}]{% endif %}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="button" id="addFilterTsPropValueBtn" class="btn btn-sm btn-outline-primary"{% if not are_prop_filters_not_defined %} disabled{% endif %}><i class="bi bi-plus-circle me-1"></i>Add attribute filter</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="propsContainer" class="d-grid d-xl-flex gap-2 mb-3">
+                                {% for x in ts_properties %}
+                                {% set prop_id = "prop_" + x.id | string %}
+                                {% if prop_id in filters %}
+                                <div id="propContainer_{{ x.id }}" class="mb-2">
+                                    <div class="input-group input-group-sm flex-nowrap">
+                                        <span id="propLabel_{{ x.id }}" class="input-group-text">{{ x.name }}{% if x.unit_symbol %} [{{ x.unit_symbol }}]{% endif %}</span>
+                                        {% if x.value_type == "string" %}
+                                        <input type="text" id="{{ prop_id }}" name="{{ prop_id }}" class="form-control form-control-sm" form="formFilters" aria-describedby="propLabel_{{ x.id }}" maxlength="100" value="{{ filters[prop_id] }}">
+                                        {% elif x.value_type == "integer" %}
+                                        <input type="number" id="{{ prop_id }}" name="{{ prop_id }}" class="form-control form-control-sm" form="formFilters" aria-describedby="propLabel_{{ x.id }}" value="{{ filters[prop_id] }}">
+                                        {% elif x.value_type == "float" %}
+                                        <input type="number" id="{{ prop_id }}" name="{{ prop_id }}" class="form-control form-control-sm" form="formFilters" aria-describedby="propLabel_{{ x.id }}" step="0.01" value="{{ filters[prop_id] }}">
+                                        {% elif x.value_type == "boolean" %}
+                                        <div class="input-group-text bg-white">
+                                            <div class="form-check form-switch">
+                                                <input type="hidden" name="{{ prop_id }}" form="formFilters" value="{{ filters[prop_id] }}">
+                                                <input type="checkbox" id="{{ prop_id }}" class="form-check-input" role="switch" aria-describedby="propLabel_{{ x.id }}"{% if filters[prop_id] == "on" %} checked{% endif %}>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <button id="propDeleteBtn_{{ x.id }}" class="btn btn-sm btn-outline-danger" type="button" title="Remove the attribute filter"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                    {% if x.decription or x.value_type %}
+                                    <div id="propDescription_{{ x.id }}" class="form-text fst-italic">
+                                        {{ x.description }}{% if x.value_type %}{% if x.description %}, {% endif %}{{ x.value_type }}{% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <form id="formFilters" class="row justify-content-end g-2" action="{{ url_for(request.endpoint) }}">
                                 <input type="hidden" name="{{ campaign_ctxt_query_arg_name }}" value="{{ g.campaign_ctxt.id }}" required />
-                                <input type="text" class="form-control form-control-sm border{% if filters['in_name'] | length > 0 %} border-info bg-info bg-opacity-10{% endif %}" id="in_name" name="in_name" placeholder="Name..." value="{{ filters['in_name'] }}" autofocus />
-                                <select class="form-select form-select-sm border{% if filters['campaign_scope_id'] is not none %} border-info bg-info bg-opacity-10{% endif %}" id="campaign_scope_id" name="campaign_scope_id" form="formFilters" aria-label="Select a filter value">
-                                    <option value="{{ none }}"{% if filters["campaign_scope_id"] is none %} selected{% endif %}>All campaign scopes</option>
-                                    {% for x in campaign_scopes %}
-                                    <option value="{{ x.id }}"{% if filters["campaign_scope_id"] == x.id | string %} selected{% endif %}>{{ x.name }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button id="formFiltersSubmitBtn" class="btn btn-sm btn-outline-info text-nowrap" type="submit" form="formFilters" title="Apply filters"><i class="bi bi-funnel"></i> Apply</button>
-                                <a id="formFiltersResetBtn" class="btn btn-sm btn-outline-secondary text-nowrap" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
+                                <div class="col-12 col-xl-auto">
+                                    <button id="formFiltersSubmitBtn" class="btn btn-sm btn-outline-info text-nowrap w-100" type="submit" title="Apply filters"><i class="bi bi-funnel me-1"></i>Apply</button>
+                                </div>
+                                <div class="col-12 col-xl-auto">
+                                    <a id="formFiltersResetBtn" class="btn btn-sm btn-outline-secondary text-nowrap w-100" role="button" href="{{ url_for(request.endpoint) }}" title="Remove filters"><i class="bi bi-eraser me-1"></i>Remove</a>
+                                </div>
                             </form>
                         </div>
                     </div>
