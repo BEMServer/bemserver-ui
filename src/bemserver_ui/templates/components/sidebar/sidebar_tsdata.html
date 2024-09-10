@@ -11,8 +11,8 @@
                 <ul class="nav nav-pills flex-column gap-1">
                     {% filter indent(width=20, first=True) %}
                     {% if g.campaign_ctxt.has_campaign %}
-                    {{- mac_sidebar.render_nav_item("Explore timeseries data", url_for("timeseries.data.explore"), "Explore timeseries data", ["bi", "bi-bar-chart-line"]) -}}
-                    {{- mac_sidebar.render_nav_item("Data completeness", url_for("timeseries.data.completeness"), "Data completeness", ["bi", "bi-pie-chart"]) -}}
+                    {{- mac_sidebar.render_nav_item("Explore", url_for("timeseries.data.explore"), "Explore timeseries data", ["bi", "bi-bar-chart-line"]) -}}
+                    {{- mac_sidebar.render_nav_item("Completeness", url_for("timeseries.data.completeness"), "Timeseries data completeness", ["bi", "bi-pie-chart"]) -}}
                     {% endif %}
                     {% for sidebar_section_plugin in sidebar_section_plugins %}
                     {{- mac_sidebar.render_nav_item_from_plugin(sidebar_section_plugin) -}}
