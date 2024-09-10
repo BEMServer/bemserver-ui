@@ -1,5 +1,6 @@
 """Timeseries views"""
 
+import json
 from copy import deepcopy
 
 import flask
@@ -67,6 +68,10 @@ def list():
     for campaign_scope in campaign_scopes_resp.data:
         campaign_scopes_by_id[campaign_scope["id"]] = campaign_scope
 
+    # Get timeseries properties.
+    ts_props_resp = flask.g.api_client.timeseries_properties.getall()
+    ts_props_by_id = {x["id"]: x for x in ts_props_resp.data}
+
     # Build timeseries filters from query args.
     # `filters` are for API request and `ui_filers` is just values for UI components.
     filters = {
@@ -106,6 +111,22 @@ def list():
     if "zone_id" in flask.request.args and flask.request.args["zone_id"] != "":
         filters["zone_id"] = flask.request.args["zone_id"]
 
+    # Filters on timeseries properties.
+    prop_filters = {}
+    for ts_prop_id, ts_prop in ts_props_by_id.items():
+        ts_prop_arg_name = f"prop_{ts_prop_id}"
+        if ts_prop_arg_name in flask.request.args:
+            raw_prop_value = str(flask.request.args[ts_prop_arg_name])
+            ui_filters[ts_prop_arg_name] = raw_prop_value
+            prop_value = raw_prop_value
+            if ts_prop["value_type"] == "boolean":
+                prop_value = "true" if prop_value == "on" else "false"
+            prop_filters[ts_prop["name"]] = prop_value
+    if len(prop_filters.keys()) > 0:
+        filters["properties"] = json.dumps(prop_filters)
+
+    are_prop_filters_not_defined = ts_props_by_id.keys() != prop_filters.keys()
+
     # Query args to set current page and page size.
     if "page_size" in flask.request.args:
         filters["page_size"] = int(flask.request.args["page_size"])
@@ -123,6 +144,7 @@ def list():
                 for x in FULL_STRUCTURAL_ELEMENT_TYPES
             ]
         )
+        or filters.get("properties", None) is not None
     )
 
     # Get timeseries list applying filters.
@@ -144,6 +166,8 @@ def list():
         is_filtered=is_filtered,
         pagination=prepare_pagination(timeseries_resp.pagination),
         ts_data_states=ts_data_states_resp.data,
+        ts_properties=ts_props_resp.data,
+        are_prop_filters_not_defined=are_prop_filters_not_defined,
     )
 
 

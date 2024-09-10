@@ -7,6 +7,7 @@ import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.j
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
+import { getOptionIndexFromSelect } from "/static/scripts/modules/tools/utils.js";
 
 
 export class TimeseriesListView {
@@ -23,6 +24,8 @@ export class TimeseriesListView {
     #tzName = "UTC";
 
     #formFiltersElmt = null;
+    #formFiltersSubmitBtnElmt = null;
+    #formFiltersResetBtnElmt = null;
     #searchInputElmt = null;
     #campaignScopeElmt = null;
     #pageInputElmt = null;
@@ -35,6 +38,11 @@ export class TimeseriesListView {
     #structuralElementIdInputElmt = null;
     #structuralElementRecursiveSwitchElmt = null;
     #zoneIdInputElmt = null;
+
+    #definePropertyContainerElmt = null;
+    #definePropertySelectElmt = null;
+    #addFilterTsPropValueBtnElmt = null;
+    #propertiesContainerElmt = null;
 
     constructor(options = {}) {
         this.#internalAPIRequester = new InternalAPIRequest();
@@ -51,6 +59,8 @@ export class TimeseriesListView {
 
     #cacheDOM() {
         this.#formFiltersElmt = document.getElementById("formFilters");
+        this.#formFiltersSubmitBtnElmt = document.getElementById("formFiltersSubmitBtn");
+        this.#formFiltersResetBtnElmt = document.getElementById("formFiltersResetBtn");
         this.#searchInputElmt = document.getElementById("in_name");
         this.#campaignScopeElmt = document.getElementById("campaign_scope_id");
         this.#pageInputElmt = document.getElementById("page");
@@ -64,9 +74,22 @@ export class TimeseriesListView {
 
         this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
         this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
+
+        this.#definePropertyContainerElmt = document.getElementById("definePropertyContainer");
+        this.#definePropertySelectElmt = document.getElementById("definePropertySelect");
+        this.#addFilterTsPropValueBtnElmt = document.getElementById("addFilterTsPropValueBtn");
+        this.#propertiesContainerElmt = document.getElementById("propsContainer");
     }
 
     #initEventListeners() {
+        this.#formFiltersSubmitBtnElmt.addEventListener("click", () => {
+            this.#pageInputElmt.value = 1;
+        });
+
+        this.#formFiltersResetBtnElmt.addEventListener("click", () => {
+            this.#pageInputElmt.value = 1;
+        });
+
         this.#searchInputElmt.addEventListener("input", () => {
             if (this.#filters.in_name != this.#searchInputElmt.value) {
                 this.#searchInputElmt.classList.remove("border-info", "bg-info", "bg-opacity-10");
@@ -158,6 +181,147 @@ export class TimeseriesListView {
                 }
             }
         });
+
+        this.#addFilterTsPropValueBtnElmt.addEventListener("click", () => {
+            this.#addPropertyFilter();
+
+            if (this.#definePropertySelectElmt.selectedIndex != -1) {
+                let selectedPropertyOptionElmt = this.#definePropertySelectElmt.options[this.#definePropertySelectElmt.selectedIndex];
+                selectedPropertyOptionElmt.setAttribute("disabled", true);
+
+                this.#updateAvailableProperties();
+            }
+        });
+    }
+
+    #addPropertyFilter() {
+        if (this.#definePropertySelectElmt.selectedIndex != -1) {
+            let selectedPropertyOptionElmt = this.#definePropertySelectElmt.options[this.#definePropertySelectElmt.selectedIndex];
+            let propertyId = selectedPropertyOptionElmt.value;
+            let propertyType = selectedPropertyOptionElmt.getAttribute("data-type", "string");
+            let propertyDescription = selectedPropertyOptionElmt.getAttribute("data-description");
+
+            let propertyContainerElmt = document.createElement("div");
+            propertyContainerElmt.classList.add("mb-2");
+            propertyContainerElmt.id = `propContainer_${propertyId}`;
+            this.#propertiesContainerElmt.appendChild(propertyContainerElmt);
+
+            let propertyInputGroupElmt = document.createElement("div");
+            propertyInputGroupElmt.classList.add("input-group", "input-group-sm", "flex-nowrap");
+            propertyContainerElmt.appendChild(propertyInputGroupElmt);
+
+            let propertyLabelElmt = document.createElement("span");
+            propertyLabelElmt.classList.add("input-group-text");
+            propertyLabelElmt.id = `propLabel_${propertyId}`;
+            propertyLabelElmt.textContent = selectedPropertyOptionElmt.text;
+            propertyInputGroupElmt.appendChild(propertyLabelElmt);
+
+            let propertyValueElmt = document.createElement("input");
+            propertyValueElmt.classList.add("form-control", "form-control-sm");
+            propertyValueElmt.id = `prop_${propertyId}`;
+            propertyValueElmt.name = propertyValueElmt.id;
+            propertyValueElmt.setAttribute("form", "formFilters");
+            propertyValueElmt.setAttribute("aria-describedby", propertyLabelElmt.id);
+
+            switch (propertyType) {
+                case "string":
+                    propertyValueElmt.type = "text";
+                    propertyValueElmt.setAttribute("maxlength", 100);
+                    break;
+                case "integer":
+                    propertyValueElmt.type = "number";
+                    break;
+                case "float":
+                    propertyValueElmt.type = "number";
+                    propertyValueElmt.setAttribute("step", 0.01);
+                    break;
+                case "boolean":
+                    propertyValueElmt.classList.replace("form-control", "form-check-input");
+                    propertyValueElmt.classList.remove("form-control-sm");
+                    propertyValueElmt.type = "checkbox";
+                    propertyValueElmt.setAttribute("role", "switch");
+                    break;
+            }
+
+            if (propertyValueElmt.type == "checkbox") {
+                let propertySwitchInputGroupElmt = document.createElement("div");
+                propertySwitchInputGroupElmt.classList.add("input-group-text", "bg-white");
+                propertyInputGroupElmt.appendChild(propertySwitchInputGroupElmt);
+
+                let propertySwitchContainerElmt = document.createElement("div");
+                propertySwitchContainerElmt.classList.add("form-check", "form-switch");
+                propertySwitchInputGroupElmt.appendChild(propertySwitchContainerElmt);
+
+                // Trick that forces the form to send checkbox value, even when unchecked.
+                let hiddenPropValElmt = document.createElement("input");
+                hiddenPropValElmt.type = "hidden";
+                hiddenPropValElmt.name = propertyValueElmt.name;
+                hiddenPropValElmt.setAttribute("form", propertyValueElmt.getAttribute("form"));
+                hiddenPropValElmt.setAttribute("value", propertyValueElmt.checked ? "on": "off");
+                propertySwitchContainerElmt.appendChild(hiddenPropValElmt);
+
+                propertySwitchContainerElmt.appendChild(propertyValueElmt);
+
+                propertyValueElmt.addEventListener("click", () => {
+                    hiddenPropValElmt.setAttribute("value", propertyValueElmt.checked ? "on": "off");
+                });
+            }
+            else {
+                propertyInputGroupElmt.appendChild(propertyValueElmt);
+            }
+
+            let propertyDescriptionElmt = document.createElement("div");
+            propertyDescriptionElmt.classList.add("form-text", "fst-italic");
+            propertyDescriptionElmt.id = `propDescription_${propertyId}`;
+            propertyDescriptionElmt.textContent = [propertyDescription, propertyType].filter(Boolean).join(", ");
+            propertyContainerElmt.appendChild(propertyDescriptionElmt);
+
+            let propertyDeleteBtnElmt = document.createElement("button");
+            propertyDeleteBtnElmt.classList.add("btn", "btn-sm", "btn-outline-danger");
+            propertyDeleteBtnElmt.id = `propDeleteBtn_${propertyId}`;
+            propertyDeleteBtnElmt.setAttribute("type", "button");
+            propertyDeleteBtnElmt.setAttribute("title", "Remove the attribute filter");
+            propertyInputGroupElmt.appendChild(propertyDeleteBtnElmt);
+
+            let propertyDeleteIconElmt = document.createElement("i");
+            propertyDeleteIconElmt.classList.add("bi", "bi-trash");
+            propertyDeleteBtnElmt.appendChild(propertyDeleteIconElmt);
+
+            propertyDeleteBtnElmt.addEventListener("click", () => {
+                propertyContainerElmt.remove();
+
+                selectedPropertyOptionElmt.removeAttribute("disabled");
+
+                this.#updateAvailableProperties();
+            });
+
+            propertyValueElmt.focus();
+        }
+    }
+
+    #updateAvailableProperties() {
+        let availableElmts = [].slice.call(this.#definePropertySelectElmt.querySelectorAll(`option:not([disabled])`));
+        if (availableElmts.length > 0) {
+            let index = getOptionIndexFromSelect(this.#definePropertySelectElmt, availableElmts[0].value);
+            this.#definePropertySelectElmt.selectedIndex = index;
+
+            if (this.#definePropertySelectElmt.hasAttribute("disabled")) {
+                this.#definePropertySelectElmt.removeAttribute("disabled");
+            }
+            if (this.#addFilterTsPropValueBtnElmt.hasAttribute("disabled")) {
+                this.#addFilterTsPropValueBtnElmt.removeAttribute("disabled");
+            }
+            if (this.#definePropertyContainerElmt.classList.contains("d-none", "invisible")) {
+                this.#definePropertyContainerElmt.classList.remove("d-none", "invisible");
+            }
+        }
+        else {
+            this.#definePropertySelectElmt.selectedIndex = -1;
+
+            this.#definePropertySelectElmt.setAttribute("disabled", true);
+            this.#addFilterTsPropValueBtnElmt.setAttribute("disabled", true);
+            this.#definePropertyContainerElmt.classList.add("d-none", "invisible");
+        }
     }
 
     #getEditBtnHTML(id, tab=null) {
@@ -567,6 +731,30 @@ export class TimeseriesListView {
             in_name: this.#searchInputElmt.value,
             campaign_scope_id: this.#campaignScopeElmt.options[this.#campaignScopeElmt.selectedIndex].value,
             page: this.#pageInputElmt.value,
+        }
+
+        // Set event listener on existing attribute filter remove buttons.
+        let attributeFilterRemoveBtnElmts = [].slice.call(this.#propertiesContainerElmt.querySelectorAll(`button[id^="propDeleteBtn_"]`));
+        for (let attributeFilterRemoveBtnElmt of attributeFilterRemoveBtnElmts) {
+            let attrId = attributeFilterRemoveBtnElmt.id.split("_")[1];
+
+            attributeFilterRemoveBtnElmt.addEventListener("click", () => {
+                document.getElementById(`propContainer_${attrId}`)?.remove();
+
+                let propOptIndex = getOptionIndexFromSelect(this.#definePropertySelectElmt, attrId);
+                this.#definePropertySelectElmt.options[propOptIndex]?.removeAttribute("disabled");
+
+                this.#updateAvailableProperties();
+            });
+        }
+
+        // Set event listener on existing checkbox attribute filters.
+        let attributeFilterCheckboxElmts = [].slice.call(this.#propertiesContainerElmt.querySelectorAll(`input[type="checkbox"]`));
+        for (let attributeFilterCheckboxElmt of attributeFilterCheckboxElmts) {
+            attributeFilterCheckboxElmt.addEventListener("click", () => {
+                let attributeFilterCheckboxHiddenInputElmt = this.#propertiesContainerElmt.querySelector(`input[type="hidden"][name="${attributeFilterCheckboxElmt.id}"]`);
+                attributeFilterCheckboxHiddenInputElmt.setAttribute("value", attributeFilterCheckboxElmt.checked ? "on": "off");
+            });
         }
     }
 }
