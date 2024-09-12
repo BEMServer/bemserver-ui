@@ -148,6 +148,11 @@ class TestCommonAnalysis:
         assert dt_start == dt_now - dt.timedelta(hours=24.0)
         assert dt_end == dt_now
 
+        period_type = get_explore_period_type("last-24-hours")
+        dt_start, dt_end = compute_explore_period_bounds(period_type, None, tz=tz)
+        assert dt_start.date() == (dt_now - dt.timedelta(hours=24.0)).date()
+        assert dt_end.date() == dt_now.date()
+
         period_type = get_explore_period_type("last-7-days")
         dt_start, dt_end = compute_explore_period_bounds(
             period_type, end_date, end_time, tz=tz

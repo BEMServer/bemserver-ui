@@ -91,10 +91,13 @@ def compute_explore_period_bounds(
 
     if end_date is None:
         dt_end = dt.datetime.now(tz=tz)
-    try:
-        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
-    except BEMServerUICommonInvalidDatetimeError as exc:
-        raise BEMServerUICommonInvalidDatetimeError("Invalid end datetime!") from exc
+    else:
+        try:
+            dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
+        except BEMServerUICommonInvalidDatetimeError as exc:
+            raise BEMServerUICommonInvalidDatetimeError(
+                "Invalid end datetime!"
+            ) from exc
 
     if period_type["id"] == "custom":
         try:
