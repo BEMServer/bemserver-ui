@@ -12,6 +12,7 @@
                     {% filter indent(width=20, first=True) %}
                     {% if g.campaign_ctxt.has_campaign %}
                     {{- mac_sidebar.render_nav_item("Explore", url_for("timeseries.data.explore"), "Explore timeseries data", ["bi", "bi-bar-chart-line"]) -}}
+                    {{- mac_sidebar.render_nav_item("Compare data states", url_for("timeseries.data.compare_states"), "Compare timeseries data states", ["bi", "bi-bookmarks"]) -}}
                     {{- mac_sidebar.render_nav_item("Completeness", url_for("timeseries.data.completeness"), "Timeseries data completeness", ["bi", "bi-pie-chart"]) -}}
                     {% endif %}
                     {% for sidebar_section_plugin in sidebar_section_plugins %}

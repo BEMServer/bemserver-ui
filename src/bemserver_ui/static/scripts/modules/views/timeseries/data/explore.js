@@ -5,129 +5,8 @@ import "/static/scripts/modules/components/time/datetimePicker.js";
 import "/static/scripts/modules/components/timeseries/bucketWidth.js";
 import "/static/scripts/modules/components/spinner.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
-import { TimeseriesChartExplore } from "/static/scripts/modules/components/charts/tsChartExplore.js";
+import { TimeseriesChartExplore, TimeseriesChartSeriesOptions, SeriesYAxisPositions, SeriesTypes, SeriesLineStyles, SeriesLineSymbols, SeriesBarDecals, defaultSeriesYAxisPosition, defaultSeriesType, defaultSeriesLineStyle, defaultSeriesLineSymbol, defaultSeriesBarDecal } from "/static/scripts/modules/components/charts/tsChartExplore.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
-
-
-// TODO: Maybe those const values could be structures as enums? and general app consts?
-
-const SeriesYAxisPositions = Object.freeze({
-    "left": "left",
-    "right": "right",
-});
-
-const SeriesTypes = Object.freeze({
-    "line": "line",
-    "bar": "bar",
-});
-
-const SeriesLineStyles = Object.freeze({
-    "solid": "solid",
-    "dashed": "dashed",
-    "dotted": "dotted",
-});
-
-const SeriesLineSymbols = Object.freeze({
-    "emptyCircle": "empty circle",
-    "circle": "circle",
-    "rect": "rectangle",
-    "roundRect": "rounded rectangle",
-    "triangle": "triangle",
-    "diamond": "diamond",
-    "pin": "pin",
-    "arrow": "arrow",
-    "path://": "none",
-});
-
-const SeriesBarDecals = Object.freeze({
-    "none": {
-        "label": "none",
-        "decal": {
-            symbol: "path://",
-            symbolSize: 1,
-            dashArrayX: 5,
-            dashArrayY: 5,
-            rotation: 0,
-        },
-    },
-    "hash1": {
-        "label": "hash type 1",
-        "decal": {
-            symbol: "rect",
-            symbolSize: 1,
-            dashArrayX: [1, 0],
-            dashArrayY: [2, 5],
-            rotation: Math.PI / 6,
-        },
-    },
-    "dots": {
-        "label": "dots",
-        "decal": {
-            symbol: "circle",
-            symbolSize: 0.8,
-            dashArrayX: [
-                [8, 8],
-                [0, 8, 8, 0],
-            ],
-            dashArrayY: [6, 0],
-            rotation: 0,
-        },
-    },
-    "hash2": {
-        "label": "hash type 2",
-        "decal": {
-            symbol: "rect",
-            symbolSize: 1,
-            dashArrayX: [1, 0],
-            dashArrayY: [4, 3],
-            rotation: -Math.PI / 4,
-            rotation: 0,
-        },
-    },
-    "hash3": {
-        "label": "hash type 3",
-        "decal": {
-            symbol: "rect",
-            symbolSize: 1,
-            dashArrayX: [
-                [6, 6],
-                [0, 6, 6, 0],
-            ],
-            dashArrayY: [6, 0],
-            rotation: 0,
-        },
-    },
-    "hash4": {
-        "label": "hash type 4",
-        "decal": {
-            symbol: "rect",
-            symbolSize: 1,
-            dashArrayX: [
-                [1, 0],
-                [1, 6],
-            ],
-            dashArrayY: [1, 0, 6, 0],
-            rotation: Math.PI / 4,
-        },
-    },
-    "lines_horiz": {
-        "label": "horizontal lines",
-        "decal": {
-            symbol: "rect",
-            symbolSize: 1,
-            dashArrayX: [1, 0],
-            dashArrayY: 10,
-            rotation: 0,
-        },
-    },
-});
-
-
-const defaultSeriesYAxisPosition = "left";
-const defaultSeriesType = "line";
-const defaultSeriesLineStyle = "solid";
-const defaultSeriesLineSymbol = "emptyCircle";
-const defaultSeriesBarDecal = "none";
 
 
 class TimeseriesDataExploreView {
@@ -232,6 +111,19 @@ class TimeseriesDataExploreView {
         });
 
         this.#tsDataStatesSelectElmt.addEventListener("change", () => {
+            let tsDataState = {
+                id: this.#tsDataStatesSelectElmt.value,
+                name: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
+            };
+
+            for (let tsSeriesOption of Object.values(this.#tsSeriesOptions)) {
+                this.#chartExplore.removeSeries(tsSeriesOption.id);
+
+                tsSeriesOption.tsDataState = tsDataState;
+                let chartSeriesParams = tsSeriesOption.toChartSeries();
+                this.#chartExplore.addSeries(chartSeriesParams);
+            }
+
             this.#loadChartSeries();
         });
 
@@ -321,8 +213,10 @@ class TimeseriesDataExploreView {
 
         // Chart explore event listener.
         document.addEventListener("seriesVisibilityChanged", (event) => {
-            this.#tsSeriesOptions[event.detail.id].show = event.detail.visibility;
-            this.#updateChartSeriesOptionsVisibility(event.detail.id);
+            let tsID = event.detail.timeseriesID;
+            let isVisible = event.detail.visibility;
+            this.#tsSeriesOptions[tsID].show = isVisible;
+            this.#updateChartSeriesOptionsVisibility(tsID);
         });
 
         window.addEventListener("popstate", () => {
@@ -358,7 +252,7 @@ class TimeseriesDataExploreView {
             this.#tsSelector.select(
                 tsIDs,
                 () => {
-                    this.#addTimeseries(this.#tsSelector.selectedItems, "left", "line", true);
+                    this.#addTimeseries(this.#tsSelector.selectedItems);
                     this.#tsSelector.clearAllSelection();
 
                     if (Object.keys(this.#tsSeriesOptions).length <= 0) {
@@ -375,7 +269,12 @@ class TimeseriesDataExploreView {
             if (!Object.keys(this.#tsSeriesOptions).includes(tsData.id.toString())) {
                 let seriesColor = this.#chartExplore.getNextColor();
 
-                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, seriesColor, seriesYAxisPosition, seriesType);
+                let tsDataState = {
+                    id: this.#tsDataStatesSelectElmt.value,
+                    name: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
+                };
+
+                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, tsDataState, seriesColor, seriesYAxisPosition, seriesType);
                 let tsSeriesChartOptsRowElmt = this.#createTimeseriesChartOptionsRowElment(tsChartSeriesOpts);
                 this.#chartSeriesContainerBodyElmt.appendChild(tsSeriesChartOptsRowElmt);
 
@@ -430,6 +329,7 @@ class TimeseriesDataExploreView {
     }
 
     #createTimeseriesChartOptionsRowElment(tsChartSeriesOpts) {
+        let tsID = tsChartSeriesOpts.timeseries.id;
         let seriesYAxisPosition = tsChartSeriesOpts.yAxisPosition || defaultSeriesYAxisPosition;
         let seriesType = tsChartSeriesOpts.type || defaultSeriesType;
         let seriesLineStyle = tsChartSeriesOpts.style || defaultSeriesLineStyle;
@@ -460,7 +360,7 @@ class TimeseriesDataExploreView {
         visibilitySwitchContainerElmt.classList.add("form-check", "form-switch");
         visibilityCellElmt.appendChild(visibilitySwitchContainerElmt);
         let visibilitySwitchElmt = document.createElement("input");
-        visibilitySwitchElmt.id = `seriesVisibilitySwitch-${tsChartSeriesOpts.id.toString()}`;
+        visibilitySwitchElmt.id = `seriesVisibilitySwitch-${tsID.toString()}`;
         visibilitySwitchElmt.classList.add("form-check-input");
         visibilitySwitchElmt.type = "checkbox";
         visibilitySwitchElmt.setAttribute("role", "switch");
@@ -468,7 +368,7 @@ class TimeseriesDataExploreView {
         visibilitySwitchContainerElmt.appendChild(visibilitySwitchElmt);
 
         let colorInputElmt = document.createElement("input");
-        colorInputElmt.id = `seriesColorPicker-${tsChartSeriesOpts.id.toString()}`;
+        colorInputElmt.id = `seriesColorPicker-${tsID.toString()}`;
         colorInputElmt.type = "color";
         colorInputElmt.classList.add("form-control", "form-control-sm");
         colorInputElmt.value = tsChartSeriesOpts.color;
@@ -481,7 +381,7 @@ class TimeseriesDataExploreView {
         nameCellElmt.appendChild(seriesNameElmt);
 
         let yAxisPositionInputElmt = document.createElement("select");
-        yAxisPositionInputElmt.id = `seriesYAxisPositionSelect-${tsChartSeriesOpts.id.toString()}`;
+        yAxisPositionInputElmt.id = `seriesYAxisPositionSelect-${tsID.toString()}`;
         yAxisPositionInputElmt.classList.add("form-select", "form-select-sm");
         yAxisPositionInputElmt.setAttribute("aria-label", "Select a position");
         for (let [optValue, optText] of Object.entries(SeriesYAxisPositions)) {
@@ -494,7 +394,7 @@ class TimeseriesDataExploreView {
         yAxisPositionCellElmt.appendChild(yAxisPositionInputElmt);
 
         let typeInputElmt = document.createElement("select");
-        typeInputElmt.id = `seriesTypeSelect-${tsChartSeriesOpts.id.toString()}`;
+        typeInputElmt.id = `seriesTypeSelect-${tsID.toString()}`;
         typeInputElmt.classList.add("form-select", "form-select-sm");
         typeInputElmt.setAttribute("aria-label", "Select a type of series");
         for (let [optValue, optText] of Object.entries(SeriesTypes)) {
@@ -507,7 +407,7 @@ class TimeseriesDataExploreView {
         typeCellElmt.appendChild(typeInputElmt);
 
         let styleInputElmt = document.createElement("select");
-        styleInputElmt.id = `seriesStyleSelect-${tsChartSeriesOpts.id.toString()}`;
+        styleInputElmt.id = `seriesStyleSelect-${tsID.toString()}`;
         styleInputElmt.classList.add("form-select", "form-select-sm");
         styleInputElmt.setAttribute("aria-label", "Select a style of series");
         for (let [optValue, optText] of Object.entries(SeriesLineStyles)) {
@@ -520,7 +420,7 @@ class TimeseriesDataExploreView {
         styleCellElmt.appendChild(styleInputElmt);
 
         let symbolInputElmt = document.createElement("select");
-        symbolInputElmt.id = `seriesSymbolSelect-${tsChartSeriesOpts.id.toString()}`;
+        symbolInputElmt.id = `seriesSymbolSelect-${tsID.toString()}`;
         symbolInputElmt.classList.add("form-select", "form-select-sm");
         symbolInputElmt.setAttribute("aria-label", "Select a symbol of series");
         for (let [optValue, optText] of Object.entries(SeriesLineSymbols)) {
@@ -533,7 +433,7 @@ class TimeseriesDataExploreView {
         styleCellElmt.appendChild(symbolInputElmt);
 
         let decalInputElmt = document.createElement("select");
-        decalInputElmt.id = `seriesDecalSelect-${tsChartSeriesOpts.id.toString()}`;
+        decalInputElmt.id = `seriesDecalSelect-${tsID.toString()}`;
         decalInputElmt.classList.add("form-select", "form-select-sm");
         decalInputElmt.setAttribute("aria-label", "Select a decal of series");
         for (let [optValue, optData] of Object.entries(SeriesBarDecals)) {
@@ -576,46 +476,48 @@ class TimeseriesDataExploreView {
 
         // Event listeners.
         visibilitySwitchElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].show = visibilitySwitchElmt.checked;
-            this.#updateChartSeriesOptionsVisibility(tsChartSeriesOpts.id);
-            this.#chartExplore.toggleSeriesVisibility(tsChartSeriesOpts.id);
+            this.#tsSeriesOptions[tsID].show = visibilitySwitchElmt.checked;
+            this.#updateChartSeriesOptionsVisibility(tsID);
+            let seriesID = this.#tsSeriesOptions[tsID].id;
+            this.#chartExplore.toggleSeriesVisibility(seriesID);
         });
 
         colorInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].color = colorInputElmt.value;
-            this.#refreshChart(tsChartSeriesOpts.id);
+            this.#tsSeriesOptions[tsID].color = colorInputElmt.value;
+            this.#refreshChart(tsID);
         });
 
         typeInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].type = typeInputElmt.value;
+            this.#tsSeriesOptions[tsID].type = typeInputElmt.value;
             updateSeriesStyleOptionsFunc();
-            this.#refreshChart(tsChartSeriesOpts.id);
+            this.#refreshChart(tsID);
         });
 
         styleInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].style = styleInputElmt.value;
-            this.#refreshChart(tsChartSeriesOpts.id);
+            this.#tsSeriesOptions[tsID].style = styleInputElmt.value;
+            this.#refreshChart(tsID);
         });
 
         symbolInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].symbol = symbolInputElmt.value;
-            this.#refreshChart(tsChartSeriesOpts.id);
+            this.#tsSeriesOptions[tsID].symbol = symbolInputElmt.value;
+            this.#refreshChart(tsID);
         });
 
         decalInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].decalName = decalInputElmt.value;
-            this.#refreshChart(tsChartSeriesOpts.id);
+            this.#tsSeriesOptions[tsID].decalName = decalInputElmt.value;
+            this.#refreshChart(tsID);
         });
 
         yAxisPositionInputElmt.addEventListener("change", () => {
-            this.#tsSeriesOptions[tsChartSeriesOpts.id].yAxisPosition = yAxisPositionInputElmt.value;
-            this.#refreshChart(tsChartSeriesOpts.id, true);
+            this.#tsSeriesOptions[tsID].yAxisPosition = yAxisPositionInputElmt.value;
+            this.#refreshChart(tsID, true);
         });
 
         removeBtnElmt.addEventListener("click", () => {
             rowElmt.remove();
-            this.#chartExplore.removeSeries(tsChartSeriesOpts.id);
-            delete this.#tsSeriesOptions[tsChartSeriesOpts.id];
+            let seriesID = this.#tsSeriesOptions[tsID].id;
+            this.#chartExplore.removeSeries(seriesID);
+            delete this.#tsSeriesOptions[tsID];
             this.#updateSelectedTimeseriesInfo();
             this.#updateUrlParams();
         });
@@ -718,7 +620,7 @@ class TimeseriesDataExploreView {
 
         let doReplaceUrl = false;
         if (this.#aggInputElmt.value != "none") {
-            // Just replace page URL when aggregation has not changed while buket is not defined.
+            // Just replace page URL when aggregation has not changed while bucket is not defined.
             doReplaceUrl = url.searchParams.has("agg", this.#aggInputElmt.value) && (!url.searchParams.has("bucket_width_value") || !url.searchParams.has("bucket_width_unit"));
 
             url.searchParams.set("agg", this.#aggInputElmt.value);
@@ -793,7 +695,8 @@ class TimeseriesDataExploreView {
                         // Get timeseries data or empty structure if not in data from internal API response.
                         let tsData = data[tsID.toString()] || {};
                         // Update timeseries chart series.
-                        this.#chartExplore.updateSeriesData(tsID, tsData, { aggregation: aggregation });
+                        let seriesID = this.#tsSeriesOptions[tsID].id;
+                        this.#chartExplore.updateSeriesData(seriesID, tsData, { aggregation: aggregation });
                     }
                     this.#periodTypeLoaded = this.#periodTypeElmt.value;
 
@@ -816,7 +719,7 @@ class TimeseriesDataExploreView {
 
         // Update chart series (style...).
         if (tsID != null) {
-            this.#chartExplore.updateSeries(this.#tsSeriesOptions[tsID].toChartSeries(), yAxisIndexChanged);
+            this.#chartExplore.updateSeries(this.#tsSeriesOptions[tsID].id, this.#tsSeriesOptions[tsID].toChartSeries(), yAxisIndexChanged);
         }
         else {
             // TODO: update all?
@@ -849,119 +752,6 @@ class TimeseriesDataExploreView {
                 }
             },
         );
-    }
-}
-
-
-class TimeseriesChartSeriesOptions {
-
-    #tsData = null;
-    #type = defaultSeriesType;
-    #style = defaultSeriesLineStyle;
-    #symbol = defaultSeriesLineSymbol;
-    #yAxisPosition = defaultSeriesYAxisPosition;
-
-    get id() {
-        return this.#tsData?.id;
-    }
-
-    get name() {
-        return this.#tsData?.name;
-    }
-
-    get label() {
-        return this.#tsData?.label;
-    }
-
-    get unitSymbol() {
-        return this.#tsData?.unit_symbol;
-    }
-
-    get type() {
-        return this.#type;
-    }
-    set type(value) {
-        if (Object.keys(SeriesTypes).includes(value)) {
-            this.#type = value;
-        }
-    }
-
-    get style() {
-        return this.#style;
-    }
-    set style(value) {
-        if (Object.keys(SeriesLineStyles).includes(value)) {
-            this.#style = value;
-        }
-    }
-
-    get symbol() {
-        return this.#symbol;
-    }
-    set symbol(value) {
-        if (Object.keys(SeriesLineSymbols).includes(value)) {
-            this.#symbol = value;
-        }
-    }
-
-    get yAxisPosition() {
-        return this.#yAxisPosition;
-    }
-    set yAxisPosition(value) {
-        if (Object.keys(SeriesYAxisPositions).includes(value)) {
-            this.#yAxisPosition = value;
-        }
-    }
-
-    get yAxisIndex() {
-        return this.#yAxisPosition == SeriesYAxisPositions.left ? 0 : 1;
-    }
-
-    constructor(tsData, color = null, yAxisPosition = defaultSeriesYAxisPosition, type = defaultSeriesType, options = {}) {
-        // options:
-        //  if type == "line", may contain "style" and "symbol" definition
-        //  if type == "bar", may contain "decalName" definition
-
-        this.#tsData = tsData;
-        this.color = color;
-        this.type = type;
-        this.yAxisPosition = yAxisPosition;
-        this.show = true;
-
-        if (this.#type == "line") {
-            this.style = options.style || defaultSeriesLineStyle;
-            this.symbol = options.symbol || defaultSeriesLineSymbol;
-        }
-        this.decalName = options.decalName || defaultSeriesBarDecal;
-    }
-
-    toChartSeries(ignoreColor = false) {
-        let series = {
-            id: this.id,
-            name: this.label,
-            type: this.type,
-            yAxisIndex: this.yAxisIndex,
-            data: [],
-            visible: this.show,
-            unitSymbol: this.unitSymbol,
-        };
-        if (!ignoreColor) {
-            series.color = this.color;
-        }
-        if (this.#type == "line") {
-            series.lineStyle = {
-                type: this.#style,
-            };
-            series.symbol = this.#symbol;
-            series.showSymbol = this.#symbol != "path://";
-        }
-        else if (this.#type == "bar") {
-            series.itemStyle = {
-                decal: SeriesBarDecals[this.decalName].decal,
-            };
-        }
-
-        return series;
     }
 }
 

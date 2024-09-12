@@ -108,7 +108,9 @@ def retrieve_data(id):
 def retrieve_multiple_data():
     ts_ids = [int(x) for x in flask.request.args["timeseries"].split(",")]
     data_state_id = flask.request.args["data_state"]
-    tz_name = flask.request.args["timezone"]
+
+    default_tz_name = flask.g.campaign_ctxt.tz_name
+    tz_name = flask.request.args.get("timezone", default_tz_name) or default_tz_name
 
     period_type = get_explore_period_type(flask.request.args["period"])
     if period_type is None:
