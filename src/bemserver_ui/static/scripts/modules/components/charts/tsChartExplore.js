@@ -29,6 +29,7 @@ export class TimeseriesChartExplore extends ChartBase {
             // Get series id from name.
             let seriesIndex = this.#getSeriesIndexFromName(params.name);
             let seriesID = this.#chartOpts.series[seriesIndex].id;
+            let tsID = this.#chartOpts.series[seriesIndex].timeseriesID;
             let isVisible = params.selected[params.name];
     
             this.#chartOpts.series[seriesIndex].visible = isVisible;
@@ -36,7 +37,7 @@ export class TimeseriesChartExplore extends ChartBase {
     
             let seriesVisibilityEvent = new CustomEvent(
                 "seriesVisibilityChanged",
-                { detail: { id: seriesID, visibility: isVisible }, bubbles: true },
+                { detail: { id: seriesID, timeseriesID: tsID, visibility: isVisible }, bubbles: true },
             );
             this.dispatchEvent(seriesVisibilityEvent);
         });
@@ -138,7 +139,6 @@ export class TimeseriesChartExplore extends ChartBase {
     getNextColor() {
         let chatColors = this.#chartOpts.color;
         let seriesColor = chatColors[this.#currentSeriesIndex % chatColors.length];
-        this.#currentSeriesIndex += 1;
         return seriesColor;
     }
 
@@ -166,9 +166,9 @@ export class TimeseriesChartExplore extends ChartBase {
         }
     }
 
-    #hasSeries(id) {
+    #hasSeries(seriesID) {
         let seriesIDs = this.#chartOpts.series.map((series) => { return series.id });
-        return seriesIDs.includes(id);
+        return seriesIDs.includes(seriesID);
     }
 
     #updateLegend(applyOption = false) {
@@ -221,7 +221,7 @@ export class TimeseriesChartExplore extends ChartBase {
             for (let series of opt.series) {
                 let tableHeadThElmt = document.createElement("th");
                 tableHeadThElmt.setAttribute("scope", "col");
-                tableHeadThElmt.innerText = `${series.name}${series.aggregation != null ? ` ${series.aggregation}` : ""}`;
+                tableHeadThElmt.innerText = `${series.name}${series.aggregation != null ? ` | ${series.aggregation}` : ""}`;
                 tableHeadTrElmt.appendChild(tableHeadThElmt);
             }
             tableHeadElmt.appendChild(tableHeadTrElmt);
@@ -235,7 +235,7 @@ export class TimeseriesChartExplore extends ChartBase {
                 tableTrElmt.appendChild(tableCellTimestampElmt);
                 for (let series of opt.series) {
                     let tableCellElmt = document.createElement("td");
-                    tableCellElmt.innerText = Parser.parseFloatOrDefault(series.data[index][1], Number.NaN, 2);
+                    tableCellElmt.innerText = (index in series.data) ? Parser.parseFloatOrDefault(series.data[index][1], Number.NaN, 2) : Number.NaN;
                     tableTrElmt.appendChild(tableCellElmt);
                 }
                 tableBodyElmt.appendChild(tableTrElmt);
@@ -255,9 +255,9 @@ export class TimeseriesChartExplore extends ChartBase {
         return mainContainerElmt;
     }
 
-    #getSeriesIndex(id) {
+    #getSeriesIndex(seriesID) {
         let seriesIDs = this.#chartOpts.series.map((series) => { return series.id.toString(); });
-        return seriesIDs.indexOf(id.toString());
+        return seriesIDs.indexOf(seriesID.toString());
     }
 
     #getSeriesIndexFromName(name) {
@@ -316,9 +316,11 @@ export class TimeseriesChartExplore extends ChartBase {
         }
     }
 
-    updateSeries(seriesParams, yAxisIndexChanged = false) {
-        let seriesIndex = this.#getSeriesIndex(seriesParams.id);
+    updateSeries(seriesID, seriesParams, yAxisIndexChanged = false) {
+        let seriesIndex = this.#getSeriesIndex(seriesID);
         if (seriesIndex != -1) {
+            this.#chartOpts.series[seriesIndex].id = seriesParams.id;
+
             // Update series color.
             if (seriesParams.color != null) {
                 this.#chartOpts.series[seriesIndex].color = seriesParams.color;
@@ -373,8 +375,17 @@ export class TimeseriesChartExplore extends ChartBase {
             // When Y-axis changed, update left and right legends.
             if (yAxisIndexChanged) {
                 let previousYAxisIndex = seriesParams.yAxisIndex == 0 ? 1 : 0;
-                this.#chartOpts.legend[previousYAxisIndex].data = this.#chartOpts.legend[previousYAxisIndex].data.filter(serieName => serieName != seriesParams.name);
+                this.#chartOpts.legend[previousYAxisIndex].data = this.#chartOpts.legend[previousYAxisIndex].data.filter(serieName => serieName != this.#chartOpts.series[seriesIndex].name);
                 this.#chartOpts.legend[seriesParams.yAxisIndex].data.push(seriesParams.name);
+            }
+            else {
+                // Just update series legend name.
+                for (let legendIndex=0 ; legendIndex<this.#chartOpts.legend[seriesParams.yAxisIndex].data.length ; legendIndex++) {
+                    if (this.#chartOpts.legend[seriesParams.yAxisIndex].data[legendIndex] == this.#chartOpts.series[seriesIndex].name) {
+                        this.#chartOpts.legend[seriesParams.yAxisIndex].data[legendIndex] = seriesParams.name;
+                        break;
+                    }
+                }
             }
 
             // Set series visibility.
@@ -387,8 +398,8 @@ export class TimeseriesChartExplore extends ChartBase {
         }
     }
 
-    updateSeriesData(id, data, options = { aggregation: null }) {
-        let seriesIndex = this.#getSeriesIndex(id);
+    updateSeriesData(seriesID, data, options = { aggregation: null }) {
+        let seriesIndex = this.#getSeriesIndex(seriesID);
         if (seriesIndex != -1) {
             this.#chartOpts.series[seriesIndex].data = this.#prepareSeriesData(data);
             this.#chartOpts.series[seriesIndex].aggregation = options.aggregation;
@@ -397,9 +408,9 @@ export class TimeseriesChartExplore extends ChartBase {
         }
     }
 
-    toggleSeriesVisibility(id) {
-        if (this.#hasSeries(id)) {
-            let seriesIndex = this.#getSeriesIndex(id);
+    toggleSeriesVisibility(seriesID) {
+        if (this.#hasSeries(seriesID)) {
+            let seriesIndex = this.#getSeriesIndex(seriesID);
             let series = this.#chartOpts.series[seriesIndex];
 
             let actionType = "legendToggleSelect";
@@ -410,17 +421,17 @@ export class TimeseriesChartExplore extends ChartBase {
         }
     }
 
-    removeSeries(id) {
-        if (this.#hasSeries(id)) {
+    removeSeries(seriesID) {
+        if (this.#hasSeries(seriesID)) {
             this.clear();
 
-            let seriesIndex = this.#getSeriesIndex(id);
+            let seriesIndex = this.#getSeriesIndex(seriesID);
             let series = this.#chartOpts.series[seriesIndex];
             if (this.#chartOpts.legend[series.yAxisIndex].selected) {
                 delete this.#chartOpts.legend[series.yAxisIndex].selected[series.name];
             }
             this.#chartOpts.legend[series.yAxisIndex].data = this.#chartOpts.legend[series.yAxisIndex].data.filter(seriesName => seriesName != series.name);
-            this.#chartOpts.series = this.#chartOpts.series.filter(series => series.id != id);
+            this.#chartOpts.series = this.#chartOpts.series.filter(series => series.id != seriesID);
 
             if (this.#chartOpts.series.length <= 0) {
                 this.#showNoData();
@@ -453,5 +464,253 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#updateYAxisName();
         this.#updateLegend();
         this.#setChartOptions();
+    }
+}
+
+
+// TODO: Maybe those const values could be structures as enums? and general app consts?
+
+export const SeriesYAxisPositions = Object.freeze({
+    "left": "left",
+    "right": "right",
+});
+
+export const SeriesTypes = Object.freeze({
+    "line": "line",
+    "bar": "bar",
+});
+
+export const SeriesLineStyles = Object.freeze({
+    "solid": "solid",
+    "dashed": "dashed",
+    "dotted": "dotted",
+});
+
+export const SeriesLineSymbols = Object.freeze({
+    "emptyCircle": "empty circle",
+    "circle": "circle",
+    "rect": "rectangle",
+    "roundRect": "rounded rectangle",
+    "triangle": "triangle",
+    "diamond": "diamond",
+    "pin": "pin",
+    "arrow": "arrow",
+    "path://": "none",
+});
+
+export const SeriesBarDecals = Object.freeze({
+    "none": {
+        "label": "none",
+        "decal": {
+            symbol: "path://",
+            symbolSize: 1,
+            dashArrayX: 5,
+            dashArrayY: 5,
+            rotation: 0,
+        },
+    },
+    "hash1": {
+        "label": "hash type 1",
+        "decal": {
+            symbol: "rect",
+            symbolSize: 1,
+            dashArrayX: [1, 0],
+            dashArrayY: [2, 5],
+            rotation: Math.PI / 6,
+        },
+    },
+    "dots": {
+        "label": "dots",
+        "decal": {
+            symbol: "circle",
+            symbolSize: 0.8,
+            dashArrayX: [
+                [8, 8],
+                [0, 8, 8, 0],
+            ],
+            dashArrayY: [6, 0],
+            rotation: 0,
+        },
+    },
+    "hash2": {
+        "label": "hash type 2",
+        "decal": {
+            symbol: "rect",
+            symbolSize: 1,
+            dashArrayX: [1, 0],
+            dashArrayY: [4, 3],
+            rotation: -Math.PI / 4,
+            rotation: 0,
+        },
+    },
+    "hash3": {
+        "label": "hash type 3",
+        "decal": {
+            symbol: "rect",
+            symbolSize: 1,
+            dashArrayX: [
+                [6, 6],
+                [0, 6, 6, 0],
+            ],
+            dashArrayY: [6, 0],
+            rotation: 0,
+        },
+    },
+    "hash4": {
+        "label": "hash type 4",
+        "decal": {
+            symbol: "rect",
+            symbolSize: 1,
+            dashArrayX: [
+                [1, 0],
+                [1, 6],
+            ],
+            dashArrayY: [1, 0, 6, 0],
+            rotation: Math.PI / 4,
+        },
+    },
+    "lines_horiz": {
+        "label": "horizontal lines",
+        "decal": {
+            symbol: "rect",
+            symbolSize: 1,
+            dashArrayX: [1, 0],
+            dashArrayY: 10,
+            rotation: 0,
+        },
+    },
+});
+
+
+export const defaultSeriesYAxisPosition = "left";
+export const defaultSeriesType = "line";
+export const defaultSeriesLineStyle = "solid";
+export const defaultSeriesLineSymbol = "emptyCircle";
+export const defaultSeriesBarDecal = "none";
+
+
+export class TimeseriesChartSeriesOptions {
+
+    #tsData = null;
+    #tsDataState = null;
+    #type = defaultSeriesType;
+    #style = defaultSeriesLineStyle;
+    #symbol = defaultSeriesLineSymbol;
+    #yAxisPosition = defaultSeriesYAxisPosition;
+
+    get id() {
+        return `${this.#tsData?.id}${this.#tsDataState != null ? `_${this.#tsDataState.id}` : ""}`;
+    }
+
+    get name() {
+        return this.#tsData?.name;
+    }
+
+    get label() {
+        return `${this.#tsData?.label}${this.#tsDataState != null ? ` | ${this.#tsDataState.name}` : ""}`;
+    }
+
+    get unitSymbol() {
+        return this.#tsData?.unit_symbol;
+    }
+
+    get type() {
+        return this.#type;
+    }
+    set type(value) {
+        if (Object.keys(SeriesTypes).includes(value)) {
+            this.#type = value;
+        }
+    }
+
+    get style() {
+        return this.#style;
+    }
+    set style(value) {
+        if (Object.keys(SeriesLineStyles).includes(value)) {
+            this.#style = value;
+        }
+    }
+
+    get symbol() {
+        return this.#symbol;
+    }
+    set symbol(value) {
+        if (Object.keys(SeriesLineSymbols).includes(value)) {
+            this.#symbol = value;
+        }
+    }
+
+    get yAxisPosition() {
+        return this.#yAxisPosition;
+    }
+    set yAxisPosition(value) {
+        if (Object.keys(SeriesYAxisPositions).includes(value)) {
+            this.#yAxisPosition = value;
+        }
+    }
+
+    get yAxisIndex() {
+        return this.#yAxisPosition == SeriesYAxisPositions.left ? 0 : 1;
+    }
+
+    get timeseries() {
+        return this.#tsData;
+    }
+
+    get tsDataState() {
+        return this.#tsDataState;
+    }
+    set tsDataState(value) {
+        this.#tsDataState = value;
+    }
+
+    constructor(tsData, tsDataState, color = null, yAxisPosition = defaultSeriesYAxisPosition, type = defaultSeriesType, options = {}) {
+        // options:
+        //  if type == "line", may contain "style" and "symbol" definition
+        //  if type == "bar", may contain "decalName" definition
+
+        this.#tsData = tsData;
+        this.#tsDataState = tsDataState;
+        this.color = color;
+        this.type = type;
+        this.yAxisPosition = yAxisPosition;
+        this.show = true;
+
+        if (this.#type == "line") {
+            this.style = options.style || defaultSeriesLineStyle;
+            this.symbol = options.symbol || defaultSeriesLineSymbol;
+        }
+        this.decalName = options.decalName || defaultSeriesBarDecal;
+    }
+
+    toChartSeries(ignoreColor = false) {
+        let series = {
+            id: this.id,
+            name: this.label,
+            type: this.type,
+            yAxisIndex: this.yAxisIndex,
+            data: [],
+            visible: this.show,
+            unitSymbol: this.unitSymbol,
+            timeseriesID: this.timeseries?.id,
+        };
+        if (!ignoreColor) {
+            series.color = this.color;
+        }
+        if (this.#type == "line") {
+            series.lineStyle = {
+                type: this.#style,
+            };
+            series.symbol = this.#symbol;
+            series.showSymbol = this.#symbol != "path://";
+        }
+        else if (this.#type == "bar") {
+            series.itemStyle = {
+                decal: SeriesBarDecals[this.decalName].decal,
+            };
+        }
+
+        return series;
     }
 }

@@ -1,0 +1,77 @@
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
+{% extends "pages/base.html" %}
+
+{% set title = "Compare timeseries data states" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <div class="row mb-2">
+                <div class="col">
+                    <input type="hidden" id="timeseries" value="{{ timeseries_ids }}">
+                    {% filter indent(width=20, first=False) %}
+                    {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExploreStates", selection_limit=1) -}}
+                    {% endfilter %}
+                </div>
+            </div>
+            <div class="row gy-1 mb-2">
+                <div class="col-12 col-lg-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Period</span>
+                        <select id="periodType" class="form-select" aria-label="Select a period" required>
+                            {% for x in period_types %}
+                            <option value="{{ x.id }}"{% if x.id == period_type %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div id="periodCustom" class="col-12 col-lg-auto d-xl-flex d-grid py-2 py-lg-0 gap-2 d-none invisible">
+                    <div is="app-datetime-picker" id="start_datetime" title="From" date="{{ period_start.date().isoformat() }}" time="{{ period_start.time().isoformat()[:5] }}" max="{{ period_end.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                    <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ period_end.date().isoformat() }}" time="{{ period_end.time().isoformat()[:5] }}" min="{{ period_start.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h5>Timeseries data states to compare</h5>
+                </div>
+            </div>
+            <div class="row gy-2">
+                <div class="col-12 col-lg-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Timeseries data state 1</span>
+                        <select id="data_states_1" class="form-select" aria-label="Select a timeseries data state" required>
+                            {% for x in data_states %}
+                            <option value="{{ x.id }}"{% if x.id == data_state_id_1 %} selected{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">Timeseries data state 2</span>
+                        <select id="data_states_2" class="form-select" aria-label="Select a timeseries data state" required>
+                            {% for x in data_states %}
+                            <option value="{{ x.id }}"{% if x.id == data_state_id_2 %} selected{% else %}{% if x.id == data_state_id_1 %} disabled{% endif %}{% endif %}>{{ x.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div id="chartContainer" class="border border-1 rounded bg-white p-2" style="height: 600px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/data/compareStates.js') }}" defer></script>
+{% endfilter %}
+{% endblock body_scripts %}
