@@ -919,8 +919,13 @@ export class TimeseriesSelector extends HTMLElement {
         tsIds = tsIds.map(
             tsId => Parser.parseIntOrDefault(tsId)
         ).filter(
-            tsId => !this.#selectedItemElmts.map(item => { item.timeseries.id }).includes(tsId)
+            tsId => this.#canSelect(tsId)
         );
+
+        // Apply selection limit.
+        if (this.#allowedSelectionLimit != -1) {
+            tsIds = tsIds.slice(0, this.#allowedSelectionLimit);
+        }
 
         for (let [fetchUrl, reqID] of Object.entries(this.#getTimeseriesRedIDs)) {
             this.#internalAPIRequester.abort(reqID);
@@ -931,8 +936,10 @@ export class TimeseriesSelector extends HTMLElement {
             tsIds.map(tsId => app.urlFor(`api.timeseries.retrieve_one`, {id: tsId})),
             (responses) => {
                 for (let tsResponse of responses) {
-                    let selectedItemElmt = this.#createSelectedItemElement(tsResponse.data);
-                    this.#selectedItemElmts.push(selectedItemElmt);
+                    if (this.#canSelect(tsResponse.data.id)) {
+                        let selectedItemElmt = this.#createSelectedItemElement(tsResponse.data);
+                        this.#selectedItemElmts.push(selectedItemElmt);
+                    }
                 }
 
                 this.#update();
