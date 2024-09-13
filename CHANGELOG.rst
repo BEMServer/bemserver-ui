@@ -1,6 +1,37 @@
 Changelog
 ---------
 
+0.8.0 (2024-09-16)
+++++++++++++++++++
+
+Features:
+
+- Timeseries:
+
+  - Add filters in timeseries list page: timeseries name, timeseries property value
+  - Timeseries list page accepts filters as url query args
+  - Manage locations page: sticky top available locations when scrolling down
+
+- Timeseries data:
+
+  - Timeseries data explore page accepts filters as url query args
+  - Timeseries data completeness page accepts filters as url query args
+  - Add timeseries data compare data states page
+
+- Events:
+
+  - On timeseries related events, add a link pointing to timeseries data involved (+/- 7 days around event timestamp)
+
+Fixes:
+
+- Fix timeseries list page (reset pagination when updating filters)
+
+Other changes:
+
+- Still require bemserver-api-client >=0.21.1 and <0.22.0
+- Require bemserver-api 0.24.2
+- Require bemserver-core 0.18.3
+
 0.7.2 (2024-06-12)
 ++++++++++++++++++
 
