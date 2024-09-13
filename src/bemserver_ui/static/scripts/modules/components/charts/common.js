@@ -1,4 +1,4 @@
-import "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js";
+import "https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js";
 
 
 export class ChartBase {
