@@ -10,7 +10,7 @@ exceptiongroup==1.2.0
     # via pytest
 iniconfig==2.0.0
     # via pytest
-packaging==24.1
+packaging==24.2
     # via
     #   -r requirements/tests.in
     #   pytest
