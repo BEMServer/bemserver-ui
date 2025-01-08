@@ -220,7 +220,8 @@ export class Tree extends HTMLElement {
             liElmt.appendChild(linkElmt);
 
             linkElmt.addEventListener("click", (event) => {
-                if (Parser.parseBoolOrDefault(node.is_selectable)) {
+                let isSelectable = linkElmt.classList.contains("disabled") ? false : true;
+                if (isSelectable) {
                     if (this.#treeNodeSelected != event.target) {
                         this.#treeNodeSelected?.classList.remove("active");
                         this.#treeNodeSelected = event.target;
@@ -323,10 +324,24 @@ export class Tree extends HTMLElement {
         this.#treeContainerElmt.innerHTML = "";
     }
 
-    load(data) {
+    load(data, selectableTypes = null) {
         this.hideLoading();
 
         if (data.length > 0) {
+            if (selectableTypes != null)
+            {
+                let recursiveSetNodeSelectable = (node, types) => {
+                    node.is_selectable = types.includes(node.type);
+                    for (let childNode of node.nodes) {
+                        recursiveSetNodeSelectable(childNode, types);
+                    }
+                };
+        
+                for (let node of data) {
+                    recursiveSetNodeSelectable(node, types);
+                }
+            }
+
             this.#renderNodes(data);
         }
         else {
@@ -334,6 +349,27 @@ export class Tree extends HTMLElement {
             noDataElmt.classList.add("fst-italic", "text-muted", "mb-0");
             noDataElmt.innerText = "No data";
             this.#treeContainerElmt.appendChild(noDataElmt);
+        }
+    }
+
+    setSelectableTypes(types = null) {
+        if (types == null) return;
+
+        let linkElmts = [].slice.call(this.#treeContainerElmt.querySelectorAll(`.nav-tree-item-link`));
+        for (let linkElmt of linkElmts)
+        {
+            let nodeType = linkElmt.getAttribute("data-tree-node-type");
+            if (nodeType == null) continue;
+            if (types.includes(nodeType))
+            {
+                linkElmt.classList.remove("disabled");
+                linkElmt.removeAttribute("aria-disabled");
+            }
+            else
+            {
+                linkElmt.classList.add("disabled");
+                linkElmt.setAttribute("aria-disabled", true);
+            }
         }
     }
 
