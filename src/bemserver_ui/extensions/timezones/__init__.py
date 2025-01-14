@@ -28,9 +28,9 @@ def init_app(app):
                     this.timezones = {json.dumps(tz_tool.timezones)};
                     this.regions = {json.dumps(tz_tool.regions)};
                     this.areasByRegion = {json.dumps(tz_tool.areas_by_region)};
-                    this.timezonesByRegionByArea = {json.dumps(
-                        tz_tool.timezones_by_region_by_area
-                    )};
+                    this.timezonesByRegionByArea = {
+                json.dumps(tz_tool.timezones_by_region_by_area)
+            };
                 }}
 
                 tzExists(tzName) {{
