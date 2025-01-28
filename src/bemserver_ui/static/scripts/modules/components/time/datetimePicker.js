@@ -221,16 +221,9 @@ export class DatetimePicker extends HTMLDivElement {
         tzInfoLabelElmt.innerText = this.#tzInfo["label"];
         tzInfoTitleContentElmt.appendChild(tzInfoLabelElmt);
 
-        this.#tzInfoElmt.setAttribute("title", tzInfoTitleContentElmt.outerHTML);
-        this.#enableOrRefreshTooltips();
-    }
-
-    #enableOrRefreshTooltips() {
-        // Enable (or refresh) Bootstrap tooltips.
-        var tooltipTriggerList = [].slice.call(this.querySelectorAll(`[data-bs-toggle="tooltip"]`));
-        tooltipTriggerList.map((tooltipTriggerEl) => {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        this.#tzInfoElmt.setAttribute("data-bs-title", tzInfoTitleContentElmt.outerHTML);
+        let bsTooltipTzInfo = bootstrap.Tooltip.getOrCreateInstance(this.#tzInfoElmt);
+        bsTooltipTzInfo.setContent({ ".tooltip-inner": tzInfoTitleContentElmt.outerHTML });
     }
 
     connectedCallback() {

@@ -77,6 +77,16 @@ class App {
         }
     }
 
+    #enablePopovers() {
+        let popoverTriggerElmts = document.querySelectorAll(`[data-bs-toggle="popover"]`);
+        [...popoverTriggerElmts].map(popoverTriggerElmt => new bootstrap.Popover(popoverTriggerElmt));
+    }
+
+    #enableTooltips() {
+        let tooltipTriggerElmts = document.querySelectorAll(`[data-bs-toggle="tooltip"]`);
+        [...tooltipTriggerElmts].map(tooltipTriggerElmt => new bootstrap.Tooltip(tooltipTriggerElmt));
+    }
+
     flashMessage(message, category="message", delay=null, dismiss=true) {
         this.#managers[APP_MANAGERS.MESSAGE_MANAGER.name]?.flash(message, category, delay, dismiss);
     }
@@ -93,6 +103,8 @@ class App {
         for (let [managerName, managerConfig] of Object.entries(managers)) {
             this.#initManager(managerName, managerConfig);
         }
+        this.#enablePopovers();
+        this.#enableTooltips();
     }
 }
 

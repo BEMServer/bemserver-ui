@@ -46,7 +46,6 @@ class TimeseriesManageStructuralElementsView {
         this.#tsListContainerElmt.innerHTML = "";
         this.#tsListContainerElmt.appendChild(this.#tsListElmt);
 
-        this.#enableOrRefreshTooltips();
         this.#initEventListeners();
     }
 
@@ -228,14 +227,6 @@ class TimeseriesManageStructuralElementsView {
                     },
                 );
             }
-        });
-    }
-
-    #enableOrRefreshTooltips() {
-        // Enable (or refresh) Bootstrap tooltips.
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll(`[data-bs-toggle="tooltip"]`));
-        tooltipTriggerList.map((tooltipTriggerEl) => {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     }
 
