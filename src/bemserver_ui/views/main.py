@@ -85,11 +85,14 @@ def stats():
 def about():
     about_resp = flask.g.api_client.about.getall()
 
-    about_versions = {}
+    about_infos = {}
     for app_name, app_version in about_resp.data["versions"].items():
-        about_versions[BEMSERVER_APP_LABELS[app_name]] = app_version
-    about_versions["API client"] = importlib.metadata.version("bemserver-api-client")
-    about_versions["UI"] = importlib.metadata.version("bemserver-ui")
+        about_infos[BEMSERVER_APP_LABELS[app_name]] = {"version": app_version}
+    about_infos["API client"] = {
+        "version": importlib.metadata.version("bemserver-api-client"),
+        "description": flask.g.api_client.host,
+    }
+    about_infos["UI"] = {"version": importlib.metadata.version("bemserver-ui")}
 
     plugin_infos = {}
     for plugin_module in PLUGINS_LOADED:
@@ -99,6 +102,6 @@ def about():
 
     return flask.render_template(
         "pages/about.html",
-        about_versions=about_versions,
+        about_infos=about_infos,
         plugin_infos=plugin_infos,
     )

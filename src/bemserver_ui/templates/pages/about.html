@@ -12,8 +12,14 @@
         </div>
         <div class="col-12 col-sm-6 text-center align-self-center">
             <div class="d-flex flex-column justify-content-start">
-                {% for app_name, app_version in about_versions.items() %}
-                <div class="hstack gap-2 font-monospace"><span class="text-secondary">{{ app_name }}</span><small class="fw-bold">{{ app_version }}</small></div>
+                {% for app_name, app_info in about_infos.items() %}
+                <div class="hstack gap-2 font-monospace">
+                    <span class="text-secondary">{{ app_name }}</span>
+                    <small class="fw-bold">{{ app_info.version }}</small>
+                    {% if "description" in app_info %}
+                    <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-title="{{ app_info.description }}"></i>
+                    {% endif %}
+                </div>
                 {% endfor %}
                 {% if plugin_infos | length > 0 %}
                 <div class="accordion mt-2" id="accordionPlugins">
