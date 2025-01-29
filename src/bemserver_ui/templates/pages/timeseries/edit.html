@@ -53,7 +53,7 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="description">Description</label>
-                            <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ timeseries.description }}</textarea>
+                            <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ timeseries.description | crlf2html }}</textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="unit_symbol">Unit symbol</label>
