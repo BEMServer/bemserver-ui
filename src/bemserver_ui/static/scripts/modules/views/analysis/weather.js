@@ -234,7 +234,7 @@ export class WeatherExploreView {
                 paramContainerElmt.appendChild(paramName);
 
                 let tsDescription = document.createElement("small");
-                tsDescription.classList.add("text-muted");
+                tsDescription.classList.add("text-muted", "multiline");
                 tsDescription.textContent = weatherParamData.timeseries.description;
                 paramContainerElmt.appendChild(tsDescription);
 

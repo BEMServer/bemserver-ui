@@ -26,7 +26,7 @@
                         <i class="bi bi-tag"></i>
                         <h6 class="fw-bold text-break mb-0">{{ x.name }}</h6>
                     </div>
-                    <span class="fst-italic text-muted">{{ x.description }}</span>
+                    <span class="fst-italic text-muted multiline">{{ x.description | crlf2html }}</span>
                 </a>
                 {% endfor %}
             </div>

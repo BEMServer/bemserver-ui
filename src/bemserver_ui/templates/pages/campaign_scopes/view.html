@@ -47,7 +47,7 @@
                             <dt>Name</dt>
                             <dd class="text-break">{{ campaign_scope.name }}</dd>
                             <dt>Description</dt>
-                            <dd class="text-break">{{ campaign_scope.description | default("-", true) }}</dd>
+                            <dd class="text-break multiline">{{ campaign_scope.description | crlf2html | default("-", true) }}</dd>
                         </dl>
                         {% if signed_user.is_admin %}
                         <div class="order-0 order-lg-1 text-end">
