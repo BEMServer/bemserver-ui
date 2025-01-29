@@ -134,12 +134,19 @@ class TimeseriesDataExploreView {
         });
 
         this.#tsSelector.addEventListener("toggleItem", () => {
-            if (this.#tsSelector.selectedItems.length > 0) {
-                this.#selectedTimeseriesSaveBtnElmt.removeAttribute("disabled");
-            }
-            else {
-                this.#selectedTimeseriesSaveBtnElmt.setAttribute("disabled", true);
-            }
+            this.#updateAddTimeseriesButtonState();
+        });
+
+        this.#tsSelector.addEventListener("removeItem", () => {
+            this.#updateAddTimeseriesButtonState();
+        });
+
+        this.#tsSelector.addEventListener("selectionChanged", () => {
+            this.#updateAddTimeseriesButtonState();
+        });
+
+        this.#tsSelector.addEventListener("clearSelection", () => {
+            this.#updateAddTimeseriesButtonState();
         });
 
         this.#selectedTimeseriesSaveBtnElmt.addEventListener("click", () => {
@@ -261,6 +268,15 @@ class TimeseriesDataExploreView {
                 },
             );
         });
+    }
+
+    #updateAddTimeseriesButtonState() {
+        if (this.#tsSelector.selectedItems.length > 0) {
+            this.#selectedTimeseriesSaveBtnElmt.removeAttribute("disabled");
+        }
+        else {
+            this.#selectedTimeseriesSaveBtnElmt.setAttribute("disabled", true);
+        }
     }
 
     #addTimeseries(timeseriesList, seriesYAxisPosition = "left", seriesType = "line") {
