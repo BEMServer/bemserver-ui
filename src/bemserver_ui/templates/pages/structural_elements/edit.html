@@ -54,7 +54,7 @@
                         {% endif %}
                         <div class="mb-3">
                             <label class="form-label" for="description">Description</label>
-                            <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ structural_element.description }}</textarea>
+                            <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ structural_element.description | crlf2html }}</textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="ifc_id">IFC ID</label>
@@ -157,5 +157,8 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module" src="{{ url_for('static', filename='scripts/modules/views/structuralElements/edit.js') }}" defer></script>
+<!-- <script>
+    document.getElementById("description").value = "{{ structural_element.description }}";
+</script> -->
 {% endfilter %}
 {% endblock body_scripts %}

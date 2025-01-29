@@ -315,7 +315,7 @@ export class StructuralElementsExploreView {
         }
 
         let descElmt = document.createElement("small");
-        descElmt.classList.add("fst-italic", "text-muted", "text-break");
+        descElmt.classList.add("fst-italic", "text-muted", "text-break", "multiline");
         descElmt.textContent = data.structural_element.description;
         this.#generalTabContentElmt.appendChild(descElmt);
 

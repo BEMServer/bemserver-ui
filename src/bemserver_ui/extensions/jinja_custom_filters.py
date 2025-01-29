@@ -2,6 +2,8 @@
 
 import zoneinfo
 
+from markupsafe import Markup, escape
+
 from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 from bemserver_ui.common.time import convert_from_iso
 
@@ -31,3 +33,15 @@ def init_app(app):
     def is_dict(obj_instance):
         """Test if an object instance is of dictionary type."""
         return isinstance(obj_instance, dict)
+
+    @app.template_filter("crlf2html")
+    def crlf2html(value):
+        """Securely replace all carriage return ("\r") and new line characters ("\n").
+
+        "&#13;" replaces "\r"
+        "&#10;" replaces "\n"
+        """
+        safe_value = str(escape(value))
+        formatted_value = safe_value.replace("\r", "&#13;")
+        formatted_value = formatted_value.replace("\n", "&#10;")
+        return Markup(formatted_value)

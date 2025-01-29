@@ -68,7 +68,7 @@
                                 {% if is_campaign_selected %}
                                 <div><small class="text-opacity-50 text-primary fst-italic"><i class="bi bi-info-square"></i> This campaign is currently selected as the working context.</small></div>
                                 {% endif %}
-                                <div class="text-muted ms-2">{{ x.description }}</div>
+                                <div class="text-muted multiline ms-2">{{ x.description | crlf2html }}</div>
                             </div>
                             <div class="v-stack">
                                 <div class="d-md-flex d-grid align-items-center gap-md-2">

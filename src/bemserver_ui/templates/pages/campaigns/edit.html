@@ -68,7 +68,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="description">Description</label>
-                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ campaign.description }}</textarea>
+                    <textarea form="editForm" class="form-control" id="description" name="description" maxlength="500" rows="3">{{ campaign.description | crlf2html }}</textarea>
                 </div>
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ url_for('campaigns.view', id=campaign.id) }}" class="btn btn-outline-secondary btn-sm text-break" title="Cancel">Cancel</a>

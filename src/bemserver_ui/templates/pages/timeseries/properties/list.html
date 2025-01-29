@@ -35,10 +35,10 @@
                             <td>{{ prop.value_type }}</td>
                             <td>{{ prop.unit_symbol }}</td>
                             <td>
-                                {% if prop.description|length > 80 %}
-                                <abbr title="{{ prop.description }}">{{ prop.description | truncate(80) }}</abbr>
+                                {% if prop.description | length > 80 %}
+                                <abbr title="{{ prop.description | crlf2html }}" class="multiline">{{ prop.description | truncate(80) }}</abbr>
                                 {% else %}
-                                {{ prop.description }}
+                                <span class="multiline">{{ prop.description }}</span>
                                 {% endif %}
                             </td>
                             <td class="text-center"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('timeseries.properties.edit', id=prop.id) }}" title="Edit attribute"><i class="bi bi-pencil"></i></td>

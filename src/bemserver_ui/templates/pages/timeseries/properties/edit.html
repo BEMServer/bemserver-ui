@@ -39,7 +39,7 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="description">Description</label>
-                        <textarea form="editForm" class="form-control" id="description" name="description" maxlength="250" rows="3">{{ property.description }}</textarea>
+                        <textarea form="editForm" class="form-control" id="description" name="description" maxlength="250" rows="3">{{ property.description | crlf2html }}</textarea>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end gap-2">

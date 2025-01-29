@@ -16,7 +16,7 @@
                 </h5>
                 <div class="card-body text-end">
                     <span class="d-block fw-bold text-{% if g.campaign_ctxt.campaign['state'] == 'ongoing' %}success{% else %}muted{% endif %}">{{ g.campaign_ctxt.campaign["state"] }}</span>
-                    <small class="d-block text-muted">{{ g.campaign_ctxt.campaign["description"] }}</small>
+                    <small class="d-block text-muted text-break multiline">{{ g.campaign_ctxt.campaign["description"] | crlf2html }}</small>
                 </div>
                 <div class="card-body d-flex flex-wrap justify-content-center align-content-center gap-3">
                     {% if signed_user.is_admin %}

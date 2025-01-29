@@ -92,7 +92,7 @@
                             <dt>Until</dt>
                             <dd>{{ campaign.end_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>
                             <dt>Description</dt>
-                            <dd class="text-break">{{ campaign.description | default("-", true) }}</dd>
+                            <dd class="text-break multiline">{{ campaign.description | crlf2html | default("-", true) }}</dd>
                         </dl>
                         <div>
                             {% if signed_user.is_admin %}
@@ -115,7 +115,7 @@
                             <i class="bi bi-bounding-box-circles"></i>
                             <div class="d-grid">
                                 <h6 class="fw-bold text-nowrap mb-0">{{ x.name }}</h6>
-                                <small class="text-muted">{{ x.description }}</small>
+                                <small class="text-muted multiline">{{ x.description | crlf2html }}</small>
                             </div>
                         </a>
                         {% endfor %}

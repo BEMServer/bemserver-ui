@@ -440,7 +440,7 @@ export class EventEditView {
         }
 
         let tsDescElmt = document.createElement("small");
-        tsDescElmt.classList.add("fst-italic", "text-muted");
+        tsDescElmt.classList.add("fst-italic", "text-muted", "multiline");
         tsDescElmt.innerText = tsData.description;
         tsInnerContainerElmt.appendChild(tsDescElmt);
 
