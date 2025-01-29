@@ -428,6 +428,8 @@ export class TimeseriesSelector extends HTMLElement {
                     break;
                 }
             }
+
+            this.#dispatchSelectionChanged();
         });
 
         this.#unselectAllResultsBtnElmt.addEventListener("click", (event) => {
@@ -442,6 +444,8 @@ export class TimeseriesSelector extends HTMLElement {
                 item.unselect(false);
                 this.#updateSelection(item, false);
             }
+
+            this.#dispatchSelectionChanged();
         });
 
         this.#clearAllSelectionBtnElmt.addEventListener("click", (event) => {
@@ -515,6 +519,11 @@ export class TimeseriesSelector extends HTMLElement {
         this.#dropdownSearchBtnElmt.addEventListener("hidden.bs.dropdown", () => {
             this.#isOpened = false;
         });
+    }
+
+    #dispatchSelectionChanged() {
+        let selectionChangedEvent = new CustomEvent("selectionChanged", { bubbles: true});
+        this.dispatchEvent(selectionChangedEvent);
     }
 
     #updateSearchInput() {
@@ -770,7 +779,7 @@ export class TimeseriesSelector extends HTMLElement {
             searchResultItem?.unselect(false);
 
             this.#selectedItemElmts = this.#selectedItemElmts.filter(x => x.timeseries.id != selectedItem.timeseries.id);
-            this.#updateSelectedItemsCounter();
+            this.#update();
 
             let eventDetail = { timeseries: selectedItem.timeseries };
             let removeEvent = new CustomEvent("removeItem", { detail: eventDetail, bubbles: true});
