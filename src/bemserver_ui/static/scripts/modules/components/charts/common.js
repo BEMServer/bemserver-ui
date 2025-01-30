@@ -103,11 +103,16 @@ export class ChartBase {
         this.#chart.dispose();
     }
 
-    clear() {
-        this.showLoading();
-        this.#chart.clear();
-        this.#chart.setOption(this.#options, true);
-        this.hideLoading();
+    clear(justClear = false) {
+        if (!justClear) {
+            this.showLoading();
+            this.#chart.clear();
+            this.#chart.setOption(this.#options, true);
+            this.hideLoading();
+        }
+        else {
+            this.#chart.clear();
+        }
     }
 
     registerEventCallback(eventName, callback) {

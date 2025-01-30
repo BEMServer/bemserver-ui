@@ -198,9 +198,12 @@ export class TimeseriesChartExplore extends ChartBase {
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
-            let timestamps = opt.series[0].data.map((serieData) => {
-                return echarts.time.format(serieData[0], "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}");
+            let seriesTimestamps = opt.series.map((seriesInfo) => {
+                return seriesInfo.data.map((seriesData) => {
+                    return echarts.time.format(seriesData[0], "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}");
+                });
             });
+            let timestamps = Array.from(new Set([].concat(...seriesTimestamps)));
 
             let tableContainerElmt = document.createElement("div");
             tableContainerElmt.classList.add("table-responsive");
@@ -423,7 +426,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     removeSeries(seriesID) {
         if (this.#hasSeries(seriesID)) {
-            this.clear();
+            this.clear(true);
 
             let seriesIndex = this.#getSeriesIndex(seriesID);
             let series = this.#chartOpts.series[seriesIndex];
@@ -433,15 +436,14 @@ export class TimeseriesChartExplore extends ChartBase {
             this.#chartOpts.legend[series.yAxisIndex].data = this.#chartOpts.legend[series.yAxisIndex].data.filter(seriesName => seriesName != series.name);
             this.#chartOpts.series = this.#chartOpts.series.filter(series => series.id != seriesID);
 
-            if (this.#chartOpts.series.length <= 0) {
-                this.#showNoData();
-                this.#currentSeriesIndex = 0;
-            }
-
             this.#updateYAxisName();
             this.#updateLegend();
 
             this.#setChartOptions();
+        }
+
+        if (this.#chartOpts.series.length <= 0) {
+            this.clearAll();
         }
     }
 
