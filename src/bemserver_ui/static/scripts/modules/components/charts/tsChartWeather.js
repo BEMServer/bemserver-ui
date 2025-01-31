@@ -108,10 +108,13 @@ export class TimeseriesChartWeather extends ChartBase {
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
-            // TODO fix this, see TimeseriesChartExplore
-            let timestamps = opt.series[0].data.map((serieData) => {
-                return echarts.time.format(serieData[0], timeFormat);
+            // Get a merged list of all series timestamps.
+            let seriesTimestamps = opt.series.map((seriesInfo) => {
+                return seriesInfo.data.map((seriesData) => {
+                    return echarts.time.format(seriesData[0], timeFormat);
+                });
             });
+            let timestamps = Array.from(new Set([].concat(...seriesTimestamps)));
 
             let subtitleElmt = document.createElement("h5");
             subtitleElmt.innerText = opt.title[0].subtext;
@@ -149,11 +152,9 @@ export class TimeseriesChartWeather extends ChartBase {
                 tableCellTimestampElmt.innerText = timestamp;
                 tableTrElmt.appendChild(tableCellTimestampElmt);
                 for (let serie of opt.series) {
-                    if (serie.data && serie.data[index]) {
-                        let tableCellElmt = document.createElement("td");
-                        tableCellElmt.innerText = serie.data[index][1].toString();
-                        tableTrElmt.appendChild(tableCellElmt);
-                    }
+                    let tableCellElmt = document.createElement("td");
+                    tableCellElmt.textContent = (index in serie.data) ? Parser.parseFloatOrDefault(serie.data[index][1], Number.NaN, 2) : "-";
+                    tableTrElmt.appendChild(tableCellElmt);
                 }
                 tableBodyElmt.appendChild(tableTrElmt);
             }
