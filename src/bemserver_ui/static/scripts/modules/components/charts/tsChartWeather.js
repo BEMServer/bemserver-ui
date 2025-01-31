@@ -15,6 +15,9 @@ export class TimeseriesChartWeather extends ChartBase {
         "Surface solar radiation forecast": "#E38028",
     };
 
+    #showTsInfoCallback = null;
+
+
     constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
 
@@ -67,10 +70,10 @@ export class TimeseriesChartWeather extends ChartBase {
                 feature: {
                     myTSInfo: {
                         show: true,
-                        title: "Weather parameters timeseries",
+                        title: "Timeseries Information",
                         icon: "path://m9.708 6.075-3.024.379-.108.502.595.108c.387.093.464.232.38.619l-.975 4.577c-.255 1.183.14 1.74 1.067 1.74.72 0 1.554-.332 1.933-.789l.116-.549c-.263.232-.65.325-.905.325-.363 0-.494-.255-.402-.704l1.323-6.208Zm.091-2.755a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0Z",
                         onclick: () => {
-                            this.#showTSInfo();
+                            this.#showTsInfoCallback?.();
                         },
                     },
                     dataView: {
@@ -100,15 +103,12 @@ export class TimeseriesChartWeather extends ChartBase {
         });
     }
 
-    #showTSInfo(tsInfoCallback = null) {
-        tsInfoCallback?.();
-    }
-
     #optionToContent(opt, timeFormat) {
         let mainContainerElmt = document.createElement("div");
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
+            // TODO fix this, see TimeseriesChartExplore
             let timestamps = opt.series[0].data.map((serieData) => {
                 return echarts.time.format(serieData[0], timeFormat);
             });
@@ -173,6 +173,8 @@ export class TimeseriesChartWeather extends ChartBase {
     }
 
     load(name, dataset, timeFormat, tsInfoCallback = null) {
+        this.#showTsInfoCallback = tsInfoCallback;
+
         let listUnit = {0: [], 1: []};
         let dataLegend = {0: [], 1: []};
         let dataSeries = [];
@@ -217,10 +219,6 @@ export class TimeseriesChartWeather extends ChartBase {
                 feature: {
                     dataView: {
                         optionToContent: (opt) => { return this.#optionToContent(opt, timeFormat); },
-                    },
-                    myTSInfo: {
-                        show: tsInfoCallback != null,
-                        onclick: () => { this.#showTSInfo(tsInfoCallback); },
                     },
                 },
             },
