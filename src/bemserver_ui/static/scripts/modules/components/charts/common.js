@@ -68,8 +68,8 @@ export class ChartBase {
         return this.#chart.getOption();
     }
 
-    setOption(options) {
-        this.#chart.setOption(options);
+    setOption(options, opts) {
+        this.#chart.setOption(options, opts);
     }
 
     getChartColors() {
@@ -85,6 +85,18 @@ export class ChartBase {
                 seriesColor: this.#chart.getVisual({ seriesIndex: s.seriesIndex }, "color"),
             };
         });
+    }
+
+    getDom() {
+        return this.#chart.getDom();
+    }
+
+    getWidth() {
+        return this.#chart.getWidth();
+    }
+
+    getHeight() {
+        return this.#chart.getHeight();
     }
 
     showLoading() {
