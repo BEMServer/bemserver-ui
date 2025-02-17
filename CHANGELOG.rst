@@ -1,6 +1,28 @@
 Changelog
 ---------
 
+0.8.1 (2025-02-17)
+++++++++++++++++++
+
+Features:
+
+- General:
+
+  - Reorder sidebar menus
+
+- About:
+
+  - Show connected API host information near version
+
+Fixes:
+
+- Fix multiline text display (both as read-only labels and inside input text areas)
+- Fix timeseries selection
+- Fix timeseries data explore dataviews
+- Fix weather analysis (timeseries information popup)
+- Fix weather analysis (forecast timestamps were missing in dataview)
+
+
 0.8.0 (2024-09-16)
 ++++++++++++++++++
 
