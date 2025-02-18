@@ -1,7 +1,7 @@
 import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
-import { TimeseriesChartExplore, TimeseriesChartSeriesOptions } from "/static/scripts/modules/components/charts/tsChartExplore.js";
+import { TimeseriesChartExplore, TimeseriesChartSeriesOptions, SeriesYAxisPositions, SeriesTypes, SeriesLineStyles } from "/static/scripts/modules/components/charts/tsChartExplore.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
 
@@ -62,6 +62,19 @@ class TimeSeriesDataExploreStatesView {
             this.#updateUrlParams();
         });
 
+        this.#tsSelector.addEventListener("removeItem", (event) => {
+            let tsID = event.detail.timeseries.id;
+            for (let tsDataStateID of Object.keys(this.#tsSeriesOptionsByDataState)) {
+                if (this.#tsSeriesOptionsByDataState[tsDataStateID][tsID] != null) {
+                    let seriesID = this.#tsSeriesOptionsByDataState[tsDataStateID][tsID].seriesID;
+                    this.#chartExplore.removeSeries(seriesID);
+                    delete this.#tsSeriesOptionsByDataState[tsDataStateID][tsID];
+                }
+            }
+            this.#updateSelectedTimeseriesInfo();
+            this.#updateUrlParams();
+        });
+
         this.#tsSelector.addEventListener("closePanel", () => {
             let curTsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "").slice().sort();
             let newTsIDs = this.#tsSelector.selectedItems.map(ts => ts.id.toString()).slice().sort();
@@ -71,7 +84,7 @@ class TimeSeriesDataExploreStatesView {
                 let tsIDsToRemove = curTsIDs.filter(curTsID => !newTsIDs.includes(curTsID));
                 for (let tsID of tsIDsToRemove) {
                     for (let tsDataStateID of Object.keys(this.#tsSeriesOptionsByDataState)) {
-                        let seriesID = this.#tsSeriesOptionsByDataState[tsDataStateID][tsID].id;
+                        let seriesID = this.#tsSeriesOptionsByDataState[tsDataStateID][tsID].seriesID;
                         this.#chartExplore.removeSeries(seriesID);
                         delete this.#tsSeriesOptionsByDataState[tsDataStateID][tsID];
                     }
@@ -122,12 +135,12 @@ class TimeSeriesDataExploreStatesView {
             let newTsDataState1 = {
                 id: selectedOpt1Elmt.value,
                 name: selectedOpt1Elmt.text,
-                styleOpts: { style: "solid" },
+                styleOpts: { style: SeriesLineStyles.solid },
             };
             let newTsDataState2 = {
                 id: selectedOpt2Elmt.value,
                 name: selectedOpt2Elmt.text,
-                styleOpts: { style: "dashed" },
+                styleOpts: { style: SeriesLineStyles.dashed },
             };
 
             let updatedTsIDs = [];
@@ -139,7 +152,7 @@ class TimeSeriesDataExploreStatesView {
                 for (let tsData of this.#tsSelector.selectedItems) {
                     let seriesColor = this.#chartExplore.getNextColor();
 
-                    let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState1, seriesColor, "left", "line", newTsDataState1.styleOpts);
+                    let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState1, seriesColor, SeriesYAxisPositions.left, SeriesTypes.line, newTsDataState1.styleOpts);
 
                     let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
                     this.#chartExplore.addSeries(chartSeriesParams);
@@ -162,7 +175,7 @@ class TimeSeriesDataExploreStatesView {
                 for (let tsData of this.#tsSelector.selectedItems) {
                     let seriesColor = this.#chartExplore.getNextColor();
 
-                    let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState2, seriesColor, "left", "line", newTsDataState2.styleOpts);
+                    let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState2, seriesColor, SeriesYAxisPositions.left, SeriesTypes.line, newTsDataState2.styleOpts);
 
                     let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
                     this.#chartExplore.addSeries(chartSeriesParams);
@@ -190,7 +203,7 @@ class TimeSeriesDataExploreStatesView {
             }
             for (let tsDataStateIDToRemove of tsDataStateIDsToRemove) {
                 for (let seriesOption of Object.values(this.#tsSeriesOptionsByDataState[tsDataStateIDToRemove])) {
-                    let seriesID = seriesOption.id;
+                    let seriesID = seriesOption.seriesID;
                     this.#chartExplore.removeSeries(seriesID);
                 }
                 delete this.#tsSeriesOptionsByDataState[tsDataStateIDToRemove];
@@ -208,7 +221,7 @@ class TimeSeriesDataExploreStatesView {
             let newTsDataState2 = {
                 id: this.#tsDataStates2SelectElmt.value,
                 name: this.#tsDataStates2SelectElmt.options[this.#tsDataStates2SelectElmt.selectedIndex].text,
-                styleOpts: { style: "dashed" },
+                styleOpts: { style: SeriesLineStyles.dashed },
             };
 
             // Add new series for selected timeseries data state.
@@ -217,7 +230,7 @@ class TimeSeriesDataExploreStatesView {
             for (let tsData of this.#tsSelector.selectedItems) {
                 let seriesColor = this.#chartExplore.getNextColor();
 
-                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState2, seriesColor, "left", "line", newTsDataState2.styleOpts);
+                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, newTsDataState2, seriesColor, SeriesYAxisPositions.left, SeriesTypes.line, newTsDataState2.styleOpts);
 
                 let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
                 this.#chartExplore.addSeries(chartSeriesParams);
@@ -231,7 +244,7 @@ class TimeSeriesDataExploreStatesView {
 
             // Remove previous tsDataState2.
             for (let seriesOption of Object.values(this.#tsSeriesOptionsByDataState[this.#previousTsDataStateId2])) {
-                let seriesID = seriesOption.id;
+                let seriesID = seriesOption.seriesID;
                 this.#chartExplore.removeSeries(seriesID);
             }
             delete this.#tsSeriesOptionsByDataState[this.#previousTsDataStateId2];
@@ -266,7 +279,7 @@ class TimeSeriesDataExploreStatesView {
             this.#chartExplore.clearAll();
             this.#timeseriesElmt.value = url.searchParams.get("timeseries");
             let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
-            this.#tsSelector.select(tsIDs, () => { this.#addTimeseries(this.#tsSelector.selectedItems, "left", "line", true); });
+            this.#tsSelector.select(tsIDs, () => { this.#addTimeseries(this.#tsSelector.selectedItems, SeriesYAxisPositions.left, SeriesTypes.line); });
         });
     }
 
@@ -345,17 +358,17 @@ class TimeSeriesDataExploreStatesView {
         this.#timeseriesElmt.value = Object.keys(this.#tsSeriesOptionsByDataState[this.#tsDataStates1SelectElmt.value] || []).join();
     }
 
-    #addTimeseries(timeseriesList, seriesYAxisPosition = "left", seriesType = "line") {
+    #addTimeseries(timeseriesList, seriesYAxisPosition = SeriesYAxisPositions.left, seriesType = SeriesTypes.line) {
         let tsDataStates = [
             {
                 id: this.#tsDataStates1SelectElmt.value,
                 name: this.#tsDataStates1SelectElmt.options[this.#tsDataStates1SelectElmt.selectedIndex].text,
-                styleOpts: { style: "solid" },
+                styleOpts: { style: SeriesLineStyles.solid },
             },
             {
                 id: this.#tsDataStates2SelectElmt.value,
                 name: this.#tsDataStates2SelectElmt.options[this.#tsDataStates2SelectElmt.selectedIndex].text,
-                styleOpts: { style: "dashed" },
+                styleOpts: { style: SeriesLineStyles.dashed },
             },
         ];
 
@@ -438,7 +451,7 @@ class TimeSeriesDataExploreStatesView {
                                 // Get timeseries data or empty structure if not in data from internal API response.
                                 let tsData = data[tsID.toString()] || {};
                                 // Update timeseries chart series.
-                                let seriesID = seriesOptions[tsID].id;
+                                let seriesID = seriesOptions[tsID].seriesID;
                                 this.#chartExplore.updateSeriesData(seriesID, tsData);
                             }
                             this.#periodTypeLoaded = this.#periodTypeElmt.value;
