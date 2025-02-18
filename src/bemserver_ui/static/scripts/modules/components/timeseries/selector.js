@@ -11,10 +11,6 @@ import { debounce, timer } from "/static/scripts/modules/tools/utils.js";
 
 class TimeseriesItem {
 
-    get label() {
-        return `${this.name}${this.unit_symbol ? ` [${this.unit_symbol}]` : ""}`;
-    }
-
     constructor(data) {
         this.id = data.id;
         this.name = data.name;
@@ -22,6 +18,8 @@ class TimeseriesItem {
         this.unit_symbol = data.unit_symbol;
         this.campaign_id = data.campaign_id;
         this.campaign_scope_id = data.campaign_scope_id;
+
+        this.label = `${this.name}${this.unit_symbol ? ` [${this.unit_symbol}]` : ""}`;
     }
 }
 
