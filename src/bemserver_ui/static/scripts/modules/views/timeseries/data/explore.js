@@ -7,6 +7,7 @@ import "/static/scripts/modules/components/spinner.js";
 import { TimeseriesSelector } from "/static/scripts/modules/components/timeseries/selector.js";
 import { TimeseriesChartExplore, TimeseriesChartSeriesOptions, SeriesYAxisPositions, SeriesTypes, SeriesLineStyles, SeriesLineSymbols, SeriesBarDecals, defaultSeriesYAxisPosition, defaultSeriesType, defaultSeriesLineStyle, defaultSeriesLineSymbol, defaultSeriesBarDecal } from "/static/scripts/modules/components/charts/tsChartExplore.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "/static/scripts/modules/tools/compress.js";
 
 
 class TimeseriesDataExploreView {
@@ -28,6 +29,7 @@ class TimeseriesDataExploreView {
     #chartSettingsCanvas = null;
     #chartSeriesContainerElmt = null;
     #chartSeriesContainerBodyElmt = null;
+    #tsSeriesChartOptsRowElmts = {};
     #seriesCountElmt = null;
     #removeAllSeriesBtnElmt = null;
     #tsDataStatesSelectElmt = null;
@@ -117,7 +119,7 @@ class TimeseriesDataExploreView {
             };
 
             for (let tsSeriesOption of Object.values(this.#tsSeriesOptions)) {
-                this.#chartExplore.removeSeries(tsSeriesOption.id);
+                this.#chartExplore.removeSeries(tsSeriesOption.seriesID);
 
                 tsSeriesOption.tsDataState = tsDataState;
                 let chartSeriesParams = tsSeriesOption.toChartSeries();
@@ -224,6 +226,7 @@ class TimeseriesDataExploreView {
             let isVisible = event.detail.visibility;
             this.#tsSeriesOptions[tsID].show = isVisible;
             this.#updateChartSeriesOptionsVisibility(tsID);
+            this.#updateUrlParams();
         });
 
         window.addEventListener("popstate", () => {
@@ -253,6 +256,7 @@ class TimeseriesDataExploreView {
             // Update timeseries selector component with (un)selected timeseries and refresh chart.
             this.#tsSelector.clearAllSelection();
             this.#tsSeriesOptions = {};
+            this.#loadChartSettingsFromUrlParam(url.searchParams.get("chart"));
             this.#chartExplore.clearAll();
             this.#timeseriesElmt.value = url.searchParams.get("timeseries");
             let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
@@ -279,10 +283,11 @@ class TimeseriesDataExploreView {
         }
     }
 
-    #addTimeseries(timeseriesList, seriesYAxisPosition = "left", seriesType = "line") {
+    #addTimeseries(timeseriesInfoList, seriesYAxisPosition = "left", seriesType = "line") {
         let addedTsIDs = [];
-        for (let tsData of timeseriesList) {
-            if (!Object.keys(this.#tsSeriesOptions).includes(tsData.id.toString())) {
+        for (let tsInfo of timeseriesInfoList) {
+            let tsChartSeriesOpts = this.#tsSeriesOptions[tsInfo.id];
+            if (tsChartSeriesOpts == null) {
                 let seriesColor = this.#chartExplore.getNextColor();
 
                 let tsDataState = {
@@ -290,16 +295,21 @@ class TimeseriesDataExploreView {
                     name: this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text,
                 };
 
-                let tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsData, tsDataState, seriesColor, seriesYAxisPosition, seriesType);
+                tsChartSeriesOpts = new TimeseriesChartSeriesOptions(tsInfo, tsDataState, seriesColor, seriesYAxisPosition, seriesType);
+                this.#tsSeriesOptions[tsInfo.id] = tsChartSeriesOpts;
+            }
+
+            if (!Object.keys(this.#tsSeriesChartOptsRowElmts).includes(tsInfo.id)) {
                 let tsSeriesChartOptsRowElmt = this.#createTimeseriesChartOptionsRowElment(tsChartSeriesOpts);
                 this.#chartSeriesContainerBodyElmt.appendChild(tsSeriesChartOptsRowElmt);
+                this.#tsSeriesChartOptsRowElmts[tsInfo.id] = tsSeriesChartOptsRowElmt;
+                this.#updateChartSeriesOptionsVisibility(tsInfo.id);
+            }
 
-                let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
+            let chartSeriesParams = tsChartSeriesOpts.toChartSeries();
+            if (!this.#chartExplore.hasSeries(chartSeriesParams.id)) {
                 this.#chartExplore.addSeries(chartSeriesParams);
-
-                this.#tsSeriesOptions[tsData.id] = tsChartSeriesOpts;
-
-                addedTsIDs.push(tsData.id);
+                addedTsIDs.push(tsInfo.id);
             }
         }
 
@@ -345,7 +355,7 @@ class TimeseriesDataExploreView {
     }
 
     #createTimeseriesChartOptionsRowElment(tsChartSeriesOpts) {
-        let tsID = tsChartSeriesOpts.timeseries.id;
+        let tsID = tsChartSeriesOpts.tsInfo.id;
         let seriesYAxisPosition = tsChartSeriesOpts.yAxisPosition || defaultSeriesYAxisPosition;
         let seriesType = tsChartSeriesOpts.type || defaultSeriesType;
         let seriesLineStyle = tsChartSeriesOpts.style || defaultSeriesLineStyle;
@@ -380,7 +390,7 @@ class TimeseriesDataExploreView {
         visibilitySwitchElmt.classList.add("form-check-input");
         visibilitySwitchElmt.type = "checkbox";
         visibilitySwitchElmt.setAttribute("role", "switch");
-        visibilitySwitchElmt.checked = true;
+        visibilitySwitchElmt.checked = tsChartSeriesOpts.show;
         visibilitySwitchContainerElmt.appendChild(visibilitySwitchElmt);
 
         let colorInputElmt = document.createElement("input");
@@ -393,7 +403,7 @@ class TimeseriesDataExploreView {
         colorCellElmt.appendChild(colorInputElmt);
 
         let seriesNameElmt = document.createElement("small");
-        seriesNameElmt.innerText = tsChartSeriesOpts.name;
+        seriesNameElmt.innerText = tsChartSeriesOpts.tsInfo.name;
         nameCellElmt.appendChild(seriesNameElmt);
 
         let yAxisPositionInputElmt = document.createElement("select");
@@ -463,7 +473,7 @@ class TimeseriesDataExploreView {
 
         let removeBtnElmt = document.createElement("button");
         removeBtnElmt.classList.add("btn", "btn-sm", "btn-outline-danger");
-        removeBtnElmt.title = `Remove ${tsChartSeriesOpts.name} series`;
+        removeBtnElmt.title = `Remove ${tsChartSeriesOpts.tsInfo.name} series`;
         removeCellElmt.appendChild(removeBtnElmt);
         let removeIconElmt = document.createElement("i");
         removeIconElmt.classList.add("bi", "bi-trash");
@@ -494,46 +504,52 @@ class TimeseriesDataExploreView {
         visibilitySwitchElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].show = visibilitySwitchElmt.checked;
             this.#updateChartSeriesOptionsVisibility(tsID);
-            let seriesID = this.#tsSeriesOptions[tsID].id;
-            this.#chartExplore.toggleSeriesVisibility(seriesID);
+            this.#chartExplore.toggleSeriesVisibility(this.#tsSeriesOptions[tsID].seriesID);
+            this.#updateUrlParams();
         });
 
         colorInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].color = colorInputElmt.value;
             this.#refreshChart(tsID);
+            this.#updateUrlParams();
         });
 
         typeInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].type = typeInputElmt.value;
             updateSeriesStyleOptionsFunc();
             this.#refreshChart(tsID);
+            this.#updateUrlParams();
         });
 
         styleInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].style = styleInputElmt.value;
             this.#refreshChart(tsID);
+            this.#updateUrlParams();
         });
 
         symbolInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].symbol = symbolInputElmt.value;
             this.#refreshChart(tsID);
+            this.#updateUrlParams();
         });
 
         decalInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].decalName = decalInputElmt.value;
             this.#refreshChart(tsID);
+            this.#updateUrlParams();
         });
 
         yAxisPositionInputElmt.addEventListener("change", () => {
             this.#tsSeriesOptions[tsID].yAxisPosition = yAxisPositionInputElmt.value;
             this.#refreshChart(tsID, true);
+            this.#updateUrlParams();
         });
 
         removeBtnElmt.addEventListener("click", () => {
             rowElmt.remove();
-            let seriesID = this.#tsSeriesOptions[tsID].id;
-            this.#chartExplore.removeSeries(seriesID);
+            this.#chartExplore.removeSeries(this.#tsSeriesOptions[tsID].seriesID);
             delete this.#tsSeriesOptions[tsID];
+            delete this.#tsSeriesChartOptsRowElmts[tsID];
             this.#updateSelectedTimeseriesInfo();
             this.#updateUrlParams();
         });
@@ -652,6 +668,10 @@ class TimeseriesDataExploreView {
             url.searchParams.delete("bucket_width_unit");
         }
 
+        // Set chart settings.
+        let compressedChartSettings = compressToEncodedURIComponent(this.#tsSeriesOptions);
+        url.searchParams.set("chart", compressedChartSettings);
+
         // Update current page URL only when different than current one.
         if (doReplaceUrl) {
             window.history.replaceState(null, document.title, url);
@@ -711,8 +731,9 @@ class TimeseriesDataExploreView {
                         // Get timeseries data or empty structure if not in data from internal API response.
                         let tsData = data[tsID.toString()] || {};
                         // Update timeseries chart series.
-                        let seriesID = this.#tsSeriesOptions[tsID].id;
+                        let seriesID = this.#tsSeriesOptions[tsID].seriesID;
                         this.#chartExplore.updateSeriesData(seriesID, tsData, { aggregation: aggregation });
+                        this.#chartExplore.updateSeries(seriesID, this.#tsSeriesOptions[tsID].toChartSeries());
                     }
                     this.#periodTypeLoaded = this.#periodTypeElmt.value;
 
@@ -735,7 +756,7 @@ class TimeseriesDataExploreView {
 
         // Update chart series (style...).
         if (tsID != null) {
-            this.#chartExplore.updateSeries(this.#tsSeriesOptions[tsID].id, this.#tsSeriesOptions[tsID].toChartSeries(), yAxisIndexChanged);
+            this.#chartExplore.updateSeries(this.#tsSeriesOptions[tsID].seriesID, this.#tsSeriesOptions[tsID].toChartSeries(), yAxisIndexChanged);
         }
         else {
             // TODO: update all?
@@ -744,7 +765,31 @@ class TimeseriesDataExploreView {
         this.#chartExplore.hideLoading();
     }
 
+    #loadChartSettingsFromUrlParam(urlParamValue) {
+        if (this.#tsSeriesOptions == null) {
+            this.#tsSeriesOptions = {};
+        }
+
+        if (urlParamValue != null) {
+            let chartSettings = decompressFromEncodedURIComponent(urlParamValue);
+            for (let [tsID, tsChartsSeriesOpts] of Object.entries(chartSettings)) {
+                let opts = {};
+                if (tsChartsSeriesOpts.type == SeriesTypes.line) {
+                    opts.style = tsChartsSeriesOpts.style;
+                    opts.symbol = tsChartsSeriesOpts.symbol;
+                }
+                opts.decalName = tsChartsSeriesOpts.decalName;
+                this.#tsSeriesOptions[tsID] = new TimeseriesChartSeriesOptions(tsChartsSeriesOpts.tsInfo, tsChartsSeriesOpts.tsDataState, tsChartsSeriesOpts.color, tsChartsSeriesOpts.yAxisPosition, tsChartsSeriesOpts.type, opts);
+                this.#tsSeriesOptions[tsID].show = tsChartsSeriesOpts.show;
+            }
+        }
+    }
+
     mount() {
+        // Load chart settings from url paramter.
+        let url = new URL(window.location);
+        this.#loadChartSettingsFromUrlParam(url.searchParams.get("chart"));
+
         this.#endDateDefault = this.#periodEndDatetimeElmt.date;
         this.#endTimeDefault = this.#periodEndDatetimeElmt.time;
         this.#endDateCustomBackup = this.#periodEndDatetimeElmt.date;

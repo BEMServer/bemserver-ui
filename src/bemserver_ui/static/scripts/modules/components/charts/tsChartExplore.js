@@ -260,7 +260,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     #getSeriesIndex(seriesID) {
         let seriesIDs = this.#chartOpts.series.map((series) => { return series.id.toString(); });
-        return seriesIDs.indexOf(seriesID.toString());
+        return seriesIDs.indexOf(seriesID?.toString());
     }
 
     #getSeriesIndexFromName(name) {
@@ -300,6 +300,10 @@ export class TimeseriesChartExplore extends ChartBase {
         this.setOption(this.#chartOpts);
     }
 
+    hasSeries(seriesID) {
+        return this.#hasSeries(seriesID);
+    }
+
     addSeries(seriesParams, data = null) {
         if (!this.#hasSeries(seriesParams.id)) {
             seriesParams.data = this.#prepareSeriesData(data);
@@ -316,6 +320,9 @@ export class TimeseriesChartExplore extends ChartBase {
             this.#setChartOptions();
 
             this.#currentSeriesIndex += 1;
+        }
+        else {
+            this.updateSeriesData(seriesParams.id, data);
         }
     }
 
@@ -393,6 +400,10 @@ export class TimeseriesChartExplore extends ChartBase {
 
             // Set series visibility.
             this.#chartOpts.series[seriesIndex].visible = seriesParams.visible;
+            this.dispatchAction({
+                type: seriesParams.visible ? "legendSelect" : "legendUnSelect",
+                name: seriesParams.name,
+            });
 
             this.#updateYAxisName();
             this.#updateLegend();
@@ -593,121 +604,77 @@ export const defaultSeriesBarDecal = "none";
 
 export class TimeseriesChartSeriesOptions {
 
-    #tsData = null;
-    #tsDataState = null;
-    #type = defaultSeriesType;
-    #style = defaultSeriesLineStyle;
-    #symbol = defaultSeriesLineSymbol;
-    #yAxisPosition = defaultSeriesYAxisPosition;
+    tsInfo = null;
+    tsDataState = null;
+    type = defaultSeriesType;
+    style = defaultSeriesLineStyle;
+    symbol = defaultSeriesLineSymbol;
+    yAxisPosition = defaultSeriesYAxisPosition;
+    decalName = defaultSeriesBarDecal;
+    seriesID = null;
+    show = true;
 
-    get id() {
-        return `${this.#tsData?.id}${this.#tsDataState != null ? `_${this.#tsDataState.id}` : ""}`;
-    }
-
-    get name() {
-        return this.#tsData?.name;
-    }
-
-    get label() {
-        return `${this.#tsData?.label}${this.#tsDataState != null ? ` | ${this.#tsDataState.name}` : ""}`;
-    }
-
-    get unitSymbol() {
-        return this.#tsData?.unit_symbol;
-    }
-
-    get type() {
-        return this.#type;
-    }
-    set type(value) {
-        if (Object.keys(SeriesTypes).includes(value)) {
-            this.#type = value;
-        }
-    }
-
-    get style() {
-        return this.#style;
-    }
-    set style(value) {
-        if (Object.keys(SeriesLineStyles).includes(value)) {
-            this.#style = value;
-        }
-    }
-
-    get symbol() {
-        return this.#symbol;
-    }
-    set symbol(value) {
-        if (Object.keys(SeriesLineSymbols).includes(value)) {
-            this.#symbol = value;
-        }
-    }
-
-    get yAxisPosition() {
-        return this.#yAxisPosition;
-    }
-    set yAxisPosition(value) {
-        if (Object.keys(SeriesYAxisPositions).includes(value)) {
-            this.#yAxisPosition = value;
-        }
-    }
-
-    get yAxisIndex() {
-        return this.#yAxisPosition == SeriesYAxisPositions.left ? 0 : 1;
-    }
-
-    get timeseries() {
-        return this.#tsData;
-    }
-
-    get tsDataState() {
-        return this.#tsDataState;
-    }
-    set tsDataState(value) {
-        this.#tsDataState = value;
-    }
-
-    constructor(tsData, tsDataState, color = null, yAxisPosition = defaultSeriesYAxisPosition, type = defaultSeriesType, options = {}) {
+    constructor(tsInfo, tsDataState, color = null, yAxisPosition = defaultSeriesYAxisPosition, type = defaultSeriesType, options = {}) {
         // options:
         //  if type == "line", may contain "style" and "symbol" definition
         //  if type == "bar", may contain "decalName" definition
 
-        this.#tsData = tsData;
-        this.#tsDataState = tsDataState;
+        if (!Object.keys(SeriesYAxisPositions).includes(yAxisPosition)) {
+            console.warn(`Unknwon series y axis position: ${yAxisPosition}`);
+        }
+        if (!Object.keys(SeriesTypes).includes(type)) {
+            console.warn(`Unknwon series type: ${type}`);
+        }
+        if (!Object.keys(SeriesLineStyles).includes(options.style)) {
+            console.warn(`Unknwon series line style: ${options.style}`);
+        }
+        if (!Object.keys(SeriesLineSymbols).includes(options.symbol)) {
+            console.warn(`Unknwon series line symbol: ${options.symbol}`);
+        }
+        if (!Object.keys(SeriesBarDecals).includes(options.decalName)) {
+            console.warn(`Unknwon series bar decal name: ${options.decalName}`);
+        }
+
+        this.tsInfo = tsInfo;
+        this.tsDataState = tsDataState;
         this.color = color;
         this.type = type;
         this.yAxisPosition = yAxisPosition;
-        this.show = true;
 
-        if (this.#type == "line") {
+        if (this.type == SeriesTypes.line) {
             this.style = options.style || defaultSeriesLineStyle;
             this.symbol = options.symbol || defaultSeriesLineSymbol;
         }
         this.decalName = options.decalName || defaultSeriesBarDecal;
+
+        this.seriesID = `${this.tsInfo?.id}${this.tsDataState != null ? `_${this.tsDataState.id}` : ""}`;
     }
 
     toChartSeries(ignoreColor = false) {
+        let seriesLabel = `${this.tsInfo?.label}${this.tsDataState != null ? ` | ${this.tsDataState.name}` : ""}`;
+        let seriesUnitSymbol = this.tsInfo?.unit_symbol;
+
         let series = {
-            id: this.id,
-            name: this.label,
+            id: this.seriesID,
+            name: seriesLabel,
             type: this.type,
-            yAxisIndex: this.yAxisIndex,
+            yAxisIndex: this.yAxisPosition == SeriesYAxisPositions.left ? 0 : 1,
             data: [],
             visible: this.show,
-            unitSymbol: this.unitSymbol,
-            timeseriesID: this.timeseries?.id,
+            unitSymbol: seriesUnitSymbol,
+            timeseriesID: this.tsInfo?.id,
         };
         if (!ignoreColor) {
             series.color = this.color;
         }
-        if (this.#type == "line") {
+        if (this.type == SeriesTypes.line) {
             series.lineStyle = {
-                type: this.#style,
+                type: this.style,
             };
-            series.symbol = this.#symbol;
-            series.showSymbol = this.#symbol != "path://";
+            series.symbol = this.symbol;
+            series.showSymbol = this.symbol != "path://";
         }
-        else if (this.#type == "bar") {
+        else if (this.type == SeriesTypes.bar) {
             series.itemStyle = {
                 decal: SeriesBarDecals[this.decalName].decal,
             };
