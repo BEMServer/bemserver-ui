@@ -6,6 +6,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     #chartOpts = {};
     #currentSeriesIndex = 0;
+    #datetimeFormat = "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}";
 
 
     get seriesCount() {
@@ -198,13 +199,39 @@ export class TimeseriesChartExplore extends ChartBase {
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
-            let seriesTimestamps = opt.series.map((seriesInfo) => {
-                return seriesInfo.data.map((seriesData) => {
-                    return echarts.time.format(seriesData[0], "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}");
-                });
-            });
-            let timestamps = Array.from(new Set([].concat(...seriesTimestamps)));
+            // Get all timestamps from all series data.
+            let timestamps = [];
+            for (let series of opt.series) {
+                for (let seriesData of series.data) {
+                    let timestamp = seriesData[0];
+                    if (!timestamps.includes(timestamp)) {
+                        timestamps.push(timestamp);
+                    }
+                }
+            }
+            // Ensure that the timestamps are ordered (from the older to the newest).
+            timestamps = timestamps.sort();
 
+            // For each timestamp, get the data from each series. If the timestamp does not exists, the value is null.
+            let data = {};
+            for (let timestamp of timestamps) {
+                data[timestamp] = [];
+                for (let series of opt.series) {
+                    let value = null;
+                    for (let seriesData of series.data) {
+                        if (seriesData[0] == timestamp) {
+                            value = Parser.parseFloatOrDefault(seriesData[1], Number.NaN, 2);
+                            break;
+                        }
+                        if (seriesData[0] > timestamp) {
+                            break;
+                        }
+                    }
+                    data[timestamp].push(value);
+                }
+            }
+
+            // Build the table of the dataview, and fill it with the data extracted for each series.
             let tableContainerElmt = document.createElement("div");
             tableContainerElmt.classList.add("table-responsive");
 
@@ -231,14 +258,14 @@ export class TimeseriesChartExplore extends ChartBase {
             tableElmt.appendChild(tableHeadElmt);
             let tableBodyElmt = document.createElement("tbody");
             tableBodyElmt.classList.add("table-group-divider");
-            for (let [index, timestamp] of timestamps.entries()) {
+            for (let [timestamp, values] of Object.entries(data)) {
                 let tableTrElmt = document.createElement("tr");
                 let tableCellTimestampElmt = document.createElement("td");
-                tableCellTimestampElmt.innerText = timestamp;
+                tableCellTimestampElmt.innerText = echarts.time.format(timestamp, this.#datetimeFormat);
                 tableTrElmt.appendChild(tableCellTimestampElmt);
-                for (let series of opt.series) {
+                for (let value of values) {
                     let tableCellElmt = document.createElement("td");
-                    tableCellElmt.innerText = (index in series.data) ? Parser.parseFloatOrDefault(series.data[index][1], Number.NaN, 2) : Number.NaN;
+                    tableCellElmt.innerText = value;
                     tableTrElmt.appendChild(tableCellElmt);
                 }
                 tableBodyElmt.appendChild(tableTrElmt);
