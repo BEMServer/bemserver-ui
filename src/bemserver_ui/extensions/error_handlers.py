@@ -17,11 +17,24 @@ from bemserver_api_client.exceptions import (
 from bemserver_ui.extensions.campaign_context import (
     IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
 )
+from bemserver_ui.extensions.plugins import PLUGINS_LOADED
 
 
 def _is_from_internal_api():
     if flask.request.endpoint is not None:
-        return flask.request.endpoint.startswith("api.")
+        # Consider plugin's internal APIs too, using plugin's
+        #  `is_endpoint_from_internal_api` function when implemented.
+        #  If not, try something else.
+        is_from_plugin_internal_api = any(
+            [
+                plugin_module.is_endpoint_from_internal_api()
+                if hasattr(plugin_module, "is_endpoint_from_internal_api")
+                else f"{plugin_module.plugin.PLUGIN_PREFIX}_api"
+                in flask.request.endpoint
+                for plugin_module in PLUGINS_LOADED
+            ]
+        )
+        return flask.request.endpoint.startswith("api.") or is_from_plugin_internal_api
     return False
 
 
