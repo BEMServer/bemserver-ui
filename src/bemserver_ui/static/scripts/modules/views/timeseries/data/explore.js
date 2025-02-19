@@ -299,10 +299,10 @@ class TimeseriesDataExploreView {
                 this.#tsSeriesOptions[tsInfo.id] = tsChartSeriesOpts;
             }
 
-            if (!Object.keys(this.#tsSeriesChartOptsRowElmts).includes(tsInfo.id)) {
+            if (!Object.keys(this.#tsSeriesChartOptsRowElmts).includes(tsInfo.id.toString())) {
                 let tsSeriesChartOptsRowElmt = this.#createTimeseriesChartOptionsRowElment(tsChartSeriesOpts);
                 this.#chartSeriesContainerBodyElmt.appendChild(tsSeriesChartOptsRowElmt);
-                this.#tsSeriesChartOptsRowElmts[tsInfo.id] = tsSeriesChartOptsRowElmt;
+                this.#tsSeriesChartOptsRowElmts[tsInfo.id.toString()] = tsSeriesChartOptsRowElmt;
                 this.#updateChartSeriesOptionsVisibility(tsInfo.id);
             }
 
