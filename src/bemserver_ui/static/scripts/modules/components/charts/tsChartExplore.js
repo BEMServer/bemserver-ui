@@ -26,7 +26,7 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#initChartOptions();
         this.#chartOpts = this.getOption();
 
-        this.registerEventCallback("legendselectchanged", (params) => {
+        this.registerEvent("legendselectchanged", (params) => {
             // Get series id from name.
             let seriesIndex = this.#getSeriesIndexFromName(params.name);
             let seriesID = this.#chartOpts.series[seriesIndex].id;

@@ -4,7 +4,7 @@ import "https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js";
 export class ChartBase {
 
     #chart = null;
-    #chartEventCallbacks = {};
+    #chartEventHandlers = {};
 
     #loadingOptions = {
         text: "loading...",
@@ -52,15 +52,6 @@ export class ChartBase {
 
         window.addEventListener("unload", () => {
             this.dispose();
-        });
-
-        // TODO for now, only legendselectchanged is really listened.
-        this.#chart.on("legendselectchanged", (params) => {
-            if (this.#chartEventCallbacks["legendselectchanged"] != null) {
-                for (let eventCallback of this.#chartEventCallbacks["legendselectchanged"]) {
-                    eventCallback(params);
-                }
-            }
         });
     }
 
@@ -127,22 +118,34 @@ export class ChartBase {
         }
     }
 
-    registerEventCallback(eventName, callback) {
-        if (!this.#chartEventCallbacks[eventName]) {
-            this.#chartEventCallbacks[eventName] = [];
+    registerEvent(eventName, handler) {
+        if (handler == null) {
+            console.warn(`Can not register "${eventName}" event with null handler!`);
+            return;
         }
-        this.#chartEventCallbacks[eventName].push(callback);
+
+        if (Object.keys(this.#chartEventHandlers).includes(eventName)) {
+            console.warn(`Can not register "${eventName}" event twice!`);
+            return ;
+        }
+
+        this.#chartEventHandlers[eventName] = handler;
+        this.#chart.on(eventName, handler);
     }
 
-    unregisterEventCallback(eventName, callback) {
-        if (this.#chartEventCallbacks[eventName])
-        {
-            this.#chartEventCallbacks[eventName] = this.#chartEventCallbacks[eventName].filter(
-                (evtCallback) => {
-                    return evtCallback != callback;
-                }
-            );
+    unregisterEvent(eventName, handler) {
+        if (!Object.keys(this.#chartEventHandlers).includes(eventName)) {
+            console.warn(`Can not unregister unknown "${eventName}" event!`);
+            return;
         }
+
+        if (handler == null) {
+            console.warn(`Can not unregister "${eventName}" event with null handler!`);
+            return;
+        }
+
+        delete this.#chartEventHandlers[eventName];
+        this.#chart.off(eventName, handler);
     }
 
     dispatchAction(params) {
