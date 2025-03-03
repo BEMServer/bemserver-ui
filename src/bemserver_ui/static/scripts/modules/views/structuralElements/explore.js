@@ -345,12 +345,8 @@ export class StructuralElementsExploreView {
             let latTitleNameElmt = document.createElement("span");
             latTitleNameElmt.textContent = "Latitude";
             latTitleContainerElmt.appendChild(latTitleNameElmt);
-            let latTitleUnitElmt = document.createElement("small");
-            latTitleUnitElmt.classList.add("text-muted", "ms-1");
-            latTitleUnitElmt.textContent = "[°]";
-            latTitleContainerElmt.appendChild(latTitleUnitElmt);
             let latValueElmt = document.createElement("dd");
-            latValueElmt.textContent = data.structural_element.latitude != null ? data.structural_element.latitude : "-";
+            latValueElmt.textContent = `${data.structural_element.latitude != null ? data.structural_element.latitude : "-"} °`;
             latContainerElmt.appendChild(latValueElmt);
 
             let longContainerElmt = document.createElement("dl");
@@ -361,12 +357,8 @@ export class StructuralElementsExploreView {
             let longTitleNameElmt = document.createElement("span");
             longTitleNameElmt.textContent = "Longitude";
             longTitleContainerElmt.appendChild(longTitleNameElmt);
-            let longTitleUnitElmt = document.createElement("small");
-            longTitleUnitElmt.classList.add("text-muted", "ms-1");
-            longTitleUnitElmt.textContent = "[°]";
-            longTitleContainerElmt.appendChild(longTitleUnitElmt);
             let longValueElmt = document.createElement("dd");
-            longValueElmt.textContent = data.structural_element.longitude != null ? data.structural_element.longitude : "-";
+            longValueElmt.textContent = `${data.structural_element.longitude != null ? data.structural_element.longitude : "-"} °`;
             longContainerElmt.appendChild(longValueElmt);
         }
     }
@@ -379,7 +371,7 @@ export class StructuralElementsExploreView {
         this.#propertiesTabContentElmt.appendChild(mainContainerElmt);
 
         let propContainerElmt = document.createElement("div");
-        propContainerElmt.classList.add("d-flex", "gap-4");
+        propContainerElmt.classList.add("list-group", "w-100");
         mainContainerElmt.appendChild(propContainerElmt);
 
         if (app.signedUser.is_admin) {
@@ -391,45 +383,46 @@ export class StructuralElementsExploreView {
 
         if (data.properties.length > 0) {
             for (let property of data.properties) {
-                let propItemContainerElmt = document.createElement("div");
-                propItemContainerElmt.classList.add("row");
-                propContainerElmt.appendChild(propItemContainerElmt);
+                let propGroupItemContainerElmt = document.createElement("div");
+                propGroupItemContainerElmt.classList.add("list-group-item");
+                propContainerElmt.appendChild(propGroupItemContainerElmt);
 
-                let propItemElmt = document.createElement("dl");
-                propItemElmt.classList.add("col");
+                let propItemContainerElmt = document.createElement("div");
+                propItemContainerElmt.classList.add("d-flex", "justify-content-xl-start", "justify-content-between", "gap-4", "w-100");
+                propGroupItemContainerElmt.appendChild(propItemContainerElmt);
+
+                let propItemElmt = document.createElement("div");
                 propItemContainerElmt.appendChild(propItemElmt);
 
-                let propTitleElmt = document.createElement("dt");
-                propItemElmt.appendChild(propTitleElmt);
+                let propItemTitleElmt = document.createElement("div");
+                propItemTitleElmt.classList.add("fw-bold");
+                propItemTitleElmt.textContent = property.name;
+                propItemElmt.appendChild(propItemTitleElmt);
 
-                let propNameElmt = document.createElement("span");
-                propNameElmt.textContent = property.name;
-                propTitleElmt.appendChild(propNameElmt);
+                let propItemValueContainerElmt = document.createElement("div");
+                propItemValueContainerElmt.classList.add("d-flex", "gap-1");
+                propItemElmt.appendChild(propItemValueContainerElmt);
+
+                let propItemValueElmt = document.createElement("span");
+                propItemValueElmt.textContent = property.value?.length > 0 ? property.value : "-";
+                propItemValueContainerElmt.appendChild(propItemValueElmt);
 
                 if (property.unit_symbol?.length > 0) {
-                    let propUnitElmt = document.createElement("small");
-                    propUnitElmt.classList.add("text-muted", "ms-1");
-                    propUnitElmt.textContent = `[${property.unit_symbol}]`;
-                    propTitleElmt.appendChild(propUnitElmt);
+                    let propItemUnitElmt = document.createElement("span");
+                    propItemUnitElmt.classList.add("fw-bold");
+                    propItemUnitElmt.textContent = property.unit_symbol;
+                    propItemValueContainerElmt.appendChild(propItemUnitElmt);
                 }
+
+                let propItemInfoElmt = document.createElement("div");
+                propItemContainerElmt.appendChild(propItemInfoElmt);
 
                 if (property.description?.length > 0) {
-                    let abbrContainerElmt = document.createElement("sup");
-                    abbrContainerElmt.classList.add("ms-1");
-                    propTitleElmt.appendChild(abbrContainerElmt);
-
-                    let abbrElmt = document.createElement("abbr");
-                    abbrElmt.title = property.description != null ? property.description : "";
-                    abbrContainerElmt.appendChild(abbrElmt);
-
-                    let abbrIconElmt = document.createElement("i");
-                    abbrIconElmt.classList.add("bi", "bi-question-diamond");
-                    abbrElmt.appendChild(abbrIconElmt);
+                    let propItemDescriptionElmt = document.createElement("small");
+                    propItemDescriptionElmt.classList.add("fst-italic", "text-muted", "multiline");
+                    propItemDescriptionElmt.textContent = property.description != null ? property.description : "";
+                    propItemInfoElmt.appendChild(propItemDescriptionElmt);
                 }
-
-                let propValueElmt = document.createElement("dd");
-                propValueElmt.textContent = property.value?.length > 0 ? property.value : "-";
-                propItemElmt.appendChild(propValueElmt);
             }
         }
         else {
