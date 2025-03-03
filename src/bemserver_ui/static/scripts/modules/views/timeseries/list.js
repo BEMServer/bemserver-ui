@@ -324,35 +324,31 @@ export class TimeseriesListView {
         }
     }
 
-    #getEditBtnHTML(id, tab=null) {
+    #createPropertiesElement(properties, tsId) {
+        let propContainerElmt = document.createElement("div");
+        propContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-start", "gap-3");
+
+        let propDataElmt = document.createElement("div");
+        propDataElmt.classList.add("list-group", "w-100");
+        propContainerElmt.appendChild(propDataElmt);
+
         if (app.signedUser.is_admin) {
-            let editUrlParams = {id: id};
-            let editLabel = ``;
-            if (tab != null) {
-                editUrlParams["tab"] = tab;
-                editLabel = ` ${tab}`;
-            }
-            let editUrl = app.urlFor(`timeseries.edit`, editUrlParams);
-            return `<a class="btn btn-sm btn-outline-secondary ms-auto w-auto" href="${editUrl}" role="button" title="Edit${editLabel}"><i class="bi bi-pencil"></i> Edit${editLabel}</a>`;
-        }
-        return ``;
-    }
+            let editLinkElmt = document.createElement("a");
+            editLinkElmt.classList.add("btn", "btn-sm", "btn-outline-secondary", "ms-auto", "w-auto");
+            editLinkElmt.setAttribute("role", "button");
+            editLinkElmt.title = `Edit attributes`;
+            editLinkElmt.href = app.urlFor(`timeseries.edit`, {id: tsId, tab: "attributes"});
+            propContainerElmt.appendChild(editLinkElmt);
 
-    #getPropertyHelpHTML(property) {
-        let ret = ``;
-        if (property.description?.length > 0) {
-            let abbrElmt = document.createElement("abbr");
-            abbrElmt.title = property.description != null ? property.description : "";
-            let abbrContentElmt = document.createElement("i");
-            abbrContentElmt.classList.add("bi", "bi-question-diamond");
-            abbrElmt.appendChild(abbrContentElmt);
-            ret = `<sup class="ms-1">${abbrElmt.outerHTML}</sup>`;
-        }
-        return ret;
-    }
+            let editIconElmt = document.createElement("i");
+            editIconElmt.classList.add("bi", "bi-pencil", "me-1");
+            editLinkElmt.appendChild(editIconElmt);
 
-    #getPropertiesHTML(properties, tsId) {
-        let propertyDataHTML = ``;
+            let editLabelElmt = document.createElement("span");
+            editLabelElmt.textContent = editLinkElmt.title;
+            editLinkElmt.appendChild(editLabelElmt);
+        }
+
         if (properties.length > 0) {
             for (let property of properties) {
                 let propVal = property.value;
@@ -366,25 +362,58 @@ export class TimeseriesListView {
                     case "boolean":
                         propVal = Parser.parseBoolOrDefault(property.value, "-");
                         break;
-                    }
+                }
 
-                let unitSymbol = (property.unit_symbol != null && property.unit_symbol.length > 0) ? `<span class="text-muted ms-1">[${property.unit_symbol}]</span>` : ``;
-                propertyDataHTML += `<dl>
-    <dt>${property.name}${unitSymbol}${this.#getPropertyHelpHTML(property)}</dt>
-    <dd>${propVal}</dd>
-</dl>`;
+                let propGroupItemContainerElmt = document.createElement("div");
+                propGroupItemContainerElmt.classList.add("list-group-item");
+                propDataElmt.appendChild(propGroupItemContainerElmt);
+
+                let propItemContainerElmt = document.createElement("div");
+                propItemContainerElmt.classList.add("d-flex", "justify-content-xl-start", "justify-content-between", "gap-4", "w-100");
+                propGroupItemContainerElmt.appendChild(propItemContainerElmt);
+
+                let propItemElmt = document.createElement("div");
+                propItemContainerElmt.appendChild(propItemElmt);
+
+                let propItemTitleElmt = document.createElement("div");
+                propItemTitleElmt.classList.add("fw-bold");
+                propItemTitleElmt.textContent = property.name;
+                propItemElmt.appendChild(propItemTitleElmt);
+
+                let propItemValueContainerElmt = document.createElement("div");
+                propItemValueContainerElmt.classList.add("d-flex", "gap-1");
+                propItemElmt.appendChild(propItemValueContainerElmt);
+
+                let propItemValueElmt = document.createElement("span");
+                propItemValueElmt.textContent = propVal;
+                propItemValueContainerElmt.appendChild(propItemValueElmt);
+
+                if (property.unit_symbol?.length > 0) {
+                    let propItemUnitElmt = document.createElement("span");
+                    propItemUnitElmt.classList.add("fw-bold");
+                    propItemUnitElmt.textContent = property.unit_symbol;
+                    propItemValueContainerElmt.appendChild(propItemUnitElmt);
+                }
+
+                let propItemInfoElmt = document.createElement("div");
+                propItemContainerElmt.appendChild(propItemInfoElmt);
+
+                if (property.description?.length > 0) {
+                    let propItemDescriptionElmt = document.createElement("small");
+                    propItemDescriptionElmt.classList.add("fst-italic", "text-muted", "multiline");
+                    propItemDescriptionElmt.textContent = property.description != null ? property.description : "";
+                    propItemInfoElmt.appendChild(propItemDescriptionElmt);
+                }
             }
         }
         else {
-            propertyDataHTML = `<p class="fst-italic">No attributes</p>`;
+            let noDataElmt = document.createElement("p");
+            noDataElmt.classList.add("fst-italic");
+            noDataElmt.textContent = "No attributes";
+            propDataElmt.appendChild(noDataElmt);
         }
 
-        return `<div class="d-flex justify-content-between align-items-start mb-3">
-    <div class="d-flex gap-4">
-        ${propertyDataHTML}
-    </div>
-    ${this.#getEditBtnHTML(tsId, "attributes")}
-</div>`;
+        return propContainerElmt;
     }
 
     #getStructuralElementsHTML(data) {
@@ -527,11 +556,20 @@ export class TimeseriesListView {
         }
     }
 
-    #getErrorHTML(error) {
-        return `<div class="alert alert-danger" role="alert">
-    <i class="bi bi-x-octagon me-2"></i>
-    ${error}
-</div>`;
+    #createErrorElement(error) {
+        let errorContainerElmt = document.createElement("div");
+        errorContainerElmt.classList.add("alert", "alert-danger");
+        errorContainerElmt.setAttribute("role", "alert");
+
+        let errorIconElmt = document.createElement("i");
+        errorIconElmt.classList.add("bi", "bi-x-octagon", "me-2");
+        errorContainerElmt.appendChild(errorIconElmt);
+
+        let errorTextElmt = document.createElement("span");
+        errorTextElmt.textContent = error;
+        errorContainerElmt.appendChild(errorTextElmt);
+
+        return errorContainerElmt;
     }
 
     #renderProperties(tsId) {
@@ -548,11 +586,12 @@ export class TimeseriesListView {
             this.#getPropDataReqID = this.#internalAPIRequester.get(
                 app.urlFor(`api.timeseries.retrieve_property_data`, {id: tsId}),
                 (data) => {
-                    timeseriesPropertiesElmt.innerHTML = this.#getPropertiesHTML(data, tsId);
-                    timeseriesPropertiesElmt.setAttribute("data-ts-loaded", true);
+                    timeseriesPropertiesElmt.innerHTML = "";
+                    timeseriesPropertiesElmt.appendChild(this.#createPropertiesElement(data, tsId));
                 },
                 (error) => {
-                    timeseriesPropertiesElmt.innerHTML = this.#getErrorHTML(error.message);
+                    timeseriesPropertiesElmt.innerHTML = "";
+                    timeseriesPropertiesElmt.appendChild(this.#createErrorElement(error.message));
                 },
             );
         }
@@ -576,7 +615,8 @@ export class TimeseriesListView {
                     timeseriesStructuralElementsElmt.setAttribute("data-ts-loaded", true);
                 },
                 (error) => {
-                    timeseriesStructuralElementsElmt.innerHTML = this.#getErrorHTML(error.message);
+                    timeseriesStructuralElementsElmt.innerHTML = "";
+                    timeseriesStructuralElementsElmt.appendChild(this.#createErrorElement(error.message));
                 },
             );
         }
@@ -602,7 +642,8 @@ export class TimeseriesListView {
                         tsDataStatsContainerElmt.setAttribute("data-ts-loaded", true);
                     },
                     (error) => {
-                        tsDataStatsContainerElmt.innerHTML = this.#getErrorHTML(error);
+                        tsDataStatsContainerElmt.innerHTML = "";
+                        tsDataStatsContainerElmt.appendChild(this.#createErrorElement(error.message));
                     },
                 );
 
@@ -669,7 +710,8 @@ export class TimeseriesListView {
                     tsEventsContainerElmt.setAttribute("data-ts-loaded", true);
                 },
                 (error) => {
-                    tsEventsContainerElmt.innerHTML = this.#getErrorHTML(error.message);
+                    tsEventsContainerElmt.innerHTML = "";
+                    tsEventsContainerElmt.appendChild(this.#createErrorElement(error.message));
                 },
             );
         }
