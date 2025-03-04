@@ -73,7 +73,6 @@ export class TimeseriesChartCompleteness extends ChartBase {
                     return `${value.toString()}%`;
                 }
             },
-            useUTC: true,
         });
     }
 
