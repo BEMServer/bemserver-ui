@@ -1,6 +1,34 @@
 Changelog
 ---------
 
+0.8.2 (2025-03-04)
+++++++++++++++++++
+
+Features:
+
+- Timeseries data:
+
+  - Keep timeseries data explore chart settings in url query parameters
+
+- Timeseries:
+
+  - Minor update timeseries attributes display (timeseries list page)
+
+- Structural elements:
+
+  - Minor update structural element attributes display (explore page)
+
+Fixes:
+
+- Fix timeseries compare states
+- Fix timeseries data explore dataview
+
+Other changes:
+
+- Still require bemserver-api-client >=0.21.1 and <0.22.0
+- Still require bemserver-api >=0.24.2
+- Still require bemserver-core >=0.18.3
+
 0.8.1 (2025-02-17)
 ++++++++++++++++++
 
@@ -18,10 +46,15 @@ Fixes:
 
 - Fix multiline text display (both as read-only labels and inside input text areas)
 - Fix timeseries selection
-- Fix timeseries data explore dataviews
+- Fix timeseries data explore dataview
 - Fix weather analysis (timeseries information popup)
 - Fix weather analysis (forecast timestamps were missing in dataview)
 
+Other changes:
+
+- Still require bemserver-api-client >=0.21.1 and <0.22.0
+- Still require bemserver-api >=0.24.2
+- Still require bemserver-core >=0.18.3
 
 0.8.0 (2024-09-16)
 ++++++++++++++++++
