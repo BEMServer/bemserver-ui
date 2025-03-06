@@ -7,6 +7,8 @@ from bemserver_ui.extensions.campaign_context import (
     IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME,
 )
 
+from .main import get_about_data
+
 blp = flask.Blueprint("auth", __name__, url_prefix="/auth")
 
 
@@ -56,8 +58,14 @@ def signin():
         )
         return flask.redirect(url_redir)
 
+    about_data = get_about_data()
+
     # Render sign in form.
-    return flask.render_template("pages/signin.html")
+    return flask.render_template(
+        "pages/signin.html",
+        about_infos=about_data["app"],
+        plugin_infos=about_data["plugins"],
+    )
 
 
 @blp.route("/signout")

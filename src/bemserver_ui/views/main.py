@@ -83,6 +83,16 @@ def stats():
 @blp.route("/about")
 @auth.signin_required
 def about():
+    about_data = get_about_data()
+
+    return flask.render_template(
+        "pages/about.html",
+        about_infos=about_data["app"],
+        plugin_infos=about_data["plugins"],
+    )
+
+
+def get_about_data():
     about_resp = flask.g.api_client.about.getall()
 
     about_infos = {}
@@ -100,8 +110,7 @@ def about():
         plugin_info["version"] = plugin_module.__version__
         plugin_infos[plugin_info["label"]] = plugin_info
 
-    return flask.render_template(
-        "pages/about.html",
-        about_infos=about_infos,
-        plugin_infos=plugin_infos,
-    )
+    return {
+        "app": about_infos,
+        "plugins": plugin_infos,
+    }

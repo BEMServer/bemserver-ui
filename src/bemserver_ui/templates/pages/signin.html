@@ -7,6 +7,7 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/signin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles/card-flip.css') }}">
 {% endfilter %}
 {% endblock head_styles %}
 
@@ -15,16 +16,48 @@
 <div class="container-md container-fluid h-100">
     <div class="d-flex flex-column gap-4 h-100">
         <div class="d-lg-flex d-grid justify-content-center gap-3 mt-auto{% if partners is not defined %} mb-auto{% endif %}">
-            <img class="mx-auto m-lg-0 my-0 my-lg-auto app-logo" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
+            <div class="card-flip d-flex justify-content-center align-items-center app-logo-card mx-auto m-lg-0 my-0 my-lg-auto">
+                <div class="card-flip-wrapper">
+                    <div class="card-flip-side card-flip-is-active bg-body">
+                        <img class="img-fluid" src="{{ url_for('static', filename='images/bemserver.svg') }}" alt="BEMServer">
+                    </div>
+                    <div class="card-flip-side card-flip-side-back rounded bg-white overflow-y-auto">
+                        <div class="d-flex flex-column justify-content-start m-2">
+                            <h5 class="font-monospace text-center">About BEMServer</h5>
+                            {% for app_name, app_info in about_infos.items() %}
+                            <div class="hstack gap-2 font-monospace">
+                                <span class="text-secondary">{{ app_name }}</span>
+                                <small class="fw-bold">{{ app_info.version }}</small>
+                                {% if "description" in app_info %}
+                                <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-title="{{ app_info.description }}"></i>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            {% if plugin_infos | length > 0 %}
+                            <span class="font-monospace text-secondary">UI plugins ({{ plugin_infos | length }})</span>
+                            <ul class="list-unstyled border-start ps-1">
+                                {% for plugin_label, plugin_info in plugin_infos.items() %}
+                                <li class="ps-1">
+                                    <div class="hstack gap-2 font-monospace">
+                                        <small class="text-secondary text-start">{{ plugin_label }}</small>
+                                        <small class="fw-bold">{{ plugin_info.version }}</small>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="vstack gap-2 p-4 app-signin-panel">
-                <h1 class="h3 text-center d-none d-lg-block">Sign in to BEMServer</h1>
                 <form id="signinForm" class="form-signin" action="{{ url_for(request.endpoint, ignore_campaign_ctxt=True) }}" method="POST">
-                    <div class="form-floating">
-                        <input type="email" form="signinForm" class="form-control" id="email" name="email" placeholder="name@example.com" required autofocus>
+                    <div class="form-floating my-2">
+                        <input type="email" form="signinForm" class="form-control rounded-0 border-2 border-start-0 border-top-0 border-end-0" id="email" name="email" placeholder="name@example.com" required autofocus>
                         <label for="email">Email address</label>
                     </div>
-                    <div class="form-floating">
-                        <input type="password" form="signinForm" class="form-control" id="pwd" name="pwd" placeholder="Password" required>
+                    <div class="form-floating my-2">
+                        <input type="password" form="signinForm" class="form-control rounded-0 border-2 border-start-0 border-top-0 border-end-0" id="pwd" name="pwd" placeholder="Password" required>
                         <label for="pwd">Password</label>
                     </div>
                 </form>
@@ -47,6 +80,7 @@
 {% filter indent(width=8, first=True) %}
 <script type="module">
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
+    import "{{ url_for('static', filename='scripts/modules/components/cardFlip.js') }}";
 
     let app = createApp();
 

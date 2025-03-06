@@ -1,0 +1,65 @@
+:root {
+    --card-flip-transition-time: 0.5s;
+}
+
+
+.card-flip {
+    position: relative;
+    cursor: pointer;
+}
+
+.card-flip-wrapper {
+    transform-style: preserve-3d;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.card-flip.card-flip-is-ready.card-flip-is-switched .card-flip-wrapper {
+    animation: card-flip-rotate-kf var(--card-flip-transition-time) linear both;
+}
+
+.card-flip.card-flip-is-ready .card-flip-wrapper {
+    animation: card-flip-rotate-inverse-kf var(--card-flip-transition-time) linear both;
+}
+
+.card-flip-side {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.card-flip-side.card-flip-is-active {
+    position: static;
+}
+
+.card-flip-side-back {
+    transform: rotateY(180deg);
+}
+
+
+@keyframes card-flip-rotate-kf {
+    0% {
+        transform: rotateY(0);
+    }
+    70% {
+        transform: rotateY(200deg);
+    }
+    100% {
+        transform: rotateY(180deg);
+    }
+}
+
+@keyframes card-flip-rotate-inverse-kf {
+    0% {
+        transform: rotateY(180deg);
+    }
+    70% {
+        transform: rotateY(-20deg);
+    }
+    100% {
+        transform: rotateY(0);
+    }
+}

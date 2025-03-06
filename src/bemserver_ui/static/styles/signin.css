@@ -1,7 +1,10 @@
-html,
-body {
-    background-color: #f3f8e9 !important;
+:root {
+    --bs-body-bg: #f3f8e9 !important;
+    --bs-body-bg-rgb: 243, 248, 233 !important;
+    --bs-body-color: #474747 !important;
+    --bs-body-color-rgb: 71, 71, 71 !important;
 }
+
 
 body {
     min-width: 400px;
@@ -11,23 +14,14 @@ body {
     z-index: 2;
 }
 
-.form-signin input[type="email"] {
-    margin-bottom: -1px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+.form-signin input[type="email"].form-control:focus,
+.form-signin input[type="password"].form-control:focus {
+    box-shadow: none !important;
 }
 
-.form-signin input[type="password"] {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-
-.app-messages {
-    z-index: 1031;
-    max-height: 150px;
-}
-.app-messages > .alert {
-    min-width: 40vw !important;
+.form-control,
+.form-floating > .form-control:focus ~ label::after {
+    background-color: var(--bs-white) !important;
 }
 
 .app-signin-panel {
@@ -35,6 +29,7 @@ body {
     max-width: 400px;
 }
 
-.app-logo {
-    max-height: 170px;
+.app-logo-card {
+    height: 230px !important;
+    width: 300px !important;
 }
