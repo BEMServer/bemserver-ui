@@ -22,30 +22,47 @@
                                     <app-tree id="sitesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted"></app-tree>
                                 </div>
                                 <div class="col">
-                                    <h5 class="text-secondary"><i class="bi bi-calendar4-range"></i> Period</h5>
-                                    <div class="d-grid gap-2">
-                                        <select id="periodType" class="form-select" aria-label="Select a period" required>
-                                            <option value="Month-Hourly">Hourly consumption over 1 month</option>
-                                            <option value="Month-Daily" selected>Daily consumption over 1 month</option>
-                                            <option value="Year-Monthly">Monthly consumption over 1 year</option>
-                                            <option value="Yearly">Yearly consumption</option>
-                                        </select>
-                                        <div class="d-flex gap-2">
-                                            <select id="periodMonth" class="form-select d-none invisible" aria-label="Select a period month" required>
-                                                <option value="1">January</option>
-                                                <option value="2">February</option>
-                                                <option value="3">March</option>
-                                                <option value="4">April</option>
-                                                <option value="5">May</option>
-                                                <option value="6">June</option>
-                                                <option value="7">July</option>
-                                                <option value="8">August</option>
-                                                <option value="9">September</option>
-                                                <option value="10">October</option>
-                                                <option value="11">November</option>
-                                                <option value="12">December</option>
-                                            </select>
-                                            <select id="periodYear" class="form-select d-none invisible" aria-label="Select a period year" required></select>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <h5 class="text-secondary"><i class="bi bi-calendar4-range"></i> Period</h5>
+                                            <div class="d-grid gap-2">
+                                                <select id="periodType" class="form-select" aria-label="Select a period" required>
+                                                    <option value="Month-Hourly">Hourly consumption over 1 month</option>
+                                                    <option value="Month-Daily" selected>Daily consumption over 1 month</option>
+                                                    <option value="Year-Monthly">Monthly consumption over 1 year</option>
+                                                    <option value="Yearly">Yearly consumption</option>
+                                                </select>
+                                                <div class="d-flex gap-2">
+                                                    <select id="periodMonth" class="form-select d-none invisible" aria-label="Select a period month" required>
+                                                        <option value="1">January</option>
+                                                        <option value="2">February</option>
+                                                        <option value="3">March</option>
+                                                        <option value="4">April</option>
+                                                        <option value="5">May</option>
+                                                        <option value="6">June</option>
+                                                        <option value="7">July</option>
+                                                        <option value="8">August</option>
+                                                        <option value="9">September</option>
+                                                        <option value="10">October</option>
+                                                        <option value="11">November</option>
+                                                        <option value="12">December</option>
+                                                    </select>
+                                                    <select id="periodYear" class="form-select d-none invisible" aria-label="Select a period year" required></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <h5 class="text-secondary"><i class="bi bi-sliders2-vertical"></i> Unit</h5>
+                                            <div class="d-lg-flex d-grid gap-2">
+                                                <select id="unit" class="form-select form-select-sm" aria-label="Select the unit" required>
+                                                    <option value="Wh">watt hour (Wh)</option>
+                                                    <option value="kWh" selected>kilowatt hour (kWh)</option>
+                                                    <option value="MWh">megawatt hour (MWh)</option>
+                                                    <option value="GWh">gigawatt hour (GWh)</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

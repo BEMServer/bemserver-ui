@@ -21,6 +21,7 @@ def retrieve_breakdown(structural_element_type, structural_element_id):
     period_month = int(flask.request.args["period_month"])
     period_year = int(flask.request.args["period_year"])
     year_reference = int(flask.request.args["year_reference"])
+    unit = flask.request.args.get("unit")
 
     bucket_width_value = 1
     bucket_width_unit = BucketWidthUnit.hour
@@ -53,6 +54,7 @@ def retrieve_breakdown(structural_element_type, structural_element_id):
         bucket_width_value,
         bucket_width_unit,
         timezone=tz_name,
+        unit=unit,
     )
 
     return flask.jsonify(analysis_resp.data)
