@@ -16,6 +16,7 @@ export class EnergyConsumptionExploreView {
     #periodMonthSelectElmt = null;
     #periodYearSelectElmt = null;
     #sitesTreeElmt = null;
+    #unitSelectElmt = null;
 
     #tzName = "UTC";
     #yearRef = null;
@@ -57,6 +58,7 @@ export class EnergyConsumptionExploreView {
         this.#periodTypeSelectElmt = document.getElementById("periodType");
         this.#periodMonthSelectElmt = document.getElementById("periodMonth");
         this.#periodYearSelectElmt = document.getElementById("periodYear");
+        this.#unitSelectElmt = document.getElementById("unit");
     }
 
     #initEventListeners() {
@@ -84,6 +86,10 @@ export class EnergyConsumptionExploreView {
             event.preventDefault();
 
             this.#updatePreviousYearSelected();
+            this.#generateCharts();
+        });
+
+        this.#unitSelectElmt.addEventListener("change", () => {
             this.#generateCharts();
         });
     }
@@ -161,6 +167,9 @@ export class EnergyConsumptionExploreView {
                 this.#internalAPIRequester.abort(this.#retrieveDataReqID);
                 this.#retrieveDataReqID = null;
             }
+
+            let selectedUnit = this.#unitSelectElmt.value;
+
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 app.urlFor(
                     `api.analysis.energy_consumption.retrieve_breakdown`,
@@ -172,6 +181,7 @@ export class EnergyConsumptionExploreView {
                         period_year: this.#periodYearSelectElmt.value,
                         year_reference: this.#yearRef,
                         timezone: this.#tzName,
+                        unit: selectedUnit,
                     }
                 ),
                 (data) => {
@@ -215,7 +225,7 @@ export class EnergyConsumptionExploreView {
                             this.#chartByEnergy[energy] = energyChart;
 
                             energyChart.showLoading();
-                            energyChart.load(data["timestamps"], energy, energyUses, "Wh", this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                            energyChart.load(data["timestamps"], energy, energyUses, selectedUnit, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
                             energyChart.hideLoading();
                         }
                     }
