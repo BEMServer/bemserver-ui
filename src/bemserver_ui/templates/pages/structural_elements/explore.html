@@ -52,10 +52,10 @@
             </ul>
             <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="tabSitesContent">
                 <div class="tab-pane fade{% if tab == 'sites' %} show active{% endif %} p-3" id="sites-tabcontent" role="tabpanel" aria-labelledby="sites-tab">
-                    <app-tree id="sitesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted"></app-tree>
+                    <app-tree id="sitesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" max-height="400px"></app-tree>
                 </div>
                 <div class="tab-pane fade{% if tab == 'zones' %} show active{% endif %} p-3" id="zones-tabcontent" role="tabpanel" aria-labelledby="zones-tab">
-                    <app-tree id="zonesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" toolbar="false"></app-tree>
+                    <app-tree id="zonesTree" icon="bi,bi-dash-square-dotted" icon-collapsed="bi,bi-plus-square" icon-expanded="bi,bi-dash-square-dotted" toolbar="false" max-height="400px"></app-tree>
                 </div>
             </div>
         </div>

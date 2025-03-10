@@ -8,6 +8,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 export class Tree extends HTMLElement {
 
     #maxWidth = null;
+    #maxHeight = "300px";
     #showToolbar = true;
     #ignoreUnselectEvent = true;
     #defaultTreeNodeIconClasses = ["bi", "bi-folder"];
@@ -37,7 +38,8 @@ export class Tree extends HTMLElement {
     }
 
     #loadOptions(options = {}) {
-        this.#maxWidth = options.maxWidth || this.getAttribute("max-width");
+        this.#maxWidth = options.maxWidth || this.getAttribute("max-width") || this.#maxWidth;
+        this.#maxHeight = options.maxHeight || this.getAttribute("max-height") || this.#maxHeight;
         this.#showToolbar = options.showToolbar != null ? options.showToolbar : this.hasAttribute("toolbar") ? Parser.parseBoolOrDefault(this.getAttribute("toolbar")) : true;
         this.#ignoreUnselectEvent = options.ignoreUnselect != null ? options.ignoreUnselect : this.hasAttribute("ignore-unselect") ? Parser.parseBoolOrDefault(this.getAttribute("ignore-unselect")) : true;
         this.#treeNodeIconClasses = options.treeNodeIconClasses || this.getAttribute("icon")?.split(",") || this.#defaultTreeNodeIconClasses;
@@ -50,7 +52,7 @@ export class Tree extends HTMLElement {
         this.#treeContainerElmt.classList.add("nav-tree");
 
         this.#toolbarElmt = document.createElement("div");
-        this.#toolbarElmt.classList.add("d-flex", "flex-nowrap", "align-items-start", "gap-3", "ms-auto");
+        this.#toolbarElmt.classList.add("d-flex", "flex-nowrap", "align-items-start", "gap-3", "ms-auto", "position-sticky", "top-0");
 
         this.#collapseAllBtnElmt = document.createElement("a");
         this.#collapseAllBtnElmt.classList.add("link-primary", "text-decoration-none", "text-nowrap", "hstack", "align-items-center");
@@ -289,6 +291,9 @@ export class Tree extends HTMLElement {
     connectedCallback() {
         this.innerHTML = "";
         this.classList.add("d-flex", "justify-content-between", "align-items-start", "border", "rounded", "p-2", "gap-3");
+
+        this.style.maxHeight = this.#maxHeight;
+        this.classList.add("overflow-y-auto");
 
         this.#treeContainerElmt.style.maxWidth = this.#maxWidth;
         this.appendChild(this.#treeContainerElmt);
