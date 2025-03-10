@@ -18,7 +18,7 @@ class DegreeDaysExploreView {
     #sitesTreeElmt = null;
     #ddTypeSelectElmt = null;
     #ddBaseInputElmt = null;
-    #ddBaseUnitInputElmt = null;
+    #ddBaseUnitSelectElmt = null;
     #compareOptsContainerElmt = null;
     #comparePeriodSwitchElmt = null;
     #comparePeriodSelectElmt = null;
@@ -64,7 +64,7 @@ class DegreeDaysExploreView {
         this.#periodYearSelectElmt = document.getElementById("periodYear");
         this.#ddTypeSelectElmt = document.getElementById("ddType");
         this.#ddBaseInputElmt = document.getElementById("ddBase");
-        this.#ddBaseUnitInputElmt = document.getElementById("ddBaseUnit");
+        this.#ddBaseUnitSelectElmt = document.getElementById("ddBaseUnit");
 
         this.#compareOptsContainerElmt = document.getElementById("compareOptsContainer");
         this.#comparePeriodSwitchElmt = document.getElementById("comparePeriodSwitch");
@@ -113,7 +113,7 @@ class DegreeDaysExploreView {
             this.#generateCharts();
         });
 
-        this.#ddBaseUnitInputElmt.addEventListener("input", (event) => {
+        this.#ddBaseUnitSelectElmt.addEventListener("change", (event) => {
             event.preventDefault();
 
             this.#generateCharts();
@@ -279,6 +279,9 @@ class DegreeDaysExploreView {
             if (this.#comparePeriodSwitchElmt.checked) {
                 compareOpts["compare_year_period"] = this.#comparePeriodSelectElmt.value;
             }
+
+            let selectedUnit = this.#ddBaseUnitSelectElmt.value;
+
             this.#retrieveDataReqID = this.#internalAPIRequester.get(
                 app.urlFor(
                     `api.analysis.degree_days.retrieve`,
@@ -290,7 +293,7 @@ class DegreeDaysExploreView {
                         year_reference: this.#yearRef,
                         dd_type: this.#ddTypeSelectElmt.value,
                         dd_base: this.#ddBaseInputElmt.value,
-                        dd_base_unit: this.#ddBaseUnitInputElmt.value,
+                        dd_base_unit: selectedUnit,
                         ...compareOpts,
                     },
                 ),
@@ -308,7 +311,7 @@ class DegreeDaysExploreView {
 
                         this.#ddChart = new TimeseriesChartDegreeDays(chartContainerElmt);
                         this.#ddChart.showLoading();
-                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, this.#ddBaseUnitInputElmt.value, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
+                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, selectedUnit, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
                         this.#ddChart.hideLoading();
                     }
                 },
