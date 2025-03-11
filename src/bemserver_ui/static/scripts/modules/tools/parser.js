@@ -21,7 +21,7 @@ export class Parser {
         else if (fractionDigits != null) {
             let valueFloatParts = valueFloat.toString().split(".");
             if (valueFloatParts.length > 1 && Parser.parseIntOrDefault(valueFloatParts[1]) > 0) {
-                valueFloat = valueFloat.toFixed(fractionDigits);
+                valueFloat = Number.parseFloat(valueFloat.toFixed(fractionDigits));
             }
         }
         return valueFloat;
