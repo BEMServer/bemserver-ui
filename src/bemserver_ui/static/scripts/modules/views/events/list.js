@@ -5,7 +5,7 @@ import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay, TimeCalendar } from "/static/scripts/modules/tools/time.js";
+import { TimeDisplay, TimeFormat, TimeCalendar } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
@@ -751,8 +751,8 @@ export class EventListView {
 
             let exploreDatetimeStart = TimeCalendar.addDays(eventDatetime, -7);
             let exploreDatetimeEnd = TimeCalendar.addDays(eventDatetime, 7);
-            let exploreDatetimeStartLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeStart);
-            let exploreDatetimeEndLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeEnd);
+            let exploreDatetimeStartLocaleISO = TimeFormat.toLocaleISOString(exploreDatetimeStart);
+            let exploreDatetimeEndLocaleISO = TimeFormat.toLocaleISOString(exploreDatetimeEnd);
 
             let exploreLinkParams = {
                 timeseries: tsIds.join(","),
