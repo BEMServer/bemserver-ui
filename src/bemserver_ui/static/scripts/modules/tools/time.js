@@ -1,8 +1,4 @@
-export class TimeDisplay {
-    static toLocaleString(datetime, {locale = navigator.language, timezone = "UTC"}) {
-        return datetime.toLocaleString(locale, {timeZone: timezone, timeZoneName: "longOffset"});
-    }
-
+export class TimeFormat {
     static toLocaleISOString(datetime) {
         let leftPadFunc = (val, maxLength = 2, fillString = "0") => {
             return ("" + val).padStart(maxLength, fillString);
@@ -18,6 +14,13 @@ export class TimeDisplay {
         ].join(".");
 
         return `${dateISO}T${timeISO}${tzOffset}`;
+    }
+}
+
+
+export class TimeDisplay {
+    static toLocaleString(datetime, {locale = navigator.language, timezone = "UTC"}) {
+        return datetime.toLocaleString(locale, {timeZone: timezone, timeZoneName: "longOffset"});
     }
 
     static getMonthName(monthNumber, locale = navigator.language) {
