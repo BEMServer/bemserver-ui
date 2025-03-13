@@ -68,15 +68,15 @@ export class CampaignStatusInfoElement extends HTMLDivElement {
         let subStyleClassName = this.#campaignStatus == "ongoing" ? "success" : "danger";
         if (this.#renderStyle == "text") {
             this.#statusElmt.classList.add("fw-bold", `text-${subStyleClassName}`, "text-opacity-75");
-            this.#statusElmt.textContent = `[${this.#campaignStatus.toLocaleUpperCase(navigator.languages)}]`
+            this.#statusElmt.textContent = `[${this.#campaignStatus}]`
         }
         else if (this.#renderStyle == "bullet") {
             this.#statusElmt.classList.add(`bg-${subStyleClassName}`, "border", "border-light", "rounded-circle", "p-2");
-            this.#statusElmt.setAttribute("title", `Campaign state: ${this.#campaignStatus.toLocaleUpperCase(navigator.languages)}`);
+            this.#statusElmt.setAttribute("title", `Campaign state: ${this.#campaignStatus}`);
 
             let spanElmt = document.createElement("span");
             spanElmt.classList.add("visually-hidden");
-            spanElmt.textContent = this.#campaignStatus.toLocaleUpperCase(navigator.languages);
+            spanElmt.textContent = this.#campaignStatus;
             this.#statusElmt.appendChild(spanElmt);
         }
     }
