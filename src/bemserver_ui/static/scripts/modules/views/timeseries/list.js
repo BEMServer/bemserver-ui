@@ -44,6 +44,7 @@ export class TimeseriesListView {
     #propertiesContainerElmt = null;
 
     constructor(options = {}) {
+        this.#tzName = app.timezone;
         this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#loadOptions(options);
@@ -53,7 +54,6 @@ export class TimeseriesListView {
 
     #loadOptions(options = {}) {
         this.#filters = options.filters || {};
-        this.#tzName = options.timezone || "UTC";
     }
 
     #cacheDOM() {
@@ -802,3 +802,9 @@ export class TimeseriesListView {
         }
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new TimeseriesListView();
+    view.mount();
+});

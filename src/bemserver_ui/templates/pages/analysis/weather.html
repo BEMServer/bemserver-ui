@@ -101,7 +101,7 @@
     import { WeatherExploreView } from "{{ url_for('static', filename='scripts/modules/views/analysis/weather.js') }}";
 
     document.addEventListener("DOMContentLoaded", () => {
-        let view = new WeatherExploreView("{{ g.campaign_ctxt.tz_name }}", {{ forecast_nbdays }});
+        let view = new WeatherExploreView({{ forecast_nbdays }});
         view.mount();
     });
 </script>

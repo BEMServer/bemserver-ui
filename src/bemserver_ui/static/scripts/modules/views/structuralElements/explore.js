@@ -60,18 +60,14 @@ export class StructuralElementsExploreView {
     #zonesTreeElmt = null;
 
     constructor(options = {}) {
+        this.#tzName = app.timezone;
         this.#internalAPIRequester = new InternalAPIRequest();
 
-        this.#loadOptions(options);
         this.#cacheDOM();
         this.#initEventListeners();
 
         this.#updateTsSearchState();
         this.#updateEventsSearchState();
-    }
-
-    #loadOptions(options = {}) {
-        this.#tzName = options.timezone || "UTC";
     }
 
     #cacheDOM() {
@@ -758,3 +754,9 @@ export class StructuralElementsExploreView {
         this.#refreshTabs();
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new StructuralElementsExploreView();
+    view.mount();
+});

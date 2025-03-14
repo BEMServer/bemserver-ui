@@ -74,6 +74,7 @@ export class EventListView {
     #eventInfoNavLastElmt = null;
 
     constructor(options = {}) {
+        this.#tzName = app.timezone;
         this.#internalAPIRequester = new InternalAPIRequest();
 
         this.#loadOptions(options);
@@ -86,7 +87,6 @@ export class EventListView {
 
     #loadOptions(options = {}) {
         this.#structuralElementTypes = options.structuralElementTypes || [];
-        this.#tzName = options.timezone || "UTC";
         for (let [optFilterName, optFilterValue] of Object.entries(options.filters || {})) {
             this.#defaultFilters[optFilterName] = optFilterValue;
         }

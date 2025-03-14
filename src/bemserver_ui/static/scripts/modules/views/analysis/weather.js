@@ -48,8 +48,8 @@ export class WeatherExploreView {
         "Last-Year": "{dd} {MMMM} {yyyy}",
     };
 
-    constructor(tzName = "UTC", forecastNbDays = 5, year = null, month = null) {
-        this.#tzName = tzName || "UTC";
+    constructor(forecastNbDays = 5, year = null, month = null) {
+        this.#tzName = app.timezone;
         this.#forecastNbDays = forecastNbDays;
 
         let date = new Date();

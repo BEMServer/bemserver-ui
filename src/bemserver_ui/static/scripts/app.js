@@ -2,7 +2,6 @@ import { flaskEndpoints } from "/static/scripts/modules/flaskES6-endpoints.js";
 import { FlaskES6 } from "/static/scripts/modules/tools/flaskES6.js";
 
 
-// TODO: campaignContext data property is not used for now...
 // TODO: having signedUser data here kinda sucks...
 
 
@@ -46,6 +45,10 @@ class App {
 
     get signedUser() {
         return this.#signedUser;
+    }
+
+    get timezone() {
+        return this.#campaignContext?.tz_name || "UTC";
     }
 
     constructor(options = {}) {

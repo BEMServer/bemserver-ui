@@ -37,8 +37,8 @@ export class EnergyConsumptionExploreView {
         "Yearly": "{yyyy}",
     };
 
-    constructor(tzName = "UTC", year = null, month = null) {
-        this.#tzName = tzName || "UTC";
+    constructor(year = null, month = null) {
+        this.#tzName = app.timezone;
 
         let date = new Date();
         this.#yearRef = year || date.getUTCFullYear();
@@ -267,3 +267,9 @@ export class EnergyConsumptionExploreView {
         this.#loadSitesTreeData();
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new EnergyConsumptionExploreView();
+    view.mount();
+});
