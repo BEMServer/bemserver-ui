@@ -47,11 +47,10 @@
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
 <script type="module">
-    import { signedUser } from "{{ url_for('static', filename='scripts/modules/signedUserData.js') }}";
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
 
     let options = {
-        signedUser: signedUser,
+        locale: navigator.language.toUpperCase(),
         campaignContext: {{ g.campaign_ctxt.toJSON() | tojson }},
     };
 

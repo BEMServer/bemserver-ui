@@ -1,5 +1,6 @@
 import { flaskEndpoints } from "/static/scripts/modules/flaskES6-endpoints.js";
 import { FlaskES6 } from "/static/scripts/modules/tools/flaskES6.js";
+import { signedUser } from "/static/scripts/modules/signedUserData.js";
 
 
 // TODO: having signedUser data here kinda sucks...
@@ -33,7 +34,7 @@ const APP_MANAGERS = Object.freeze({
 
 class App {
 
-    #signedUser = null;
+    #locale = "EN";
     #campaignContext = {};
 
     #flaskES6 = null;
@@ -44,11 +45,15 @@ class App {
     }
 
     get signedUser() {
-        return this.#signedUser;
+        return signedUser;
     }
 
     get timezone() {
         return this.#campaignContext?.tz_name || "UTC";
+    }
+
+    get locale() {
+        return this.#locale;
     }
 
     constructor(options = {}) {
@@ -58,7 +63,7 @@ class App {
     }
 
     #loadOptions(options = {}) {
-        this.#signedUser = options.signedUser || {};
+        this.#locale = options.locale || this.#locale;
         this.#campaignContext = options.campaignContext || {};
     }
 

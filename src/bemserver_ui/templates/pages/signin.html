@@ -82,7 +82,9 @@
     import { createApp } from "{{ url_for('static', filename='scripts/app.js') }}";
     import "{{ url_for('static', filename='scripts/modules/components/cardFlip.js') }}";
 
-    let app = createApp();
+    let app = createApp({
+        locale: navigator.language.toUpperCase(),
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
         let managers = {
