@@ -1,10 +1,27 @@
 import "https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js";
 
 
+// TODO use echarts.registerLocale
+// Something like this:
+// static async registerLocale(locale) {
+//     try {
+//         let { default: localeData } = await import(`https://cdn.jsdelivr.net/npm/echarts@${ECHARTS_VERSION}/lib/i18n/lang${locale}.js`);
+//         if (localeData != null) {
+//             echarts.registerLocale(locale, localeData);
+//         }
+//     }
+//     catch (error) {
+//         console.error(`Chart can not register "${locale}" locale: ${error}`);
+//     }
+// }
+
+
 export class ChartBase {
 
     #chart = null;
     #chartEventHandlers = {};
+
+    #locale = "EN";
 
     #loadingOptions = {
         text: "loading...",
@@ -39,6 +56,9 @@ export class ChartBase {
     }
 
     constructor(chartContainerElmt, initOptions = null) {
+        initOptions = initOptions || {};
+        this.#locale = initOptions.locale || this.#locale;
+
         this.#chart = echarts.init(chartContainerElmt, null, initOptions);
         this.#chart.setOption(this.#options);
 
@@ -154,5 +174,13 @@ export class ChartBase {
 
     dispatchEvent(event) {
         this.#chart.getDom().dispatchEvent(event);
+    }
+
+    formatTime(timestamp, format) {
+        return echarts.time.format(timestamp, format, false, this.#locale);
+    }
+
+    formatValue(value) {
+        return (value != null ? value : Number.NaN).toLocaleString(this.#locale);
     }
 }
