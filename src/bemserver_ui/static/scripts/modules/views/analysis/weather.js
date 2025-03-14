@@ -3,7 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
-import { TimeCalendar, TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { TimeCalendar, TimeFormat } from "/static/scripts/modules/tools/time.js";
 
 
 export class WeatherExploreView {
@@ -135,11 +135,12 @@ export class WeatherExploreView {
             }
 
             this.#periodMonthSelectElmt.innerHTML = "";
-            for (let month = 1; month <= 12; month++) {
+            let months = TimeFormat.getLocaleMonthNames(navigator.language);
+            for (let [monthNumber, monthName] of Object.entries(months)) {
                 let option = document.createElement("option");
-                option.value = month;
-                option.textContent = TimeDisplay.getMonthName(month);
-                option.selected = month == this.#monthRef;
+                option.value = monthNumber;
+                option.textContent = monthName;
+                option.selected = monthNumber == this.#monthRef;
                 this.#periodMonthSelectElmt.appendChild(option);
             }
 

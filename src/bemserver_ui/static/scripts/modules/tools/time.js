@@ -15,14 +15,14 @@ export class TimeFormat {
 
         return `${dateISO}T${timeISO}${tzOffset}`;
     }
-}
 
-
-export class TimeDisplay {
-    static getMonthName(monthNumber, locale = navigator.language) {
-        let date = new Date(1970);
-        date.setMonth(monthNumber - 1);
-        return date.toLocaleString(locale, { month: "long" });
+    static getLocaleMonthNames(locale = navigator.language) {
+        let months = {};
+        for (let monthNumber = 1; monthNumber <= 12; monthNumber++) {
+            let date = new Date(1970, monthNumber - 1);
+            months[monthNumber] = date.toLocaleString(locale, { month: "long" });
+        }
+        return months;
     }
 }
 
