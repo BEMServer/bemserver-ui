@@ -274,17 +274,6 @@
 {% block body_scripts %}
 {{ super() -}}
 {% filter indent(width=8, first=True) %}
-<script type="module">
-    import { TimeseriesListView } from "{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}";
-
-    document.addEventListener("DOMContentLoaded", () => {
-        let options = {
-            timezone: {{ g.campaign_ctxt.tz_name | tojson }},
-        };
-
-        let view = new TimeseriesListView(options);
-        view.mount();
-    });
-</script>
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/list.js') }}" defer></script>
 {% endfilter %}
 {% endblock body_scripts %}

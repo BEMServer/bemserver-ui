@@ -19,13 +19,14 @@ class TimeSeriesDataCompletenessView {
     #periodMonthElmt = null;
     #periodWeekElmt = null;
     #periodDayElmt = null;
-    #tzNameElmt = null;
     #timeseriesElmt = null;
 
+    #tzName = "UTC";
     #chartCompleteness = null;
     #tsSelector = null;
 
     constructor() {
+        this.#tzName = app.timezone;
         this.#tsSelector = TimeseriesSelector.getInstance("tsSelectorCompleteness");
         this.#internalAPIRequester = new InternalAPIRequest();
 
@@ -42,7 +43,6 @@ class TimeSeriesDataCompletenessView {
         this.#periodMonthElmt = document.getElementById("periodMonth");
         this.#periodWeekElmt = document.getElementById("periodWeek");
         this.#periodDayElmt = document.getElementById("periodDay");
-        this.#tzNameElmt = document.getElementById("tzname");
         this.#timeseriesElmt = document.getElementById("timeseries");
     }
 
@@ -299,7 +299,7 @@ class TimeSeriesDataCompletenessView {
                 (data) => {
                     data.period = this.#periodTypeElmt.options[this.#periodTypeElmt.selectedIndex].text;
                     data.datastate_name = this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text;
-                    this.#chartCompleteness.load(data, shouldDisplayTime, this.#tzNameElmt.value);
+                    this.#chartCompleteness.load(data, shouldDisplayTime, this.#tzName);
                 },
                 (error) => {
                     app.flashMessage(error.toString(), "error");

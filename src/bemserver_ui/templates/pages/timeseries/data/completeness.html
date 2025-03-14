@@ -29,7 +29,6 @@
                 </div>
                 <div class="col-auto">
                     <div class="hstack gap-2">
-                        <input type="hidden" id="tzname" value="{{ g.campaign_ctxt.tz_name }}">
                         <select id="periodYear" class="form-select form-select-sm d-none invisible" aria-label="Select a period year" required>
                             {% for x in years %}
                             <option value="{{ x }}"{% if x == period_year %} selected{% endif %}>{{ x }}</option>
