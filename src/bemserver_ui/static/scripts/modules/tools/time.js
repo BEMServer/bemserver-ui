@@ -19,10 +19,6 @@ export class TimeFormat {
 
 
 export class TimeDisplay {
-    static toLocaleString(datetime, {locale = navigator.language, timezone = "UTC"}) {
-        return datetime.toLocaleString(locale, {timeZone: timezone, timeZoneName: "longOffset"});
-    }
-
     static getMonthName(monthNumber, locale = navigator.language) {
         let date = new Date(1970);
         date.setMonth(monthNumber - 1);

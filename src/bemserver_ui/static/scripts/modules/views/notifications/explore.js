@@ -3,7 +3,6 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { ItemsCount } from "/static/scripts/modules/components/itemsCount.js";
@@ -825,13 +824,16 @@ export class NotificationExploreView {
         rowElmt.setAttribute("data-index", rowIndex)
         rowElmt.notifData = notifData;
 
+        let notifTimestamp = new Date(notifData.timestamp);
+        let notifTimestampStr = notifTimestamp.toLocaleString(navigator.language, { timeZone: campaignData.timezone, timeZoneName: "longOffset" });
+
         let timestampElmt = document.createElement("th");
         timestampElmt.id = `notif-${notifData.id.toString()}-timestamp`;
         if (!notifData.read) {
             timestampElmt.classList.add("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-5", "border-warning", "text-warning-emphasis");
         }
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(notifData.timestamp), {timezone: campaignData.timezone});
+        timestampElmt.innerText = notifTimestampStr;
         rowElmt.appendChild(timestampElmt);
 
         let eventRowElmt = this.#createEventRowElement(notifData.event, campaignData);
@@ -1016,8 +1018,11 @@ export class NotificationExploreView {
             timestampTitleElmt.innerText = "Timestamp";
             timestampColElmt.appendChild(timestampTitleElmt);
 
+            let notifTimestamp = new Date(this.#currentNotifElmt.notifData.timestamp);
+            let notifTimestampStr = notifTimestamp.toLocaleString(navigator.language, { timeZone: this.#currentTabCampaignData.timezone, timeZoneName: "longOffset" });
+
             let timestampValueElmt = document.createElement("p");
-            timestampValueElmt.innerText = TimeDisplay.toLocaleString(new Date(this.#currentNotifElmt.notifData.timestamp), {timezone: this.#currentTabCampaignData.timezone});
+            timestampValueElmt.innerText = notifTimestampStr;
             timestampColElmt.appendChild(timestampValueElmt);
 
             let statusColElmt = document.createElement("div");
@@ -1227,9 +1232,12 @@ export class NotificationExploreView {
         let eventElmt = document.createElement("tr");
         eventElmt.classList.add("align-middle");
 
+        let notifTimestamp = new Date(eventData.timestamp);
+        let notifTimestampStr = notifTimestamp.toLocaleString(navigator.language, { timeZone: campaignData.timezone, timeZoneName: "longOffset" });
+
         let timestampElmt = document.createElement("th");
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: campaignData.timezone});
+        timestampElmt.innerText = notifTimestampStr;
         eventElmt.appendChild(timestampElmt);
 
         let sourceElmt = document.createElement("td");
