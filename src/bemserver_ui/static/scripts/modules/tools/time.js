@@ -24,6 +24,24 @@ export class TimeFormat {
         }
         return months;
     }
+
+    // TODO impmlement and use something like this:
+    // static formatDate(value, locale, options) {
+    //     locale = locale || navigator.language.toUpperCase();
+    //     options.timeZoneName = options.timeZoneName || "longOffset";
+    //     return value?.toLocaleDateString(locale, options);
+    // }
+
+    // static formatTimestamp(value, locale, options) {
+    //     locale = locale || navigator.language.toUpperCase();
+    //     options.timeZoneName = options.timeZoneName || "longOffset";
+    //     return value?.toLocaleString(locale, options);
+    // }
+
+    // static formatNumber(value, locale) {
+    //     locale = locale || navigator.language.toUpperCase();
+    //     return (value != null ? value : Number.NaN).toLocaleString(locale);
+    // }
 }
 
 
