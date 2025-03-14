@@ -1,6 +1,5 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartCompleteness extends ChartBase {
@@ -80,7 +79,7 @@ export class TimeseriesChartCompleteness extends ChartBase {
         let timestamps = data["timestamps"].map((timestamp) => {
             if (displayTime) {
                 let tsDate = new Date(timestamp);
-                return !isNaN(tsDate) ? TimeDisplay.toLocaleString(tsDate, { timezone: tzName }).replace(" ", "\n") : null;
+                return !Number.isNaN(tsDate) ? tsDate.toLocaleString(navigator.language, { timeZone: tzName, timeZoneName: "longOffset" }).replace(" ", "\n") : null;
             }
             else {
                 return timestamp.substring(0, 10);
@@ -93,7 +92,7 @@ export class TimeseriesChartCompleteness extends ChartBase {
                 name: tsInfo.name,
                 type: "heatmap",
                 data: tsInfo["ratio"].map((ratio, xIndex) => {
-                    return [xIndex, yIndex, Parser.parseFloatOrDefault(Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100.0, 0.0, 0)];
+                    return [xIndex, yIndex, (Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100.0).toFixed(0)];
                 }),
                 emphasis: {
                     itemStyle: {

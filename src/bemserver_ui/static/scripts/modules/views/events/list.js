@@ -5,7 +5,7 @@ import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay, TimeFormat, TimeCalendar } from "/static/scripts/modules/tools/time.js";
+import { TimeFormat, TimeCalendar } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
@@ -783,9 +783,12 @@ export class EventListView {
         eventElmt.setAttribute("data-index", rowIndex);
         eventElmt.setAttribute("data-timestamp", eventData.timestamp);
 
+        let eventTimestamp = new Date(eventData.timestamp);
+        let eventTimestampStr = eventTimestamp.toLocaleString(navigator.language, { timeZone: this.#tzName, timeZoneName: "longOffset" });
+
         let timestampElmt = document.createElement("th");
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+        timestampElmt.textContent = eventTimestampStr;
         eventElmt.appendChild(timestampElmt);
 
         let sourceElmt = document.createElement("td");
