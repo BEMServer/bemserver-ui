@@ -41,19 +41,19 @@
             <div class="alert alert-info" role="alert">
                 <div>
                     <i class="bi bi-info-square me-2"></i>
-                    This campaign is {% if is_campaign_selected_edit %}currently{% else %}NOT{% endif %} selected as the working context.
+                    This campaign is {% if is_campaign_selected_edit %}currently{% else %}<span class="fw-bold fst-italic">NOT</span>{% endif %} selected as the working context.
                 </div>
-                <dl class="mt-2 mb-0">
+                <dl class="row mt-2 mb-0">
                     {% if is_campaign_selected_edit %}
-                    <dt>Unselect</dt>
-                    <dd>Reset the current working context, this campaign is not selected anymore.</dd>
+                    <dt class="col-2">Unselect</dt>
+                    <dd class="col-10">Reset the current working context, this campaign is not selected anymore.</dd>
                     {% if signed_user.is_admin %}
-                    <dt>Delete</dt>
-                    <dd>While this campaign is set as the current working context, deletion is <span class="fw-bold fst-italic">disabled</span>.</dd>
+                    <dt class="col-2">Delete</dt>
+                    <dd class="col-10">While this campaign is set as the current working context, deletion is <span class="fw-bold fst-italic">disabled</span>.</dd>
                     {% endif %}
                     {% else %}
-                    <dt>Select</dt>
-                    <dd>This campaign is set as the current working context{% if g.campaign_ctxt.has_campaign %} (and replaces the current selected campaign: {{ g.campaign_ctxt.name }}){% endif %}.</dd>
+                    <dt class="col-2">Select</dt>
+                    <dd class="col-10">This campaign is set as the current working context{% if g.campaign_ctxt.has_campaign %} (and replaces the current selected campaign: {{ g.campaign_ctxt.name }}){% endif %}.</dd>
                     {% endif %}
                 </dl>
             </div>
