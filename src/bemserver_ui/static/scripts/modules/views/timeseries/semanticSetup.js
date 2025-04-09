@@ -503,7 +503,7 @@ export class TimeseriesSemanticSetupView {
             btnModalTimeseriesSelectorElmt.id = `btnEditSetup-${suffixId}`;
             btnModalTimeseriesSelectorElmt.classList.add("btn", "btn-sm", "btn-link", "link-secondary", "text-decoration-none", "text-break", "mx-auto");
             btnModalTimeseriesSelectorElmt.setAttribute("data-bs-toggle", "modal");
-            btnModalTimeseriesSelectorElmt.setAttribute("data-bs-target", "#selectTimeseries");
+            btnModalTimeseriesSelectorElmt.setAttribute("data-bs-target", `#${this.#selectTimeseriesModalElmt.id}`);
             btnModalTimeseriesSelectorElmt.innerText = tsLabel;
             btnModalTimeseriesSelectorElmt.title = "Edit selection";
             editContainerElmt.appendChild(btnModalTimeseriesSelectorElmt);
@@ -587,6 +587,7 @@ export class TimeseriesSemanticSetupView {
                         if (dataToEdit.timeseries_id != null) {
                             this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
                         }
+                        this.#tsSelector.open();
                     },
                 );
 
@@ -883,6 +884,7 @@ export class TimeseriesSemanticSetupView {
                             if (dataToEdit.timeseries_id != null) {
                                 this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
                             }
+                            this.#tsSelector.open();
                         },
                     );
 
@@ -1087,6 +1089,7 @@ export class TimeseriesSemanticSetupView {
                             if (dataToEdit.timeseries_id != null) {
                                 this.#tsSelector.select([dataToEdit.timeseries_id], () => { this.#updateSaveBtnState(); });
                             }
+                            this.#tsSelector.open();
                         },
                     );
 

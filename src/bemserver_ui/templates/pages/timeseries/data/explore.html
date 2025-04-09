@@ -107,8 +107,8 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="selectTimeseries" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="selectTimeseriesLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade" id="selectTimeseries" data-bs-keyboard="true" tabindex="-1" aria-labelledby="selectTimeseriesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="selectTimeseriesLabel">Add data series</h4>
@@ -118,7 +118,7 @@
                 <div class="row mb-4">
                     <div class="col">
                         {% filter indent(width=16, first=False) %}
-                        {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExplore", filters={"extend": True}) -}}
+                        {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExplore", filters={"extend": True}, is_modal=False) -}}
                         {% endfilter %}
                     </div>
                 </div>

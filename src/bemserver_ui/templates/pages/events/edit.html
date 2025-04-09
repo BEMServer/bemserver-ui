@@ -151,7 +151,7 @@
             </div>
             <div class="modal-body">
                 {% filter indent(width=16, first=False) %}
-                {{ mac_ts_selector.render_ts_selector(element_id="ts-selector", filters={'campaign-scope': event.campaign_scope_id}) -}}
+                {{ mac_ts_selector.render_ts_selector(element_id="ts-selector", filters={'campaign-scope': event.campaign_scope_id}, is_modal=False) -}}
                 {% endfilter %}
             </div>
             <div class="modal-footer d-flex justify-content-end gap-2">

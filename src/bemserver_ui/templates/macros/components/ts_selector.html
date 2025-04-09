@@ -1,22 +1,50 @@
 {% import "macros/components/structural_element_selector.html" as mac_struct_elmt_selector %}
 
-{% macro render_ts_selector(element_id=none, selection_limit=-1, filters={}) %}
+{% macro render_ts_selector(element_id=none, selection_limit=-1, filters={}, is_modal=True) %}
 <app-ts-selector{% if element_id %} id="{{ element_id }}"{% endif %} selection-limit="{{ selection_limit }}"{% for filter_name, filter_value in filters.items() %} {{ filter_name }}={{ filter_value }}{% endfor %}>
     <div class="d-flex justify-content-between align-items-start gap-2">
         <h5>Timeseries selection</h5>
         <small id="countResultsSelected" class="text-muted"></small>
     </div>
-    <div class="btn-group bg-white w-100">
-        <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3"></div>
+    <div class="btn-group bg-white w-100 mb-1">
+        <div id="selectedItemsContainer" class="d-flex flex-wrap align-items-center border border-secondary bg-secondary bg-opacity-25 rounded-start w-100 gap-2 p-2 px-3 overflow-y-auto" style="max-height: 100px;"></div>
         <button id="clearSelectionBtn" type="button" class="btn btn-outline-danger g-1 d-none invisible">
             <i class="bi bi-x-lg"></i>
             <span class="visually-hidden">Clear selection</span>
         </button>
-        <button id="dropdownSearchBtn" type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split g-1" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-reference="parent" aria-expanded="false">
-            <i class="bi bi-search"></i>
-            <span class="visually-hidden">Toggle search panel</span>
-        </button>
-        <div id="dropdownSearchPanel" class="dropdown-menu shadow w-100 p-4" aria-labelledby="dropdownSearchBtn">
+        <a id="tsSearchPanelToggleBtn" class="btn btn-sm btn-outline-secondary d-flex align-items-center" data-bs-toggle="{% if is_modal %}modal{% else %}collapse{% endif %}" data-bs-target="#tsSearchPanel{% if is_modal %}Modal{% endif %}"{% if not is_modal %} aria-expanded="false" aria-controls="tsSearchPanel"{% endif %}>
+            <i id="tsSearchPanelToggleIcon" class="bi bi-caret-down-fill me-1"></i>
+            <span id="tsSearchPanelToggleText">Browse...</span>
+        </a>
+    </div>
+    {% if is_modal %}
+    <div class="modal fade" id="tsSearchPanelModal" data-bs-keyboard="true" tabindex="-1" aria-labelledby="tsSearchPanelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="tsSearchPanelModalLabel">Timeseries finder</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+    {% endif %}
+    {% filter indent(width=16 if is_modal else 0, first=False) %}
+    <div id="tsSearchPanel" class="{% if not is_modal %}collapse {% endif %}border rounded bg-white p-3">
+        <div class="d-flex justify-content-between align-items-center gap-2">
+            <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity ms-1"></i></small>
+            <div class="d-lg-flex d-grid align-items-center text-end gap-lg-3">
+                <button id="selectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">select all in page</button>
+                <button id="unselectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">unselect all in page</button>
+                <div class="vr d-none d-lg-block"></div>
+                <button id="clearAllSelectionBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">clear all selection</button>
+                <div class="vr d-none d-lg-block"></div>
+                <input id="tsSearchFiltersToggleBtn" type="checkbox" class="btn-check" autocomplete="off" data-bs-toggle="collapse" data-bs-target="#tsSearchFiltersPanel" aria-expanded="false" aria-controls="tsSearchFiltersPanel">
+                <label class="btn btn-sm btn-outline-secondary" for="tsSearchFiltersToggleBtn">
+                    <i class="bi bi-funnel me-1"></i>
+                    <span>Filters</span>
+                </label>
+            </div>
+        </div>
+        <div id="tsSearchFiltersPanel" class="collapse border rounded bg-light p-2 mt-1 mb-2">
             <div class="d-flex align-items-center gap-2 mb-2">
                 <input type="text" class="form-control form-control-sm" id="search" name="search" placeholder="Search..." aria-label="Search" aria-describedby="search" autofocus>
                 <a id="clearSearchBtn" role="button" class="link-danger text-decoration-none d-none invisible" title="Clear search filter"><i class="bi bi-x-circle"></i></a>
@@ -38,31 +66,33 @@
                     {{ mac_struct_elmt_selector.render_zone_selector(html_element_id="zoneSelector", title=none) -}}
                     {% endfilter %}
                 </div>
-            </div>
-            <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2 mb-2">
+            </div>                
+            <div id="searchFiltersContainer" class="d-xl-flex d-grid gap-2">
                 <a id="removeFiltersBtn" role="button" class="btn btn-sm btn-outline-secondary text-nowrap" title="Remove filters"><i class="bi bi-eraser"></i> Remove</a>
             </div>
-            <hr class="mb-2">
-            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
-                <small id="selectionLimit" class="text-nowrap fst-italic text-muted">Selection limit: <i class="bi bi-infinity ms-1"></i></small>
-                <div class="d-lg-flex d-grid align-items-center text-end gap-lg-3">
-                    <button id="selectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">select all in page</button>
-                    <button id="unselectAllResultsBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">unselect all in page</button>
-                    <div class="vr d-none d-lg-block"></div>
-                    <button id="clearAllSelectionBtn" class="btn btn-sm btn-link link-secondary text-nowrap" role="button">clear all selection</button>
+        </div>
+        <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 my-2 px-3 py-2 overflow-y-auto" style="max-height: 300px;">
+            <p class="fst-italic text-center text-muted w-100">No search results</p>
+        </div>
+        <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
+            <div class="d-flex justify-content-between align-items-center gap-4 w-100">
+                <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
+                <small class="text-nowrap text-muted"><app-items-count id="searchResultsCount"></app-items-count></small>
+            </div>
+            <ul is="app-pagination" id="searchResultsPagination"></ul>
+        </nav>
+    </div>
+    {% endfilter %}
+    {% if is_modal %}
+                </div>
+                <div class="modal-footer d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-dismiss="modal">
+                        <i class="bi bi-check2 me-1"></i>OK
+                    </button>
                 </div>
             </div>
-            <div id="searchResultsContainer" class="d-flex flex-wrap gap-2 mb-3">
-                <p class="fst-italic text-center text-muted w-100">No search results</p>
-            </div>
-            <nav class="d-xl-flex justify-content-xl-between align-items-center d-grid gap-2 w-100" aria-label="Timeseries pagination">
-                <div class="d-flex justify-content-between align-items-center gap-4 w-100">
-                    <div is="app-pagesize-selector" id="searchResultsPageSizeSelector" current="50"></div>
-                    <small class="text-nowrap text-muted"><app-items-count id="searchResultsCount"></app-items-count></small>
-                </div>
-                <ul is="app-pagination" id="searchResultsPagination"></ul>
-            </nav>
         </div>
     </div>
+    {% endif %}
 </app-ts-selector>
 {% endmacro %}

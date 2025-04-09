@@ -159,6 +159,8 @@ class TimeseriesDataExploreView {
         });
 
         this.#selectTimeseriesModalElmt?.addEventListener("shown.bs.modal", () => {
+            this.#tsSelector.open();
+
             this.#selectTimeseriesYAxisPositionContainerElmt.innerHTML = "";
             for (let [optValue, optText] of Object.entries(SeriesYAxisPositions)) {
                 let radioOptContainerElmt = document.createElement("div");

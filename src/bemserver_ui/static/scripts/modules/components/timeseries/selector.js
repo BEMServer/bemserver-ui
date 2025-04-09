@@ -230,9 +230,12 @@ export class TimeseriesSelector extends HTMLElement {
 
     #selectedItemsContainerElmt = null;
     #clearSelectionBtnElmt = null;
-    #dropdownSearchBtnElmt = null;
-    #dropdownSearchPanelElmt = null;
-    #bsDropdownSearchPanel = null;
+
+    #tsSearchPanelToggleBtnElmt = null;
+    #tsSearchPanelToggleIconElmt = null;
+    #tsSearchPanelToggleTextElmt = null;
+    #tsSearchPanelTargetElmt = null;
+    #bsSearchPanel = null;
 
     #searchInputElmt = null;
 
@@ -270,7 +273,7 @@ export class TimeseriesSelector extends HTMLElement {
     // List of SelectedItem instance that are in selectedItemsContainerElmt.
     #selectedItemElmts = [];
 
-    #isOpened = false;
+    #isModalMode = false;
 
     // TODO rename to selectedTimeseries
     get selectedItems() {
@@ -279,7 +282,7 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     get isOpened() {
-        return this.#isOpened;
+        return this.#tsSearchPanelTargetElmt?.classList.contains("show");
     }
 
     constructor(options = {}) {
@@ -313,33 +316,44 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     #cacheDOM() {
-        this.#selectedItemsContainerElmt = document.getElementById("selectedItemsContainer");
+        this.#selectedItemsContainerElmt = this.querySelector(`#selectedItemsContainer`);
         this.#clearSelectionBtnElmt = this.querySelector("#clearSelectionBtn");
-        this.#dropdownSearchBtnElmt = document.getElementById("dropdownSearchBtn");
-        this.#dropdownSearchPanelElmt = document.getElementById("dropdownSearchPanel");
-        this.#bsDropdownSearchPanel = bootstrap.Dropdown.getOrCreateInstance(this.#dropdownSearchPanelElmt);
 
-        this.#searchInputElmt = document.getElementById("search");
+        this.#tsSearchPanelToggleBtnElmt = this.querySelector(`#tsSearchPanelToggleBtn`);
+        this.#tsSearchPanelToggleIconElmt = this.querySelector(`#tsSearchPanelToggleIcon`);
+        this.#tsSearchPanelToggleTextElmt = this.querySelector(`#tsSearchPanelToggleText`);
+        this.#tsSearchPanelTargetElmt = this.querySelector(this.#tsSearchPanelToggleBtnElmt.getAttribute("data-bs-target"));
 
-        this.#searchClearBtnElmt = document.getElementById("clearSearchBtn");
-        this.#filtersRemoveBtnElmt = document.getElementById("removeFiltersBtn");
+        this.#isModalMode = this.#tsSearchPanelToggleBtnElmt.getAttribute("data-bs-toggle") == "modal";
+
+        if (this.#isModalMode) {
+            this.#bsSearchPanel = new bootstrap.Modal(this.#tsSearchPanelTargetElmt);
+        }
+        else {
+            this.#bsSearchPanel = new bootstrap.Collapse(this.#tsSearchPanelTargetElmt, { toggle: false });
+        }
+
+        this.#searchInputElmt = this.querySelector(`#search`);
+
+        this.#searchClearBtnElmt = this.querySelector(`#clearSearchBtn`);
+        this.#filtersRemoveBtnElmt = this.querySelector(`#removeFiltersBtn`);
 
         this.#siteSelector = StructuralElementSelector.getInstance("siteSelector");
         this.#zoneSelector = StructuralElementSelector.getInstance("zoneSelector");
-        this.#siteSelectorRecursiveSwitchElmt = document.getElementById("siteSelectorRecursiveSwitch");
+        this.#siteSelectorRecursiveSwitchElmt = this.querySelector(`#siteSelectorRecursiveSwitch`);
 
-        this.#searchFiltersContainerElmt = document.getElementById("searchFiltersContainer");
+        this.#searchFiltersContainerElmt = this.querySelector(`#searchFiltersContainer`);
 
-        this.#searchResultsContainerElmt = document.getElementById("searchResultsContainer");
-        this.#searchResultsPageSizeSelectorElmt = document.getElementById("searchResultsPageSizeSelector");
-        this.#searchResultsCountElmt = document.getElementById("searchResultsCount");
-        this.#searchResultsPaginationElmt = document.getElementById("searchResultsPagination");
+        this.#searchResultsContainerElmt = this.querySelector(`#searchResultsContainer`);
+        this.#searchResultsPageSizeSelectorElmt = this.querySelector(`#searchResultsPageSizeSelector`);
+        this.#searchResultsCountElmt = this.querySelector(`#searchResultsCount`);
+        this.#searchResultsPaginationElmt = this.querySelector(`#searchResultsPagination`);
 
-        this.#selectionLimitElmt = document.getElementById("selectionLimit");
-        this.#countResultsSelectedElmt = document.getElementById("countResultsSelected");
-        this.#selectAllResultsBtnElmt = document.getElementById("selectAllResultsBtn");
-        this.#unselectAllResultsBtnElmt = document.getElementById("unselectAllResultsBtn");
-        this.#clearAllSelectionBtnElmt = document.getElementById("clearAllSelectionBtn");
+        this.#selectionLimitElmt = this.querySelector(`#selectionLimit`);
+        this.#countResultsSelectedElmt = this.querySelector(`#countResultsSelected`);
+        this.#selectAllResultsBtnElmt = this.querySelector(`#selectAllResultsBtn`);
+        this.#unselectAllResultsBtnElmt = this.querySelector(`#unselectAllResultsBtn`);
+        this.#clearAllSelectionBtnElmt = this.querySelector(`#clearAllSelectionBtn`);
     }
 
     #initEventListeners() {
@@ -489,39 +503,44 @@ export class TimeseriesSelector extends HTMLElement {
             }
         });
 
-        this.#dropdownSearchBtnElmt.addEventListener("shown.bs.dropdown", () => {
-            this.#isOpened = true;
-            this.#fixDropdownSearchPanelPosition();
+        this.#tsSearchPanelTargetElmt.addEventListener(`show.bs.${ this.#isModalMode ? "modal" : "collapse"}`, (event) => {
+            if (event.target != this.#tsSearchPanelTargetElmt) return;
+
+            this.#tsSearchPanelToggleBtnElmt.classList.replace("btn-outline-secondary", "btn-outline-success");
+            this.#tsSearchPanelToggleIconElmt.classList.replace("bi-caret-down-fill", "bi-check2");
+            this.#tsSearchPanelToggleTextElmt.textContent = "OK";
+
+            this.#dispatchToggleEvent(true);
         });
 
-        this.#dropdownSearchBtnElmt.addEventListener("show.bs.dropdown", () => {
-            let eventDetail = { isOpened: true };
+        this.#tsSearchPanelTargetElmt.addEventListener(`hide.bs.${ this.#isModalMode ? "modal" : "collapse"}`, (event) => {
+            if (event.target != this.#tsSearchPanelTargetElmt) return;
 
-            let openEvent = new CustomEvent("openPanel", { detail: eventDetail, bubbles: true });
-            this.dispatchEvent(openEvent);
+            this.#tsSearchPanelToggleBtnElmt.classList.replace("btn-outline-success", "btn-outline-secondary");
+            this.#tsSearchPanelToggleIconElmt.classList.replace("bi-check2", "bi-caret-down-fill");
+            this.#tsSearchPanelToggleTextElmt.textContent = "Browse...";
 
-            let toggleEvent = new CustomEvent("togglePanel", { detail: eventDetail, bubbles: true });
-            this.dispatchEvent(toggleEvent);
-        });
-
-        this.#dropdownSearchBtnElmt.addEventListener("hide.bs.dropdown", () => {
-            let eventDetail = { isOpened: false };
-
-            let openEvent = new CustomEvent("closePanel", { detail: eventDetail, bubbles: true });
-            this.dispatchEvent(openEvent);
-
-            let toggleEvent = new CustomEvent("togglePanel", { detail: eventDetail, bubbles: true });
-            this.dispatchEvent(toggleEvent);
-        });
-
-        this.#dropdownSearchBtnElmt.addEventListener("hidden.bs.dropdown", () => {
-            this.#isOpened = false;
+            this.#dispatchToggleEvent(false);
         });
     }
 
     #dispatchSelectionChanged() {
         let selectionChangedEvent = new CustomEvent("selectionChanged", { bubbles: true});
         this.dispatchEvent(selectionChangedEvent);
+    }
+
+    #dispatchToggleEvent(isOpened = true) {
+        let eventDetail = { isOpened: isOpened };
+        if (isOpened) {
+            let openEvent = new CustomEvent("openPanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(openEvent);
+        }
+        else {
+            let closeEvent = new CustomEvent("closePanel", { detail: eventDetail, bubbles: true });
+            this.dispatchEvent(closeEvent);
+        }
+        let toggleEvent = new CustomEvent("togglePanel", { detail: eventDetail, bubbles: true });
+        this.dispatchEvent(toggleEvent);
     }
 
     #updateSearchInput() {
@@ -825,18 +844,11 @@ export class TimeseriesSelector extends HTMLElement {
             }
         }
 
-        this.#fixDropdownSearchPanelPosition();
-
         if (dispatchActionEvent) {
             let eventDetail = { timeseries: searchResultItem.timeseries, isActive: searchResultItem.isActive };
             let toggleEvent = new CustomEvent("toggleItem", { detail: eventDetail, bubbles: true});
             this.dispatchEvent(toggleEvent);
         }
-    }
-
-    #fixDropdownSearchPanelPosition() {
-        // Update dropdown-menu position, taking in account selected items container height.
-        this.#dropdownSearchPanelElmt.style.transform = `translate(0px, ${this.#selectedItemsContainerElmt.offsetHeight + this.#bsDropdownSearchPanel._config.offset[1]}px)`;
     }
 
     #loadSearchResults() {
@@ -995,11 +1007,15 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     open() {
-        this.#bsDropdownSearchPanel.show();
+        this.#bsSearchPanel.show();
     }
 
     close() {
-        this.#bsDropdownSearchPanel.hide();
+        this.#bsSearchPanel.hide();
+    }
+
+    toggle() {
+        this.#bsSearchPanel.toggle();
     }
 
     static getInstance(elementId = null) {
