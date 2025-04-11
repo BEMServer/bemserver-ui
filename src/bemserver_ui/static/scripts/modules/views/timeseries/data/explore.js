@@ -132,6 +132,7 @@ class TimeseriesDataExploreView {
         this.#timezonePickerElmt.addEventListener("tzChange", () => {
             this.#periodStartDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#periodEndDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
+            this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
             this.#loadChartSeries();
         });
 
@@ -801,6 +802,7 @@ class TimeseriesDataExploreView {
         this.#updateAggregationBucketState();
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
+        this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");

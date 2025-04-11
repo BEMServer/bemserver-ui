@@ -1,12 +1,15 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+// import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
 
 
 export class TimeseriesChartExplore extends ChartBase {
 
     #chartOpts = {};
     #currentSeriesIndex = 0;
-    #datetimeFormat = "{yyyy}-{MM}-{dd} {HH}:{mm}:{ss}";
+
+    #tzName = "UTC";
 
 
     get seriesCount() {
@@ -19,9 +22,19 @@ export class TimeseriesChartExplore extends ChartBase {
         }, 0);
     }
 
+    get tzName() {
+        return this.#tzName;
+    }
+    set tzName(value) {
+        this.#tzName = value;
+        // Settings.defaultZone = this.#tzName;
+    }
+
 
     constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
+
+        Settings.defaultZone = "UTC";
 
         this.#initChartOptions();
         this.#chartOpts = this.getOption();
@@ -118,6 +131,7 @@ export class TimeseriesChartExplore extends ChartBase {
                     type: "inside",
                 },
             ],
+            useUTC: true,
         });
     }
 
@@ -190,7 +204,32 @@ export class TimeseriesChartExplore extends ChartBase {
 
     #prepareSeriesData(data) {
         return Object.entries(data || {}).map(([timestamp, value]) => {
-            return [timestamp, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
+            // let dt = DateTime.fromISO(timestamp, { setZone: true });
+            let dt = DateTime.fromISO(timestamp, { zone: this.#tzName });
+
+            // this.#tzName = dt.zoneName;
+
+            // if (index < 2) {
+            //     console.log(this.#tzName);
+            //     console.log(dt);
+            //     console.log(typeof(dt));
+            // }
+
+            dt = dt.setZone("UTC", { keepLocalTime: true });
+
+            // if (index < 2) {
+            //     console.log(dt);
+            //     console.log(typeof(dt));
+            // }
+
+            // index += 1;
+
+            return [
+                // timestamp,
+                // echarts.time.parse(timestamp),
+                dt.ts,
+                Parser.parseFloatOrDefault(value, Number.NaN, 2)
+            ];
         });
     }
 
@@ -200,35 +239,80 @@ export class TimeseriesChartExplore extends ChartBase {
 
         if (opt.series.length > 0) {
             // Get all timestamps from all series data.
-            let timestamps = [];
+            // let timestamps = [];
+            let timestamps = {};
             for (let series of opt.series) {
-                for (let seriesData of series.data) {
-                    let timestamp = seriesData[0];
-                    if (!timestamps.includes(timestamp)) {
-                        timestamps.push(timestamp);
+                // for (let seriesData of series.data) {
+                //     let timestamp = seriesData[0];
+                //     if (!timestamps.includes(timestamp)) {
+                //         timestamps.push(timestamp);
+                //     }
+                // }
+
+                for (let isoTime of series.isoTimes) {
+                    let dt = DateTime.fromISO(isoTime, { zone: this.#tzName });
+                    if (timestamps[dt.ts] == null) {
+                        timestamps[dt.ts] = dt;
                     }
+
+                    // if (!timestamps.includes(isoDatetime)) {
+                    //     timestamps.push(isoDatetime);
+                    // }
                 }
             }
             // Ensure that the timestamps are ordered (from the older to the newest).
-            timestamps = timestamps.sort();
+            // timestamps = timestamps.sort();
+            // timestamps = timestamps.sort((a, b) => { return a >= b; });
+            let entries = Object.entries(timestamps);
+            entries.sort((a, b) => { return a[1] >= b[1]; });
+            timestamps = Object.fromEntries(entries);
 
             // For each timestamp, get the data from each series. If the timestamp does not exists, the value is null.
             let data = {};
-            for (let timestamp of timestamps) {
-                data[timestamp] = [];
+            for (let timestamp of Object.values(timestamps)) {
+
+                let isoTime = timestamp.toISO({ suppressMilliseconds: true });
+
+                data[isoTime] = [];
+
+                let dtUTC = timestamp.setZone("UTC", { keepLocalTime: true });
                 for (let series of opt.series) {
                     let value = null;
+                    console.log("====");
                     for (let seriesData of series.data) {
-                        if (seriesData[0] == timestamp) {
+                        // console.log(seriesData[0], dtUTC.ts);
+                        console.log(
+                            DateTime.fromMillis(seriesData[0], { zone: this.#tzName }).toISO(),
+                            timestamp.toISO(),
+                        );
+
+                        if (seriesData[0] == dtUTC.ts) {
                             value = Parser.parseFloatOrDefault(seriesData[1], Number.NaN, 2);
+                            console.log(value);
                             break;
                         }
-                        if (seriesData[0] > timestamp) {
-                            break;
-                        }
+                        // if (seriesData[0] > timestamp) {
+                        //     console.log("stop");
+                        //     break;
+                        // }
                     }
-                    data[timestamp].push(value);
+                    data[isoTime].push(value);
                 }
+
+                // data[timestamp] = [];
+                // for (let series of opt.series) {
+                //     let value = null;
+                //     for (let seriesData of series.data) {
+                //         if (seriesData[0] == timestamp) {
+                //             value = Parser.parseFloatOrDefault(seriesData[1], Number.NaN, 2);
+                //             break;
+                //         }
+                //         if (seriesData[0] > timestamp) {
+                //             break;
+                //         }
+                //     }
+                //     data[timestamp].push(value);
+                // }
             }
 
             // Build the table of the dataview, and fill it with the data extracted for each series.
@@ -239,7 +323,8 @@ export class TimeseriesChartExplore extends ChartBase {
             tableElmt.classList.add("table", "table-sm", "table-hover", "table-bordered", "caption-top", "user-select-all");
             let tableCaptionElmt = document.createElement("caption");
             tableCaptionElmt.classList.add("fst-italic", "text-muted", "text-end");
-            tableCaptionElmt.innerText = `${timestamps.length.toString()} rows`;
+            // tableCaptionElmt.innerText = `${timestamps.length.toString()} rows`;
+            tableCaptionElmt.innerText = `${Object.keys(timestamps).length.toString()} rows`;
             tableElmt.appendChild(tableCaptionElmt);
             let tableHeadElmt = document.createElement("thead");
             let tableHeadTrElmt = document.createElement("tr");
@@ -261,7 +346,15 @@ export class TimeseriesChartExplore extends ChartBase {
             for (let [timestamp, values] of Object.entries(data)) {
                 let tableTrElmt = document.createElement("tr");
                 let tableCellTimestampElmt = document.createElement("td");
-                tableCellTimestampElmt.innerText = echarts.time.format(timestamp, this.#datetimeFormat);
+                // tableCellTimestampElmt.innerText = TimeDisplay.toLocaleISOString(new Date(timestamp));
+                tableCellTimestampElmt.innerText = timestamp;
+
+                // console.log(timestamp);
+                // console.log(typeof(timestamp));
+
+                // let dt = DateTime.fromMillis(Parser.parseIntOrDefault(timestamp, null), { zone: "UTC" }).setZone(this.#tzName, { keepLocalTime: true });
+                // tableCellTimestampElmt.innerText = dt.toISO();
+
                 tableTrElmt.appendChild(tableCellTimestampElmt);
                 for (let value of values) {
                     let tableCellElmt = document.createElement("td");
@@ -444,6 +537,8 @@ export class TimeseriesChartExplore extends ChartBase {
         if (seriesIndex != -1) {
             this.#chartOpts.series[seriesIndex].data = this.#prepareSeriesData(data);
             this.#chartOpts.series[seriesIndex].aggregation = options.aggregation;
+
+            this.#chartOpts.series[seriesIndex].isoTimes = Object.keys(data || {});
 
             this.#setChartOptions();
         }

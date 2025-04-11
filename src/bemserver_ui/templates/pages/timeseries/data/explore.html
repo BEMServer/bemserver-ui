@@ -3,6 +3,10 @@
 
 {% set title = "Explore timeseries data" %}
 
+{% if tz_name is not defined %}
+    {% set tz_name = g.campaign_ctxt.tz_name %}
+{% endif %}
+
 {% block main_content %}
 {{ super() -}}
 <div class="container-fluid">
@@ -21,8 +25,8 @@
                     </div>
                 </div>
                 <div id="periodCustom" class="col-auto d-xl-flex d-grid py-2 py-xl-0 gap-2 d-none invisible">
-                    <div is="app-datetime-picker" id="start_datetime" title="From" date="{{ period_start.date().isoformat() }}" time="{{ period_start.time().isoformat()[:5] }}" max="{{ period_end.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
-                    <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ period_end.date().isoformat() }}" time="{{ period_end.time().isoformat()[:5] }}" min="{{ period_start.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+                    <div is="app-datetime-picker" id="start_datetime" title="From" date="{{ period_start.date().isoformat() }}" time="{{ period_start.time().isoformat()[:5] }}" max="{{ period_end.date().isoformat() }}" tzname="{{ tz_name }}"></div>
+                    <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ period_end.date().isoformat() }}" time="{{ period_end.time().isoformat()[:5] }}" min="{{ period_start.date().isoformat() }}" tzname="{{ tz_name }}"></div>
                 </div>
             </div>
             <div class="row d-lg-flex d-grid">
@@ -99,7 +103,7 @@
             </div>
             <div class="row">
                 <div class="col-auto">
-                    <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                    <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ tz_name }}" required>
                         <div is="app-spinner"></div>
                     </div>
                 </div>

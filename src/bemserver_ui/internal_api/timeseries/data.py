@@ -165,6 +165,8 @@ def retrieve_multiple_data():
         if str(ts_id) not in ts_data:
             ts_data[str(ts_id)] = {}
 
+    print(ts_data)
+
     return flask.jsonify(ts_data)
 
 
