@@ -2,7 +2,6 @@ import { app } from "/static/scripts/app.js";
 import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
@@ -481,8 +480,8 @@ export class TimeseriesListView {
         let timestampsBoundsListElmt = document.createElement("ul");
         timestampsBoundsListElmt.classList.add("list-group", "list-group-flush");
         timestampsCardElmt.appendChild(timestampsBoundsListElmt);
-        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", tsDataStats["first_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["first_timestamp"]), {timezone: this.#tzName}) : "-"));
-        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", tsDataStats["last_timestamp"] != null ? TimeDisplay.toLocaleString(new Date(tsDataStats["last_timestamp"]), {timezone: this.#tzName}) : "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", tsDataStats["first_timestamp"] || "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", tsDataStats["last_timestamp"] || "-"));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Period duration", tsDataStats["period_duration"] || "-"));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last data since", tsDataStats["last_data_since"] || "-"));
 
@@ -524,7 +523,7 @@ export class TimeseriesListView {
 
                 let timestampElmt = document.createElement("h6");
                 timestampElmt.classList.add("text-nowrap", "mb-0");
-                timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+                timestampElmt.innerText = eventData.timestamp;
                 headerContentElmt.appendChild(timestampElmt);
 
                 let levelBadgeElmt = new EventLevelBadge();
