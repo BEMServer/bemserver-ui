@@ -16,7 +16,8 @@ blp = flask.Blueprint("energy_consumption", __name__, url_prefix="/energy_consum
 @auth.signin_required
 @ensure_campaign_context
 def retrieve_breakdown(structural_element_type, structural_element_id):
-    tz_name = flask.request.args.get("timezone", flask.g.campaign_ctxt.tz_name)
+    default_tz_name = flask.g.campaign_ctxt.tz_name
+    tz_name = flask.request.args.get("timezone", default_tz_name) or default_tz_name
     period_type = flask.request.args["period_type"]
     period_month = int(flask.request.args["period_month"])
     period_year = int(flask.request.args["period_year"])

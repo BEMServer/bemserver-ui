@@ -5,7 +5,7 @@ import { TimeseriesChartEnergyConsumption } from "/static/scripts/modules/compon
 import "/static/scripts/modules/components/tree.js";
 
 
-export class EnergyConsumptionExploreView {
+class EnergyConsumptionExploreView {
 
     #internalAPIRequester = null;
     #retrieveDataReqID = null;
@@ -18,7 +18,6 @@ export class EnergyConsumptionExploreView {
     #sitesTreeElmt = null;
     #unitSelectElmt = null;
 
-    #tzName = "UTC";
     #yearRef = null;
     #monthRef = null;
     #maxPastYears = 20;
@@ -30,16 +29,14 @@ export class EnergyConsumptionExploreView {
     #previousPeriodType = null;
     #previousYearSelected = null;
 
-    #timeFormatPerPeriodType = {
-        "Month-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Month-Daily": "{dd} {MMMM} {yyyy}",
-        "Year-Monthly": "{MMMM} {yyyy}",
-        "Yearly": "{yyyy}",
+    #timeDisplayModePerPeriodType = {
+        "Month-Hourly": "iso",
+        "Month-Daily": "date",
+        "Year-Monthly": "month",
+        "Yearly": "year",
     };
 
-    constructor(tzName = "UTC", year = null, month = null) {
-        this.#tzName = tzName || "UTC";
-
+    constructor(year = null, month = null) {
         let date = new Date();
         this.#yearRef = year || date.getUTCFullYear();
         this.#monthRef = month || date.getUTCMonth() + 1;
@@ -180,7 +177,6 @@ export class EnergyConsumptionExploreView {
                         period_month: this.#periodMonthSelectElmt.value,
                         period_year: this.#periodYearSelectElmt.value,
                         year_reference: this.#yearRef,
-                        timezone: this.#tzName,
                         unit: selectedUnit,
                     }
                 ),
@@ -225,7 +221,7 @@ export class EnergyConsumptionExploreView {
                             this.#chartByEnergy[energy] = energyChart;
 
                             energyChart.showLoading();
-                            energyChart.load(data["timestamps"], energy, energyUses, selectedUnit, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value]);
+                            energyChart.load(data["timestamps"], energy, energyUses, selectedUnit, app.campaignContext.tz_name, this.#timeDisplayModePerPeriodType[this.#periodTypeSelectElmt.value]);
                             energyChart.hideLoading();
                         }
                     }
@@ -267,3 +263,9 @@ export class EnergyConsumptionExploreView {
         this.#loadSitesTreeData();
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    let view = new EnergyConsumptionExploreView();
+    view.mount();
+});

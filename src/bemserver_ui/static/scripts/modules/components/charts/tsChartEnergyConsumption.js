@@ -1,5 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
 
 
 export class TimeseriesChartEnergyConsumption extends ChartBase {
@@ -76,12 +77,14 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
                     bottom: 50,
                 },
             ],
+            // Trick to prevent echarts from converting timestamps to navigator local time.
+            useUTC: true,
         });
     }
 
-    #optionToContent(opt, unit, timeFormat) {
+    #optionToContent(opt, unit, tzName = "UTC", timeDisplayMode = "iso") {
         let timestamps = opt.series[0].data.map((serieData) => {
-            return echarts.time.format(serieData[0], timeFormat);
+            return this.#formatTime(serieData[0], tzName, timeDisplayMode);
         });
 
         let mainContainerElmt = document.createElement("div");
@@ -136,7 +139,7 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat) {
+    #tooltipFormatter(params, unit, tzName = "UTC", timeDisplayMode = "iso") {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -145,7 +148,7 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
         for (let [index, serieParams] of params.entries()) {
             if (index == 0) {
                 let timeElmt = document.createElement("h6");
-                timeElmt.innerText = echarts.time.format(serieParams.value[0], timeFormat);
+                timeElmt.textContent = this.#formatTime(serieParams.value[0], tzName, timeDisplayMode);
                 tooltipContainerElmt.appendChild(timeElmt);
             }
 
@@ -177,14 +180,42 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
         return tooltipContainerElmt;
     }
 
-    load(timestamps, energy, energyUses, unit, timeFormat) {
+    #formatTime(time, tzName, displayMode) {
+        // Set back chart timestamps in the desired timezone.
+        let dt = DateTime.fromMillis(time, { zone: "UTC" });
+        dt = dt.setZone(tzName, { keepLocalTime: true });
+
+        if (displayMode == "year") {
+            return dt.year.toString();
+        }
+        else if (displayMode == "month") {
+            return `${dt.year.toString()}-${dt.month.toString().padStart(2, "0")}`;
+        }
+        else if (displayMode == "date") {
+            return dt.toISODate();
+        }
+
+        return dt.toISO({ suppressMilliseconds: true });
+    }
+
+    load(timestamps, energy, energyUses, unit, tzName = "UTC", timeDisplayMode = "iso") {
+        Settings.defaultZone = tzName;
+
         let dataSeries = Object.entries(energyUses).map(([energyUse, consumptions]) => {
             let serie = {
                 id: energyUse,
                 name: energyUse,
                 type: "bar",
                 data: timestamps.map((time, index) => {
-                    return [time, Parser.parseFloatOrDefault(consumptions[index], Number.NaN, 2)];
+                    // Trick to get around the inability of echarts to manage timezones...
+                    // X-axis time line is shown in UTC, keeping local time.
+                    let dt = DateTime.fromISO(time, { zone: tzName });
+                    dt = dt.setZone("UTC", { keepLocalTime: true });
+
+                    return [
+                        dt.ts,
+                        Parser.parseFloatOrDefault(consumptions[index], Number.NaN, 2),
+                    ];
                 }),
                 emphasis: {
                     focus: "series",
@@ -206,12 +237,12 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
             toolbox: {
                 feature: {
                     dataView: {
-                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat); },
+                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, tzName, timeDisplayMode); },
                     },
                 },
             },
             tooltip: {
-                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat); },
+                formatter: (params) => { return this.#tooltipFormatter(params, unit, tzName, timeDisplayMode); },
             },
             yAxis: [
                 {
