@@ -276,6 +276,7 @@ class TimeSeriesDataExploreStatesView {
             // Update timeseries selector component with (un)selected timeseries and refresh chart.
             this.#tsSelector.clearAllSelection();
             this.#tsSeriesOptionsByDataState = {};
+            this.#chartExplore.tzName = app.campaignContect.tz_name;
             this.#chartExplore.clearAll();
             this.#timeseriesElmt.value = url.searchParams.get("timeseries");
             let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
@@ -478,6 +479,7 @@ class TimeSeriesDataExploreStatesView {
         this.#previousTsDataStateId2 = this.#tsDataStates2SelectElmt.value;
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
+        this.#chartExplore.tzName = app.campaignContext.tz_name;
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
