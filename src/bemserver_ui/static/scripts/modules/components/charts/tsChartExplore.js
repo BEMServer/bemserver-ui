@@ -225,7 +225,9 @@ export class TimeseriesChartExplore extends ChartBase {
             for (let series of opt.series) {
                 for (let row of series.data) {
                     // Set back chart timestamps in the desired timezone.
-                    let dtISO = DateTime.fromMillis(row[0], { zone: this.#tzName }).toISO();
+                    let dt = DateTime.fromMillis(row[0], { zone: "UTC" });
+                    dt = dt.setZone(this.#tzName, { keepLocalTime: true });
+                    let dtISO = dt.toISO();
                     if (data[dtISO] == null) {
                         data[dtISO] = {};
                     }
@@ -235,7 +237,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
             // Ensure that the timestamps are ordered (from the older to the newest).
             let entries = Object.entries(data);
-            entries.sort((a, b) => { return a[1] < b[1]; });
+            entries.sort((a, b) => { return a[0] >= b[0]; });
             data = Object.fromEntries(entries);
 
             // Build the table of the dataview, and fill it with the data extracted for each series.
@@ -273,7 +275,7 @@ export class TimeseriesChartExplore extends ChartBase {
                 tableTrElmt.appendChild(tableCellTimestampElmt);
                 for (let series of opt.series) {
                     let tableCellElmt = document.createElement("td");
-                    tableCellElmt.innerText = values[series.id] || "-";
+                    tableCellElmt.innerText = values[series.id] || "";
                     tableTrElmt.appendChild(tableCellElmt);
                 }
                 tableBodyElmt.appendChild(tableTrElmt);
