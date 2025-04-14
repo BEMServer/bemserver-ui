@@ -93,7 +93,9 @@ def explore():
     else:
         period_type = None
 
-    tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
+    default_tz_name = flask.g.campaign_ctxt.tz_name
+    tz_name = flask.request.args.get("tz", default_tz_name) or default_tz_name
+    tz = zoneinfo.ZoneInfo(tz_name)
     dt_now = dt.datetime.now(tz=tz)
 
     period_end_date = flask.request.args.get("period_end_date")
@@ -140,6 +142,7 @@ def explore():
         agg=agg,
         bucket_width_value=bucket_width_value,
         bucket_width_unit=bucket_width_unit,
+        tz_name=tz_name,
     )
 
 
