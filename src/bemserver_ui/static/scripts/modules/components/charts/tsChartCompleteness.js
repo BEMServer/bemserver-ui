@@ -1,6 +1,5 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartCompleteness extends ChartBase {
@@ -70,35 +69,89 @@ export class TimeseriesChartCompleteness extends ChartBase {
                 top: "center",
                 text: ["Complete", "Empty"],
                 formatter: (value) => {
-                    return `${value.toString()}%`;
+                    return `${Parser.parseFloatOrDefault(value, 0.0, 0)}%`;
                 }
             },
         });
     }
 
-    load(data, displayTime, tzName) {
-        let timestamps = data["timestamps"].map((timestamp) => {
-            if (displayTime) {
-                let tsDate = new Date(timestamp);
-                return !isNaN(tsDate) ? TimeDisplay.toLocaleString(tsDate, { timezone: tzName }).replace(" ", "\n") : null;
-            }
-            else {
-                return timestamp.substring(0, 10);
-            }
-        });
+    #tooltipFormatter(params, timestamps, timeseriesInfo) {
+        let xIndex = params.data[0];
+        let timestamp = timestamps[xIndex];
+        let tsInfo = timeseriesInfo[params.seriesId]
+        let expCount = tsInfo.expected_count[xIndex];
+        let interval = tsInfo.interval ? `${tsInfo.interval}s${tsInfo.undefined_interval ? " (auto)": ""}` : "no interval";
 
+        let tooltipContainerElmt = document.createElement("div");
+
+        let tooltipHeaderElmt = document.createElement("div");
+        tooltipHeaderElmt.classList.add("hstack", "gap-3");
+        tooltipHeaderElmt.style.maxWidth = "400px";
+        tooltipContainerElmt.appendChild(tooltipHeaderElmt);
+
+        let seriesNameElmt = document.createElement("div");
+        seriesNameElmt.classList.add("fs-6", "fw-bold", "text-truncate");
+        seriesNameElmt.textContent = params.seriesName;
+        tooltipHeaderElmt.appendChild(seriesNameElmt);
+
+        let seriesIdElmt = document.createElement("div");
+        seriesIdElmt.classList.add("text-black", "text-opacity-50", "ms-auto");
+        seriesIdElmt.textContent = `ID #${params.seriesId}`;
+        tooltipHeaderElmt.appendChild(seriesIdElmt);
+
+        let intervalContainerElmt = document.createElement("div");
+        intervalContainerElmt.classList.add("hstack", "gap-3", "mb-2");
+        tooltipContainerElmt.appendChild(intervalContainerElmt);
+
+        let intervalTitleElmt = document.createElement("div");
+        intervalTitleElmt.classList.add("fw-bold", "text-black", "text-opacity-50");
+        intervalTitleElmt.textContent = "Interval";
+        intervalContainerElmt.appendChild(intervalTitleElmt);
+
+        let intervalValueElmt = document.createElement("div");
+        intervalValueElmt.textContent = interval;
+        intervalContainerElmt.appendChild(intervalValueElmt);
+
+        let timestampElmt = document.createElement("div");
+        timestampElmt.classList.add("fw-bold");
+        timestampElmt.textContent = timestamp;
+        tooltipContainerElmt.appendChild(timestampElmt);
+
+        let completenessContainerElmt = document.createElement("div");
+        completenessContainerElmt.classList.add("hstack", "gap-3");
+        tooltipContainerElmt.appendChild(completenessContainerElmt);
+
+        let completenessTitleElmt = document.createElement("div");
+        completenessTitleElmt.classList.add("fw-bold", "text-black", "text-opacity-50");
+        completenessTitleElmt.textContent = "Completeness";
+        completenessContainerElmt.appendChild(completenessTitleElmt);
+
+        let completenessValueElmt = document.createElement("div");
+        completenessValueElmt.classList.add("fw-bold");
+        completenessValueElmt.style.color = params.color;
+        completenessValueElmt.textContent = `${params.data[2]}% (${tsInfo.count[xIndex]}/${expCount ? expCount.toFixed(0) : "?"})`;
+        completenessContainerElmt.appendChild(completenessValueElmt);
+
+        return tooltipContainerElmt;
+    }
+
+    load(data, displayTime) {
         let dataSeries = Object.entries(data["timeseries"]).map(([tsId, tsInfo], yIndex) => {
             return {
                 id: tsId,
                 name: tsInfo.name,
                 type: "heatmap",
                 data: tsInfo["ratio"].map((ratio, xIndex) => {
-                    return [xIndex, yIndex, Parser.parseFloatOrDefault(Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100.0, 0.0, 0)];
+                    return [
+                        xIndex,
+                        yIndex,
+                        Parser.parseFloatOrDefault(Parser.parseFloatOrDefault(ratio, 0.0, 2) * 100.0, 0.0, 0),
+                    ];
                 }),
                 emphasis: {
                     itemStyle: {
-                        shadowBlur: 10,
-                        shadowColor: "rgba(0, 0, 0, 1)",
+                        borderColor: "#444444",
+                        borderWidth: 1,
                     }
                 },
             };
@@ -106,33 +159,18 @@ export class TimeseriesChartCompleteness extends ChartBase {
 
         let options = {
             title: {
-                subtext: `${data.period} - ${data.datastate_name}`,
+                subtext: `${data.period} | ${data.datastate_name}`,
             },
             series: dataSeries,
             tooltip: {
-                formatter: (p) => {
-                    let xIndex = p.data[0];
-                    let tsInfo = data["timeseries"][p.seriesId];
-                    let expCount = tsInfo.expected_count[xIndex];
-                    let interval = tsInfo.interval ? `${tsInfo.interval}s${tsInfo.undefined_interval ? " (auto)": ""}` : "no interval";
-
-                    return `<div class="hstack gap-3" style="max-width: 400px;">
-    <div class="fs-6 fw-bold text-truncate">${p.seriesName}</div>
-    <div class="text-black text-opacity-50 ms-auto">ID #${p.seriesId}</div>
-</div>
-<div class="hstack gap-3 mb-2">
-    <div class="fw-bold text-black text-opacity-50">Interval</div>
-    <div>${interval}</div>
-</div>
-<div class="fw-bold">${timestamps[xIndex]}<div>
-<div class="hstack gap-3">
-    <div class="fw-bold text-black text-opacity-50">Completeness</div>
-    <div class="fw-bold" style="color: ${p.color};">${p.data[2]}% (${tsInfo.count[xIndex]}/${expCount ? expCount.toFixed(0) : "?"})</div>
-</div>`;
+                formatter: (params) => {
+                    return this.#tooltipFormatter(params, data["timestamps"], data["timeseries"]);
                 },
             },
             xAxis: {
-                data: timestamps,
+                data: data["timestamps"].map((timestamp) => {
+                    return displayTime ? timestamp.replace("T", "\n") : timestamp.substring(0, 10);
+                }),
             },
             yAxis: {
                 data: dataSeries.map((serie) => {

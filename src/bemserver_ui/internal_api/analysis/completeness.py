@@ -46,7 +46,8 @@ def retrieve_completeness():
     ):
         period_month = None
 
-    tz_name = flask.g.campaign_ctxt.tz_name
+    default_tz_name = flask.g.campaign_ctxt.tz_name
+    tz_name = flask.request.args.get("tz", default_tz_name) or default_tz_name
     try:
         dt_start, dt_end = compute_completeness_period_bounds(
             period_type,
