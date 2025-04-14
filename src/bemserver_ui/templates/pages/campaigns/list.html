@@ -74,9 +74,9 @@
                                 <div class="d-md-flex d-grid align-items-center gap-md-2">
                                     <div>
                                         <i class="bi bi-watch"></i>
-                                        <small class="fw-bold text-muted">{{ x.timezone_info["area"]["label"] }}</small>
+                                        <small class="fw-bold text-muted">{{ x.timezone_info["name"] }}</small>
                                     </div>
-                                    <small class="fst-italic text-black text-opacity-50 ms-sm-2">{{ x.timezone_info["label"] }}</small>
+                                    <small class="fst-italic text-black text-opacity-50 ms-sm-2">{{ x.timezone_info["area"]["label"] }}</small>
                                 </div>
                                 {% if x.start_time is defined %}
                                 {% set is_ongoing = x.state == "ongoing" %}

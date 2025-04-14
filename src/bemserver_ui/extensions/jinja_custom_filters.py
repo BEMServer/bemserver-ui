@@ -14,8 +14,10 @@ def init_app(app):
         """Convert an ISO datetime to a human readable string.
 
         Examples:
-            2022-03-21T14:55:08.442000+01:00 becomes 21/03/2022, 13:55:08 UTC
-            2022-03-21T14:55:08.442000+01:00 becomes 21/03/2022, 14:55:08 UTC+0100
+            2022-03-21T14:55:08.442000Z
+                becomes 2022-03-21T15:55:08.442000+01:00 in Europe/Paris timezone
+            2022-03-21T14:55:08.442000+01:00
+                becomes 2022-03-21T15:55:08.442000Z in UTC
         """
         try:
             tz = zoneinfo.ZoneInfo(tz_name)
@@ -27,7 +29,7 @@ def init_app(app):
         except BEMServerUICommonInvalidDatetimeError:
             return default
 
-        return ret.strftime("%d/%m/%Y, %H:%M:%S UTC%z")
+        return ret.isoformat()
 
     @app.template_filter("is_dict")
     def is_dict(obj_instance):

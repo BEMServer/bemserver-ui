@@ -81,11 +81,11 @@
                             <dt>Name</dt>
                             <dd class="text-break">{{ campaign.name }}</dd>
                             <dt>Status</dt>
-                            <dd class="fw-bold text-{% if campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">{{ campaign.state | upper }}</dd>
+                            <dd class="fw-bold text-{% if campaign.state == 'ongoing' %}success{% else %}danger{% endif %} text-opacity-75">{{ campaign.state }}</dd>
                             <dt>Timezone</dt>
-                            <dd class="v-stack">
-                                <span>{{ campaign.timezone_info["area"]["label"] }}</span>
-                                <div><small class="fst-italic text-muted">{{ campaign.timezone_info["label"] }}</small></div>
+                            <dd class="d-flex gap-2">
+                                <span>{{ campaign.timezone_info["name"] }}</span>
+                                <small class="fst-italic text-muted">{{ campaign.timezone_info["area"]["label"] }}</small>
                             </dd>
                             <dt>From</dt>
                             <dd>{{ campaign.start_time | iso_datetime_format(tz_name=campaign.timezone, default="not defined") }}</dd>

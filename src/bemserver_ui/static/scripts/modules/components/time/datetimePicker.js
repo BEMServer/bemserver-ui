@@ -212,14 +212,14 @@ export class DatetimePicker extends HTMLDivElement {
 
         let tzInfoTitleContentElmt = document.createElement("div");
         tzInfoTitleContentElmt.classList.add("d-grid");
-        let tzInfoAreaLabelElmt = document.createElement("span");
-        tzInfoAreaLabelElmt.classList.add("fw-bold");
-        tzInfoAreaLabelElmt.innerText = this.#tzInfo["area"]["label"];
-        tzInfoTitleContentElmt.appendChild(tzInfoAreaLabelElmt);
         let tzInfoLabelElmt = document.createElement("span");
-        tzInfoLabelElmt.classList.add("fst-italic");
-        tzInfoLabelElmt.innerText = this.#tzInfo["label"];
+        tzInfoLabelElmt.classList.add("fw-bold");
+        tzInfoLabelElmt.textContent = this.#tzInfo["name"];
         tzInfoTitleContentElmt.appendChild(tzInfoLabelElmt);
+        let tzInfoAreaLabelElmt = document.createElement("span");
+        tzInfoAreaLabelElmt.classList.add("fst-italic");
+        tzInfoAreaLabelElmt.textContent = this.#tzInfo["area"]["label"];
+        tzInfoTitleContentElmt.appendChild(tzInfoAreaLabelElmt);
 
         this.#tzInfoElmt.setAttribute("data-bs-title", tzInfoTitleContentElmt.outerHTML);
         let bsTooltipTzInfo = bootstrap.Tooltip.getOrCreateInstance(this.#tzInfoElmt);
