@@ -5,17 +5,16 @@ import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay, TimeCalendar } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
+import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
 
 
 export class EventListView {
 
     #structuralElementTypes = []
-    #tzName = "UTC";
     #defaultFilters = {};
     #defaultEventInfoTabListPageSize = 10;
 
@@ -86,7 +85,6 @@ export class EventListView {
 
     #loadOptions(options = {}) {
         this.#structuralElementTypes = options.structuralElementTypes || [];
-        this.#tzName = options.timezone || "UTC";
         for (let [optFilterName, optFilterValue] of Object.entries(options.filters || {})) {
             this.#defaultFilters[optFilterName] = optFilterValue;
         }
@@ -738,7 +736,7 @@ export class EventListView {
         // Update event timeseries data explore link button.
         if (eventInfoTabKey == "ts") {
             let tsIds = data.map((dataRow) => { return dataRow.id; });
-            let eventDatetime = new Date(this.#currentEventElmt.getAttribute("data-timestamp"));
+            let eventDatetime = DateTime.fromISO(this.#currentEventElmt.getAttribute("data-timestamp"), { zone: app.campaignContext.tz_name });
             this.#updateEventInfoTabTsDataExploreLink(tsIds, eventDatetime);
         }
     }
@@ -749,19 +747,17 @@ export class EventListView {
             this.#eventInfoTabExploreLinkElmt.removeAttribute("aria-disabled");
             this.#eventInfoTabExploreLinkElmt.removeAttribute("tabindex");
 
-            let exploreDatetimeStart = TimeCalendar.addDays(eventDatetime, -7);
-            let exploreDatetimeEnd = TimeCalendar.addDays(eventDatetime, 7);
-            let exploreDatetimeStartLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeStart);
-            let exploreDatetimeEndLocaleISO = TimeDisplay.toLocaleISOString(exploreDatetimeEnd);
+            let exploreDatetimeStart = eventDatetime.minus({ days: 7 }).set({ seconds: 0, milliseconds: 0 });
+            let exploreDatetimeEnd = eventDatetime.plus({ days: 7 }).set({ seconds: 0, milliseconds: 0 });
 
             let exploreLinkParams = {
                 timeseries: tsIds.join(","),
-                tz: this.#tzName,
+                tz: app.campaignContext.tz_name,
                 period_type: "custom",
-                period_start_date: exploreDatetimeStartLocaleISO.split("T")[0],
-                period_start_time: exploreDatetimeStartLocaleISO.split("T")[1].split(":", 2).join(":"),
-                period_end_date: exploreDatetimeEndLocaleISO.split("T")[0],
-                period_end_time: exploreDatetimeEndLocaleISO.split("T")[1].split(":", 2).join(":"),
+                period_start_date: exploreDatetimeStart.toISODate(),
+                period_start_time: exploreDatetimeStart.toISOTime({ suppressMilliseconds: true, suppressSeconds: true, includeOffset: false }),
+                period_end_date: exploreDatetimeEnd.toISODate(),
+                period_end_time: exploreDatetimeEnd.toISOTime({ suppressMilliseconds: true, suppressSeconds: true, includeOffset: false }),
             };
             this.#eventInfoTabExploreLinkElmt.href = app.urlFor(`timeseries.data.explore`, exploreLinkParams);
         }
@@ -785,7 +781,7 @@ export class EventListView {
 
         let timestampElmt = document.createElement("th");
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+        timestampElmt.textContent = DateTime.fromISO(eventData.timestamp, { zone: app.campaignContext.tz_name }).toISO();
         eventElmt.appendChild(timestampElmt);
 
         let sourceElmt = document.createElement("td");
