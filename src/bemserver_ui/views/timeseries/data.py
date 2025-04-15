@@ -2,12 +2,11 @@
 
 import calendar
 import datetime as dt
-import io
 import zoneinfo
 
 import flask
 
-from bemserver_api_client.enums import Aggregation, BucketWidthUnit, DataFormat
+from bemserver_api_client.enums import DataFormat
 
 from bemserver_ui.common.analysis import (
     get_aggregation_types,
@@ -305,80 +304,28 @@ def completeness():
     )
 
 
-@blp.route("/<int:id>/download")
-@auth.signin_required
-@ensure_campaign_context
-def download(id):
-    ts_resp = flask.g.api_client.timeseries.getone(id=id)
-    flask.request.args["timeseries"] = ts_resp.data["name"]
-    return flask.redirect(
-        flask.url_for("timeseries_data.download_multiple", flask.request.args)
-    )
-
-
-@blp.route("/download")
-@auth.signin_required
-@ensure_campaign_context
-def download_multiple():
-    data_state_id = flask.request.args["data_state"]
-    ts_names = [str(x) for x in flask.request.args["timeseries"].split(",")]
-    start_date = flask.request.args["start_date"]
-    start_time = flask.request.args.get("start_time", "00:00") or "00:00"
-    end_date = flask.request.args["end_date"]
-    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
-    tz_name = flask.request.args["timezone"]
-    aggregation = flask.request.args.get("agg")
-    if aggregation == "none":
-        aggregation = None
-    bucket_width_value = flask.request.args.get("bucket_width_value")
-    bucket_width_unit = flask.request.args.get("bucket_width_unit")
-
-    tz = zoneinfo.ZoneInfo(tz_name)
-    try:
-        dt_start = convert_html_form_datetime(start_date, start_time, tz=tz)
-    except BEMServerUICommonInvalidDatetimeError:
-        flask.abort(422, description="Invalid start datetime!")
-    try:
-        dt_end = convert_html_form_datetime(end_date, end_time, tz=tz)
-    except BEMServerUICommonInvalidDatetimeError:
-        flask.abort(422, description="Invalid end datetime!")
-
-    if (
-        aggregation is not None
-        and bucket_width_value is not None
-        and bucket_width_unit is not None
-    ):
-        ts_data_csv = flask.g.api_client.timeseries_data.download_aggregate_by_names(
-            flask.g.campaign_ctxt.id,
-            dt_start.isoformat(),
-            dt_end.isoformat(),
-            data_state_id,
-            ts_names,
-            aggregation=Aggregation(aggregation),
-            bucket_width_value=bucket_width_value,
-            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
-            format=DataFormat.csv,
-        )
-    else:
-        ts_data_csv = flask.g.api_client.timeseries_data.download_by_names(
-            flask.g.campaign_ctxt.id,
-            dt_start.isoformat(),
-            dt_end.isoformat(),
-            data_state_id,
-            ts_names,
-            format=DataFormat.csv,
-        )
-
-    return flask.send_file(
-        io.BytesIO(ts_data_csv.data),
-        as_attachment=True,
-        download_name="timeseries_data.csv",
-    )
-
-
 @blp.route("/delete")
 @auth.signin_required(roles=[Roles.admin])
 @ensure_campaign_context
 def delete():
     # Just render page. Delete is performed with internal API call from JS module.
     return flask.render_template("pages/timeseries/data/delete.html")
+
+
+@blp.route("/export")
+@auth.signin_required(roles=[Roles.admin])
+@ensure_campaign_context
+def export():
+    period_types = get_explore_period_types()
+    agg_types = get_aggregation_types()
+
+    tz = zoneinfo.ZoneInfo(flask.g.campaign_ctxt.tz_name)
+    dt_now = dt.datetime.now(tz=tz)
+    period_end = dt_now
+
+    return flask.render_template(
+        "pages/timeseries/data/export.html",
+        period_types=period_types,
+        agg_types=agg_types,
+        period_end=period_end,
+    )

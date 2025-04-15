@@ -56,6 +56,7 @@
                     <ul class="nav nav-pills flex-column gap-1">
                         {% filter indent(width=24, first=True) %}
                         {{- mac_sidebar.render_nav_item("Import timeseries data", url_for("timeseries.data.upload"), "Import timeseries data", ["bi", "bi-filetype-csv"]) -}}
+                        {{- mac_sidebar.render_nav_item("Export timeseries data", url_for("timeseries.data.export"), "Export timeseries data", ["bi", "bi-filetype-csv"]) -}}
                         {{- mac_sidebar.render_nav_item("Delete history", url_for("timeseries.data.delete"), "Delete timeseries data", ["bi", "bi-trash3"]) -}}
                         {% endfilter %}
                     </ul>

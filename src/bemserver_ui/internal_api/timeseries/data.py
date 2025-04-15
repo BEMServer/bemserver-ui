@@ -3,9 +3,10 @@
 import csv
 import datetime as dt
 import zoneinfo
-from io import StringIO
+from io import BytesIO, StringIO
 
 import flask
+from werkzeug.utils import secure_filename
 
 from bemserver_api_client.enums import Aggregation, BucketWidthUnit, DataFormat
 
@@ -233,3 +234,78 @@ def retrieve_stats():
             ts_stats["last_data_since"] = None
 
     return flask.jsonify(data_stats)
+
+
+@blp.route("/download")
+@auth.signin_required
+@ensure_campaign_context
+def download_multiple():
+    default_filename = "timeseries_data"
+    filename = flask.request.args.get("filename", default_filename) or default_filename
+
+    data_state_id = flask.request.args["data_state"]
+    ts_names = [str(x) for x in flask.request.args["timeseries"].split(",")]
+
+    if len(ts_names) <= 0:
+        flask.abort(422, description="Missing timeseries!")
+
+    default_tz_name = flask.g.campaign_ctxt.tz_name
+    tz_name = flask.request.args.get("timezone", default_tz_name) or default_tz_name
+
+    period_type = get_explore_period_type(flask.request.args["period"])
+    if period_type is None:
+        flask.abort(422, description="Unknown period type!")
+
+    end_date = flask.request.args.get("end_date")
+    end_time = flask.request.args.get("end_time", "00:00") or "00:00"
+    start_date = flask.request.args.get("start_date")
+    start_time = flask.request.args.get("start_time", "00:00") or "00:00"
+
+    aggregation = flask.request.args.get("agg")
+    if aggregation == "none":
+        aggregation = None
+    bucket_width_value = flask.request.args.get("bucket_width_value")
+    bucket_width_unit = flask.request.args.get("bucket_width_unit")
+
+    tz = zoneinfo.ZoneInfo(tz_name)
+    try:
+        dt_start, dt_end = compute_explore_period_bounds(
+            period_type, end_date, end_time, start_date, start_time, tz=tz
+        )
+    except BEMServerUICommonInvalidDatetimeError as exc:
+        flask.abort(422, description=str(exc))
+
+    if (
+        aggregation is not None
+        and bucket_width_value is not None
+        and bucket_width_unit is not None
+    ):
+        ts_data_csv = flask.g.api_client.timeseries_data.download_aggregate_by_names(
+            flask.g.campaign_ctxt.id,
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            ts_names,
+            timezone=tz_name,
+            aggregation=Aggregation(aggregation),
+            bucket_width_value=bucket_width_value,
+            bucket_width_unit=BucketWidthUnit(bucket_width_unit),
+            format=DataFormat.csv,
+        )
+    else:
+        ts_data_csv = flask.g.api_client.timeseries_data.download_by_names(
+            flask.g.campaign_ctxt.id,
+            dt_start.isoformat(),
+            dt_end.isoformat(),
+            data_state_id,
+            ts_names,
+            timezone=tz_name,
+            format=DataFormat.csv,
+        )
+
+    return flask.send_file(
+        BytesIO(ts_data_csv.data),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f"{secure_filename(filename)}.csv",
+    )

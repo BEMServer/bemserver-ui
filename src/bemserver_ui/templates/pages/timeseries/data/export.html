@@ -1,0 +1,88 @@
+{% extends "pages/base.html" %}
+{% import "macros/components/campaign.html" as mac_camp %}
+{% import "macros/components/ts_selector.html" as mac_ts_selector %}
+
+{% set title = "Export timeseries data" %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="d-flex gap-4 mb-4">
+        <h5>Campaign</h5>
+        {{- mac_camp.render_campaign_info(g.campaign_ctxt.name, g.campaign_ctxt.campaign.state, render_style="bullet") }}
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            {% filter indent(width=12, first=False) %}
+            {{ mac_ts_selector.render_ts_selector(element_id="tsSelectorExport") -}}
+            {% endfilter %}
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">Timeseries data state</span>
+            <select id="data_states" class="form-select" aria-label="Select a timeseries data state" required></select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+            <div is="app-spinner"></div>
+        </div>
+    </div>
+    <div class="row d-xl-flex d-grid mb-3">
+        <div class="col-auto">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text">Period</span>
+                <select id="periodType" class="form-select" aria-label="Select a period" required>
+                    {% for x in period_types %}
+                    <option value="{{ x.id }}"{% if x.id == period_type %} selected{% endif %}>{{ x.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div id="periodCustom" class="col-auto d-xl-flex d-grid py-2 py-xl-0 gap-2 d-none invisible">
+            <div is="app-datetime-picker" id="start_datetime" title="From" time="00:00" max="{{ period_end.date().isoformat() }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+            <div is="app-datetime-picker" id="end_datetime" title="Until" date="{{ period_end.date().isoformat() }}" time="{{ period_end.time().isoformat()[:5] }}" tzname="{{ g.campaign_ctxt.tz_name }}"></div>
+        </div>
+    </div>
+    <div class="row d-lg-flex d-grid mb-3">
+        <div class="col-auto pb-2 pb-lg-0">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text">Aggregation mode</span>
+                <select class="form-select" id="agg" name="agg" aria-label="Select an aggregation mode">
+                    {% for x in agg_types %}
+                    <option value="{{ x.id }}"{% if agg is none and x.id == "none" or agg == x.id %} selected{% endif %}>{{ x.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div is="app-ts-bucket-width" id="bucket" class="d-none invisible" title="Duration" unit="{{ bucket_width_unit }}" value="{{ bucket_width_value }}" disabled="true"></div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">Filename</span>
+            <input id="filename" class="form-control" type="text" value="tsData" required>
+        </div>
+    </div>
+    <div class="row my-4">
+        <div class="col text-center">
+            <button id="exportBtn" class="btn btn-primary" title="Download timeseries data" disabled>
+                <div id="exportSpinner" class="spinner-grow spinner-grow-sm me-2 d-none invisible" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <i class="bi bi-download me-1"></i>
+                <span>Download</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/timeseries/data/export.js') }}" defer></script>
+{% endfilter %}
+{% endblock body_scripts %}

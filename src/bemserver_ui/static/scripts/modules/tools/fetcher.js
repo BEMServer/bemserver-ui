@@ -104,6 +104,34 @@ export class InternalAPIRequest {
         return Promise.reject(response);
     }
 
+    // Inspired by https://stackoverflow.com/a/63946003
+    async #processResponseBlob(response) {
+        if (response.ok) {
+            let blob = await response.blob();
+
+            // As filename is not provided by the blob object, get it from the response headers.
+            let filename = null;
+            let contentDisposition = response.headers.get("content-disposition");
+            if (contentDisposition && contentDisposition.indexOf("attachment") !== -1) {
+                let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                let matches = filenameRegex.exec(contentDisposition);
+                if (matches != null && matches[1]) { 
+                    filename = matches[1].replace(/['"]/g, "");
+                }
+            }
+
+            return { blob : blob, filename: filename };
+        }
+        else if (response.status == 401) {
+            // Just reload the current page, server knows what to do.
+            document.location.reload();
+        }
+        else if (!["AbortError"].includes(response.name)) {
+            // Return the response error.
+            return Promise.reject(response);
+        }
+    }
+
     #processError(error, rejectCallback = null) {
         if (this.#debugMode) {
             if (error.url) {
@@ -304,5 +332,22 @@ export class InternalAPIRequest {
     delete(url, etag, resolveCallback, rejectCallback = null, finallyCallback = null) {
         let params = this.#prepareDelete(etag);
         return this.#executeRequest(url, params, resolveCallback, rejectCallback, finallyCallback);
+    }
+
+    download(url, resolveCallback, rejectCallback = null, finallyCallback = null) {
+        let reqID = this.#fetch(url);
+
+        let reqPromise = this.#fetchPromises[reqID];
+        reqPromise.then(
+            this.#processResponseBlob
+        ).then(
+            resolveCallback
+        ).catch(
+            rejectCallback
+        ).finally(
+            finallyCallback
+        );
+
+        return reqID;
     }
 }
