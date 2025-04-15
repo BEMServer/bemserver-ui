@@ -1,5 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
 
 
 export class TimeseriesChartDegreeDays extends ChartBase {
@@ -62,16 +63,18 @@ export class TimeseriesChartDegreeDays extends ChartBase {
                     type: "inside",
                 },
             ],
+            // Trick to prevent echarts from converting timestamps to navigator local time.
+            useUTC: true,
         });
     }
 
-    #optionToContent(opt, unit, timeFormat, compareMode = false) {
+    #optionToContent(opt, unit, tzName = "UTC", timeDisplayMode = "iso", compareMode = false) {
         let timestamps = opt.series[0].data.map((serieData) => {
             if (compareMode) {
                 return serieData[0];
             }
             else {
-                return echarts.time.format(serieData[0], timeFormat);
+                return this.#formatTime(serieData[0], tzName, timeDisplayMode);
             }
         });
 
@@ -133,7 +136,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         return mainContainerElmt;
     }
 
-    #tooltipFormatter(params, unit, timeFormat, compareMode = false) {
+    #tooltipFormatter(params, unit, tzName = "UTC", timeDisplayMode = "iso", compareMode = false) {
         let tooltipContainerElmt = document.createElement("div");
 
         let ulElmt = document.createElement("ul");
@@ -143,10 +146,10 @@ export class TimeseriesChartDegreeDays extends ChartBase {
             if (index == 0) {
                 let timeElmt = document.createElement("h6");
                 if (compareMode) {
-                    timeElmt.innerText = serieParams.value[0];
+                    timeElmt.textContent = serieParams.value[0];
                 }
                 else {
-                    timeElmt.innerText = echarts.time.format(serieParams.value[0], timeFormat);
+                    timeElmt.textContent = this.#formatTime(serieParams.value[0], tzName, timeDisplayMode);
                 }
                 tooltipContainerElmt.appendChild(timeElmt);
             }
@@ -179,7 +182,27 @@ export class TimeseriesChartDegreeDays extends ChartBase {
         return tooltipContainerElmt;
     }
 
-    load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, timeFormat, compareMode = false, categories = null) {
+    #formatTime(time, tzName, displayMode) {
+        // Set back chart timestamps in the desired timezone.
+        let dt = DateTime.fromMillis(time, { zone: "UTC" });
+        dt = dt.setZone(tzName, { keepLocalTime: true });
+
+        if (displayMode == "year") {
+            return dt.year.toString();
+        }
+        else if (displayMode == "month") {
+            return `${dt.year.toString()}-${dt.month.toString().padStart(2, "0")}`;
+        }
+        else if (displayMode == "date") {
+            return dt.toISODate();
+        }
+
+        return dt.toISO({ suppressMilliseconds: true });
+    }
+
+    load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, tzName = "UTC", timeDisplayMode = "iso", compareMode = false, categories = null) {
+        Settings.defaultZone = tzName;
+
         let dataSeries = [];
         if (!compareMode) {
             dataSeries.push({
@@ -187,7 +210,15 @@ export class TimeseriesChartDegreeDays extends ChartBase {
                 name: `${degreeDaysType} degree days (base ${degreeDaysBase.toString()}${degreeDaysBaseUnit ? ` ${degreeDaysBaseUnit}`: ""})`,
                 type: "bar",
                 data: Object.entries(degreeDaysData).map(([timestamp, value]) => {
-                    return [timestamp, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
+                    // Trick to get around the inability of echarts to manage timezones...
+                    // X-axis time line is shown in UTC, keeping local time.
+                    let dt = DateTime.fromISO(timestamp, { zone: tzName });
+                    dt = dt.setZone("UTC", { keepLocalTime: true });
+
+                    return [
+                        dt.ts,
+                        Parser.parseFloatOrDefault(value, Number.NaN, 2),
+                    ];
                 }),
                 emphasis: {
                     focus: "series",
@@ -229,12 +260,12 @@ export class TimeseriesChartDegreeDays extends ChartBase {
                             "Close",
                             "Refresh",
                         ],
-                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, timeFormat, compareMode); },
+                        optionToContent: (opt) => { return this.#optionToContent(opt, unit, tzName, timeDisplayMode, compareMode); },
                     },
                 },
             },
             tooltip: {
-                formatter: (params) => { return this.#tooltipFormatter(params, unit, timeFormat, compareMode); },
+                formatter: (params) => { return this.#tooltipFormatter(params, unit, tzName, timeDisplayMode, compareMode); },
             },
             yAxis: {
                 name: unit,

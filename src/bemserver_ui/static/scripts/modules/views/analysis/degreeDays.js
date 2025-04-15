@@ -35,10 +35,10 @@ class DegreeDaysExploreView {
     #previousPeriodType = null;
     #previousYearSelected = null;
 
-    #timeFormatPerPeriodType = {
-        "Month-Daily": "{dd} {MMMM} {yyyy}",
-        "Year-Monthly": "{MMMM} {yyyy}",
-        "Yearly": "{yyyy}",
+    #timeDisplayModePerPeriodType = {
+        "Month-Daily": "date",
+        "Year-Monthly": "month",
+        "Yearly": "year",
     };
 
     constructor(year = null, month = null) {
@@ -311,7 +311,7 @@ class DegreeDaysExploreView {
 
                         this.#ddChart = new TimeseriesChartDegreeDays(chartContainerElmt);
                         this.#ddChart.showLoading();
-                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, selectedUnit, data["dd_unit"], this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
+                        this.#ddChart.load(data["degree_days"], this.#ddTypeSelectElmt.value, this.#ddBaseInputElmt.value, selectedUnit, data["dd_unit"], app.campaignContext.tz_name, this.#timeDisplayModePerPeriodType[this.#periodTypeSelectElmt.value], this.#comparePeriodSwitchElmt.checked, data["dd_categories"]);
                         this.#ddChart.hideLoading();
                     }
                 },
