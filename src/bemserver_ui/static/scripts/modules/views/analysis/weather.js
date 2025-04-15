@@ -37,15 +37,15 @@ export class WeatherExploreView {
     #previousDaySelected = null;
     #previousYearSelected = null;
 
-    #timeFormatPerPeriodType = {
-        "Day-Minute": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Week-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Month-Hourly": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Year-Daily": "{dd} {MMMM} {yyyy}",
-        "Last-Day": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Last-Week": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Last-Month": "{dd} {MMMM} {yyyy} {HH}:{mm}",
-        "Last-Year": "{dd} {MMMM} {yyyy}",
+    #timeDisplayModePerPeriodType = {
+        "Day-Minute": "iso",
+        "Week-Hourly": "iso",
+        "Month-Hourly": "iso",
+        "Year-Daily": "date",
+        "Last-Day": "iso",
+        "Last-Week": "iso",
+        "Last-Month": "iso",
+        "Last-Year": "date",
     };
 
     constructor(tzName = "UTC", forecastNbDays = 5, year = null, month = null) {
@@ -345,7 +345,7 @@ export class WeatherExploreView {
                             this.#chartWeather[name] = weatherChart;
 
                             weatherChart.showLoading();
-                            weatherChart.load(name, dataset, this.#timeFormatPerPeriodType[this.#periodTypeSelectElmt.value], () => { this.#updateTsInfoModal(name, dataset)});
+                            weatherChart.load(name, dataset, this.#tzName, this.#timeDisplayModePerPeriodType[this.#periodTypeSelectElmt.value], () => { this.#updateTsInfoModal(name, dataset)});
                             weatherChart.hideLoading();
                         }
                     }

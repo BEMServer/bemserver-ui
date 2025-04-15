@@ -1,5 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
+import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
 
 
 export class TimeseriesChartWeather extends ChartBase {
@@ -103,7 +104,7 @@ export class TimeseriesChartWeather extends ChartBase {
         });
     }
 
-    #optionToContent(opt, timeFormat) {
+    #optionToContent(opt, tzName = "UTC", timeDisplayMode = "iso") {
         let mainContainerElmt = document.createElement("div");
         mainContainerElmt.classList.add("m-2", "me-3");
 
@@ -111,11 +112,14 @@ export class TimeseriesChartWeather extends ChartBase {
             // Get a merged list of all series timestamps.
             let seriesTimestamps = opt.series.map((seriesInfo) => {
                 return seriesInfo.data.map((seriesData) => {
-                    return echarts.time.format(seriesData[0], timeFormat);
+                    return this.#formatTime(seriesData[0], tzName, timeDisplayMode);
                 });
             });
             let timestamps = Array.from(new Set([].concat(...seriesTimestamps)));
 
+            // Ensure that the timestamps are ordered (from the older to the newest).
+            timestamps = timestamps.sort();
+            
             let subtitleElmt = document.createElement("h5");
             subtitleElmt.innerText = opt.title[0].subtext;
             mainContainerElmt.appendChild(subtitleElmt);
@@ -173,7 +177,27 @@ export class TimeseriesChartWeather extends ChartBase {
         return mainContainerElmt;
     }
 
-    load(name, dataset, timeFormat, tsInfoCallback = null) {
+    #formatTime(time, tzName, displayMode) {
+        // Set back chart timestamps in the desired timezone.
+        let dt = DateTime.fromMillis(time, { zone: "UTC" });
+        dt = dt.setZone(tzName, { keepLocalTime: true });
+
+        if (displayMode == "year") {
+            return dt.year.toString();
+        }
+        else if (displayMode == "month") {
+            return `${dt.year.toString()}-${dt.month.toString().padStart(2, "0")}`;
+        }
+        else if (displayMode == "date") {
+            return dt.toISODate();
+        }
+
+        return dt.toISO({ suppressMilliseconds: true });
+    }
+
+    load(name, dataset, tzName = "UTC", timeDisplayMode = "iso", tsInfoCallback = null) {
+        Settings.defaultZone = tzName;
+
         this.#showTsInfoCallback = tsInfoCallback;
 
         let listUnit = {0: [], 1: []};
@@ -186,7 +210,15 @@ export class TimeseriesChartWeather extends ChartBase {
                         name: `${value.name}${value.timeseries.unit_symbol != null ? ` [${value.timeseries.unit_symbol}]` : ""}`,
                         type: "line",
                         data: Object.entries(value.data).map(([date, value]) => {
-                            return [date, Parser.parseFloatOrDefault(value, Number.NaN, 2)];
+                            // Trick to get around the inability of echarts to manage timezones...
+                            // X-axis time line is shown in UTC, keeping local time.
+                            let dt = DateTime.fromISO(date, { zone: tzName });
+                            dt = dt.setZone("UTC", { keepLocalTime: true });
+
+                            return [
+                                dt.ts,
+                                Parser.parseFloatOrDefault(value, Number.NaN, 2),
+                            ];
                         }),
                         emphasis: {
                             focus: "series",
@@ -219,7 +251,7 @@ export class TimeseriesChartWeather extends ChartBase {
             toolbox: {
                 feature: {
                     dataView: {
-                        optionToContent: (opt) => { return this.#optionToContent(opt, timeFormat); },
+                        optionToContent: (opt) => { return this.#optionToContent(opt, tzName, timeDisplayMode); },
                     },
                 },
             },
