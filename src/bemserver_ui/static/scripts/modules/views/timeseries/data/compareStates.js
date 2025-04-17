@@ -10,6 +10,7 @@ class TimeSeriesDataExploreStatesView {
 
     #internalAPIRequester = null;
     #tsDataGetByDataStateReqIDs = [];
+    #downloadByStateReqID = {};
 
     #chartContainerElmt = null;
 
@@ -276,7 +277,7 @@ class TimeSeriesDataExploreStatesView {
             // Update timeseries selector component with (un)selected timeseries and refresh chart.
             this.#tsSelector.clearAllSelection();
             this.#tsSeriesOptionsByDataState = {};
-            this.#chartExplore.tzName = app.campaignContect.tz_name;
+            this.#chartExplore.tzName = app.campaignContext.tz_name;
             this.#chartExplore.clearAll();
             this.#timeseriesElmt.value = url.searchParams.get("timeseries");
             let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
@@ -470,6 +471,61 @@ class TimeSeriesDataExploreStatesView {
         }
     }
 
+    #downloadCSV() {
+        for (let [state, reqID] of Object.entries(this.#downloadByStateReqID)) {
+            if (reqID != null) {
+                this.#internalAPIRequester.abort(reqID);
+                this.#downloadByStateReqID[state] = null;
+            }
+        }
+
+        if (this.#tsSelector.selectedItems.length > 0 && this.#hasPeriodSelected()) {
+
+            for (let [tsDataStateId, seriesOptions] of Object.entries(this.#tsSeriesOptionsByDataState)) {
+                let tsNames = Object.values(seriesOptions).map((seriesOpt) => { return seriesOpt.tsInfo.name; });
+                let tsDataStateName = Object.values(seriesOptions)[0].tsDataState.name;
+
+                let urlParams = {
+                    timeseries: tsNames,
+                    data_state: tsDataStateId,
+                    timezone: app.campaignContext.tz_name,
+                    period: this.#periodTypeElmt.value,
+                    filename: `timeseries_data_${tsDataStateName.toLowerCase()}`,
+                };
+                if (this.#isPeriodCustom()) {
+                    urlParams.start_date = this.#periodStartDatetimeElmt.date;
+                    urlParams.start_time = this.#periodStartDatetimeElmt.time;
+                    urlParams.end_date = this.#periodEndDatetimeElmt.date;
+                    urlParams.end_time = this.#periodEndDatetimeElmt.time;
+                }
+
+                this.#downloadByStateReqID[tsDataStateId] = this.#internalAPIRequester.download(
+                    app.urlFor(`api.timeseries.data.download_multiple`, urlParams),
+                    (response) => {
+                        // Inspired by https://blog.stephensorensen.com/download-files-using-fetch
+                        let objectUrl = URL.createObjectURL(response.blob);
+                        let virtualLinkElmt = document.createElement("a");
+                        virtualLinkElmt.href = objectUrl;
+                        virtualLinkElmt.download = response.filename;
+                        virtualLinkElmt.click();
+                        URL.revokeObjectURL(objectUrl);
+
+                        app.flashMessage(`${response.filename} file downloaded!`, "success", 5);
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
+                    },
+                    () => {
+                        this.#downloadByStateReqID[tsDataStateId] = null;
+                    },
+                );
+            }
+        }
+        else {
+            app.flashMessage("No series or no valid period selected!", "warning", 5);
+        }
+    }
+
     mount() {
         this.#endDateCustomBackup = this.#periodEndDatetimeElmt.date;
         this.#endTimeCustomBackup = this.#periodEndDatetimeElmt.time;
@@ -480,6 +536,7 @@ class TimeSeriesDataExploreStatesView {
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
         this.#chartExplore.tzName = app.campaignContext.tz_name;
+        this.#chartExplore.csvCallback = () => { this.#downloadCSV(); }
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");

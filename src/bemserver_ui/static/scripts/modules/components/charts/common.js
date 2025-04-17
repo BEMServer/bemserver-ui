@@ -24,6 +24,20 @@ export class ChartBase {
             bottom: 50,
             containLabel: true,
         },
+        toolbox: {
+            itemSize: 25,
+            feature: {
+                dataView: {
+                    readOnly: true,
+                    buttonColor: "#95c11a",
+                    icon: "image:///static/images/icons/sheet.svg",
+                },
+                saveAsImage: {
+                    name: "timeseries_data",
+                    icon: "image:///static/images/icons/file-image.svg",
+                },
+            },
+        },
         tooltip: {
             trigger: "axis",
             axisPointer: {

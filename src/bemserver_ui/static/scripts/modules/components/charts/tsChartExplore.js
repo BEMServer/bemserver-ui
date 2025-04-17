@@ -9,6 +9,7 @@ export class TimeseriesChartExplore extends ChartBase {
     #currentSeriesIndex = 0;
 
     #tzName = "UTC";
+    #csvCallback = null;
 
 
     get seriesCount() {
@@ -28,6 +29,15 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#tzName = value;
     }
 
+    get csvCallback() {
+        return this.#csvCallback;
+    }
+    set csvCallback(value) {
+        this.#csvCallback = value;
+
+        this.#chartOpts.toolbox[0].feature.myCSV.show = this.#csvCallback != null;
+        this.setOption(this.#chartOpts);
+    }
 
     constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
@@ -102,16 +112,21 @@ export class TimeseriesChartExplore extends ChartBase {
                     data: [],
                 },
             ],
-            toolbox: {
-                feature: {
-                    dataView: {
-                        readOnly: true,
-                        buttonColor: "#95c11a",
-                        optionToContent: (opt) => { return this.#optionToContent(opt); },
+            toolbox: [
+                {
+                    feature: {
+                        dataView: {
+                            optionToContent: (opt) => { return this.#optionToContent(opt); },
+                        },
+                        myCSV: {
+                            show: false,
+                            title: "Download CSV",
+                            icon: "image:///static/images/icons/file-spreadsheet.svg",
+                            onclick: () => { this.#csvCallback?.(); },
+                        },
                     },
-                    saveAsImage: {},
                 },
-            },
+            ],
             tooltip: {
                 axisPointer: {
                     type: "cross",

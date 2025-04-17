@@ -45,15 +45,6 @@ export class TimeseriesChartDegreeDays extends ChartBase {
                     bottom: 0,
                 },
             ],
-            toolbox: {
-                feature: {
-                    dataView: {
-                        readOnly: true,
-                        buttonColor: "#95c11a",
-                    },
-                    saveAsImage: {},
-                },
-            },
             dataZoom: [
                 {
                     type: "slider",

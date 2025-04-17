@@ -40,14 +40,15 @@ export class TimeseriesChartCompleteness extends ChartBase {
                     hideOverlap: false,
                 },
             },
-            toolbox: {
-                feature: {
-                    dataZoom: {
-                        yAxisIndex: "none",
+            toolbox: [
+                {
+                    feature: {
+                        dataView: {
+                            show: false,
+                        },
                     },
-                    saveAsImage: {},
                 },
-            },
+            ],
             tooltip: {
                 trigger: "item",
             },

@@ -54,23 +54,6 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
                     bottom: 0,
                 },
             ],
-            toolbox: {
-                feature: {
-                    dataZoom: {
-                        yAxisIndex: "none",
-                    },
-                    dataView: {
-                        readOnly: true,
-                        buttonColor: "#95c11a",
-                        lang: [
-                            `${this.#defaultTitle} data`,
-                            "Close",
-                            "Refresh",
-                        ],
-                    },
-                    saveAsImage: {},
-                },
-            },
             dataZoom: [
                 {
                     type: "slider",

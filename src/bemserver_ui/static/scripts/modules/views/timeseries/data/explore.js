@@ -14,6 +14,7 @@ class TimeseriesDataExploreView {
 
     #internalAPIRequester = null;
     #tsDataGetReqID = null;
+    #downloadReqID = null;
 
     #chartContainerElmt = null;
     #chartExplore = null;
@@ -789,6 +790,65 @@ class TimeseriesDataExploreView {
         }
     }
 
+    #downloadCSV() {
+        if (this.#downloadReqID != null) {
+            this.#internalAPIRequester.abort(this.#downloadReqID);
+            this.#downloadReqID = null;
+        }
+
+        let tsNames = Object.values(this.#tsSeriesOptions).map((tsSeries) => {
+            return tsSeries.tsInfo.name;
+        });
+
+        if (tsNames.length > 0 && this.#hasPeriodSelected()) {
+            let urlParams = {
+                timeseries: tsNames,
+                data_state: this.#tsDataStatesSelectElmt.value,
+                timezone: this.#timezonePickerElmt.tzName,
+                period: this.#periodTypeElmt.value,
+                filename: `timeseries_data_${this.#tsDataStatesSelectElmt.options[this.#tsDataStatesSelectElmt.selectedIndex].text.toLowerCase()}`,
+            };
+            urlParams.end_date = this.#periodEndDatetimeElmt.date;
+            urlParams.end_time = this.#periodEndDatetimeElmt.time;
+            if (this.#isPeriodCustom()) {
+                urlParams.start_date = this.#periodStartDatetimeElmt.date;
+                urlParams.start_time = this.#periodStartDatetimeElmt.time;
+            }
+            let aggregation = null;
+            if (this.#aggInputElmt.value != "none") {
+                urlParams.agg = this.#aggInputElmt.value;
+                urlParams.bucket_width_value = this.#bucketElmt.bucketWidthValue;
+                urlParams.bucket_width_unit = this.#bucketElmt.bucketWidthUnit;
+
+                aggregation = this.#aggInputElmt.value;
+            }
+
+            this.#downloadReqID = this.#internalAPIRequester.download(
+                app.urlFor(`api.timeseries.data.download_multiple`, urlParams),
+                (response) => {
+                    // Inspired by https://blog.stephensorensen.com/download-files-using-fetch
+                    let objectUrl = URL.createObjectURL(response.blob);
+                    let virtualLinkElmt = document.createElement("a");
+                    virtualLinkElmt.href = objectUrl;
+                    virtualLinkElmt.download = response.filename;
+                    virtualLinkElmt.click();
+                    URL.revokeObjectURL(objectUrl);
+
+                    app.flashMessage(`${response.filename} file downloaded!`, "success", 5);
+                },
+                (error) => {
+                    app.flashMessage(error.toString(), "error");
+                },
+                () => {
+                    this.#downloadReqID = null;
+                },
+            );
+        }
+        else {
+            app.flashMessage("No series or no valid period selected!", "warning", 5);
+        }
+    }
+
     mount() {
         // Load chart settings from url paramter.
         let url = new URL(window.location);
@@ -804,6 +864,7 @@ class TimeseriesDataExploreView {
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
         this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
+        this.#chartExplore.csvCallback = () => { this.#downloadCSV(); }
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
