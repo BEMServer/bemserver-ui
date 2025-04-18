@@ -18,7 +18,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     get seriesDataCount() {
         return this.#chartOpts.series.reduce((accumulator, currentSeries) => {
-            return accumulator + currentSeries.data.length;
+            return accumulator + (currentSeries.data != null ? currentSeries.data.length : 0);
         }, 0);
     }
 
@@ -36,7 +36,7 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#csvCallback = value;
 
         this.#chartOpts.toolbox[0].feature.myCSV.show = this.#csvCallback != null;
-        this.setOption(this.#chartOpts);
+        this.#setChartOptions();
     }
 
     constructor(chartContainerElmt, initOptions = null) {
@@ -221,7 +221,9 @@ export class TimeseriesChartExplore extends ChartBase {
             // Trick to get around the inability of echarts to manage timezones...
             // X-axis time line is shown in UTC, keeping local time.
             let dt = DateTime.fromISO(timestamp, { zone: this.#tzName });
-            dt = dt.setZone("UTC", { keepLocalTime: true });
+            if (this.#tzName != "UTC") {
+                dt = dt.setZone("UTC", { keepLocalTime: true });
+            }
 
             return [
                 dt.ts,
@@ -235,9 +237,11 @@ export class TimeseriesChartExplore extends ChartBase {
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
+            let dataSeries = opt.series.filter((series) => { return series.data != null; });
+
             // Get all series data by timestamps.
             let data = {};
-            for (let series of opt.series) {
+            for (let series of dataSeries) {
                 for (let row of series.data) {
                     // Set back chart timestamps in the desired timezone.
                     let dt = DateTime.fromMillis(row[0], { zone: "UTC" });
@@ -272,7 +276,7 @@ export class TimeseriesChartExplore extends ChartBase {
             tableHeadTimestampElmt.setAttribute("scope", "col");
             tableHeadTimestampElmt.innerText = "Timestamp";
             tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-            for (let series of opt.series) {
+            for (let series of dataSeries) {
                 let tableHeadThElmt = document.createElement("th");
                 tableHeadThElmt.setAttribute("scope", "col");
                 tableHeadThElmt.innerText = `${series.name}${series.aggregation != null ? ` | ${series.aggregation}` : ""}`;
@@ -288,7 +292,7 @@ export class TimeseriesChartExplore extends ChartBase {
                 tableCellTimestampElmt.innerText = timestamp;
 
                 tableTrElmt.appendChild(tableCellTimestampElmt);
-                for (let series of opt.series) {
+                for (let series of dataSeries) {
                     let tableCellElmt = document.createElement("td");
                     tableCellElmt.innerText = values[series.id] || "";
                     tableTrElmt.appendChild(tableCellElmt);
@@ -479,11 +483,33 @@ export class TimeseriesChartExplore extends ChartBase {
             let seriesIndex = this.#getSeriesIndex(seriesID);
             let series = this.#chartOpts.series[seriesIndex];
 
-            let actionType = "legendToggleSelect";
-            this.dispatchAction({
-                type: actionType,
-                name: series.name,
-            });
+            if (series.name != null) {
+                let actionType = "legendToggleSelect";
+                this.dispatchAction({
+                    type: actionType,
+                    name: series.name,
+                });
+            }
+            else {
+                // Toggle mark areas visibility.
+                if (series.markArea == null) return;
+
+                console.log(this.#chartOpts.series[seriesIndex].markArea.itemStyle);
+
+                if (series.markArea.itemStyle.opacity == 0) {
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacity = series.markArea.itemStyle.opacityBackup || 0.4;
+                }
+                else {
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacityBackup = series.markArea.itemStyle.opacity;
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacity = 0;
+                }
+
+                this.#chartOpts.series[seriesIndex].markArea.label.show = !series.markArea.label.show;
+
+                this.#setChartOptions();
+
+                console.log(this.getOption());
+            }
         }
     }
 
@@ -530,6 +556,159 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#updateLegend();
         this.#setChartOptions();
     }
+
+    // hasMarkAreaSeries(areaName) {
+    //     let options = this.getOption();
+    //     let seriesIds = options.series.map((series) => { return series.id; });
+    //     return seriesIds.includes(this.#getMarkAreaSeriesId(areaName));
+    // }
+
+    // timestamps: list[[timestamp_start, timestamp_end]]
+    updateMarkAreaSeries(areaName, timestamps, styleOpts = { color: "#777777", opacity: 0.4, bgColorLabel: "#ffffff" }) {
+        // let markAreaSeriesId = this.#getMarkAreaSeriesId(areaName);
+
+        // if (this.#hasSeries(areaName)) {
+        //     console.warn(`This chart already contains a series for ${areaName} mark area!`);
+        //     return;
+        // }
+
+        let markAreaData = timestamps.map((areaRange) => {
+            // Trick to get around the inability of echarts to manage timezones...
+            // X-axis time line is shown in UTC, keeping local time.
+            let areaRangeDateStart = DateTime.fromISO(areaRange[0], { zone: this.#tzName });
+            let areaRangeDateEnd = DateTime.fromISO(areaRange[1], { zone: this.#tzName });
+            if (this.#tzName != "UTC") {
+                areaRangeDateStart = areaRangeDateStart.setZone("UTC", { keepLocalTime: true });
+                areaRangeDateEnd = areaRangeDateEnd.setZone("UTC", { keepLocalTime: true });
+            }
+
+            return [
+                {
+                    name: areaName,
+                    xAxis: areaRangeDateStart.ts,
+                },
+                {
+                    xAxis: areaRangeDateEnd.ts,
+                },
+            ];
+        });
+
+        // let markAreaSeries = {
+        //     id: areaName,
+        //     // name: null,
+        //     type: "line",
+        //     silent: true,
+        //     // data: [],
+        //     markArea: {
+        //         silent: true,
+        //         data: markAreaData,
+        //         itemStyle: {
+        //             color: styleOpts.color || "#777777",
+        //             opacity: styleOpts.opacity || 0.4,
+        //         },
+        //         label: {
+        //             show: true,
+        //             backgroundColor: styleOpts.bgColorLabel || "#ffffff",
+        //         },
+        //     },
+        // };
+
+        // console.log(markAreaSeries);
+
+        // let options = this.getOption();
+        // options.series.push(markAreaSeries);
+
+        // console.log(options.series);
+
+        // this.setOption(options);
+
+        let seriesIndex = this.#getSeriesIndex(areaName);
+
+        if (seriesIndex != -1) {
+            this.#chartOpts.series[seriesIndex].markArea.data = markAreaData;
+        }
+        else {
+            let markAreaSeries = {
+                id: areaName,
+                // name: null,
+                type: "line",
+                silent: true,
+                // data: [],
+                markArea: {
+                    silent: true,
+                    data: markAreaData,
+                    itemStyle: {
+                        color: styleOpts.color || "#777777",
+                        opacity: styleOpts.opacity || 0.4,
+                    },
+                    label: {
+                        show: true,
+                        backgroundColor: styleOpts.bgColorLabel || "#ffffff",
+                    },
+                },
+            };
+
+            this.#chartOpts.series.push(markAreaSeries);
+        }
+
+        delete this.#chartOpts.markArea;
+
+        this.#setChartOptions();
+
+        console.log(this.getOption());
+    }
+
+    // showMarkAreaSeries(areaName) {
+    //     // // let markAreaSeries = this.#getMarkAreaSeries(areaName);
+    //     // // if (markAreaSeries != null) {
+
+    //     // // }
+
+    //     // let markAreaSeriesId = this.#getMarkAreaSeriesId(areaName);
+    //     // let options = this.getOption();
+
+    //     // for (let series of options.series) {
+    //     //     if (series.id == markAreaSeriesId) {
+    //     //         series.
+    //     //         this.setOption(options);
+    //     //         break;
+    //     //     }
+    //     // }
+    // }
+
+    // hideMarkAreaSeries(areaName) {
+    //     // let options = this.getOption();
+    //     // options.series.push(markAreaSeries);
+    //     // this.setOption(options);
+    // }
+
+    // #getMarkAreaSeriesId(areaName) {
+    //     return `area-${areaName}`;
+    // }
+
+    // #getMarkAreaSeries(areaName) {
+    //     let markAreaSeriesId = this.#getMarkAreaSeriesId(areaName);
+    //     let options = this.getOption();
+    //     for (let series of options.series) {
+    //         if (series.id == markAreaSeriesId) {
+    //             return series;
+    //         }
+    //     }
+    //     return null;
+    // }
+
+    // toggleSeriesVisibility(seriesID) {
+    //     if (this.#hasSeries(seriesID)) {
+    //         let seriesIndex = this.#getSeriesIndex(seriesID);
+    //         let series = this.#chartOpts.series[seriesIndex];
+
+    //         let actionType = "legendToggleSelect";
+    //         this.dispatchAction({
+    //             type: actionType,
+    //             name: series.name,
+    //         });
+    //     }
+    // }
 }
 
 

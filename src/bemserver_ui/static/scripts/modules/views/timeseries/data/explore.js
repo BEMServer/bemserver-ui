@@ -15,6 +15,7 @@ class TimeseriesDataExploreView {
     #internalAPIRequester = null;
     #tsDataGetReqID = null;
     #downloadReqID = null;
+    #weekendsReqID = null;
 
     #chartContainerElmt = null;
     #chartExplore = null;
@@ -35,6 +36,7 @@ class TimeseriesDataExploreView {
     #removeAllSeriesBtnElmt = null;
     #tsDataStatesSelectElmt = null;
     #timezonePickerElmt = null;
+    #weekendPeriodSwitchElmt = null;
 
     #selectTimeseriesModalElmt = null;
     #selectTimeseriesModal = null;
@@ -50,6 +52,7 @@ class TimeseriesDataExploreView {
 
     #tsSeriesOptions = {};
     #periodTypeLoaded = null;
+    #weekendAreaName = "weekend";
 
 
     constructor() {
@@ -77,6 +80,7 @@ class TimeseriesDataExploreView {
         this.#removeAllSeriesBtnElmt = document.getElementById("removeAllSeriesBtn");
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
         this.#timezonePickerElmt = document.getElementById("timezonePicker");
+        this.#weekendPeriodSwitchElmt = document.getElementById("weekendPeriodSwitch");
 
         this.#selectTimeseriesModalElmt = document.getElementById("selectTimeseries");
         this.#selectTimeseriesModal = new bootstrap.Modal(this.#selectTimeseriesModalElmt);
@@ -91,6 +95,8 @@ class TimeseriesDataExploreView {
             this.#updatePeriodCustomState();
             if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
                 this.#loadChartSeries();
+
+                this.#refreshAreaSeries(true);
             }
         });
 
@@ -135,6 +141,19 @@ class TimeseriesDataExploreView {
             this.#periodEndDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
             this.#loadChartSeries();
+        });
+
+        this.#weekendPeriodSwitchElmt.addEventListener("change", () => {
+
+            if (this.#chartExplore.hasSeries(this.#weekendAreaName)) {
+                this.#chartExplore.toggleSeriesVisibility(this.#weekendAreaName);
+                this.#updateUrlParams();
+            }
+            else {
+                this.#refreshAreaSeries();
+            }
+
+            // this.#updateUrlParams();
         });
 
         this.#tsSelector.addEventListener("toggleItem", () => {
@@ -770,6 +789,46 @@ class TimeseriesDataExploreView {
         this.#chartExplore.hideLoading();
     }
 
+    #refreshAreaSeries(forceReloadData = false) {
+        if (this.#weekendPeriodSwitchElmt.checked && this.#hasPeriodSelected()) {
+            if (!this.#chartExplore.hasSeries(this.#weekendAreaName) || forceReloadData) {
+                this.#chartExplore.showLoading();
+
+                if (this.#weekendsReqID != null) {
+                    this.#internalAPIRequester.abort(this.#weekendsReqID);
+                    this.#weekendsReqID = null;
+                }
+
+                let urlParams = {
+                    timezone: this.#timezonePickerElmt.tzName,
+                    period: this.#periodTypeElmt.value,
+                };
+                urlParams.end_date = this.#periodEndDatetimeElmt.date;
+                urlParams.end_time = this.#periodEndDatetimeElmt.time;
+                if (this.#isPeriodCustom()) {
+                    urlParams.start_date = this.#periodStartDatetimeElmt.date;
+                    urlParams.start_time = this.#periodStartDatetimeElmt.time;
+                }
+
+                this.#weekendsReqID = this.#internalAPIRequester.get(
+                    app.urlFor(`api.analysis.parameters.weekends`, urlParams),
+                    (data) => {
+                        console.log(data);
+
+                        this.#chartExplore.updateMarkAreaSeries(this.#weekendAreaName, data, { color: "#5b6b9f" });
+
+                        this.#chartExplore.hideLoading();
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
+
+                        this.#chartExplore.hideLoading();
+                    },
+                );
+            }
+        }
+    }
+
     #loadChartSettingsFromUrlParam(urlParamValue) {
         if (this.#tsSeriesOptions == null) {
             this.#tsSeriesOptions = {};
@@ -814,13 +873,10 @@ class TimeseriesDataExploreView {
                 urlParams.start_date = this.#periodStartDatetimeElmt.date;
                 urlParams.start_time = this.#periodStartDatetimeElmt.time;
             }
-            let aggregation = null;
             if (this.#aggInputElmt.value != "none") {
                 urlParams.agg = this.#aggInputElmt.value;
                 urlParams.bucket_width_value = this.#bucketElmt.bucketWidthValue;
                 urlParams.bucket_width_unit = this.#bucketElmt.bucketWidthUnit;
-
-                aggregation = this.#aggInputElmt.value;
             }
 
             this.#downloadReqID = this.#internalAPIRequester.download(

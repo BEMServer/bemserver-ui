@@ -15,6 +15,7 @@ from bemserver_ui.common.time import (
     get_isoweek_from_date,
     get_month_weeks,
     get_period_from_isoweek,
+    get_weekend_timestamps_range,
     get_weeks,
     get_year_weeks,
     strfdelta,
@@ -452,3 +453,50 @@ class TestCommonTime:
             isoweek
             == f"{dt_ref_isocal.year}-W{dt_ref_isocal.week}-{dt_ref.weekday() + 1}"
         )
+
+    # @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [ZoneInfo("Europe/Paris")])
+    def test_get_weekend_timestamps_range(self, tz):
+        # Start/end datetimes are not in weekends.
+        dt_start = dt.datetime(2025, 1, 1, 23, 30, tzinfo=tz)
+        dt_end = dt.datetime(2025, 3, 1, tzinfo=tz)
+        weekend_timestamps = get_weekend_timestamps_range(dt_start, dt_end)
+
+        assert len(weekend_timestamps) == 9
+        for weekend in weekend_timestamps:
+            assert len(weekend) == 2
+
+        expected_first_weekend = [
+            dt.datetime(2025, 1, 4, tzinfo=tz),
+            dt.datetime(2025, 1, 5, tzinfo=tz),
+        ]
+        assert weekend_timestamps[0] == expected_first_weekend
+
+        # Start datetime is a Saturday.
+        dt_start = dt.datetime(2025, 1, 5, 23, 30, tzinfo=tz)
+        dt_end = dt.datetime(2025, 2, 1, tzinfo=tz)
+        weekend_timestamps = get_weekend_timestamps_range(dt_start, dt_end)
+
+        assert len(weekend_timestamps) == 5
+        for weekend in weekend_timestamps:
+            assert len(weekend) == 2
+
+        expected_first_weekend = [
+            dt.datetime(2025, 1, 4, tzinfo=tz),
+            dt.datetime(2025, 1, 5, tzinfo=tz),
+        ]
+        assert weekend_timestamps[0] == expected_first_weekend
+
+        dt_start = dt.datetime(2025, 4, 11, 16, 43, tzinfo=tz)
+        dt_end = dt.datetime(2025, 4, 18, tzinfo=tz)
+        weekend_timestamps = get_weekend_timestamps_range(dt_start, dt_end)
+
+        assert len(weekend_timestamps) == 1
+        for weekend in weekend_timestamps:
+            assert len(weekend) == 2
+
+        expected_first_weekend = [
+            dt.datetime(2025, 4, 12, tzinfo=tz),
+            dt.datetime(2025, 4, 13, tzinfo=tz),
+        ]
+        assert weekend_timestamps[0] == expected_first_weekend
