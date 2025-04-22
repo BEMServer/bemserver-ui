@@ -24,6 +24,7 @@ export class DatetimePicker extends HTMLDivElement {
     #dateMin = null;
     #dateMax = null;
     #usedAsFilter = false;
+    #mode = "datetime";  // datetime, date or time
 
     #date = null;
     #time = null;
@@ -95,11 +96,16 @@ export class DatetimePicker extends HTMLDivElement {
         return this.#dateInputElmt.value != "" && this.#dateInputElmt.value != null;
     }
 
+    get hasTime() {
+        return this.#timeInputElmt.value != "" && this.#timeInputElmt.value != null;
+    }
+
     get isValid() {
         return this.#dateInputElmt.validity.valid && this.#timeInputElmt.validity.valid;
     }
 
     #loadOptions(options = {}) {
+        this.#mode = this.getAttribute("mode") || options.mode || "datetime";
         this.#dateInputFormBind = this.getAttribute("date-input-form-bind") || options.dateInputFormBind;
         this.#timeInputFormBind = this.getAttribute("time-input-form-bind") || options.timeInputFormBind;
         this.#isRequired = options?.required == null ? this.hasAttribute("required") : Parser.parseBoolOrDefault(options.required, false);
@@ -226,6 +232,26 @@ export class DatetimePicker extends HTMLDivElement {
         bsTooltipTzInfo.setContent({ ".tooltip-inner": tzInfoTitleContentElmt.outerHTML });
     }
 
+    #updateMode() {
+        switch (this.#mode) {
+            case "date":
+                this.#dateInputElmt.classList.remove("d-none", "invisible");
+                this.#timeInputElmt.classList.add("d-none", "invisible");
+                break;
+
+            case "time":
+                this.#dateInputElmt.classList.add("d-none", "invisible");
+                this.#timeInputElmt.classList.remove("d-none", "invisible");
+                break;
+    
+            case "datetime":
+            default:
+                this.#dateInputElmt.classList.remove("d-none", "invisible");
+                this.#timeInputElmt.classList.remove("d-none", "invisible");
+                break;
+        }
+    }
+
     connectedCallback() {
         this.#loadOptions(this.#initOptions);
 
@@ -270,6 +296,7 @@ export class DatetimePicker extends HTMLDivElement {
         this.#tzInfoElmt.setAttribute("data-bs-html", true);
         this.appendChild(this.#tzInfoElmt);
 
+        this.#updateMode();
         this.#updateDateBounds();
         this.#updateDateAndTime();
         this.#updateTzInfo();
