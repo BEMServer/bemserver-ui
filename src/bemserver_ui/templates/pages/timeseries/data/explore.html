@@ -101,10 +101,18 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row mb-2">
                 <div class="col-auto">
                     <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ tz_name }}" required>
                         <div is="app-spinner"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="weekendPeriodSwitch"{% if show_weekend_periods == 1 %} checked{% endif %}>
+                        <label class="form-check-label text-nowrap" for="weekendPeriodSwitch">Show weekend periods</label>
                     </div>
                 </div>
             </div>

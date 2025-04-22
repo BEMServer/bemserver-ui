@@ -255,3 +255,60 @@ def get_period_from_isoweek(isoweek, *, tz=dt.timezone.utc):
 def get_isoweek_from_date(date, *, include_daynum=False):
     isoweek_format = "%G-W%V-%u" if include_daynum else "%G-W%V"
     return dt.datetime.strftime(date, isoweek_format)
+
+
+def get_weekend_periods(dt_start, dt_end):
+    """Get the list of weekend periods between 2 dates.
+    Time part is ignored.
+
+    Reminder on weekday concept: Monday is 0 and Sunday is 6.
+    Weekend days are set to be Saturday (5) and Sunday (6).
+
+    :param `datetime.datetime` dt_start: Start of calculation period
+    :param `datetime.datetime` dt_end: End of calculation period
+    :return `[[datetime.datetime]]`:
+        A list of timezone aware datetime instances for each weekend period.
+    """
+    weekend_days = [5, 6]
+
+    # Ignore time part of the given period.
+    dt_start = dt_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    dt_end = dt_end.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # As we want complete weekend period, ensure that:
+    #  - the start datetime includes the first weekend day possible.
+    min_weekend_days = min(weekend_days)
+    if dt_start.weekday() in weekend_days and dt_start.weekday() > min_weekend_days:
+        dt_start -= dt.timedelta(days=1.0) * (dt_start.weekday() - min_weekend_days)
+    #  - and the end datetime includes the last weekdend day possible.
+    max_weekend_day = max(weekend_days)
+    if dt_end.weekday() in weekend_days and dt_end.weekday() < max_weekend_day:
+        dt_end += dt.timedelta(days=1.0) * (max_weekend_day - dt_end.weekday())
+
+    weekend_length = len(weekend_days)  # Number of days counted in a weekend.
+
+    # Get all weekend dates from the whole given period.
+    weekend_dates = [
+        day
+        for day in [
+            dt_start + dt.timedelta(n) for n in range((dt_end - dt_start).days + 1)
+        ]
+        if day.weekday() in weekend_days
+    ]
+
+    # Group each weekend dates together.
+    weekend_periods = []
+    index = 0
+    while index + weekend_length <= len(weekend_dates):
+        weekend_period = []
+        for n in range(weekend_length):
+            weekend_period.append(weekend_dates[index + n])
+
+        weekend_period[-1] += dt.timedelta(
+            hours=23.0, minutes=59.0, seconds=59.0, microseconds=999999
+        )
+
+        weekend_periods.append(weekend_period)
+        index += weekend_length
+
+    return weekend_periods

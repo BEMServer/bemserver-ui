@@ -128,6 +128,10 @@ def explore():
         bucket_width_value = 1
     bucket_width_unit = flask.request.args.get("bucket_width_unit", "hour")
 
+    show_weekend_periods = flask.request.args.get("show_we", 0)
+    if show_weekend_periods not in [0, 1]:
+        show_weekend_periods = 0
+
     return flask.render_template(
         "pages/timeseries/data/explore.html",
         timeseries_ids=",".join([str(x) for x in timeseries_ids]),
@@ -142,6 +146,7 @@ def explore():
         bucket_width_value=bucket_width_value,
         bucket_width_unit=bucket_width_unit,
         tz_name=tz_name,
+        show_weekend_periods=show_weekend_periods,
     )
 
 

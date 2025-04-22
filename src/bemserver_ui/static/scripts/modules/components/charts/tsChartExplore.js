@@ -18,7 +18,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     get seriesDataCount() {
         return this.#chartOpts.series.reduce((accumulator, currentSeries) => {
-            return accumulator + currentSeries.data.length;
+            return accumulator + (currentSeries.data != null ? currentSeries.data.length : 0);
         }, 0);
     }
 
@@ -36,7 +36,7 @@ export class TimeseriesChartExplore extends ChartBase {
         this.#csvCallback = value;
 
         this.#chartOpts.toolbox[0].feature.myCSV.show = this.#csvCallback != null;
-        this.setOption(this.#chartOpts);
+        this.#setChartOptions();
     }
 
     constructor(chartContainerElmt, initOptions = null) {
@@ -46,23 +46,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
         this.#initChartOptions();
         this.#chartOpts = this.getOption();
-
-        this.registerEvent("legendselectchanged", (params) => {
-            // Get series id from name.
-            let seriesIndex = this.#getSeriesIndexFromName(params.name);
-            let seriesID = this.#chartOpts.series[seriesIndex].id;
-            let tsID = this.#chartOpts.series[seriesIndex].timeseriesID;
-            let isVisible = params.selected[params.name];
-    
-            this.#chartOpts.series[seriesIndex].visible = isVisible;
-            this.#updateYAxisName(true);
-    
-            let seriesVisibilityEvent = new CustomEvent(
-                "seriesVisibilityChanged",
-                { detail: { id: seriesID, timeseriesID: tsID, visibility: isVisible }, bubbles: true },
-            );
-            this.dispatchEvent(seriesVisibilityEvent);
-        });
+        this.#initEventListeners();
     }
 
     #initChartOptions() {
@@ -149,6 +133,25 @@ export class TimeseriesChartExplore extends ChartBase {
         });
     }
 
+    #initEventListeners() {
+        this.registerEvent("legendselectchanged", (params) => {
+            // Get series id from name.
+            let seriesIndex = this.#getSeriesIndexFromName(params.name);
+            let seriesID = this.#chartOpts.series[seriesIndex].id;
+            let tsID = this.#chartOpts.series[seriesIndex].timeseriesID;
+            let isVisible = params.selected[params.name];
+    
+            this.#chartOpts.series[seriesIndex].visible = isVisible;
+            this.#updateYAxisName(true);
+    
+            let seriesVisibilityEvent = new CustomEvent(
+                "seriesVisibilityChanged",
+                { detail: { id: seriesID, timeseriesID: tsID, visibility: isVisible }, bubbles: true },
+            );
+            this.dispatchEvent(seriesVisibilityEvent);
+        });
+    }
+
     showLoading() {
         // Hide "No data" title.
         this.#hideNoData(true);
@@ -221,7 +224,9 @@ export class TimeseriesChartExplore extends ChartBase {
             // Trick to get around the inability of echarts to manage timezones...
             // X-axis time line is shown in UTC, keeping local time.
             let dt = DateTime.fromISO(timestamp, { zone: this.#tzName });
-            dt = dt.setZone("UTC", { keepLocalTime: true });
+            if (this.#tzName != "UTC") {
+                dt = dt.setZone("UTC", { keepLocalTime: true });
+            }
 
             return [
                 dt.ts,
@@ -235,9 +240,11 @@ export class TimeseriesChartExplore extends ChartBase {
         mainContainerElmt.classList.add("m-2", "me-3");
 
         if (opt.series.length > 0) {
+            let dataSeries = opt.series.filter((series) => { return series.data != null; });
+
             // Get all series data by timestamps.
             let data = {};
-            for (let series of opt.series) {
+            for (let series of dataSeries) {
                 for (let row of series.data) {
                     // Set back chart timestamps in the desired timezone.
                     let dt = DateTime.fromMillis(row[0], { zone: "UTC" });
@@ -272,7 +279,7 @@ export class TimeseriesChartExplore extends ChartBase {
             tableHeadTimestampElmt.setAttribute("scope", "col");
             tableHeadTimestampElmt.innerText = "Timestamp";
             tableHeadTrElmt.appendChild(tableHeadTimestampElmt);
-            for (let series of opt.series) {
+            for (let series of dataSeries) {
                 let tableHeadThElmt = document.createElement("th");
                 tableHeadThElmt.setAttribute("scope", "col");
                 tableHeadThElmt.innerText = `${series.name}${series.aggregation != null ? ` | ${series.aggregation}` : ""}`;
@@ -288,7 +295,7 @@ export class TimeseriesChartExplore extends ChartBase {
                 tableCellTimestampElmt.innerText = timestamp;
 
                 tableTrElmt.appendChild(tableCellTimestampElmt);
-                for (let series of opt.series) {
+                for (let series of dataSeries) {
                     let tableCellElmt = document.createElement("td");
                     tableCellElmt.innerText = values[series.id] || "";
                     tableTrElmt.appendChild(tableCellElmt);
@@ -479,11 +486,31 @@ export class TimeseriesChartExplore extends ChartBase {
             let seriesIndex = this.#getSeriesIndex(seriesID);
             let series = this.#chartOpts.series[seriesIndex];
 
-            let actionType = "legendToggleSelect";
-            this.dispatchAction({
-                type: actionType,
-                name: series.name,
-            });
+            if (series.name != null) {
+                let actionType = "legendToggleSelect";
+                this.dispatchAction({
+                    type: actionType,
+                    name: series.name,
+                });
+            }
+            else {
+                // Toggle mark areas visibility.
+                if (series.markArea == null) return;
+
+                // Hide areas by setting the opacity to zero, show by setting back the original opacity value.
+                if (series.markArea.itemStyle.opacity == 0) {
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacity = series.markArea.itemStyle.opacityBackup || 0.4;
+                }
+                else {
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacityBackup = series.markArea.itemStyle.opacity;
+                    this.#chartOpts.series[seriesIndex].markArea.itemStyle.opacity = 0;
+                }
+
+                // Show/hide area label.
+                this.#chartOpts.series[seriesIndex].markArea.label.show = !series.markArea.label.show;
+
+                this.#setChartOptions();
+            }
         }
     }
 
@@ -528,6 +555,61 @@ export class TimeseriesChartExplore extends ChartBase {
     refresh() {
         this.#updateYAxisName();
         this.#updateLegend();
+        this.#setChartOptions();
+    }
+
+    // Expected timestamps format: list[[timestamp_start, timestamp_end]]
+    updateMarkAreaSeries(areaName, timestamps, styleOpts = { color: "#777777", opacity: 0.4, bgColorLabel: "#ffffff" }) {
+        let markAreaData = Object.entries(timestamps).map(([index, areaRange]) => {
+            // Trick to get around the inability of echarts to manage timezones...
+            // X-axis time line is shown in UTC, keeping local time.
+            let areaRangeDateStart = DateTime.fromISO(areaRange[0], { zone: this.#tzName });
+            let areaRangeDateEnd = DateTime.fromISO(areaRange[1], { zone: this.#tzName });
+            if (this.#tzName != "UTC") {
+                areaRangeDateStart = areaRangeDateStart.setZone("UTC", { keepLocalTime: true });
+                areaRangeDateEnd = areaRangeDateEnd.setZone("UTC", { keepLocalTime: true });
+            }
+
+            return [
+                {
+                    name: index % 2 == 0 ? areaName : null,
+                    xAxis: areaRangeDateStart.ts,
+                },
+                {
+                    xAxis: areaRangeDateEnd.ts,
+                },
+            ];
+        });
+
+        let seriesIndex = this.#getSeriesIndex(areaName);
+        if (seriesIndex != -1) {
+            this.#chartOpts.series[seriesIndex].markArea.data = markAreaData;
+        }
+        else {
+            let markAreaSeries = {
+                id: areaName,
+                type: "line",
+                silent: true,
+                markArea: {
+                    silent: true,
+                    data: markAreaData,
+                    itemStyle: {
+                        color: styleOpts.color || "#777777",
+                        opacity: styleOpts.opacity || 0.4,
+                    },
+                    label: {
+                        show: true,
+                        backgroundColor: styleOpts.bgColorLabel || "#ffffff",
+                    },
+                },
+            };
+
+            this.#chartOpts.series.push(markAreaSeries);
+        }
+
+        // XXX: remove this entry from chart options, else mark areas from series are not displayed...
+        delete this.#chartOpts.markArea;
+
         this.#setChartOptions();
     }
 }

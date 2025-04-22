@@ -15,6 +15,7 @@ class TimeseriesDataExploreView {
     #internalAPIRequester = null;
     #tsDataGetReqID = null;
     #downloadReqID = null;
+    #weekendsReqID = null;
 
     #chartContainerElmt = null;
     #chartExplore = null;
@@ -35,6 +36,7 @@ class TimeseriesDataExploreView {
     #removeAllSeriesBtnElmt = null;
     #tsDataStatesSelectElmt = null;
     #timezonePickerElmt = null;
+    #weekendPeriodSwitchElmt = null;
 
     #selectTimeseriesModalElmt = null;
     #selectTimeseriesModal = null;
@@ -50,6 +52,8 @@ class TimeseriesDataExploreView {
 
     #tsSeriesOptions = {};
     #periodTypeLoaded = null;
+    #weekendAreaName = "weekend";
+    #weekendAreaForceRefresh = false;
 
 
     constructor() {
@@ -77,6 +81,7 @@ class TimeseriesDataExploreView {
         this.#removeAllSeriesBtnElmt = document.getElementById("removeAllSeriesBtn");
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
         this.#timezonePickerElmt = document.getElementById("timezonePicker");
+        this.#weekendPeriodSwitchElmt = document.getElementById("weekendPeriodSwitch");
 
         this.#selectTimeseriesModalElmt = document.getElementById("selectTimeseries");
         this.#selectTimeseriesModal = new bootstrap.Modal(this.#selectTimeseriesModalElmt);
@@ -90,17 +95,20 @@ class TimeseriesDataExploreView {
         this.#periodTypeElmt.addEventListener("change", () => {
             this.#updatePeriodCustomState();
             if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
+                this.#weekendAreaForceRefresh = true;
                 this.#loadChartSeries();
             }
         });
 
         this.#periodStartDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
+            this.#weekendAreaForceRefresh = true;
             this.#loadChartSeries();
         }, 1000));
 
         this.#periodEndDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
+            this.#weekendAreaForceRefresh = true;
             this.#loadChartSeries();
         }, 1000));
 
@@ -134,7 +142,18 @@ class TimeseriesDataExploreView {
             this.#periodStartDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#periodEndDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
+            this.#weekendAreaForceRefresh = true;
             this.#loadChartSeries();
+        });
+
+        this.#weekendPeriodSwitchElmt.addEventListener("change", () => {
+            if (this.#chartExplore.hasSeries(this.#weekendAreaName)) {
+                this.#chartExplore.toggleSeriesVisibility(this.#weekendAreaName);
+                this.#updateUrlParams();
+            }
+            else {
+                this.#refreshAreaSeries();
+            }
         });
 
         this.#tsSelector.addEventListener("toggleItem", () => {
@@ -237,6 +256,8 @@ class TimeseriesDataExploreView {
             let url = new URL(window.location);
 
             this.#tsDataStatesSelectElmt.value = url.searchParams.get("data_state");
+
+            this.#weekendPeriodSwitchElmt.checked = url.searchParams.get("show_we") == 1;
 
             this.#periodTypeElmt.value = url.searchParams.get("period_type");
             let tzName = url.searchParams.get("tz");
@@ -624,6 +645,7 @@ class TimeseriesDataExploreView {
         url.searchParams.set("data_state", this.#tsDataStatesSelectElmt.value);
         url.searchParams.set("period_type", this.#periodTypeElmt.value);
         url.searchParams.set("tz", this.#timezonePickerElmt.tzName);
+        url.searchParams.set("show_we", this.#weekendPeriodSwitchElmt.checked ? 1 : 0);
 
         let doUpdateUrl = true;
         if (this.#isPeriodCustom()) {
@@ -754,6 +776,8 @@ class TimeseriesDataExploreView {
         else {
             this.#chartExplore.hideLoading();
         }
+
+        this.#refreshAreaSeries();
     }
 
     #refreshChart(tsID = null, yAxisIndexChanged = false) {
@@ -768,6 +792,48 @@ class TimeseriesDataExploreView {
         }
 
         this.#chartExplore.hideLoading();
+    }
+
+    #refreshAreaSeries() {
+        if (this.#weekendPeriodSwitchElmt.checked && this.#hasPeriodSelected()) {
+            if (!this.#chartExplore.hasSeries(this.#weekendAreaName) || this.#weekendAreaForceRefresh) {
+                this.#weekendAreaForceRefresh = false;
+                this.#chartExplore.showLoading();
+
+                if (this.#weekendsReqID != null) {
+                    this.#internalAPIRequester.abort(this.#weekendsReqID);
+                    this.#weekendsReqID = null;
+                }
+
+                let urlParams = {
+                    timezone: this.#timezonePickerElmt.tzName,
+                    period: this.#periodTypeElmt.value,
+                };
+                urlParams.end_date = this.#periodEndDatetimeElmt.date;
+                urlParams.end_time = this.#periodEndDatetimeElmt.time;
+                if (this.#isPeriodCustom()) {
+                    urlParams.start_date = this.#periodStartDatetimeElmt.date;
+                    urlParams.start_time = this.#periodStartDatetimeElmt.time;
+                }
+
+                this.#weekendsReqID = this.#internalAPIRequester.get(
+                    app.urlFor(`api.analysis.parameters.weekends`, urlParams),
+                    (data) => {
+                        this.#chartExplore.updateMarkAreaSeries(this.#weekendAreaName, data, { color: "#999999" });
+
+                        this.#chartExplore.hideLoading();
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
+
+                        this.#chartExplore.hideLoading();
+                    },
+                );
+            }
+        }
+        else {
+            this.#chartExplore.toggleSeriesVisibility(this.#weekendAreaName);
+        }
     }
 
     #loadChartSettingsFromUrlParam(urlParamValue) {
@@ -814,13 +880,10 @@ class TimeseriesDataExploreView {
                 urlParams.start_date = this.#periodStartDatetimeElmt.date;
                 urlParams.start_time = this.#periodStartDatetimeElmt.time;
             }
-            let aggregation = null;
             if (this.#aggInputElmt.value != "none") {
                 urlParams.agg = this.#aggInputElmt.value;
                 urlParams.bucket_width_value = this.#bucketElmt.bucketWidthValue;
                 urlParams.bucket_width_unit = this.#bucketElmt.bucketWidthUnit;
-
-                aggregation = this.#aggInputElmt.value;
             }
 
             this.#downloadReqID = this.#internalAPIRequester.download(
@@ -865,6 +928,8 @@ class TimeseriesDataExploreView {
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
         this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
         this.#chartExplore.csvCallback = () => { this.#downloadCSV(); }
+
+        this.#refreshAreaSeries();
 
         // Update timeseries selector component with selected timeseries and update chart.
         let tsIDs = (this.#timeseriesElmt.value.split(",") || []).filter(x => x != "");
