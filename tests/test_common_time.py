@@ -12,8 +12,11 @@ from bemserver_ui.common.time import (
     add_time,
     convert_from_iso,
     convert_html_form_datetime,
+    convert_html_form_time,
+    get_default_night,
     get_isoweek_from_date,
     get_month_weeks,
+    get_night_periods,
     get_period_from_isoweek,
     get_weekend_periods,
     get_weeks,
@@ -53,6 +56,18 @@ class TestCommonTime:
             convert_html_form_datetime("2023-03-dd", "HH:07")
         with pytest.raises(BEMServerUICommonInvalidDatetimeError):
             convert_html_form_datetime("2023-03-22", "10:07", tz="bad_tz")
+
+    def test_convert_html_form_time(self):
+        assert convert_html_form_time("10:07") == dt.time(hour=10, minute=7)
+
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            convert_html_form_time("66:07")
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            convert_html_form_time(None)
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            convert_html_form_time(42)
+        with pytest.raises(BEMServerUICommonInvalidDatetimeError):
+            convert_html_form_time("HH:07")
 
     def test_convert_from_iso(self):
         assert convert_from_iso("2023-03-22T10:07:00+00:00") == (
@@ -500,3 +515,48 @@ class TestCommonTime:
             dt.datetime(2025, 4, 13, 23, 59, 59, 999999, tzinfo=tz),
         ]
         assert weekend_periods[0] == expected_first_weekend
+
+    def test_get_default_night(self):
+        default_night_times = get_default_night()
+        assert len(default_night_times) == 2
+        assert default_night_times[0] == dt.time(hour=22)
+        assert default_night_times[1] == dt.time(hour=6)
+
+    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    def test_get_night_periods(self, tz):
+        # Default night time from 22:00 to 06:00.
+        dt_start = dt.datetime(2025, 4, 15, tzinfo=tz)
+        dt_end = dt.datetime(2025, 4, 25, tzinfo=tz)
+        night_periods = get_night_periods(dt_start, dt_end)
+
+        assert len(night_periods) == 10
+        for night in night_periods:
+            assert len(night) == 2
+            assert night[0].hour == 22
+            assert night[1].hour == 6
+
+        # Default night time from 22:00 to 06:00, set start/end time for period.
+        dt_start = dt.datetime(2025, 4, 15, 23, 30, tzinfo=tz)
+        dt_end = dt.datetime(2025, 4, 25, 2, 22, tzinfo=tz)
+        night_periods = get_night_periods(dt_start, dt_end)
+
+        assert len(night_periods) == 10
+        for night in night_periods:
+            assert len(night) == 2
+            assert night[0].hour == 22
+            assert night[1].hour == 6
+
+        # Custom night time from 23:15 to 07:30.
+        dt_start = dt.datetime(2025, 4, 15, tzinfo=tz)
+        dt_end = dt.datetime(2025, 4, 25, tzinfo=tz)
+        t_night_start = dt.time(hour=23, minute=15)
+        t_night_end = dt.time(hour=7, minute=30)
+        night_periods = get_night_periods(
+            dt_start, dt_end, t_night_start=t_night_start, t_night_end=t_night_end
+        )
+
+        assert len(night_periods) == 10
+        for night in night_periods:
+            assert len(night) == 2
+            assert night[0].time() == t_night_start
+            assert night[1].time() == t_night_end

@@ -101,18 +101,38 @@
                     </div>
                 </div>
             </div>
-            <div class="row mb-2">
+            <div class="row mb-3">
                 <div class="col-auto">
                     <div is="app-timezone-picker" id="timezonePicker" title="Timezone" tzname="{{ tz_name }}" required>
                         <div is="app-spinner"></div>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-auto">
+            <div class="row mb-2">
+                <div class="col-auto d-flex align-items-center gap-3">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="weekendPeriodSwitch"{% if show_weekend_periods == 1 %} checked{% endif %}>
                         <label class="form-check-label text-nowrap" for="weekendPeriodSwitch">Show weekend periods</label>
+                    </div>
+                    <div>
+                        <input id="weekendPeriodColor" type="color" class="form-control form-control-sm" aria-label="Select a color" style="width: 40px;" value="#999999" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto d-flex align-items-center gap-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="nightPeriodSwitch"{% if show_night_periods == 1 %} checked{% endif %}>
+                        <label class="form-check-label text-nowrap" for="nightPeriodSwitch">Show night periods</label>
+                    </div>
+                    <div>
+                        <input id="nightPeriodColor" type="color" class="form-control form-control-sm" aria-label="Select a color" style="width: 40px;" value="#5b6b9f" disabled>
+                    </div>
+                </div>
+                <div class="col-auto offset-1">
+                    <div class="d-flex gap-2">
+                        <div is="app-datetime-picker" id="nightStartTime" title="From" mode="time" time="{{ night_start_time.isoformat()[:5] }}" tzname="{{ tz_name }}"{% if show_night_periods == 0 %} disabled{% endif %}></div>
+                        <div is="app-datetime-picker" id="nightEndTime" title="Until" mode="time" time="{{ night_end_time.isoformat()[:5] }}" tzname="{{ tz_name }}"{% if show_night_periods == 0 %} disabled{% endif %}></div>
                     </div>
                 </div>
             </div>

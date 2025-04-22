@@ -40,6 +40,25 @@ def convert_html_form_datetime(form_date, form_time, *, tz=dt.timezone.utc):
     return ret
 
 
+def convert_html_form_time(form_time):
+    """Convert an HTML input time to a time instance.
+
+    :param str form_date: HTML form input time value (HH:MM).
+    :return `datetime.time`: The time instance created.
+    :raise `BEMServerUICommonInvalidDatetimeError`:
+        When HTML form inputs are not valid.
+    """
+    try:
+        ret = dt.datetime.strptime(form_time, "%H:%M").time()
+    except (
+        ValueError,
+        TypeError,
+    ) as exc:
+        raise BEMServerUICommonInvalidDatetimeError from exc
+
+    return ret
+
+
 def convert_from_iso(dt_iso, *, tz=dt.timezone.utc):
     """Convert an ISO datetime to a timezone aware datetime instance.
 
@@ -312,3 +331,56 @@ def get_weekend_periods(dt_start, dt_end):
         index += weekend_length
 
     return weekend_periods
+
+
+def get_default_night():
+    """Get the default night start and end times."""
+    return [dt.time(hour=22), dt.time(hour=6)]
+
+
+def get_night_periods(dt_start, dt_end, t_night_start=None, t_night_end=None):
+    """Get the list of night periods between 2 dates.
+    Time part if given period is ignored.
+
+    :param `datetime.datetime` dt_start: Start of calculation period
+    :param `datetime.datetime` dt_end: End of calculation period
+    :param `datetime.datetime` t_night_start:
+        (optional, default 22:00) Start of night period
+    :param `datetime.datetime` t_night_end:
+        (optional, default 06:00) End of night period
+    :return `[[datetime.datetime]]`:
+        A list of timezone aware datetime instances for each night in given period.
+    """
+    default_night_times = get_default_night()
+    if t_night_start is None:
+        t_night_start = default_night_times[0]
+    if t_night_end is None:
+        t_night_end = default_night_times[1]
+
+    td_night_start = dt.timedelta(
+        hours=t_night_start.hour,
+        minutes=t_night_start.minute,
+        seconds=t_night_start.second,
+        microseconds=t_night_start.microsecond,
+    )
+    td_night_end = dt.timedelta(
+        days=1.0,
+        hours=t_night_end.hour,
+        minutes=t_night_end.minute,
+        seconds=t_night_end.second,
+        microseconds=t_night_end.microsecond,
+    )
+
+    # Ignore time part of the given period.
+    dt_start = dt_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    dt_end = dt_end.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    night_periods = []
+    dt_current = dt_start
+    while dt_current < dt_end:
+        night_start = dt_current + td_night_start
+        night_end = dt_current + td_night_end
+        night_periods.append([night_start, night_end])
+        dt_current += dt.timedelta(days=1)
+
+    return night_periods

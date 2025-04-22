@@ -10,6 +10,7 @@ export class TimeseriesChartExplore extends ChartBase {
 
     #tzName = "UTC";
     #csvCallback = null;
+    #showAreaLabel = false;
 
 
     get seriesCount() {
@@ -507,7 +508,7 @@ export class TimeseriesChartExplore extends ChartBase {
                 }
 
                 // Show/hide area label.
-                this.#chartOpts.series[seriesIndex].markArea.label.show = !series.markArea.label.show;
+                this.#chartOpts.series[seriesIndex].markArea.label.show = (!series.markArea.label.show && this.#showAreaLabel) || this.#showAreaLabel;
 
                 this.#setChartOptions();
             }
@@ -598,7 +599,7 @@ export class TimeseriesChartExplore extends ChartBase {
                         opacity: styleOpts.opacity || 0.4,
                     },
                     label: {
-                        show: true,
+                        show: this.#showAreaLabel,
                         backgroundColor: styleOpts.bgColorLabel || "#ffffff",
                     },
                 },

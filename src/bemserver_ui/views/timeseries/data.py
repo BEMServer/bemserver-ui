@@ -18,6 +18,8 @@ from bemserver_ui.common.exceptions import BEMServerUICommonInvalidDatetimeError
 from bemserver_ui.common.time import (
     convert_from_iso,
     convert_html_form_datetime,
+    convert_html_form_time,
+    get_default_night,
     get_isoweek_from_date,
     get_month_weeks,
 )
@@ -132,6 +134,22 @@ def explore():
     if show_weekend_periods not in [0, 1]:
         show_weekend_periods = 0
 
+    show_night_periods = flask.request.args.get("show_night", 0)
+    if show_night_periods not in [0, 1]:
+        show_night_periods = 0
+
+    default_night_times = get_default_night()
+    night_start_time = flask.request.args.get("night_start_time")
+    night_end_time = flask.request.args.get("night_end_time")
+    try:
+        t_night_start = convert_html_form_time(night_start_time)
+    except BEMServerUICommonInvalidDatetimeError:
+        t_night_start = default_night_times[0]
+    try:
+        t_night_end = convert_html_form_time(night_end_time)
+    except BEMServerUICommonInvalidDatetimeError:
+        t_night_end = default_night_times[1]
+
     return flask.render_template(
         "pages/timeseries/data/explore.html",
         timeseries_ids=",".join([str(x) for x in timeseries_ids]),
@@ -147,6 +165,9 @@ def explore():
         bucket_width_unit=bucket_width_unit,
         tz_name=tz_name,
         show_weekend_periods=show_weekend_periods,
+        show_night_periods=show_night_periods,
+        night_start_time=t_night_start,
+        night_end_time=t_night_end,
     )
 
 

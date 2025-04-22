@@ -16,6 +16,7 @@ class TimeseriesDataExploreView {
     #tsDataGetReqID = null;
     #downloadReqID = null;
     #weekendsReqID = null;
+    #nightsReqID = null;
 
     #chartContainerElmt = null;
     #chartExplore = null;
@@ -37,6 +38,11 @@ class TimeseriesDataExploreView {
     #tsDataStatesSelectElmt = null;
     #timezonePickerElmt = null;
     #weekendPeriodSwitchElmt = null;
+    #weekendPeriodColorElmt = null;
+    #nightPeriodSwitchElmt = null;
+    #nightPeriodColorElmt = null;
+    #nightStartTimeInputElmt = null;
+    #nightEndTimeInputElmt = null;
 
     #selectTimeseriesModalElmt = null;
     #selectTimeseriesModal = null;
@@ -54,6 +60,8 @@ class TimeseriesDataExploreView {
     #periodTypeLoaded = null;
     #weekendAreaName = "weekend";
     #weekendAreaForceRefresh = false;
+    #nightAreaName = "night";
+    #nightAreaForceRefresh = false;
 
 
     constructor() {
@@ -82,6 +90,11 @@ class TimeseriesDataExploreView {
         this.#tsDataStatesSelectElmt = document.getElementById("data_states");
         this.#timezonePickerElmt = document.getElementById("timezonePicker");
         this.#weekendPeriodSwitchElmt = document.getElementById("weekendPeriodSwitch");
+        this.#weekendPeriodColorElmt = document.getElementById("weekendPeriodColor");
+        this.#nightPeriodSwitchElmt = document.getElementById("nightPeriodSwitch");
+        this.#nightPeriodColorElmt = document.getElementById("nightPeriodColor");
+        this.#nightStartTimeInputElmt = document.getElementById("nightStartTime");
+        this.#nightEndTimeInputElmt = document.getElementById("nightEndTime");
 
         this.#selectTimeseriesModalElmt = document.getElementById("selectTimeseries");
         this.#selectTimeseriesModal = new bootstrap.Modal(this.#selectTimeseriesModalElmt);
@@ -96,6 +109,7 @@ class TimeseriesDataExploreView {
             this.#updatePeriodCustomState();
             if (this.#periodTypeElmt.value != this.#periodTypeLoaded) {
                 this.#weekendAreaForceRefresh = true;
+                this.#nightAreaForceRefresh = true;
                 this.#loadChartSeries();
             }
         });
@@ -103,12 +117,14 @@ class TimeseriesDataExploreView {
         this.#periodStartDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodEndDatetimeElmt.dateMin = this.#periodStartDatetimeElmt.date;
             this.#weekendAreaForceRefresh = true;
+            this.#nightAreaForceRefresh = true;
             this.#loadChartSeries();
         }, 1000));
 
         this.#periodEndDatetimeElmt.addEventListener("datetimeChange", debounce(() => {
             this.#periodStartDatetimeElmt.dateMax = this.#periodEndDatetimeElmt.date;
             this.#weekendAreaForceRefresh = true;
+            this.#nightAreaForceRefresh = true;
             this.#loadChartSeries();
         }, 1000));
 
@@ -143,6 +159,9 @@ class TimeseriesDataExploreView {
             this.#periodEndDatetimeElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
             this.#weekendAreaForceRefresh = true;
+            this.#nightAreaForceRefresh = true;
+            this.#nightStartTimeInputElmt.tzName = this.#timezonePickerElmt.tzName;
+            this.#nightEndTimeInputElmt.tzName = this.#timezonePickerElmt.tzName;
             this.#loadChartSeries();
         });
 
@@ -152,9 +171,33 @@ class TimeseriesDataExploreView {
                 this.#updateUrlParams();
             }
             else {
-                this.#refreshAreaSeries();
+                this.#refreshWeekendAreaSeries();
             }
         });
+
+        this.#nightPeriodSwitchElmt.addEventListener("change", () => {
+            this.#updateNightCustomTimeState();
+
+            if (this.#chartExplore.hasSeries(this.#nightAreaName)) {
+                this.#chartExplore.toggleSeriesVisibility(this.#nightAreaName);
+                this.#updateUrlParams();
+            }
+            else {
+                this.#refreshNightAreaSeries();
+            }
+        });
+
+        this.#nightStartTimeInputElmt.addEventListener("timeChange", debounce(() => {
+            this.#updateUrlParams();
+            this.#nightAreaForceRefresh = true;
+            this.#refreshNightAreaSeries();
+        }, 1000));
+
+        this.#nightEndTimeInputElmt.addEventListener("timeChange", debounce(() => {
+            this.#updateUrlParams();
+            this.#nightAreaForceRefresh = true;
+            this.#refreshNightAreaSeries();
+        }, 1000));
 
         this.#tsSelector.addEventListener("toggleItem", () => {
             this.#updateAddTimeseriesButtonState();
@@ -306,6 +349,17 @@ class TimeseriesDataExploreView {
         }
         else {
             this.#selectedTimeseriesSaveBtnElmt.setAttribute("disabled", true);
+        }
+    }
+
+    #updateNightCustomTimeState() {
+        if (this.#nightPeriodSwitchElmt.checked) {
+            this.#nightStartTimeInputElmt.setEnabled();
+            this.#nightEndTimeInputElmt.setEnabled();
+        }
+        else {
+            this.#nightStartTimeInputElmt.setDisabled();
+            this.#nightEndTimeInputElmt.setDisabled();
         }
     }
 
@@ -646,6 +700,15 @@ class TimeseriesDataExploreView {
         url.searchParams.set("period_type", this.#periodTypeElmt.value);
         url.searchParams.set("tz", this.#timezonePickerElmt.tzName);
         url.searchParams.set("show_we", this.#weekendPeriodSwitchElmt.checked ? 1 : 0);
+        url.searchParams.set("show_night", this.#nightPeriodSwitchElmt.checked ? 1 : 0);
+        if (this.#nightPeriodSwitchElmt.checked) {
+            url.searchParams.set("night_start_time", this.#nightStartTimeInputElmt.time);
+            url.searchParams.set("night_end_time", this.#nightEndTimeInputElmt.time);
+        }
+        else {
+            url.searchParams.delete("night_start_time");
+            url.searchParams.delete("night_end_time");
+        }
 
         let doUpdateUrl = true;
         if (this.#isPeriodCustom()) {
@@ -795,6 +858,11 @@ class TimeseriesDataExploreView {
     }
 
     #refreshAreaSeries() {
+        this.#refreshWeekendAreaSeries();
+        this.#refreshNightAreaSeries();
+    }
+
+    #refreshWeekendAreaSeries() {
         if (this.#weekendPeriodSwitchElmt.checked && this.#hasPeriodSelected()) {
             if (!this.#chartExplore.hasSeries(this.#weekendAreaName) || this.#weekendAreaForceRefresh) {
                 this.#weekendAreaForceRefresh = false;
@@ -819,7 +887,7 @@ class TimeseriesDataExploreView {
                 this.#weekendsReqID = this.#internalAPIRequester.get(
                     app.urlFor(`api.analysis.parameters.weekends`, urlParams),
                     (data) => {
-                        this.#chartExplore.updateMarkAreaSeries(this.#weekendAreaName, data, { color: "#999999" });
+                        this.#chartExplore.updateMarkAreaSeries(this.#weekendAreaName, data, { color: this.#weekendPeriodColorElmt.value });
 
                         this.#chartExplore.hideLoading();
                     },
@@ -831,8 +899,46 @@ class TimeseriesDataExploreView {
                 );
             }
         }
-        else {
-            this.#chartExplore.toggleSeriesVisibility(this.#weekendAreaName);
+    }
+
+    #refreshNightAreaSeries() {
+        if (this.#nightPeriodSwitchElmt.checked && this.#nightStartTimeInputElmt.hasTime && this.#nightEndTimeInputElmt.hasTime && this.#hasPeriodSelected()) {
+            if (!this.#chartExplore.hasSeries(this.#nightAreaName) || this.#nightAreaForceRefresh) {
+                this.#nightAreaForceRefresh = false;
+                this.#chartExplore.showLoading();
+
+                if (this.#nightsReqID != null) {
+                    this.#internalAPIRequester.abort(this.#nightsReqID);
+                    this.#nightsReqID = null;
+                }
+
+                let urlParams = {
+                    night_start_time: this.#nightStartTimeInputElmt.time,
+                    night_end_time: this.#nightEndTimeInputElmt.time,
+                    timezone: this.#timezonePickerElmt.tzName,
+                    period: this.#periodTypeElmt.value,
+                };
+                urlParams.end_date = this.#periodEndDatetimeElmt.date;
+                urlParams.end_time = this.#periodEndDatetimeElmt.time;
+                if (this.#isPeriodCustom()) {
+                    urlParams.start_date = this.#periodStartDatetimeElmt.date;
+                    urlParams.start_time = this.#periodStartDatetimeElmt.time;
+                }
+
+                this.#nightsReqID = this.#internalAPIRequester.get(
+                    app.urlFor(`api.analysis.parameters.nights`, urlParams),
+                    (data) => {
+                        this.#chartExplore.updateMarkAreaSeries(this.#nightAreaName, data, { color: this.#nightPeriodColorElmt.value });
+
+                        this.#chartExplore.hideLoading();
+                    },
+                    (error) => {
+                        app.flashMessage(error.toString(), "error");
+
+                        this.#chartExplore.hideLoading();
+                    },
+                );
+            }
         }
     }
 
@@ -924,6 +1030,7 @@ class TimeseriesDataExploreView {
 
         this.#updatePeriodCustomState();
         this.#updateAggregationBucketState();
+        this.#updateNightCustomTimeState();
 
         this.#chartExplore = new TimeseriesChartExplore(this.#chartContainerElmt);
         this.#chartExplore.tzName = this.#timezonePickerElmt.tzName;
