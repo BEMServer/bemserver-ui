@@ -281,6 +281,7 @@ class TimeseriesDataExploreView {
         this.#removeAllSeriesBtnElmt.addEventListener("click", () => {
             this.#chartExplore.clearAll();
             this.#tsSeriesOptions = {};
+            this.#tsSeriesChartOptsRowElmts = {};
             this.#chartSeriesContainerBodyElmt.innerHTML = "";
             this.#updateSelectedTimeseriesInfo();
             this.#updateUrlParams();
