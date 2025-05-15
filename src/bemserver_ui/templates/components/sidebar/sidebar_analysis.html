@@ -1,13 +1,13 @@
 {% if g.campaign_ctxt.has_campaign or sidebar_section_plugins | length > 0 %}
-<div class="accordion app-sidebar-accordion rounded bg-info bg-opacity-25">
-    <div class="accordion-item border-0">
+<div class="accordion app-sidebar-accordion">
+    <div class="accordion-item">
         <h2 class="accordion-header" id="panelHeadingAnalysis">
-            <button class="accordion-button text-muted rounded-0 shadow-none collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAnalysis" aria-expanded="false" aria-controls="panelCollapseAnalysis">
-                <span class="app-sidebar-heading"><i class="bi bi-speedometer"></i> Analysis</span>
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAnalysis" aria-expanded="false" aria-controls="panelCollapseAnalysis">
+                <span class="app-sidebar-heading"><i class="bi bi-speedometer me-2"></i>Analysis</span>
             </button>
         </h2>
         <div id="panelCollapseAnalysis" class="accordion-collapse collapse" aria-labelledby="panelHeadingAnalysis">
-            <div class="accordion-body px-0 py-2">
+            <div class="accordion-body">
                 <ul class="nav nav-pills flex-column gap-1">
                     {% filter indent(width=20, first=True) %}
                     {% if g.campaign_ctxt.has_campaign %}
