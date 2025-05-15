@@ -1,6 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
+import { DateTime, TimeSettings } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartWeather extends ChartBase {
@@ -191,7 +191,7 @@ export class TimeseriesChartWeather extends ChartBase {
     }
 
     load(name, dataset, tzName = "UTC", timeDisplayMode = "iso", tsInfoCallback = null) {
-        Settings.defaultZone = tzName;
+        TimeSettings.defaultZone = tzName;
 
         this.#showTsInfoCallback = tsInfoCallback;
 

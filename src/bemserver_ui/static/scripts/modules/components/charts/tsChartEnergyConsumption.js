@@ -1,6 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
+import { DateTime, TimeSettings } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartEnergyConsumption extends ChartBase {
@@ -182,7 +182,7 @@ export class TimeseriesChartEnergyConsumption extends ChartBase {
     }
 
     load(timestamps, energy, energyUses, unit, tzName = "UTC", timeDisplayMode = "iso") {
-        Settings.defaultZone = tzName;
+        TimeSettings.defaultZone = tzName;
 
         let dataSeries = Object.entries(energyUses).map(([energyUse, consumptions]) => {
             let serie = {

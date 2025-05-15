@@ -9,7 +9,7 @@ import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
-import { DateTime } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
+import { DateTime } from "/static/scripts/modules/tools/time.js";
 
 
 export class EventListView {

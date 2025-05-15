@@ -1,6 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
+import { DateTime, TimeSettings } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartDegreeDays extends ChartBase {
@@ -192,7 +192,7 @@ export class TimeseriesChartDegreeDays extends ChartBase {
     }
 
     load(degreeDaysData, degreeDaysType, degreeDaysBase, degreeDaysBaseUnit, unit, tzName = "UTC", timeDisplayMode = "iso", compareMode = false, categories = null) {
-        Settings.defaultZone = tzName;
+        TimeSettings.defaultZone = tzName;
 
         let dataSeries = [];
         if (!compareMode) {

@@ -1,6 +1,6 @@
 import { ChartBase } from "/static/scripts/modules/components/charts/common.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
-import { DateTime, Settings } from "https://cdn.jsdelivr.net/npm/luxon@3.6.1/build/es6/luxon.js";
+import { DateTime, TimeSettings } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesChartExplore extends ChartBase {
@@ -43,7 +43,7 @@ export class TimeseriesChartExplore extends ChartBase {
     constructor(chartContainerElmt, initOptions = null) {
         super(chartContainerElmt, initOptions);
 
-        Settings.defaultZone = "UTC";
+        TimeSettings.defaultZone = "UTC";
 
         this.#initChartOptions();
         this.#chartOpts = this.getOption();
