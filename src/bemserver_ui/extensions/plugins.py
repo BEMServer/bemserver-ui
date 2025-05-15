@@ -43,12 +43,15 @@ def init_app(app):
                 plugin_sidebar = plugin_module.get_sidebar(campaign_ctxt)
                 for sidebar_section, sidebar_data in plugin_sidebar.items():
                     if sidebar_section not in SIDEBAR_SECTIONS:
-                        BSUI_PLUGINS_LOGGER.warn(
+                        BSUI_PLUGINS_LOGGER.warning(
                             "Unknown %s sidebar section for %s plugin",
                             sidebar_section,
                             plugin_module.__name__,
                         )
                         continue
+                    for x in sidebar_data:
+                        x["plugin_info"] = plugin_module.PLUGIN_INFO
+                        x["plugin_info"]["version"] = plugin_module.__version__
                     sidebar_plugins[sidebar_section].extend(sidebar_data)
             return sidebar_plugins
 
