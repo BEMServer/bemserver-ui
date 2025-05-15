@@ -7,6 +7,7 @@ import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
 import { StructuralElementSelector } from "/static/scripts/modules/components/structuralElements/selector.js";
 import { getOptionIndexFromSelect } from "/static/scripts/modules/tools/utils.js";
+import { DateTime } from "/static/scripts/modules/tools/time.js";
 
 
 export class TimeseriesListView {
@@ -470,6 +471,15 @@ export class TimeseriesListView {
             return listGroupItemElmt;
         };
 
+        let firstTimestamp = "-";
+        if (tsDataStats["first_timestamp"] != null) {
+            firstTimestamp = DateTime.fromISO(tsDataStats["first_timestamp"], { zone: this.#tzName }).toISO();
+        }
+        let lastTimestamp = "-";
+        if (tsDataStats["last_timestamp"] != null) {
+            lastTimestamp = DateTime.fromISO(tsDataStats["last_timestamp"], { zone: this.#tzName }).toISO();
+        }
+
         let timestampsCardElmt = document.createElement("div");
         timestampsCardElmt.classList.add("card", "mb-auto");
         statsContainerElmt.appendChild(timestampsCardElmt);
@@ -480,8 +490,8 @@ export class TimeseriesListView {
         let timestampsBoundsListElmt = document.createElement("ul");
         timestampsBoundsListElmt.classList.add("list-group", "list-group-flush");
         timestampsCardElmt.appendChild(timestampsBoundsListElmt);
-        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", tsDataStats["first_timestamp"] || "-"));
-        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", tsDataStats["last_timestamp"] || "-"));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("First", firstTimestamp));
+        timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last", lastTimestamp));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Period duration", tsDataStats["period_duration"] || "-"));
         timestampsBoundsListElmt.appendChild(createListGroupItemElmt("Last data since", tsDataStats["last_data_since"] || "-"));
 
@@ -523,7 +533,7 @@ export class TimeseriesListView {
 
                 let timestampElmt = document.createElement("h6");
                 timestampElmt.classList.add("text-nowrap", "mb-0");
-                timestampElmt.innerText = eventData.timestamp;
+                timestampElmt.innerText = DateTime.fromISO(eventData.timestamp, { zone: this.#tzName }).toISO();
                 headerContentElmt.appendChild(timestampElmt);
 
                 let levelBadgeElmt = new EventLevelBadge();

@@ -3,7 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/time/datetimePicker.js";
 import { FilterSelect } from "/static/scripts/modules/components/filterSelect.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { DateTime } from "/static/scripts/modules/tools/time.js";
 import { Parser } from "/static/scripts/modules/tools/parser.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import { ItemsCount } from "/static/scripts/modules/components/itemsCount.js";
@@ -831,7 +831,7 @@ export class NotificationExploreView {
             timestampElmt.classList.add("border-start", "border-end-0", "border-bottom-0", "border-top-0", "border-5", "border-warning", "text-warning-emphasis");
         }
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(notifData.timestamp), {timezone: campaignData.timezone});
+        timestampElmt.textContent = DateTime.fromISO(notifData.timestamp, { zone: campaignData.timezone }).toISO();
         rowElmt.appendChild(timestampElmt);
 
         let eventRowElmt = this.#createEventRowElement(notifData.event, campaignData);
@@ -1017,7 +1017,7 @@ export class NotificationExploreView {
             timestampColElmt.appendChild(timestampTitleElmt);
 
             let timestampValueElmt = document.createElement("p");
-            timestampValueElmt.innerText = TimeDisplay.toLocaleString(new Date(this.#currentNotifElmt.notifData.timestamp), {timezone: this.#currentTabCampaignData.timezone});
+            timestampValueElmt.textContent = DateTime.fromISO(this.#currentNotifElmt.notifData.timestamp, { zone: this.#currentTabCampaignData.timezone }).toISO();
             timestampColElmt.appendChild(timestampValueElmt);
 
             let statusColElmt = document.createElement("div");
@@ -1229,7 +1229,7 @@ export class NotificationExploreView {
 
         let timestampElmt = document.createElement("th");
         timestampElmt.setAttribute("scope", "row");
-        timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: campaignData.timezone});
+        timestampElmt.textContent = DateTime.fromISO(eventData.timestamp, { zone: campaignData.timezone }).toISO();
         eventElmt.appendChild(timestampElmt);
 
         let sourceElmt = document.createElement("td");

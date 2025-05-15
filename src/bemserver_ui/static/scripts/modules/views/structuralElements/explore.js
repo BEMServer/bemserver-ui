@@ -3,7 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import "/static/scripts/modules/components/itemsCount.js";
 import "/static/scripts/modules/components/pagination.js";
-import { TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { DateTime } from "/static/scripts/modules/tools/time.js";
 import { EventLevelBadge } from "/static/scripts/modules/components/eventLevel.js";
 import "/static/scripts/modules/components/tree.js";
 import { debounce } from "/static/scripts/modules/tools/utils.js";
@@ -537,7 +537,7 @@ export class StructuralElementsExploreView {
 
                 let timestampElmt = document.createElement("h6");
                 timestampElmt.classList.add("text-nowrap", "mb-0");
-                timestampElmt.innerText = TimeDisplay.toLocaleString(new Date(eventData.timestamp), {timezone: this.#tzName});
+                timestampElmt.textContent = DateTime.fromISO(eventData.timestamp, { zone: this.#tzName }).toISO();
                 headerContentElmt.appendChild(timestampElmt);
 
                 let levelBadgeElmt = new EventLevelBadge();

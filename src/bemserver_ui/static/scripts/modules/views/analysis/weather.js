@@ -3,7 +3,7 @@ import { InternalAPIRequest } from "/static/scripts/modules/tools/fetcher.js";
 import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
-import { TimeCalendar, TimeDisplay } from "/static/scripts/modules/tools/time.js";
+import { DateTime, TimeInfo } from "/static/scripts/modules/tools/time.js";
 
 
 export class WeatherExploreView {
@@ -135,11 +135,12 @@ export class WeatherExploreView {
             }
 
             this.#periodMonthSelectElmt.innerHTML = "";
-            for (let month = 1; month <= 12; month++) {
+            for (let [index, monthName] of Object.entries(TimeInfo.months())) {
+                let monthNumber = +index + 1;
                 let option = document.createElement("option");
-                option.value = month;
-                option.textContent = TimeDisplay.getMonthName(month);
-                option.selected = month == this.#monthRef;
+                option.value = monthNumber;
+                option.textContent = monthName;
+                option.selected = monthNumber == this.#monthRef;
                 this.#periodMonthSelectElmt.appendChild(option);
             }
 
@@ -184,7 +185,7 @@ export class WeatherExploreView {
 
     #updateDaysInMonth(year, month, dayToSelect) {
         this.#periodDaySelectElmt.innerHTML = "";
-        let daysInMonth = TimeCalendar.getDaysInMonth(year, month);
+        let daysInMonth = DateTime.local(+year, +month).daysInMonth;
         let dayToSelectAdjusted = Math.min(dayToSelect, daysInMonth);
         for (let day = 1; day <= daysInMonth; day++) {
             let option = document.createElement("option");
