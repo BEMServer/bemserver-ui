@@ -67,16 +67,14 @@
         <div class="accordion-item">
             <h2 class="accordion-header" id="panelHeadingAdminServices">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminServices" aria-expanded="false" aria-controls="panelCollapseAdminServices">
-                    <span class="app-sidebar-heading"><i class="bi bi-puzzle me-2"></i>Services</span>
+                    <span class="app-sidebar-heading"><i class="bi bi-list-task me-2"></i>Tasks</span>
                 </button>
             </h2>
             <div id="panelCollapseAdminServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminServices">
                 <div class="accordion-body">
                     <ul class="nav nav-pills flex-column gap-1">
                         {% filter indent(width=24, first=True) %}
-                        {{- mac_sidebar.render_nav_item("Cleanup data", url_for("services.cleanup.list"), "Manage cleanup data service", ["bi", "bi-magic"]) -}}
-                        {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.list"), "Manage missing data service", ["bi", "bi-journal-x"]) -}}
-                        {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.list"), "Manage check outlier data service", ["bi", "bi-layout-wtf"]) -}}
+                        {{- mac_sidebar.render_nav_item("Manage tasks", url_for("tasks.manage_all"), "Manage tasks", ["bi", "bi-nut"]) -}}
                         {% endfilter %}
                     </ul>
                 </div>
