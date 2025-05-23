@@ -440,24 +440,6 @@ export class TimeseriesSemanticSetupView {
         }
     }
 
-    #loadSitesTreeData() {
-        this.#sitesTreeElmt.showLoading();
-
-        if (this.#sitesTreeReqID != null) {
-            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
-            this.#sitesTreeReqID = null;
-        }
-
-        this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
-            (data) => {
-                this.#sitesTreeElmt.load(data.data);
-                this.#sitesTreeElmt.collapseAll();
-            },
-            this.#internalApiErrorCallback,
-        );
-    }
-
     #createDropDownMenuItemElement(menuItemText, clickCallback) {
         let menuItemLinkElmt = document.createElement("a");
         menuItemLinkElmt.classList.add("dropdown-item");
@@ -1269,7 +1251,47 @@ export class TimeseriesSemanticSetupView {
         this.#energyConsSetupItemsCountElmt.update({totalCount: totalCount, firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount});
     }
 
+    #loadSitesTreeData(structuralElementType, structuralElementId) {
+        this.#sitesTreeElmt.showLoading();
+
+        console.log(structuralElementType, structuralElementId);
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
+            (data) => {
+                this.#sitesTreeElmt.load(data.data);
+                this.#sitesTreeElmt.collapseAll();
+
+                // TODO: this seems not good as it is very long and navigator stops the script...
+                if (structuralElementType != null && structuralElementId != null) {
+                    this.#sitesTreeElmt.select(`${structuralElementType}-${structuralElementId}`);
+                }
+
+                // for (let node of data.data) {
+                //     console.log(node);
+                //     console.log(node.type == structuralElementType && node.id == this.#structuralElementId);
+
+                //     if (node.type == structuralElementType && node.id == this.#structuralElementId) {
+                //         this.#sitesTreeElmt.select(node.node_id);
+                //         break;
+                //     }
+                // }
+            },
+            this.#internalApiErrorCallback,
+        );
+    }
+
     mount() {
-        this.#loadSitesTreeData();
+        // Get relevant url query paramters.
+        let url = new URL(window.location);
+        let structuralElementType = url.searchParams.get("structural_element_type");
+        let structuralElementId = url.searchParams.get("structural_element_id");
+
+        this.#loadSitesTreeData(structuralElementType, structuralElementId);
     }
 }

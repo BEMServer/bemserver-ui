@@ -222,6 +222,9 @@ export class Tree extends HTMLElement {
             liElmt.appendChild(linkElmt);
 
             linkElmt.addEventListener("click", (event) => {
+
+                console.log(event);
+
                 let isSelectable = linkElmt.classList.contains("disabled") ? false : true;
                 if (isSelectable) {
                     if (this.#treeNodeSelected != event.target) {
@@ -383,14 +386,17 @@ export class Tree extends HTMLElement {
         let [nodeType, _nodeId] = nodeId.split("-");
         let nodeData = this.getTreeNodeData(nodeType, _nodeId);
         let treeNodeElmt = this.#treeContainerElmt.querySelector(nodeData.sourceNodeQuerySelector)
-        treeNodeElmt?.click();
+        // treeNodeElmt?.click();
 
-        // Expand all parent nodes until root node.
-        let collapsableParent = this.#getCollapsableFromItem(treeNodeElmt, false, true);
-        while (collapsableParent != null) {
-            collapsableParent.show();
-            collapsableParent = this.#getCollapsableFromItem(collapsableParent._element.parentElement, false, true);
-        }
+        console.log(treeNodeElmt);
+        console.log(nodeData);
+
+        // // Expand all parent nodes until root node.
+        // let collapsableParent = this.#getCollapsableFromItem(treeNodeElmt, false, true);
+        // while (collapsableParent != null) {
+        //     collapsableParent.show();
+        //     collapsableParent = this.#getCollapsableFromItem(collapsableParent._element.parentElement, false, true);
+        // }
     }
 
     unselect() {
