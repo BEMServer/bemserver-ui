@@ -29,22 +29,20 @@ export class TimezonePicker extends HTMLDivElement {
         return this.#tzNameSelected;
     }
     set tzName(value) {
-        if (this.#tzTool.tzExists(value)) {
+        if (this.#tzNameSelected != value) {
             this.#tzNameSelected = value;
-            if (this.#tzNameSelectElmt != null) {
-                this.#tzNameSelectElmt.value = this.#tzNameSelected;
-            }
-
-            let tzInfo = this.#tzTool.getTzInfo(value);
-            this.#tzRegionSelected = tzInfo["region"];
-            if (this.#tzRegionSelectElmt != null) {
-                this.#tzRegionSelectElmt.value = this.#tzRegionSelected;
-            }
+            this.#update();
         }
     }
 
     get value() {
         return this.#tzNameSelected;
+    }
+    set value(value) {
+        if (this.#tzNameSelected != value) {
+            this.#tzNameSelected = value;
+            this.#update();
+        }
     }
 
     get tzInfo() {
@@ -54,7 +52,7 @@ export class TimezonePicker extends HTMLDivElement {
     #loadOptions(options = {}) {
         this.#inputFormBind = this.getAttribute("input-form-bind") || options.inputFormBind;
         this.#title = this.getAttribute("title") || options.title;
-        this.tzName = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
+        this.#tzNameSelected = this.getAttribute("tzname") || options.tzName || this.#tzTool.defaultTzName;
     }
 
     #cacheDOM() {
@@ -88,6 +86,12 @@ export class TimezonePicker extends HTMLDivElement {
     }
 
     #updateTzRegionChoices() {
+        if (this.#tzNameSelected != null && this.#tzRegionSelected == null) {
+            this.#checkTzNameOrDefault();
+            let tzInfo = this.#tzTool.getTzInfo(this.#tzNameSelected);
+            this.#tzRegionSelected = tzInfo["region"];
+        }
+
         this.#tzRegionSelectElmt.innerHTML = "";
         for (let tzRegion of this.#tzTool.regions) {
             let optElmt = document.createElement("option");
@@ -123,6 +127,37 @@ export class TimezonePicker extends HTMLDivElement {
     #updateInputFormBind() {
         if (this.#inputFormBindElmt != null) {
             this.#inputFormBindElmt.value = this.#tzNameSelected;
+        }
+    }
+
+    #update() {
+        this.#checkTzNameOrDefault();
+
+        let tzInfo = this.#tzTool.getTzInfo(this.#tzNameSelected);
+        if (this.#tzRegionSelectElmt != null) {
+            if (this.#tzRegionSelected != tzInfo["region"]) {
+                this.#tzRegionSelected = tzInfo["region"];
+                this.#updateTzRegionChoices();
+            }
+            else {
+                this.#tzRegionSelectElmt.value = this.#tzRegionSelected;
+            }
+        }
+
+        if (this.#tzNameSelectElmt != null) {
+            this.#updateTzNameChoices();
+        }
+
+        if (this.#tzRegionSelectElmt != null) {
+            this.#updateTzRegionChoices();
+        }
+
+        this.#updateInputFormBind();
+    }
+
+    #checkTzNameOrDefault(tzNameDefault = "UTC") {
+        if (!this.#tzTool.tzExists(this.#tzNameSelected)) {
+            this.#tzNameSelected = tzNameDefault;
         }
     }
 
