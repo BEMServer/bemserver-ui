@@ -359,15 +359,17 @@ export class DatetimePicker extends HTMLDivElement {
         }
     }
 
-    reset(options = { ignoreDate: false, ignoreTime: false }) {
-        if (!options.ignoreDate) {
-            this.#date = null;
+    reset(options = { date: null, ignoreDate: false, time: "00:00", ignoreTime: false }) {
+        let opts = Object.assign({}, { date: null, ignoreDate: false, time: "00:00", ignoreTime: false }, options);
+
+        if (!opts.ignoreDate) {
+            this.#date = opts.date;
             this.#dateMin = null;
             this.#dateMax = null;
             this.#updateDateBounds();
         }
-        if (!options.ignoreTime) {
-            this.#time = null;
+        if (!opts.ignoreTime) {
+            this.#time = opts.time;
         }
         this.#updateDateAndTime();
         this.#updateStyle();
