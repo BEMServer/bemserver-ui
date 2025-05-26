@@ -4,6 +4,7 @@ import { Spinner } from "/static/scripts/modules/components/spinner.js";
 import { TimeseriesChartWeather} from "/static/scripts/modules/components/charts/tsChartWeather.js";
 import "/static/scripts/modules/components/tree.js";
 import { DateTime, TimeInfo } from "/static/scripts/modules/tools/time.js";
+import "/static/scripts/modules/components/time/datetimePicker.js";
 
 
 export class WeatherExploreView {
@@ -11,6 +12,8 @@ export class WeatherExploreView {
     #internalAPIRequester = null;
     #retrieveDataReqID = null;
     #sitesTreeReqID = null;
+    #hasSiteCoordReqId = null;
+    #getWeatherDataSemanticsReqId = null;
 
     #mainChartContainerElmt = null;
     #periodTypeSelectElmt = null;
@@ -21,6 +24,19 @@ export class WeatherExploreView {
 
     #forecastSwitchElmt = null;
     #forecastWrapperElmt = null;
+
+    #fetchWeatherDataShowModalBtnElmt = null;
+    #fetchWeatherDataModalElmt = null;
+    #fetchWeatherDataModal = null;
+    #fetchWeatherDataModalBodyElmt = null;
+    #fetchWeatherDataSiteElmt = null;
+    #fetchWeatherDataSiteCoordWarnContainerElmt = null;
+    #fetchWeatherDataEditSiteLnkElmt = null;
+    #fetchWeatherDataForecastSwitchElmt = null;
+    #fetchWeatherDataDatetimeStartElmt = null;
+    #fetchWeatherDataDatetimeEndElmt = null;
+    #fetchWeatherDataModalParamsContainerElmt = null;
+    #fetchWeatherDataBtnElmt = null;
 
     #tzName = "UTC";
     #yearRef = null;
@@ -75,13 +91,35 @@ export class WeatherExploreView {
         this.#periodYearSelectElmt = document.getElementById("periodYear");
         this.#forecastSwitchElmt = document.getElementById("forecastSwitch");
         this.#forecastWrapperElmt = document.getElementById("forecastWrapper");
+
+        this.#fetchWeatherDataShowModalBtnElmt = document.getElementById("fetchWeatherDataShowModalBtn");
+        this.#fetchWeatherDataModalElmt = document.getElementById("fetchWeatherDataModal");
+        this.#fetchWeatherDataModal = new bootstrap.Modal(this.#fetchWeatherDataModalElmt);
+        this.#fetchWeatherDataModalBodyElmt = document.getElementById("fetchWeatherDataModalBody");
+        this.#fetchWeatherDataSiteElmt = document.getElementById("fetchWeatherDataSite");
+        this.#fetchWeatherDataSiteCoordWarnContainerElmt = document.getElementById("fetchWeatherDataSiteCoordWarnContainer");
+        this.#fetchWeatherDataEditSiteLnkElmt = document.getElementById("fetchWeatherDataEditSiteLnk");
+        this.#fetchWeatherDataForecastSwitchElmt = document.getElementById("fetchWeatherDataForecastSwitch");
+        this.#fetchWeatherDataDatetimeStartElmt = document.getElementById("fetchWeatherDataDatetimeStart");
+        this.#fetchWeatherDataDatetimeEndElmt = document.getElementById("fetchWeatherDataDatetimeEnd");
+        this.#fetchWeatherDataModalParamsContainerElmt = document.getElementById("fetchWeatherDataModalParamsContainer");
+        this.#fetchWeatherDataBtnElmt = document.getElementById("fetchWeatherDataBtn");
     }
 
     #initEventListeners() {
         this.#sitesTreeElmt.addEventListener("treeNodeSelect", (event) => {
             this.#structuralElementType = event.detail.type;
             this.#structuralElementId = event.detail.id;
-    
+
+            if (this.#structuralElementType == "site") {
+                this.#fetchWeatherDataShowModalBtnElmt?.classList.remove("disabled");
+                this.#fetchWeatherDataShowModalBtnElmt?.removeAttribute("aria-disabled");
+            }
+            else {
+                this.#fetchWeatherDataShowModalBtnElmt?.classList.add("disabled");
+                this.#fetchWeatherDataShowModalBtnElmt?.setAttribute("aria-disabled", true);
+            }
+
             this.#generateCharts();
         });
 
@@ -120,6 +158,64 @@ export class WeatherExploreView {
             this.#previousDaySelected = this.#periodDaySelectElmt.value;
             this.#previousYearSelected = this.#periodYearSelectElmt.value;
             this.#generateCharts();
+        });
+
+        this.#fetchWeatherDataForecastSwitchElmt?.addEventListener("change", () => {
+            this.#updateFetchWeatherDataMapping(this.#fetchWeatherDataForecastSwitchElmt.checked);
+        });
+
+        this.#fetchWeatherDataDatetimeStartElmt?.addEventListener("datetimeChange", () => {
+            this.#fetchWeatherDataDatetimeEndElmt.dateMin = this.#fetchWeatherDataDatetimeStartElmt.date;
+            this.#updateFetchWeatherDataBtn();
+        });
+
+        this.#fetchWeatherDataDatetimeEndElmt?.addEventListener("datetimeChange", () => {
+            this.#fetchWeatherDataDatetimeStartElmt.dateMax = this.#fetchWeatherDataDatetimeEndElmt.date;
+            this.#updateFetchWeatherDataBtn();
+        });
+
+        this.#fetchWeatherDataModalElmt?.addEventListener("show.bs.modal", () => {
+            this.#fetchWeatherDataForecastSwitchElmt.checked = false;
+            this.#fetchWeatherDataDatetimeStartElmt.reset();
+            this.#fetchWeatherDataDatetimeStartElmt.focus();
+            this.#fetchWeatherDataDatetimeEndElmt.reset();
+            this.#updateFetchWeatherDataMapping(this.#fetchWeatherDataForecastSwitchElmt.checked);
+
+            this.#checkSiteHasCoordinates(this.#structuralElementId, () => {
+                this.#updateFetchWeatherDataBtn();
+            });
+        });
+
+        this.#fetchWeatherDataBtnElmt?.addEventListener("click", () => {
+            if (this.#structuralElementType != "site" || !this.#fetchWeatherDataDatetimeStartElmt.isValid || !this.#fetchWeatherDataDatetimeEndElmt.isValid) return;
+
+            this.#fetchWeatherDataBtnElmt.classList.add("placeholder");
+            this.#fetchWeatherDataModalBodyElmt.classList.add("placeholder");
+
+            this.#internalAPIRequester.put(
+                app.urlFor(`api.structural_elements.fetch_weather_data`, {id: this.#structuralElementId}),
+                {
+                    "start_date": this.#fetchWeatherDataDatetimeStartElmt.date,
+                    "start_time": this.#fetchWeatherDataDatetimeStartElmt.time,
+                    "end_date": this.#fetchWeatherDataDatetimeEndElmt.date,
+                    "end_time": this.#fetchWeatherDataDatetimeEndElmt.time,
+                },
+                null,
+                () => {
+                    app.flashMessage(`Weather data successfully fetched.`, "success", 5);
+
+                    this.#fetchWeatherDataBtnElmt.classList.remove("placeholder");
+                    this.#fetchWeatherDataModalBodyElmt.classList.remove("placeholder");
+                    this.#fetchWeatherDataModal.hide();
+                },
+                (error) => {
+                    app.flashMessage(error.toString(), "error");
+
+                    this.#fetchWeatherDataBtnElmt.classList.remove("placeholder");
+                    this.#fetchWeatherDataModalBodyElmt.classList.remove("placeholder");
+                    this.#fetchWeatherDataModal.hide();
+                },
+            );
         });
     }
 
@@ -278,6 +374,93 @@ export class WeatherExploreView {
         tsInfoModal.show();
     }
 
+    #updateFetchWeatherDataBtn() {
+        if (!this.#fetchWeatherDataSiteCoordWarnContainerElmt.classList.contains("d-none") || !this.#fetchWeatherDataDatetimeStartElmt.isValid || !this.#fetchWeatherDataDatetimeEndElmt.isValid) {
+            this.#fetchWeatherDataBtnElmt.setAttribute("disabled", true);
+        }
+        else {
+            this.#fetchWeatherDataBtnElmt.removeAttribute("disabled");
+        }
+    }
+
+    #updateFetchWeatherDataMapping(forecast = false) {
+        this.#fetchWeatherDataModalParamsContainerElmt.innerHTML = "";
+        this.#fetchWeatherDataModalParamsContainerElmt.appendChild(new Spinner());
+
+        if (this.#getWeatherDataSemanticsReqId != null) {
+            this.#internalAPIRequester.abort(this.#getWeatherDataSemanticsReqId);
+            this.#getWeatherDataSemanticsReqId = null;
+        }
+
+        this.#getWeatherDataSemanticsReqId = this.#internalAPIRequester.get(
+            app.urlFor(`api.semantics.weather.list`, {site: this.#structuralElementId, forecast: forecast}),
+            (data) => {
+                this.#fetchWeatherDataModalParamsContainerElmt.innerHTML = "";
+
+                if (data.data.length > 0) {
+                    let weatherParamsTitleElmt = document.createElement("span");
+                    weatherParamsTitleElmt.classList.add("fw-bold");
+                    weatherParamsTitleElmt.textContent = `${data.data.length} weather parameter${data.data.length > 1 ? "s" : ""} will be fetched:`;
+                    this.#fetchWeatherDataModalParamsContainerElmt.appendChild(weatherParamsTitleElmt);
+
+                    let weatherParamsListElmt = document.createElement("dl");
+                    weatherParamsListElmt.classList.add("d-flex", "flex-wrap", "gap-3");
+                    this.#fetchWeatherDataModalParamsContainerElmt.appendChild(weatherParamsListElmt);
+                    for (let weatherParam of data.data) {
+                        let weatherParamsListItemElmt = document.createElement("div");
+                        weatherParamsListElmt.appendChild(weatherParamsListItemElmt);
+
+                        let weatherParamsListItemTitleElmt = document.createElement("dt");
+                        weatherParamsListItemTitleElmt.textContent = `${weatherParam["parameter_label"]}`;
+                        weatherParamsListItemElmt.appendChild(weatherParamsListItemTitleElmt);
+
+                        let weatherParamsListItemTextElmt = document.createElement("dd");
+                        weatherParamsListItemTextElmt.textContent = `${weatherParam["timeseries"]["name"]}${weatherParam["timeseries"]["unit_symbol"] != null ? ` [${weatherParam["timeseries"]["unit_symbol"]}]` : ""}`;
+                        weatherParamsListItemElmt.appendChild(weatherParamsListItemTextElmt);
+                    }
+                }
+                else {
+                    let warnElmt = document.createElement("div");
+                    warnElmt.classList.add("alert", "alert-warning", "border", "border-warning", "mb-0", "py-1");
+                    warnElmt.setAttribute("role", "alert");
+
+                    let warnContainerElmt = document.createElement("div");
+                    warnContainerElmt.classList.add("d-flex", "justify-content-between", "align-items-end", "gap-3");
+                    warnElmt.appendChild(warnContainerElmt);
+
+                    let warnItemElmt = document.createElement("div");
+                    warnContainerElmt.appendChild(warnItemElmt);
+
+                    let warnIconElmt = document.createElement("i");
+                    warnIconElmt.classList.add("bi", "bi-exclamation-triangle", "me-1");
+                    warnItemElmt.appendChild(warnIconElmt);
+
+                    let warnTextElmt = document.createElement("span");
+                    warnTextElmt.classList.add("fst-italic");
+                    warnTextElmt.textContent = "No weather parameter to fetch. You should set this site's timeseries semantics for weather parameters.";
+                    warnItemElmt.appendChild(warnTextElmt);
+
+                    let editMappingContainerElmt = document.createElement("small");
+                    warnContainerElmt.appendChild(editMappingContainerElmt);
+
+                    let editMappingLinkElmt = document.createElement("a");
+                    editMappingLinkElmt.classList.add("link-secondary", "text-nowrap");
+                    editMappingLinkElmt.setAttribute("role", "button");
+                    editMappingLinkElmt.title = "Setup timeseries semantics";
+                    editMappingLinkElmt.setAttribute("target", "_blank");
+                    editMappingLinkElmt.href = app.urlFor(`timeseries.semantic_setup`, { "structural_element_type": this.#structuralElementType, "structural_element_id": this.#structuralElementId });
+                    editMappingLinkElmt.textContent = "Edit semantics";
+                    editMappingContainerElmt.appendChild(editMappingLinkElmt);
+
+                    this.#fetchWeatherDataModalParamsContainerElmt.appendChild(warnElmt);
+                }
+            },
+            (error) => {
+                app.flashMessage(error.toString(), "error");
+            },
+        );
+    }
+
     #generateCharts() {
         if (this.#structuralElementType != null && this.#structuralElementId != null) {
             for (let chart of Object.values(this.#chartWeather)) {
@@ -387,6 +570,36 @@ export class WeatherExploreView {
                     this.#periodTypeSelectElmt.setAttribute("disabled", true);
                     this.#forecastSwitchElmt.setAttribute("disabled", true);
                 }
+            },
+            (error) => {
+                app.flashMessage(error.toString(), "error");
+            },
+        );
+    }
+
+    #checkSiteHasCoordinates(siteId, successCallback = null) {
+        if (this.#hasSiteCoordReqId != null) {
+            this.#internalAPIRequester.abort(this.#hasSiteCoordReqId);
+            this.#hasSiteCoordReqId = null;
+        }
+
+        // Verify that the site has long/lat coordinates.
+        this.#hasSiteCoordReqId = this.#internalAPIRequester.get(
+            app.urlFor(`api.structural_elements.retrieve_data`, {type: "site", id: siteId}),
+            (data) => {
+                this.#fetchWeatherDataSiteElmt.textContent = data.structural_element.name;
+
+                let siteHasCoord = data.structural_element.latitude != null && data.structural_element.longitude != null;
+                if (siteHasCoord) {
+                    this.#fetchWeatherDataSiteCoordWarnContainerElmt.classList.add("d-none", "invisible");
+                }
+                else {
+                    this.#fetchWeatherDataEditSiteLnkElmt.href = app.urlFor(`structural_elements.edit`, {type:this.#structuralElementType, id: this.#structuralElementId});
+
+                    this.#fetchWeatherDataSiteCoordWarnContainerElmt.classList.remove("d-none", "invisible");
+                }
+
+                successCallback?.();
             },
             (error) => {
                 app.flashMessage(error.toString(), "error");
