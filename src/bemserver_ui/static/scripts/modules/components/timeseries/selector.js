@@ -971,11 +971,13 @@ export class TimeseriesSelector extends HTMLElement {
     }
 
     async setFilters(filters) {
-        // TODO raise timeout if waited more than XXX seconds?
-
         // Wait until all filters are loaded before setting values.
-        while (!Object.values(this.#filterStates).every(x => x == "loaded")) {
-            await timer(100);
+        let timeout = 7000;
+        let timeStepWait = 100;
+        let timeElapsed = 0;
+        while (!Object.values(this.#filterStates).every(x => x == "loaded") && timeElapsed < timeout) {
+            await timer(timeStepWait);
+            timeElapsed += timeStepWait;
         }
 
         let searchResultsReloadNeeded = false;
