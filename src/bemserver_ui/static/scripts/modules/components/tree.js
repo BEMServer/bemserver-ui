@@ -232,7 +232,6 @@ export class Tree extends HTMLElement {
 
                         let treeNodeSelectEvent = new CustomEvent("treeNodeSelect", {detail: node, bubbles: true});
                         this.dispatchEvent(treeNodeSelectEvent);
-
                     }
                     else if (!this.#ignoreUnselectEvent) {
                         this.#treeNodeSelected?.classList.remove("active");
