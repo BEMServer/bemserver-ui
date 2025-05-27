@@ -14,6 +14,7 @@ from . import (
     notifications,
     semantics,
     structural_elements,
+    tasks,
     timeseries,
     user_groups,
     users,
@@ -33,6 +34,7 @@ MODULES = (
     events,
     notifications,
     semantics,
+    tasks,
 )
 
 

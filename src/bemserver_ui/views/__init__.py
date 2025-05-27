@@ -9,6 +9,7 @@ from . import (
     main,
     notifications,
     structural_elements,
+    tasks,
     timeseries,
     user_groups,
     users,
@@ -25,6 +26,7 @@ MODULES = (
     timeseries,
     events,
     notifications,
+    tasks,
     analysis,
 )
 

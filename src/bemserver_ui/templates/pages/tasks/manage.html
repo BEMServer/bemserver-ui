@@ -1,0 +1,449 @@
+{% extends "pages/base.html" %}
+
+{% set title = "Tasks" %}
+
+{% if "task_state" not in filters %}
+    {% set _ = filters.update({"task_state": "all"}) %}
+{% endif %}
+{% if "campaign" not in filters %}
+    {% if g.campaign_ctxt.has_campaign %}
+        {% set _ = filters.update({"campaign": g.campaign_ctxt.id}) %}
+    {% else %}
+        {% set _ = filters.update({"campaign": "all"}) %}
+    {% endif %}
+{% endif %}
+
+{% block main_toolbar %}
+{{ super() -}}
+{% filter indent(width=20, first=True) %}
+<div class="d-flex gap-2 gap-xl-3">
+    <a class="btn btn-sm btn-outline-primary text-nowrap" title="Add an instance of scheduled task" data-bs-toggle="modal" data-bs-target="#addTaskModal"><i class="bi bi-plus-circle me-1"></i>Add</a>
+    <a class="btn btn-sm btn-outline-primary text-nowrap" title="Run a task once" data-bs-toggle="modal" data-bs-target="#runOnceNewTaskModal"><i class="bi bi-rocket-takeoff me-1"></i>Run once</a>
+</div>
+{% endfilter %}
+{% endblock main_toolbar %}
+
+{% block main_content %}
+{{ super() -}}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="accordion" id="accordionFilters">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFilters">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-controls="collapseFilters" aria-expanded="false">
+                            <span class="fw-bold text-secondary"><i class="bi bi-funnel me-2"></i>Filters</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFilters" class="accordion-collapse collapse" aria-labelledby="headingFilters" data-bs-parent="#accordionFilters">
+                        <div class="accordion-body">
+                            <div class="row align-items-end g-2">
+                                <div class="col-12 col-lg-auto">
+                                    <label class="form-label d-none d-lg-block" for="campaigns">Campaign</label>
+                                    <select class="form-select form-select-sm" id="campaigns" name="campaign_id" aria-label="Select a filter value" data-default="{{ filters['campaign'] }}">
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-auto">
+                                    <label class="form-label d-none d-lg-block" for="taskState">Enabled</label>
+                                    <select class="form-select form-select-sm" id="taskState" name="task_state" aria-label="Select a filter value" data-default="all">
+                                        <option value="all"{% if "all" == filters["task_state"] %} selected{% endif %}>All (enabled/disabled)</option>
+                                        <option value="enabled"{% if "enabled" == filters["task_state"] %} selected{% endif %}>enabled</option>
+                                        <option value="disabled"{% if "disabled" == filters["task_state"] %} selected{% endif %}>disabled</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-auto">
+                                    <label class="form-label d-none d-lg-block" for="taskNameFilter">Task name</label>
+                                    <select class="form-select form-select-sm" id="taskNameFilter" name="task_name" aria-label="Select a filter value" data-default="all">
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg d-flex justify-content-end">
+                                    <button id="removeFiltersBtn" class="btn btn-sm btn-outline-secondary text-nowrap flex-fill flex-lg-grow-0" role="button" title="Remove filters"><i class="bi bi-eraser me-1"></i>Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-none invisible mb-4" id="campaignInfoContainer">
+        <div class="col">
+            <div class="mb-2"><span class="fw-bold">Campaign info</span></div>
+            <div class="border rounded bg-white p-3" id="campaignInfoInnerContainer">
+                <div class="d-xl-flex d-grid justify-content-between gap-3">
+                    <div class="d-grid gap-2">
+                        <h6 class="fw-bold" id="campaignStatusContainer"></h6>
+                        <div id="campaignIsContextContainer" class="d-none invisible"><small class="text-opacity-50 text-primary fst-italic"><i class="bi bi-info-square me-1"></i>This campaign is currently selected as the working context.</small></div>
+                        <div class="text-muted multiline ms-2" id="campaignDescription"></div>
+                    </div>
+                    <div class="v-stack">
+                        <div class="d-md-flex d-grid align-items-center gap-md-2">
+                            <div><i class="bi bi-watch me-1"></i><small class="fw-bold text-muted" id="campaignTzName"></small></div>
+                            <small class="fst-italic text-black text-opacity-50 ms-sm-2" id="campaignTzLabel"></small>
+                        </div>
+                        <div id="campaignPeriodContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="table-responsive-xl">
+                <table class="table table-sm table-hover table-bordered caption-top">
+                    <caption>
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <span class="fw-bold">Scheduled tasks</span>
+                            <div class="text-end">
+                                <small><app-items-count id="itemsCount"></app-items-count></small>
+                            </div>
+                        </div>
+                    </caption>
+                    <thead id="tasksTableHeader">
+                        <tr>
+                            {% if signed_user.is_admin %}
+                            <th scope="col" data-name="id"># ID</th>
+                            {% endif %}
+                            <th scope="col" data-name="is_enabled">Enabled</th>
+                            <th scope="col" data-name="task_name">Name</th>
+                            <th scope="col" data-name="campaign_id">Campaign</th>
+                            <th scope="col" class="w-50" data-name="parameters">Parameters</th>
+                            <th scope="col" data-name="schedule_offset">Schedule offset</th>
+                            <th scope="col" data-name="task_state">State</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider" id="tasksTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center p-4">
+                                <div is="app-spinner"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-2"><span class="fw-bold">Legend</span></div>
+            <div class="border rounded bg-white p-3">
+                <div class="row">
+                    <div class="col-auto" id="legendNotScheduledBadgeContainer">
+                    </div>
+                    <div class="col">
+                        <span>Scheduled task is installed but will never be executed due to a <strong>missing schedule</strong>. Most likely an incomplete application configuration file (see celery beat part).</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-auto" id="legendNotRegisteredBadgeContainer">
+                    </div>
+                    <div class="col">
+                        <span>Scheduled task is <strong>not installed</strong> (probably a missing or uninstalled plugin on server side) and will never be executed.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addTaskModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">New task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addTaskModalBody">
+                <div class="row mb-3">
+                    <div class="col-sm-2 col-3">
+                        <label class="form-label" for="addTaskCampaign">Campaign</label>
+                    </div>
+                    <div class="col">
+                        <select class="form-select form-select-sm w-auto" id="addTaskCampaign" aria-label="Select a campaign" required>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="addTaskName">Task name</label>
+                        <select class="form-select form-select-sm w-auto" id="addTaskName" aria-label="Select a task name" required>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="addTaskStateSwitch">Enabled</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="addTaskStateSwitch">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="fw-bold">Schedule and offset options</span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div id="addTaskScheduleContainer"></div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <label class="form-label" for="addTaskOffsetUnit">Unit</label>
+                        <select class="form-select form-select-sm" id="addTaskOffsetUnit" aria-label="Select an offset unit" required>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" for="addTaskOffsetStart">Start</label>
+                        <input type="number" class="form-control form-control-sm input-number-hide-arrows" id="addTaskOffsetStart" step="1" required>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" for="addTaskOffsetEnd">End</label>
+                        <input type="number" class="form-control form-control-sm input-number-hide-arrows" id="addTaskOffsetEnd" step="1" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="addTaskParameters">Parameters</label>
+                        <textarea class="form-control" id="addTaskParameters" rows="10" required></textarea>
+                        <div id="addTaskParametersError" class="text-danger fst-italic font-monospance p-2 d-none invisible"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="addTaskModalBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-save me-1"></i>Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editTaskModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-end gap-3">
+                    <h5 class="modal-title" id="editTaskModalLabel">Task <span id="editTaskId"></span></h5>
+                    <span id="editTaskName"></span>
+                    <div id="editTaskStateContainer" class="d-flex align-items-center gap-2"></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editTaskModalBody">
+                <div class="row mb-3">
+                    <div class="col-2">
+                        <label class="form-label" for="editTaskCampaign">Campaign</label>
+                    </div>
+                    <div class="col-auto">
+                        <span id="editTaskCampaign"></span>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs app-tabs" id="editTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-tabcontent" type="button" role="tab" aria-controls="edit-tabcontent" aria-selected="true"><i class="bi bi-pencil me-1"></i>Edit</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="runonce-tab" data-bs-toggle="tab" data-bs-target="#runonce-tabcontent" type="button" role="tab" aria-controls="runonce-tabcontent" aria-selected="false"><i class="bi bi-rocket-takeoff me-1"></i>Run once</button>
+                    </li>
+                </ul>
+                <div class="tab-content app-tab-content overflow-auto border border-top-0 bg-white" id="editTabContent">
+                    <div class="tab-pane fade p-3 show active" id="edit-tabcontent" role="tabpanel" aria-labelledby="edit-tab">
+                        <div class="row mb-3">
+                            <div class="col-2">
+                                <label class="form-label" for="editTaskStateSwitch">Enabled</label>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="editTaskStateSwitch">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <span class="fw-bold">Schedule and offset options</span>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col">
+                                <div id="editTaskScheduleContainer"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <label class="form-label" for="editTaskOffsetUnit">Unit</label>
+                                <select class="form-select form-select-sm" id="editTaskOffsetUnit" aria-label="Select an offset unit" required>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label" for="editTaskOffsetStart">Start</label>
+                                <input type="number" class="form-control form-control-sm input-number-hide-arrows" id="editTaskOffsetStart" step="1" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label" for="editTaskOffsetEnd">End</label>
+                                <input type="number" class="form-control form-control-sm input-number-hide-arrows" id="editTaskOffsetEnd" step="1" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label" for="editTaskParameters">Parameters</label>
+                                <textarea class="form-control" id="editTaskParameters" rows="10" required></textarea>
+                                <div id="editTaskParametersError" class="text-danger fst-italic font-monospance p-2 d-none invisible"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade p-3" id="runonce-tabcontent" role="tabpanel" aria-labelledby="runonce-tab">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <label class="form-label" for="runOnceTaskDatetimeStart">From</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div is="app-datetime-picker" id="runOnceTaskDatetimeStart" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                                            <div is="app-spinner"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <label class="form-label" for="runOnceTaskDatetimeEnd">Until</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div is="app-datetime-picker" id="runOnceTaskDatetimeEnd" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                                            <div is="app-spinner"></div>
+                                        </div>
+                                        <div class="text-end" id="runOnceTaskSetTimezoneLnkContainer">
+                                            <small>
+                                                <a id="runOnceTaskSetTimezoneLnk" class="link-primary text-decoration-none" role="button" title="Set timezone">Set timezone<i class="bi bi-globe ms-1"></i></a>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row d-none invisible" id="runOnceTaskSetTimezoneContainer">
+                                    <div class="col-2">
+                                        <label class="form-label" for="runOnceTaskTimezonePicker">Timezone</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="d-flex justify-content-end align-items-sm-center align-items-end gap-2">
+                                            <div is="app-timezone-picker" id="runOnceTaskTimezonePicker" tzname="{{ g.campaign_ctxt.tz_name }}">
+                                                <div is="app-spinner"></div>
+                                            </div>
+                                            <small>
+                                                <a id="runOnceTaskResetTimezoneLnk" class="link-primary text-decoration-none" role="button" title="Reset timezone">reset</a>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label" for="runOnceTaskParameters">Parameters</label>
+                                <textarea class="form-control" id="runOnceTaskParameters" rows="15" required></textarea>
+                                <div id="runOnceTaskParametersError" class="text-danger fst-italic font-monospance p-2 d-none invisible"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between gap-2">
+                <button id="removeTaskModalBtn" type="button" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Remove</button>
+                <div class="d-flex justify-content-between gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="editTaskModalBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-save me-1"></i>Save</button>
+                    <button id="runOnceTaskModalBtn" type="button" class="btn btn-sm btn-primary d-none invisible" disabled><i class="bi bi-rocket-takeoff me-1"></i>Run once</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="runOnceNewTaskModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="runOnceNewTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="runOnceNewTaskModalLabel">Run task once</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="runOnceNewTaskModalBody">
+                <div class="row mb-3">
+                    <div class="col-2">
+                        <label class="form-label" for="runOnceNewTaskCampaign">Campaign</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select form-select-sm" id="runOnceNewTaskCampaign" aria-label="Select a campaign" required>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-2">
+                        <label class="form-label" for="runOnceNewTaskName">Task name</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-select form-select-sm" id="runOnceNewTaskName" aria-label="Select a task name" required>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <div class="row mb-2">
+                            <div class="col-2">
+                                <label class="form-label" for="runOnceNewTaskDatetimeStart">From</label>
+                            </div>
+                            <div class="col-auto">
+                                <div is="app-datetime-picker" id="runOnceNewTaskDatetimeStart" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                                    <div is="app-spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-2">
+                                <label class="form-label" for="runOnceNewTaskDatetimeEnd">Until</label>
+                            </div>
+                            <div class="col-auto">
+                                <div is="app-datetime-picker" id="runOnceNewTaskDatetimeEnd" time="00:00" tzname="{{ g.campaign_ctxt.tz_name }}" required>
+                                    <div is="app-spinner"></div>
+                                </div>
+                                <div class="text-end" id="runOnceNewTaskSetTimezoneLnkContainer">
+                                    <small>
+                                        <a id="runOnceNewTaskSetTimezoneLnk" class="link-primary text-decoration-none" role="button" title="Set timezone">Set timezone<i class="bi bi-globe ms-1"></i></a>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-none invisible" id="runOnceNewTaskSetTimezoneContainer">
+                            <div class="col-2">
+                                <label class="form-label" for="runOnceNewTaskTimezonePicker">Timezone</label>
+                            </div>
+                            <div class="col-auto">
+                                <div class="d-flex justify-content-end align-items-sm-center align-items-end gap-2">
+                                    <div is="app-timezone-picker" id="runOnceNewTaskTimezonePicker" tzname="{{ g.campaign_ctxt.tz_name }}">
+                                        <div is="app-spinner"></div>
+                                    </div>
+                                    <small>
+                                        <a id="runOnceNewTaskResetTimezoneLnk" class="link-primary text-decoration-none" role="button" title="Reset timezone">reset</a>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="runOnceNewTaskParameters">Parameters</label>
+                        <textarea class="form-control" id="runOnceNewTaskParameters" rows="10" required></textarea>
+                        <div id="runOnceNewTaskParametersError" class="text-danger fst-italic font-monospance p-2 d-none invisible"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="runOnceNewTaskModalBtn" type="button" class="btn btn-sm btn-primary" disabled><i class="bi bi-rocket-takeoff me-1"></i>Run once</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main_content %}
+
+{% block body_scripts %}
+{{ super() -}}
+{% filter indent(width=8, first=True) %}
+<script type="module" src="{{ url_for('static', filename='scripts/modules/views/tasks/manage.js') }}" defer></script>
+{% endfilter %}
+{% endblock body_scripts %}

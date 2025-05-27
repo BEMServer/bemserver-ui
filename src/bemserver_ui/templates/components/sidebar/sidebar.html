@@ -3,14 +3,23 @@
     <div class="position-sticky">
         <div class="d-flex flex-column gap-3">
             {% filter indent(width=12, first=True) %}
-                {% include "components/sidebar/sidebar_campaign_selector.html" +%}
-                {% set sidebar_plugins = get_sidebar_plugins(g.campaign_ctxt) %}
-                {% for sidebar_section in ["analysis", "tsdata", "dashboards"] %}
-                    {% set sidebar_section_plugins = sidebar_plugins[sidebar_section] %}
-                    {% include "components/sidebar/sidebar_" + sidebar_section + ".html" %}
-                {% endfor %}
-                {% include "components/sidebar/sidebar_campaign_context.html" %}
-                {% include "components/sidebar/sidebar_admin.html" %}
+            {% include "components/sidebar/sidebar_campaign_selector.html" +%}
+            {% set sidebar_plugins = get_sidebar_plugins(g.campaign_ctxt) %}
+            {% for sidebar_section in ["analysis", "tsdata", "dashboards"] %}
+                {% set sidebar_section_plugins = sidebar_plugins[sidebar_section] %}
+                {% include "components/sidebar/sidebar_" + sidebar_section + ".html" %}
+            {% endfor %}
+<ul class="nav nav-pills flex-column gap-1">
+    {% filter indent(width=4, first=True) %}
+    {% include "components/sidebar/sidebar_campaign_context.html" %}
+    {% endfilter %}
+    <li class="nav-item d-flex justify-content-between align-items-center gap-1">
+        {% filter indent(width=8, first=True) %}
+        {{- mac_sidebar.render_nav_link("Tasks", url_for("tasks.manage"), "Manage tasks", ["bi", "bi-list-task"], extra_classes=["w-100"]) -}}
+        {% endfilter %}
+    </li>
+</ul>
+            {% include "components/sidebar/sidebar_admin.html" %}
             {% endfilter %}
         </div>
     </div>
