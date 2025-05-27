@@ -1,6 +1,62 @@
 Changelog
 ---------
 
+0.9.0 (2025-05-27)
+++++++++++++++++++
+
+Features:
+
+- Authentication:
+
+  - Update sign in form
+
+- Analysis:
+
+  - Add output unit paramter choice on energy consumption analysis
+  - Minor improve output unit parameter choice on degree days analysis
+
+- Timeseries:
+
+  - Rework on timeseries selector component
+  - Add timeseries data CSV export page
+  - Minor update timeseries list page (add all timeseries attributes in general tab)
+
+- Timeseries data:
+
+  - Add CSV export feature on some charts
+  - Add options in timeseris data explore chart settings:
+
+    - weekend periods displayed as background areas
+    - night periods (with default or custom start/end hours) displayed as background areas
+
+- Scheduled and async tasks (formerly ``Services``):
+
+  - Remove services pages (check missing, outliers, cleanup, weather data)
+  - Add tasks management page:
+
+    - Add/update/remove scheduled tasks (check missing data, outliers data, cleanup data, download weather data historical/forecast)
+    - Manually run tasks once and async
+
+  - Move fetch weather data (from an external API) feature in weather data analysis page
+
+- General:
+
+  - Minor update sidebar (style, plugin info on concerned entries)
+  - Display flash message on top layer (over modals)
+
+Fixes:
+
+- Fix timezone management and display on all charts and dataviews
+- Fix timeseries data explore (remove all timeseries)
+- Fix datetime picker component
+- Fix timezone picker component
+
+Other changes:
+
+- Require bemserver-api-client >=0.22.0 and <0.23.0
+- Require bemserver-api >=0.26.0
+- Require bemserver-core >=0.21.0
+
 0.8.2 (2025-03-04)
 ++++++++++++++++++
 
