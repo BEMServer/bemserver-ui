@@ -5,6 +5,7 @@ from . import (
     auth,
     campaign_context,
     error_handlers,
+    favicon,
     flask_es6,
     flask_helpers,
     jinja_custom_filters,
@@ -16,6 +17,7 @@ from .auth import Roles  # noqa
 from .campaign_context import ensure_campaign_context  # noqa
 
 EXT_MODULES = (
+    favicon,
     jinja_custom_filters,
     error_handlers,
     auth,
