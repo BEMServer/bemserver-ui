@@ -65,24 +65,6 @@
         </div>
         {% endif %}
         <div class="accordion-item">
-            <h2 class="accordion-header" id="panelHeadingAdminServices">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminServices" aria-expanded="false" aria-controls="panelCollapseAdminServices">
-                    <span class="app-sidebar-heading"><i class="bi bi-puzzle me-2"></i>Services</span>
-                </button>
-            </h2>
-            <div id="panelCollapseAdminServices" class="accordion-collapse collapse" aria-labelledby="panelHeadingAdminServices">
-                <div class="accordion-body">
-                    <ul class="nav nav-pills flex-column gap-1">
-                        {% filter indent(width=24, first=True) %}
-                        {{- mac_sidebar.render_nav_item("Cleanup data", url_for("services.cleanup.list"), "Manage cleanup data service", ["bi", "bi-magic"]) -}}
-                        {{- mac_sidebar.render_nav_item("Check missing data", url_for("services.missing_data.list"), "Manage missing data service", ["bi", "bi-journal-x"]) -}}
-                        {{- mac_sidebar.render_nav_item("Check outlier data", url_for("services.outlier_data.list"), "Manage check outlier data service", ["bi", "bi-layout-wtf"]) -}}
-                        {% endfilter %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="accordion-item">
             <h2 class="accordion-header" id="panelHeadingAdminEvents">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelCollapseAdminEvents" aria-expanded="false" aria-controls="panelCollapseAdminEvents">
                     <span class="app-sidebar-heading"><i class="bi bi-calendar2-event me-2"></i>Events</span>

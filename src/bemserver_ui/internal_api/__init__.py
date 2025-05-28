@@ -13,8 +13,8 @@ from . import (
     events,
     notifications,
     semantics,
-    services,
     structural_elements,
+    tasks,
     timeseries,
     user_groups,
     users,
@@ -31,10 +31,10 @@ MODULES = (
     user_groups,
     users,
     analysis,
-    services,
     events,
     notifications,
     semantics,
+    tasks,
 )
 
 

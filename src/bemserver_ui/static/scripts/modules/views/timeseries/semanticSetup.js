@@ -144,11 +144,6 @@ export class TimeseriesSemanticSetupView {
             this.#structuralElementType = event.detail.type;
             this.#structuralElementId = event.detail.id;
 
-            let filters = {};
-            filters[this.#structuralElementType] = this.#structuralElementId;
-            this.#tsSelector.setFilters(filters);
-            this.#tsSelector.clearAllSelection();
-
             this.#loadWeatherParametersSetup();
             this.#loadForecastWeatherParametersSetup();
             this.#loadEnergyProductionSetup();
@@ -181,6 +176,13 @@ export class TimeseriesSemanticSetupView {
             event.preventDefault();
 
             this.#saveSelectedTimeseries();
+        });
+
+        this.#selectTimeseriesModalElmt?.addEventListener("show.bs.modal", () => {
+            let filters = {};
+            filters[this.#structuralElementType] = this.#structuralElementId;
+            this.#tsSelector.setFilters(filters);
+            this.#tsSelector.clearAllSelection();
         });
 
         this.#selectTimeseriesModalElmt?.addEventListener("hide.bs.modal", () => {
@@ -438,24 +440,6 @@ export class TimeseriesSemanticSetupView {
             tsTdElmt.classList.remove("table-warning");
             btnDeleteElmt.classList.remove("d-none", "invisible");
         }
-    }
-
-    #loadSitesTreeData() {
-        this.#sitesTreeElmt.showLoading();
-
-        if (this.#sitesTreeReqID != null) {
-            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
-            this.#sitesTreeReqID = null;
-        }
-
-        this.#sitesTreeReqID = this.#internalAPIRequester.get(
-            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
-            (data) => {
-                this.#sitesTreeElmt.load(data.data);
-                this.#sitesTreeElmt.collapseAll();
-            },
-            this.#internalApiErrorCallback,
-        );
     }
 
     #createDropDownMenuItemElement(menuItemText, clickCallback) {
@@ -1269,7 +1253,34 @@ export class TimeseriesSemanticSetupView {
         this.#energyConsSetupItemsCountElmt.update({totalCount: totalCount, firstItem: totalCount > 0 ? 1 : 0, lastItem: totalCount});
     }
 
+    #loadSitesTreeData(structuralElementType, structuralElementId) {
+        this.#sitesTreeElmt.showLoading();
+
+        if (this.#sitesTreeReqID != null) {
+            this.#internalAPIRequester.abort(this.#sitesTreeReqID);
+            this.#sitesTreeReqID = null;
+        }
+
+        this.#sitesTreeReqID = this.#internalAPIRequester.get(
+            app.urlFor(`api.structural_elements.retrieve_tree_sites`, {types: ["site", "building"]}),
+            (data) => {
+                this.#sitesTreeElmt.load(data.data);
+                this.#sitesTreeElmt.collapseAll();
+
+                if (structuralElementType != null && structuralElementId != null) {
+                    this.#sitesTreeElmt.select(`${structuralElementType}-${structuralElementId}`);
+                }
+            },
+            this.#internalApiErrorCallback,
+        );
+    }
+
     mount() {
-        this.#loadSitesTreeData();
+        // Get relevant url query paramters.
+        let url = new URL(window.location);
+        let structuralElementType = url.searchParams.get("structural_element_type");
+        let structuralElementId = url.searchParams.get("structural_element_id");
+
+        this.#loadSitesTreeData(structuralElementType, structuralElementId);
     }
 }
