@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+0.9.1 (2025-06-02)
+++++++++++++++++++
+
+Fixes:
+
+- Fix random resource not found error message (missing favicon.ico)
+
+Other changes:
+
+- Still require bemserver-api-client >=0.22.0 and <0.23.0
+- Still require bemserver-api >=0.26.0
+- Still require bemserver-core >=0.21.0
+
 0.9.0 (2025-05-27)
 ++++++++++++++++++
 
