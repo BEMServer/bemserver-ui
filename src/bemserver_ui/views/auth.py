@@ -1,6 +1,7 @@
 """Auth views (sign in/out)"""
 
 import flask
+import werkzeug.exceptions as wexc
 
 from bemserver_ui.extensions import auth
 from bemserver_ui.extensions.campaign_context import (
@@ -32,7 +33,9 @@ def signin():
         if auth_method == "jwt":
             auth_resp = flask.g.api_client.auth.get_tokens(user_email, user_pwd)
             if auth_resp.data["status"] == "failure":
-                flask.abort(401)
+                flask.session.clear()
+                raise wexc.Unauthorized
+            # When status is not "failure", then it is a "success".
             auth.update_bearer_tokens(
                 auth_resp.data["access_token"], auth_resp.data["refresh_token"]
             )

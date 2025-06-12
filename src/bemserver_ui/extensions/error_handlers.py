@@ -68,7 +68,8 @@ def _handle_401(exc):
         if _is_from_internal_api():
             return _handle_for_internal_api(http_status_code, message)
         flask.session.clear()
-        flask.flash(message, "error")
+        if flask.request.endpoint not in ["main.index", "auth.signin"]:
+            flask.flash(message, "error")
         return flask.redirect(
             flask.url_for(
                 "auth.signin", **{IGNORE_CAMPAIGN_CONTEXT_QUERY_ARG_NAME: True}
