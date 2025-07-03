@@ -99,7 +99,8 @@ export class TaskListView {
     #legendNotScheduledBadgeContainerElmt = null;
     #legendNotRegisteredBadgeContainerElmt = null;
 
-    #availableRegisteredTasks = [];
+    #availableRegisteredAsyncTasks = [];
+    #availableRegisteredScheduledTasks = [];
     #selectedTask = null;
     #selectedTaskEtag = null;
     #selectedCampaign = null;
@@ -545,7 +546,7 @@ export class TaskListView {
     }
 
     #updateAddTaskModalWithRegisteredTaskDefaults(taskName) {
-        let registeredTask = this.#getRegisteredTask(taskName);
+        let registeredTask = this.#getRegisteredScheduledTask(taskName);
         if (registeredTask != null) {
             this.#addTaskParametersElmt.value = registeredTask["default_parameters"];
             this.#populateTaskSchedule(this.#addTaskScheduleContainerElmt, registeredTask["schedule"]);
@@ -577,7 +578,7 @@ export class TaskListView {
     }
 
     #updateEditTaskModalWithRegisteredTaskDefaults(taskName) {
-        let registeredTask = this.#getRegisteredTask(taskName);
+        let registeredTask = this.#getRegisteredScheduledTask(taskName);
         if (registeredTask != null) {
             this.#populateTaskSchedule(this.#editTaskScheduleContainerElmt, registeredTask["schedule"]);
         }
@@ -607,7 +608,7 @@ export class TaskListView {
     }
 
     #updateRunOnceTabState() {
-        let registeredTaskNames = this.#availableRegisteredTasks.map((registeredTask) => { return registeredTask.name; });
+        let registeredTaskNames = this.#availableRegisteredAsyncTasks.map((registeredTask) => { return registeredTask.name; });
         if (!registeredTaskNames.includes(this.#selectedTask.task_name)) {
             this.#runOnceTabElmt.classList.add("disabled");
             this.#runOnceTabElmt.setAttribute("aria-disabled", true);
@@ -639,7 +640,7 @@ export class TaskListView {
     }
 
     #updateRunOnceNewTaskModalWithRegisteredTaskDefaults(taskName) {
-        let registeredTask = this.#getRegisteredTask(taskName);
+        let registeredTask = this.#getRegisteredAsyncTask(taskName);
         if (registeredTask != null) {
             this.#runOnceNewTaskParametersElmt.value = registeredTask["default_parameters"];
         }
@@ -814,7 +815,7 @@ export class TaskListView {
         this.#runOnceNewTaskDatetimeEndPickerElmt.tzName = taskCampaign["timezone_info"]["name"];
     }
 
-    #updateTaskList() {
+    #updateScheduledTaskList() {
         if (this.#getTasksReqID != null) {
             this.#internalAPIRequester.abort(this.#getTasksReqID);
             this.#getTasksReqID = null;
@@ -843,7 +844,7 @@ export class TaskListView {
                     return this.#extendTaskData(task);
                 });
 
-                this.#populateTaskList(tasks);
+                this.#populateScheduledTaskList(tasks);
             },
             (error) => {
                 app.flashMessage(error.toString(), "error");
@@ -852,14 +853,14 @@ export class TaskListView {
     }
 
     #extendTaskData(task) {
-        let registeredTask = this.#getRegisteredTask(task.task_name);
+        let registeredTask = this.#getRegisteredScheduledTask(task.task_name);
         task["is_registered"] = registeredTask != null;
         task["is_scheduled"] = registeredTask != null ? Object.keys(registeredTask["schedule"]).length > 0 : false;
         return task;
     }
 
-    #getRegisteredTask(taskName) {
-        for (let registeredTask of this.#availableRegisteredTasks) {
+    #getRegisteredAsyncTask(taskName) {
+        for (let registeredTask of this.#availableRegisteredAsyncTasks) {
             if (registeredTask.name == taskName) {
                 return registeredTask;
             }
@@ -867,7 +868,17 @@ export class TaskListView {
         return null;
     }
 
-    #populateTaskList(tasks) {
+    #getRegisteredScheduledTask(taskName) {
+        for (let registeredTask of this.#availableRegisteredScheduledTasks) {
+            console.log(registeredTask);
+            if (registeredTask.async_task == taskName) {
+                return registeredTask;
+            }
+        }
+        return null;
+    }
+
+    #populateScheduledTaskList(tasks) {
         let tableColumns = [].slice.call(this.#tasksTableHeaderElmt.rows[0].cells);
         this.#tasksTableBodyElmt.innerHTML = "";
         if (tasks.length > 0) {
@@ -994,7 +1005,7 @@ export class TaskListView {
     }
 
     #populateTaskNameSelect(selectElement, addAllOption = false) {
-        let registeredTaskNames = this.#availableRegisteredTasks.map((registeredTask) => { return registeredTask.name; });
+        let registeredTaskNames = this.#availableRegisteredScheduledTasks.map((registeredTask) => { return registeredTask.async_task; });
 
         let defaultSelectedElement = selectElement.getAttribute("data-default");
 
@@ -1060,7 +1071,8 @@ export class TaskListView {
     }
 
     #loadAvailableRegisteredTasks(successCallback = null) {
-        this.#availableRegisteredTasks = [];
+        this.#availableRegisteredAsyncTasks = [];
+        this.#availableRegisteredScheduledTasks = [];
 
         if (this.#getTaskNamesReqID != null) {
             this.#internalAPIRequester.abort(this.#getTaskNamesReqID);
@@ -1070,7 +1082,12 @@ export class TaskListView {
         this.#getTaskNamesReqID = this.#internalAPIRequester.get(
             app.urlFor(`api.tasks.retrieve_registered`),
             (data) => {
-                this.#availableRegisteredTasks = data.map((registeredTask) => {
+                this.#availableRegisteredAsyncTasks = data["async_tasks"].map((registeredTask) => {
+                    registeredTask["default_parameters"] = JSON.stringify(registeredTask["default_parameters"]);
+                    return registeredTask;
+                });
+
+                this.#availableRegisteredScheduledTasks = data["scheduled_tasks"].map((registeredTask) => {
                     registeredTask["default_parameters"] = JSON.stringify(registeredTask["default_parameters"]);
                     return registeredTask;
                 });
@@ -1333,7 +1350,7 @@ export class TaskListView {
     }
 
     refresh() {
-        this.#updateTaskList();
+        this.#updateScheduledTaskList();
     }
 
     mount() {
