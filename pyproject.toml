@@ -1,6 +1,6 @@
 [project]
 name = "bemserver-ui"
-version = "0.9.1"
+version = "0.9.2"
 description = "BEMServer web interface"
 readme = "README.rst"
 license = { file = "LICENSE" }
