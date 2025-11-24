@@ -94,7 +94,9 @@ export class WeatherExploreView {
 
         this.#fetchWeatherDataShowModalBtnElmt = document.getElementById("fetchWeatherDataShowModalBtn");
         this.#fetchWeatherDataModalElmt = document.getElementById("fetchWeatherDataModal");
-        this.#fetchWeatherDataModal = new bootstrap.Modal(this.#fetchWeatherDataModalElmt);
+        if (this.#fetchWeatherDataModalElmt !== null) {
+            this.#fetchWeatherDataModal = new bootstrap.Modal(this.#fetchWeatherDataModalElmt);
+        }
         this.#fetchWeatherDataModalBodyElmt = document.getElementById("fetchWeatherDataModalBody");
         this.#fetchWeatherDataSiteElmt = document.getElementById("fetchWeatherDataSite");
         this.#fetchWeatherDataSiteCoordWarnContainerElmt = document.getElementById("fetchWeatherDataSiteCoordWarnContainer");
