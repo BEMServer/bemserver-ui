@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+0.9.2 (2025-11-24)
+++++++++++++++++++
+
+Fixes:
+
+- Fix weather data analysis page (script crash leading to no sites when the user is not admin)
+
+Other changes:
+
+- Still require bemserver-api-client >=0.22.0 and <0.23.0
+- Still require bemserver-api >=0.26.0
+- Still require bemserver-core >=0.21.0
+
 0.9.1 (2025-06-02)
 ++++++++++++++++++
 
