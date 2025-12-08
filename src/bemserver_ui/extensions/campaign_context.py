@@ -96,7 +96,7 @@ class CampaignContext:
                 CAMPAIGN_STATE_OVERALL: [],
                 **{x.value: [] for x in CampaignState},
             }
-            dt_now = dt.datetime.now(tz=dt.timezone.utc)
+            dt_now = dt.datetime.now(tz=dt.UTC)
             for campaign_data in campaigns_resp.data:
                 campaign_state = deduce_campaign_state(campaign_data, dt_now)
                 campaign_data["state"] = campaign_state
