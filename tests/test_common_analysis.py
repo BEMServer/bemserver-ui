@@ -48,7 +48,7 @@ class TestCommonAnalysis:
         period_type = get_completeness_period_type("Year-Weekly")
         assert period_type is None
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_compute_completeness_period_bounds(self, tz):
         period_type = get_completeness_period_type("Year-Monthly")
         dt_start, dt_end = compute_completeness_period_bounds(period_type, 2024, tz=tz)
@@ -95,8 +95,8 @@ class TestCommonAnalysis:
 
     def test_compute_month_period_bounds(self):
         dt_start, dt_end = _compute_month_period_bounds(2024, 12)
-        assert dt_start == dt.datetime(2024, 12, 1, tzinfo=dt.timezone.utc)
-        assert dt_end == dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)
+        assert dt_start == dt.datetime(2024, 12, 1, tzinfo=dt.UTC)
+        assert dt_end == dt.datetime(2025, 1, 1, tzinfo=dt.UTC)
 
     def test_get_default_aggregation_type(self):
         agg_type = get_default_aggregation_type()
@@ -133,7 +133,7 @@ class TestCommonAnalysis:
         period_type = get_explore_period_type("unknown")
         assert period_type is None
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_compute_explore_period_bounds(self, tz):
         dt_now = dt.datetime.now(tz=tz)
         dt_now = dt.datetime(
@@ -185,7 +185,7 @@ class TestCommonAnalysis:
         assert dt_end == dt_now
 
     def test_compute_explore_period_bounds_not_supported_period_types(self):
-        tz = dt.timezone.utc
+        tz = dt.UTC
         dt_now = dt.datetime.now(tz=tz)
         dt_now = dt.datetime(
             dt_now.year, dt_now.month, dt_now.day, dt_now.hour, dt_now.minute, tzinfo=tz

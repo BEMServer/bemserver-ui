@@ -28,7 +28,7 @@ from bemserver_ui.common.time import (
 class TestCommonTime:
     def test_convert_html_form_datetime(self):
         assert convert_html_form_datetime("2023-03-22", "10:07") == (
-            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.timezone.utc)
+            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.UTC)
         )
         tz = ZoneInfo("Europe/Paris")
         assert convert_html_form_datetime("2023-03-22", "10:07", tz=tz) == (
@@ -71,13 +71,13 @@ class TestCommonTime:
 
     def test_convert_from_iso(self):
         assert convert_from_iso("2023-03-22T10:07:00+00:00") == (
-            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.timezone.utc)
+            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.UTC)
         )
         assert convert_from_iso("2023-03-22T10:07:00+01:00") == (
-            dt.datetime(2023, 3, 22, 9, 7, tzinfo=dt.timezone.utc)
+            dt.datetime(2023, 3, 22, 9, 7, tzinfo=dt.UTC)
         )
         assert convert_from_iso("2023-03-22T10:07:00+00:00", tz=None) == (
-            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.timezone.utc)
+            dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.UTC)
         )
         assert convert_from_iso("2023-03-22T10:07:00+01:00", tz=None) == (
             dt.datetime(2023, 3, 22, 10, 7, tzinfo=dt.timezone(dt.timedelta(hours=1.0)))
@@ -345,7 +345,7 @@ class TestCommonTime:
         )
         assert add_time(dt_ref, years=-4) == (dt.datetime(2016, 2, 29, 9, 7, tzinfo=tz))
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     @pytest.mark.parametrize("complete_weeks", [False, True])
     def test_get_weeks(self, tz, complete_weeks):
         dt_start = dt.datetime(2023, 12, 21, tzinfo=tz)
@@ -379,7 +379,7 @@ class TestCommonTime:
                 assert 1 <= len(week_info["dates"]) <= 7
 
     @pytest.mark.parametrize("year", [2020, 2021, 2022, 2023, 2024])
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     @pytest.mark.parametrize("complete_weeks", [False, True])
     def test_get_year_weeks(self, year, tz, complete_weeks):
         weeks = get_year_weeks(year, complete_weeks=complete_weeks, tz=tz)
@@ -395,7 +395,7 @@ class TestCommonTime:
             else:
                 assert 1 <= len(week_info["dates"]) <= 7
 
-    @pytest.mark.parametrize("tz", [dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [dt.UTC, ZoneInfo("Europe/Paris")])
     @pytest.mark.parametrize("complete_weeks", [False, True])
     def test_get_month_weeks(self, tz, complete_weeks):
         year = 2024
@@ -436,7 +436,7 @@ class TestCommonTime:
 
         assert len(weeks) == 5
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_get_date_from_isoweek(self, tz):
         ret = _get_date_from_isoweek("2024-W01-1", tz=tz)
         assert ret == dt.datetime(2024, 1, 1, tzinfo=tz)
@@ -449,13 +449,13 @@ class TestCommonTime:
         with pytest.raises(BEMServerUICommonInvalidDatetimeError):
             _get_date_from_isoweek("2024-W01-1", tz="bad_tz")
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_get_period_from_isoweek(self, tz):
         dt_start, dt_end = get_period_from_isoweek("2024-W01", tz=tz)
         assert dt_start == dt.datetime(2024, 1, 1, tzinfo=tz)
         assert dt_end == dt.datetime(2024, 1, 7, tzinfo=tz)
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_get_isoweek_from_date(self, tz):
         dt_ref = dt.datetime(2024, 7, 24, tzinfo=tz)
         dt_ref_isocal = dt_ref.isocalendar()
@@ -469,7 +469,7 @@ class TestCommonTime:
             == f"{dt_ref_isocal.year}-W{dt_ref_isocal.week}-{dt_ref.weekday() + 1}"
         )
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_get_weekend_periods(self, tz):
         # Start/end datetimes are not in weekends.
         dt_start = dt.datetime(2025, 1, 1, 23, 30, tzinfo=tz)
@@ -522,7 +522,7 @@ class TestCommonTime:
         assert default_night_times[0] == dt.time(hour=22)
         assert default_night_times[1] == dt.time(hour=6)
 
-    @pytest.mark.parametrize("tz", [None, dt.timezone.utc, ZoneInfo("Europe/Paris")])
+    @pytest.mark.parametrize("tz", [None, dt.UTC, ZoneInfo("Europe/Paris")])
     def test_get_night_periods(self, tz):
         # Default night time from 22:00 to 06:00.
         dt_start = dt.datetime(2025, 4, 15, tzinfo=tz)

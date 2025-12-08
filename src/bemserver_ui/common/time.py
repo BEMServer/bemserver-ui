@@ -8,7 +8,7 @@ from string import Formatter
 from .exceptions import BEMServerUICommonInvalidDatetimeError
 
 
-def convert_html_form_datetime(form_date, form_time, *, tz=dt.timezone.utc):
+def convert_html_form_datetime(form_date, form_time, *, tz=dt.UTC):
     """Convert an HTML input date and time to a timezone aware datetime instance.
 
     Received HTML POST form values are not localized and tz-aware.
@@ -59,7 +59,7 @@ def convert_html_form_time(form_time):
     return ret
 
 
-def convert_from_iso(dt_iso, *, tz=dt.timezone.utc):
+def convert_from_iso(dt_iso, *, tz=dt.UTC):
     """Convert an ISO datetime to a timezone aware datetime instance.
 
     :param str dt_iso: HTML form input date value (YYYY-mm-ddTHH:MM:SS+00:00).
@@ -232,19 +232,19 @@ def get_weeks(dt_start, dt_end, *, complete_weeks=True):
     return weeks
 
 
-def get_year_weeks(year, *, complete_weeks=True, tz=dt.timezone.utc):
+def get_year_weeks(year, *, complete_weeks=True, tz=dt.UTC):
     dt_start = dt.datetime(year, 1, 1, tzinfo=tz)
     dt_end = dt.datetime(year, 12, 31, tzinfo=tz)
     return get_weeks(dt_start, dt_end, complete_weeks=complete_weeks)
 
 
-def get_month_weeks(year, month, *, complete_weeks=True, tz=dt.timezone.utc):
+def get_month_weeks(year, month, *, complete_weeks=True, tz=dt.UTC):
     dt_start = dt.datetime(year, month, 1, tzinfo=tz)
     dt_end = dt.datetime(year, month, calendar.monthrange(year, month)[1], tzinfo=tz)
     return get_weeks(dt_start, dt_end, complete_weeks=complete_weeks)
 
 
-def _get_date_from_isoweek(isoweek, *, tz=dt.timezone.utc):
+def _get_date_from_isoweek(isoweek, *, tz=dt.UTC):
     try:
         ret = dt.datetime.strptime(isoweek, "%G-W%V-%u")
     except (
@@ -264,7 +264,7 @@ def _get_date_from_isoweek(isoweek, *, tz=dt.timezone.utc):
     return ret
 
 
-def get_period_from_isoweek(isoweek, *, tz=dt.timezone.utc):
+def get_period_from_isoweek(isoweek, *, tz=dt.UTC):
     isoweek_firstday = 1
     dt_start = _get_date_from_isoweek(f"{isoweek}-{isoweek_firstday}", tz=tz)
     dt_end = _get_date_from_isoweek(f"{isoweek}-{isoweek_firstday + 6}", tz=tz)

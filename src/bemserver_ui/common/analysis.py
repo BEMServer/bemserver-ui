@@ -84,7 +84,7 @@ def compute_explore_period_bounds(
     start_date=None,
     start_time=None,
     *,
-    tz=dt.timezone.utc,
+    tz=dt.UTC,
 ):
     if not isinstance(period_type, dict) or "id" not in period_type:
         return (None, None)
@@ -167,7 +167,7 @@ def get_completeness_period_type(period_type_id):
 
 
 def compute_completeness_period_bounds(
-    period_type, year=None, month=None, week=None, day=None, *, tz=dt.timezone.utc
+    period_type, year=None, month=None, week=None, day=None, *, tz=dt.UTC
 ):
     if "id" not in period_type:
         return (
@@ -188,14 +188,14 @@ def compute_completeness_period_bounds(
     )
 
 
-def _compute_year_period_bounds(year, tz=dt.timezone.utc):
+def _compute_year_period_bounds(year, tz=dt.UTC):
     return (
         dt.datetime(year, 1, 1, tzinfo=tz),
         dt.datetime(year + 1, 1, 1, tzinfo=tz),
     )
 
 
-def _compute_month_period_bounds(year, month, tz=dt.timezone.utc):
+def _compute_month_period_bounds(year, month, tz=dt.UTC):
     dt_start = dt.datetime(year, month, 1, tzinfo=tz)
     end_year = year + (month // 12)
     end_month = (month % 12) + 1
@@ -206,7 +206,7 @@ def _compute_month_period_bounds(year, month, tz=dt.timezone.utc):
     )
 
 
-def _compute_week_period_bounds(week, tz=dt.timezone.utc):
+def _compute_week_period_bounds(week, tz=dt.UTC):
     dt_start, dt_end = get_period_from_isoweek(week, tz=tz)
     dt_end += dt.timedelta(days=1.0)
     return (
@@ -215,7 +215,7 @@ def _compute_week_period_bounds(week, tz=dt.timezone.utc):
     )
 
 
-def _compute_day_period_bounds(day, tz=dt.timezone.utc):
+def _compute_day_period_bounds(day, tz=dt.UTC):
     dt_start = convert_html_form_datetime(day, "00:00", tz=tz)
     dt_end = dt_start + dt.timedelta(days=1.0)
     return (
