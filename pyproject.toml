@@ -25,6 +25,7 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
+  "packaging>=25.0",
   "flask>=3.1.0,<4.0.0",
   "python-dotenv>=1.0.1,<2.0.0",
   "bemserver-api-client>=0.22.0,<0.23.0",

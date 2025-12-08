@@ -26,6 +26,8 @@ markupsafe==2.1.5
     # via
     #   jinja2
     #   werkzeug
+packaging==25.0
+    # via bemserver-ui (pyproject.toml)
 python-dotenv==1.0.1
     # via bemserver-ui (pyproject.toml)
 requests==2.32.3
