@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>BEMServer{% if title %} - {{ title }}{% if subtitle %} - {{ subtitle }}{% endif %}{% endif %}</title>
         <meta name="description" content="{{ description | default('') }}">
-        <meta name="author" content="{{ author | default('Nobatek/INEF4', true) }}">
+        <meta name="author" content="{{ author | default('Nobatek', true) }}">
         <link rel="icon" href="{{ url_for('static', filename='images/bemserver.ico') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='images/bemserver.ico') }}">
         {% block head_styles %}

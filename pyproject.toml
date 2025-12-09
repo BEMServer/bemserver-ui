@@ -5,12 +5,12 @@ description = "BEMServer web interface"
 readme = "README.rst"
 license = { file = "LICENSE" }
 authors = [
-  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.inef4.com" },
-  { name = "David Frédérique", email = "dfrederique@nobatek.inef4.com" },
+  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.com" },
+  { name = "David Frédérique", email = "dfrederique@nobatek.com" },
 ]
 maintainers = [
-  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.inef4.com" },
-  { name = "David Frédérique", email = "dfrederique@nobatek.inef4.com" },
+  { name = "Jérôme Lafréchoux", email = "jlafrechoux@nobatek.com" },
+  { name = "David Frédérique", email = "dfrederique@nobatek.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
