@@ -15,6 +15,7 @@ jobs:
           - {name: '3.11', python: '3.11', tox: py311}
           - {name: '3.12', python: '3.12', tox: py312}
           - {name: '3.13', python: '3.13', tox: py313}
+          - {name: '3.14', python: '3.14', tox: py314}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
