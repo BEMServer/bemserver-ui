@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.10.0 (2026-06-15)
+++++++++++++++++++
+
+Features:
+
+- Add timeout to startup API version check
+
 0.9.2 (2025-11-24)
 ++++++++++++++++++
 
