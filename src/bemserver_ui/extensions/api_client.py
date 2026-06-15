@@ -3,10 +3,12 @@
 API client exceptions are automatically handled by flask's error_handlers.
 """
 
+import time
+
 import flask
 
 from bemserver_api_client import BEMServerApiClient
-from bemserver_api_client.exceptions import BEMServerAPIVersionError
+from bemserver_api_client.exceptions import BEMServerAPIInternalError
 
 from bemserver_ui.extensions.auth import update_bearer_tokens
 
@@ -14,10 +16,11 @@ from bemserver_ui.extensions.auth import update_bearer_tokens
 def init_app(app):
     host = app.config["BEMSERVER_API_HOST"]
     use_ssl = app.config["BEMSERVER_API_USE_SSL"]
-    auth_method = app.config.get("BEMSERVER_API_AUTH_METHOD", "jwt")
+    auth_method = app.config["BEMSERVER_API_AUTH_METHOD"]
+    init_api_check_timeout = app.config["BEMSERVER_API_INITIAL_CONNECTION_TIMEOUT"]
 
     if not app.config.get("TESTING", False):
-        _check_api_version(host, use_ssl)
+        _check_api_version(host, use_ssl, timeout=init_api_check_timeout)
 
     def make_api_client(_):
         authentication_method = None
@@ -49,12 +52,18 @@ def init_app(app):
         flask.g.__class__.api_client = property(make_api_client)
 
 
-def _check_api_version(host, use_ssl):
+def _check_api_version(host, use_ssl, timeout=0):
     # Get current API version.
     apicli = BEMServerApiClient(host, use_ssl=use_ssl)
-    api_version = apicli.about.getall().data["versions"]["bemserver_api"]
-    # Check required API version for client.
-    try:
-        BEMServerApiClient.check_api_version(api_version)
-    except BEMServerAPIVersionError as exc:
-        flask.abort(500, description=f"API client error: {str(exc)}")
+    api_version = None
+    start_t = time.time()
+    while api_version is None:
+        try:
+            api_version = apicli.about.getall().data["versions"]["bemserver_api"]
+        except (BEMServerAPIInternalError, TypeError) as exc:
+            if time.time() - start_t > timeout:
+                raise BEMServerAPIInternalError("API unreachable") from exc
+            time.sleep(5)
+
+    # Check API version. Raises if version not compatible.
+    BEMServerApiClient.check_api_version(api_version)
