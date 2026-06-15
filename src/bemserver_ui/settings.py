@@ -10,6 +10,8 @@ class Config:
     BEMSERVER_API_USE_SSL = True
     # Authentication method choices are: "jwt" (preferred and default) or "http_basic"
     BEMSERVER_API_AUTH_METHOD = "jwt"
+    # Timeout for initial connection check (in seconds)
+    BEMSERVER_API_INITIAL_CONNECTION_TIMEOUT = 300
 
     BEMSERVER_UI_PARTNERS_FILE = None
 
